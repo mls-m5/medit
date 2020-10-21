@@ -1,0 +1,12 @@
+
+bin/
+.vscode/
+
+*.creator.user
+*.cflags
+*.config
+*.creator
+*.cxxflags
+*.files
+*.includes
+
