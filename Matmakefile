@@ -6,7 +6,7 @@ cpp = clang++
 
 config += c++17
 
-config += modules
+config += modules #treat includes as separate
 
 flags +=
    -W
@@ -14,18 +14,15 @@ flags +=
    -Wno-unused-parameter
    -Wno-sign-compare
    -g
-#   `pkg-config --cflags gtkmm-3.0 gtksourceviewmm-3.0`
 
 ## Main target
 main.includes +=
    include
 main.src = 
-	src/*.cpp
+   src/**.cpp
 
 main.dir = bin
 main.libs += `pkg-config --libs ncurses`
-#main.libs += `pkg-config --libs gtkmm-3.0 gtksourceviewmm-3.0`
-
 
 # ======== Tests =====================================
 
@@ -37,3 +34,4 @@ includes +=
    test
 
 buffer_test.src += src/buffer.cpp
+keysettings_test.out = %
