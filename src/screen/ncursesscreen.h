@@ -5,7 +5,7 @@
 
 class NCursesScreen : public IScreen, public IInput {
 public:
-    void draw(size_t x, size_t y, FString str) override;
+    void draw(size_t x, size_t y, const FString &str) override;
 
     void refresh() override;
     void clear() override;

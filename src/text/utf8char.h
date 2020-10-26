@@ -119,4 +119,8 @@ public:
     constexpr bool operator==(char c) const {
         return size() == 1 && _data.front() == c;
     }
+
+    operator std::string_view() const {
+        return std::string_view{_data.begin(), size()};
+    }
 };

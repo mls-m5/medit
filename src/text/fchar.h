@@ -23,4 +23,12 @@ public:
     constexpr auto size() const {
         return c.size();
     }
+
+    operator std::string_view() const {
+        return c;
+    }
+
+    operator std::string() const {
+        return std::string{std::string_view{*this}};
+    }
 };

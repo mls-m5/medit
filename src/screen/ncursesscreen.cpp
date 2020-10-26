@@ -22,7 +22,7 @@ const auto keytranslations = std::map<int16_t, KeyTranslation>{
 
 } // namespace
 
-void NCursesScreen::draw(size_t x, size_t y, FString str) {
+void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
     // Todo: Fix formatting
     ::mvprintw(y, x, std::string{str}.c_str());
 }
@@ -44,6 +44,12 @@ NCursesScreen::NCursesScreen() {
     ::raw();
     ::keypad(stdscr, true);
     ::noecho();
+
+    ::start_color();
+    ::init_pair(1, COLOR_YELLOW, COLOR_BLACK);
+    ::init_pair(2, COLOR_RED, COLOR_MAGENTA);
+    ::init_pair(3, COLOR_CYAN, COLOR_BLACK);
+    ::init_pair(4, COLOR_BLACK, COLOR_WHITE);
 }
 
 KeyEvent NCursesScreen::getInput() {

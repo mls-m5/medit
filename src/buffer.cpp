@@ -78,6 +78,9 @@ Cursor Buffer::erase(Cursor cur) {
     if (_lines.empty()) {
         return {};
     }
+    else if (_lines.size() == 1 && _lines.front().empty()) {
+        return {};
+    }
     cur = fixCursor(cur);
     auto &line = _lines.at(cur.y);
     if (cur.x == 0 && cur.y > 0) {

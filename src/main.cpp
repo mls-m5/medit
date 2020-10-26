@@ -15,16 +15,17 @@ int main(int /*argc*/, char ** /*argv*/) {
 
     Editor editor;
 
+    editor.draw(screen);
     while (true) {
         auto c = screen.getInput();
         screen.clear();
         editor.keyPress(c);
 
-        screen.draw(10, 10, std::string{"hej"});
         editor.draw(screen);
 
-        screen.draw(
-            40, screen.height() - 1, std::to_string(static_cast<int>(c.key)));
+        //        screen.draw(
+        //            40, screen.height() - 1,
+        //            std::to_string(static_cast<int>(c.key)));
 
         editor.updateCursor(screen);
 

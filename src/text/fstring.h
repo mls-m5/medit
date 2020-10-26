@@ -12,8 +12,8 @@ public:
     FString &operator=(FString &&) = default;
 
     // Convert from a standard string to a fstring
-    FString(const std::string &str);
-    operator std::string();
+    FString(const std::string &str, FormatType f = {});
+    operator std::string() const;
 
     [[nodiscard]] auto size() const {
         return _content.size();
@@ -37,6 +37,14 @@ public:
 
     [[nodiscard]] auto end() {
         return _content.end();
+    }
+
+    [[nodiscard]] auto at(size_t index) const {
+        return _content.at(index);
+    }
+
+    [[nodiscard]] auto &at(size_t index) {
+        return _content.at(index);
     }
 
     auto erase(size_t pos, size_t size) {

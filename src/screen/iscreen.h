@@ -4,7 +4,7 @@
 
 class IScreen {
 public:
-    virtual void draw(size_t x, size_t y, FString str) = 0;
+    virtual void draw(size_t x, size_t y, const FString &str) = 0;
     virtual void refresh() = 0;
     virtual void clear() = 0;
     virtual void cursor(size_t x, size_t y) = 0;
