@@ -18,6 +18,7 @@ flags +=
 ## Main target
 main.includes +=
    include
+   src
 main.src = 
    src/**.cpp
 
@@ -33,5 +34,10 @@ includes +=
    src
    test
 
-buffer_test.src += src/buffer.cpp
+buffer_test.src += src/buffer.cpp src/text/fstring.cpp
+
 keysettings_test.out = %
+
+fstring_test.src += src/text/fstring.cpp
+
+utf8char_test.src.out = %

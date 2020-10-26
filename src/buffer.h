@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cursor.h"
+#include "text/fstring.h"
 #include <string>
 #include <string_view>
 #include <vector>
@@ -20,16 +21,16 @@ public:
 
     Buffer(std::string_view text) : Buffer(std::string(text)) {}
 
-    const auto &lines() const {
+    [[nodiscard]] const auto &lines() const {
         return _lines;
     }
 
     // Make sure that the cursor does not exeede the buffer
-    Cursor fixCursor(Cursor cursor);
-    Cursor prev(Cursor cursor);
-    Cursor next(Cursor cursor); // todo: implement this
+    [[nodiscard]] Cursor fixCursor(Cursor cursor);
+    [[nodiscard]] Cursor prev(Cursor cursor);
+    [[nodiscard]] Cursor next(Cursor cursor); // todo: implement this
 
-    Cursor insert(char c, Cursor cur);
+    Cursor insert(Utf8Char c, Cursor cur);
 
     //! Remove the character after the cursor
     Cursor erase(Cursor cur);
@@ -38,5 +39,5 @@ public:
     void text(std::string);
 
 private:
-    std::vector<std::string> _lines;
+    std::vector<FString> _lines;
 };

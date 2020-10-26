@@ -8,6 +8,14 @@ Cursor Buffer::fixCursor(Cursor cursor) {
     else if (cursor.y >= _lines.size()) {
         cursor.y = _lines.size() - 1;
     }
+
+    auto line = _lines.at(cursor.y);
+    if (line.empty()) {
+        cursor.x = 0;
+    }
+    else if (cursor.x >= line.size()) {
+        cursor.x = line.size() - 1;
+    }
     return cursor;
 }
 
@@ -24,25 +32,22 @@ Cursor Buffer::prev(Cursor cursor) {
     return cursor;
 }
 
-Cursor Buffer::insert(char c, Cursor cur) {
-    cur = fixCursor(cur);
+Cursor Buffer::insert(Utf8Char c, Cursor cur) {
     if (_lines.empty()) {
         _lines.emplace_back();
     }
-    _lines.back().push_back(c);
+    cur = fixCursor(cur);
+    _lines.back().emplace_back(c);
 
     cur.x += 1;
     return cur;
 }
 
 Cursor Buffer::erase(Cursor cur) {
-    fixCursor(cur);
-    //    auto line = _lines.back();
-    //    if (!line.empty()) {
-    //        --cur.x;
-    //        line.pop_back();
-    //    }
-
+    if (_lines.empty()) {
+        return {};
+    }
+    cur = fixCursor(cur);
     auto &line = _lines.at(cur.y);
     line.erase(cur.x, 1);
     return cur;
@@ -51,7 +56,7 @@ Cursor Buffer::erase(Cursor cur) {
 std::string Buffer::text() {
     std::ostringstream ss;
     for (auto &line : _lines) {
-        ss << line << "\n";
+        ss << std::string{line} << "\n";
     }
     auto ret = ss.str();
     ret.pop_back(); // Remove extra newline

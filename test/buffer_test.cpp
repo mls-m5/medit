@@ -31,4 +31,17 @@ TEST_CASE("remove character") {
     ASSERT_EQ(buffer.text(), resultText);
 }
 
+TEST_CASE("remove at invalid cursor without crashing") {
+    const std::string_view testText = "apa bepa\n bearne";
+
+    auto buffer = Buffer{testText};
+    buffer.erase({100, 0});
+    buffer.erase({1, 100});
+}
+
+TEST_CASE("try to insert to empty buffer") {
+    auto buffer = Buffer{};
+    buffer.insert("a", {0, 0});
+}
+
 TEST_SUIT_END
