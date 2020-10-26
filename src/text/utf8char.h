@@ -91,4 +91,8 @@ public:
     constexpr const char &front() const {
         return _data.front();
     }
+
+    constexpr bool operator==(char c) const {
+        return size() == 1 && _data.front() == c;
+    }
 };

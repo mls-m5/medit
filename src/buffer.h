@@ -32,7 +32,7 @@ public:
 
     Cursor insert(Utf8Char c, Cursor cur);
 
-    //! Remove the character after the cursor
+    //! Remove the character before the cursor
     Cursor erase(Cursor cur);
 
     std::string text();

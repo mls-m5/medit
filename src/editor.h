@@ -1,18 +1,24 @@
 #pragma once
 
-#include "buffer.h"
+//#include "buffer.h"
+#include "cursor.h"
 #include "meditfwd.h"
+#include "views/bufferview.h"
 
-class Editor {
+class Editor : public BufferView {
 private:
-    Buffer _buffer;
     Cursor _cursor;
     //    IMode *mode = 0;
 
 public:
-    const auto &buffer() const {
-        return _buffer;
-    }
+    Editor(std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>())
+        : BufferView(std::move(buffer)) {}
+    Editor(const Editor &) = delete;
+    Editor(Editor &&) = default;
+    Editor &operator=(const Editor &) = delete;
+    Editor &operator=(Editor &&) = default;
 
     void keyPress(const KeyEvent &key);
+
+    void updateCursor(IScreen &screen) const;
 };

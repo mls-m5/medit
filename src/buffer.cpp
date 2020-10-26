@@ -13,8 +13,8 @@ Cursor Buffer::fixCursor(Cursor cursor) {
     if (line.empty()) {
         cursor.x = 0;
     }
-    else if (cursor.x >= line.size()) {
-        cursor.x = line.size() - 1;
+    else if (cursor.x > line.size()) {
+        cursor.x = line.size();
     }
     return cursor;
 }
@@ -37,9 +37,17 @@ Cursor Buffer::insert(Utf8Char c, Cursor cur) {
         _lines.emplace_back();
     }
     cur = fixCursor(cur);
-    _lines.back().emplace_back(c);
+    if (c == '\n') {
+        _lines.insert(_lines.begin() + cur.y + 1, FString{});
+        cur.y += 1;
+        cur.x = 0;
+    }
+    else {
+        auto &line = _lines.at(cur.y);
+        line.insert(cur.x, c);
+        cur.x += 1;
+    }
 
-    cur.x += 1;
     return cur;
 }
 
@@ -49,7 +57,18 @@ Cursor Buffer::erase(Cursor cur) {
     }
     cur = fixCursor(cur);
     auto &line = _lines.at(cur.y);
-    line.erase(cur.x, 1);
+    if (cur.x == 0 && cur.y > 0) {
+        auto oldLine = std::move(_lines.at(cur.y));
+        _lines.erase(_lines.begin() + cur.y);
+        cur.y -= 1;
+        auto &lineAbove = _lines.at(cur.y);
+        cur.x = lineAbove.size() - 1;
+        lineAbove += oldLine;
+    }
+    else {
+        line.erase(cur.x - 1, 1);
+        cur.x -= 1;
+    }
     return cur;
 }
 

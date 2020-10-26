@@ -26,7 +26,18 @@ TEST_CASE("remove character") {
 
     Buffer buffer{testText};
 
-    buffer.erase({.x = 2, .y = 0});
+    buffer.erase({.x = 3, .y = 0});
+
+    ASSERT_EQ(buffer.text(), resultText);
+}
+
+TEST_CASE("remove character on second line") {
+    const std::string_view testText = "apa bepa\n bearne";
+    const std::string_view resultText = "apa bepa\n barne";
+
+    Buffer buffer{testText};
+
+    buffer.erase({.x = 3, .y = 1});
 
     ASSERT_EQ(buffer.text(), resultText);
 }
@@ -42,6 +53,25 @@ TEST_CASE("remove at invalid cursor without crashing") {
 TEST_CASE("try to insert to empty buffer") {
     auto buffer = Buffer{};
     buffer.insert("a", {0, 0});
+}
+
+TEST_CASE("split newlines") {
+    const auto testText = std::string_view{"apa bepa\n bearne"};
+    auto buffer = Buffer{testText};
+
+    ASSERT_EQ(buffer.lines().size(), 2);
+
+    buffer.insert("\n", {10, 1});
+    ASSERT_EQ(buffer.lines().size(), 3);
+}
+
+TEST_CASE("insert at position") {
+    const auto testText = std::string_view{"apa bepa\n bearne"};
+    const auto compText = std::string_view{"apa bepa\n boearne"};
+    auto buffer = Buffer{testText};
+
+    buffer.insert('o', {2, 1});
+    ASSERT_EQ(buffer.text(), compText);
 }
 
 TEST_SUIT_END

@@ -23,14 +23,42 @@ public:
         return _content.empty();
     }
 
+    [[nodiscard]] auto begin() const {
+        return _content.begin();
+    }
+
+    [[nodiscard]] auto begin() {
+        return _content.begin();
+    }
+
+    [[nodiscard]] auto end() const {
+        return _content.end();
+    }
+
+    [[nodiscard]] auto end() {
+        return _content.end();
+    }
+
     auto erase(size_t pos, size_t size) {
         return _content.erase(_content.begin() + pos,
                               _content.begin() + (pos + size));
     }
 
+    auto insert(size_t pos, FChar value) {
+        return _content.insert(_content.begin() + pos, value);
+    }
+
+    auto insert(std::vector<FChar>::iterator place, FChar value) {
+        return _content.insert(place, value);
+    }
+
     auto &emplace_back(Utf8Char c) {
         _content.push_back(c);
         return _content.back();
+    }
+
+    auto operator+=(const FString &other) {
+        _content.insert(_content.end(), other.begin(), other.end());
     }
 
     std::vector<FChar> _content;

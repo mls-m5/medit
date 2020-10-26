@@ -1,7 +1,7 @@
 
 #include "editor.h"
-//#include <ncurses.h>
 #include "screen/terminalscreen.h"
+#include "views/bufferview.h"
 #include <string>
 #include <vector>
 
@@ -10,12 +10,6 @@ struct Screen {
     int height = 0;
 } screen;
 
-// void printRows() {
-//    for (int i = 0; i < screen.height; ++i) {
-//        mvprintw(i, 0, std::to_string(i).c_str());
-//    }
-//}
-
 int main(int /*argc*/, char ** /*argv*/) {
     TerminalScreen screen;
 
@@ -23,10 +17,15 @@ int main(int /*argc*/, char ** /*argv*/) {
 
     while (true) {
         auto c = screen.getInput();
+        screen.clear();
         editor.keyPress(c);
 
         screen.draw(10, 10, std::string{"hej"});
-        screen.draw(11, 3, editor.buffer().lines().front());
+        editor.draw(screen);
+
+        screen.draw(40, screen.height() - 1, std::to_string(c.key));
+
+        editor.updateCursor(screen);
 
         screen.refresh();
     }
