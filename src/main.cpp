@@ -1,6 +1,6 @@
 
 #include "editor.h"
-#include "screen/terminalscreen.h"
+#include "screen/ncursesscreen.h"
 #include "views/bufferview.h"
 #include <string>
 #include <vector>
@@ -11,7 +11,7 @@ struct Screen {
 } screen;
 
 int main(int /*argc*/, char ** /*argv*/) {
-    TerminalScreen screen;
+    NCursesScreen screen;
 
     Editor editor;
 
@@ -23,7 +23,8 @@ int main(int /*argc*/, char ** /*argv*/) {
         screen.draw(10, 10, std::string{"hej"});
         editor.draw(screen);
 
-        screen.draw(40, screen.height() - 1, std::to_string(c.key));
+        screen.draw(
+            40, screen.height() - 1, std::to_string(static_cast<int>(c.key)));
 
         editor.updateCursor(screen);
 

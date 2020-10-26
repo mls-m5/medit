@@ -2,6 +2,22 @@
 
 #include <array>
 
+constexpr uint8_t utf8size(char first) {
+    if ((first & 0b10000000) == 0) {
+        return 1;
+    }
+    if ((first & 0b11100000) == 0b11000000) {
+        return 2;
+    }
+    else if ((first & 0b11110000) == 0b11100000) {
+        return 3;
+    }
+    else if ((first & 0b11111000) == 0b11110000) {
+        return 4;
+    }
+    return 0;
+}
+
 class Utf8Char {
     std::array<char, 4> _data = {};
 
@@ -61,7 +77,15 @@ public:
         return _data[index];
     }
 
+    constexpr char &operator[](size_t index) {
+        return _data[index];
+    }
+
     constexpr char at(size_t index) const {
+        return _data[index];
+    }
+
+    constexpr char &at(size_t index) {
         return _data[index];
     }
 

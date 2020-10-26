@@ -3,7 +3,7 @@
 #include "screen/iinput.h"
 #include "screen/iscreen.h"
 
-class TerminalScreen : public IScreen, public IInput {
+class NCursesScreen : public IScreen, public IInput {
 public:
     void draw(size_t x, size_t y, FString str) override;
 
@@ -11,7 +11,7 @@ public:
     void clear() override;
     void cursor(size_t x, size_t y) override;
 
-    TerminalScreen();
+    NCursesScreen();
 
     KeyEvent getInput() override;
 

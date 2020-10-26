@@ -11,7 +11,7 @@ TEST_CASE("instantiate") {
 TEST_CASE("insert key") {
     KeySettings settings;
 
-    auto event = KeyEvent{10};
+    auto event = KeyEvent{Key::Return};
 
     settings.setBinding("yo", event);
 

@@ -1,8 +1,22 @@
 #pragma once
 
+#include "text/utf8char.h"
+
+enum class Key {
+    Unknown,
+    Text,
+    Up,
+    Down,
+    Left,
+    Right,
+    Backspace,
+    Return,
+};
+
 class KeyEvent {
 public:
-    int key = 0;
+    Key key = Key::Unknown;
+    Utf8Char symbol = {};
     int modifiers = 0;
     bool state = true;
 

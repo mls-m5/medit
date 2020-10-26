@@ -20,6 +20,7 @@ Cursor Buffer::fixCursor(Cursor cursor) {
 }
 
 Cursor Buffer::prev(Cursor cursor) {
+    cursor = fixCursor(cursor);
     if (cursor.x == 0) {
         if (cursor.y > 0) {
             cursor.y -= 1;
@@ -29,6 +30,28 @@ Cursor Buffer::prev(Cursor cursor) {
     else {
         cursor.x -= 1;
     }
+    return cursor;
+}
+
+Cursor Buffer::next(Cursor cursor) {
+    if (_lines.empty()) {
+        return {};
+    }
+
+    cursor = fixCursor(cursor);
+    auto line = _lines.at(cursor.y);
+
+    if (cursor.x == line.size()) {
+        if (cursor.y == _lines.size() - 1) {
+            return cursor;
+        }
+        cursor.x = 0;
+        cursor.y += 1;
+    }
+    else {
+        ++cursor.x;
+    }
+
     return cursor;
 }
 
@@ -62,7 +85,7 @@ Cursor Buffer::erase(Cursor cur) {
         _lines.erase(_lines.begin() + cur.y);
         cur.y -= 1;
         auto &lineAbove = _lines.at(cur.y);
-        cur.x = lineAbove.size() - 1;
+        cur.x = lineAbove.size();
         lineAbove += oldLine;
     }
     else {
