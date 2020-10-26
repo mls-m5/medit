@@ -1,8 +1,9 @@
 #pragma once
 
-#include "keyevent.h"
+#include "keys/keyevent.h"
+#include "meditfwd.h"
 
 class IMode {
 public:
-    virtual int keyPress(KeyEvent c) = 0;
+    virtual void keyPress(const KeyEvent c, Editor &) = 0;
 };

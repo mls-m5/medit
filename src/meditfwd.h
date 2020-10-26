@@ -5,3 +5,5 @@ class KeyEvent;
 class Buffer;
 class IScreen;
 class IView;
+class IMode;
+class Editor;

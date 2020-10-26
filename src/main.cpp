@@ -1,5 +1,6 @@
 
 #include "editor.h"
+#include "modes/insertmode.h"
 #include "screen/ncursesscreen.h"
 #include "views/bufferview.h"
 #include <string>
@@ -14,6 +15,8 @@ int main(int /*argc*/, char ** /*argv*/) {
     NCursesScreen screen;
 
     Editor editor;
+    InsertMode insertMode;
+    editor.mode(&insertMode);
 
     editor.draw(screen);
     while (true) {
@@ -23,9 +26,7 @@ int main(int /*argc*/, char ** /*argv*/) {
 
         editor.draw(screen);
 
-        //        screen.draw(
-        //            40, screen.height() - 1,
-        //            std::to_string(static_cast<int>(c.key)));
+        screen.draw(40, screen.height() - 1, std::string{c.symbol});
 
         editor.updateCursor(screen);
 
