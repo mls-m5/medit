@@ -7,3 +7,4 @@ class IScreen;
 class IView;
 class IMode;
 class Editor;
+class IFile;

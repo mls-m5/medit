@@ -9,7 +9,7 @@
 class Editor : public BufferView {
 private:
     Cursor _cursor;
-    IMode *_mode = 0;
+    IMode *_mode = nullptr;
 
 public:
     Editor(std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>())

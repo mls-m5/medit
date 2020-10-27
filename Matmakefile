@@ -24,6 +24,7 @@ main.src =
 
 main.dir = bin
 main.libs += `pkg-config --libs ncurses`
+main.copy += README.md
 
 # ======== Tests =====================================
 

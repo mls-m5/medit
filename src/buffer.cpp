@@ -98,20 +98,36 @@ Cursor Buffer::erase(Cursor cur) {
     return cur;
 }
 
-std::string Buffer::text() {
+std::string Buffer::text() const {
     std::ostringstream ss;
-    for (auto &line : _lines) {
-        ss << std::string{line} << "\n";
-    }
-    auto ret = ss.str();
-    ret.pop_back(); // Remove extra newline
-    return ret;
+
+    text(ss);
+
+    return ss.str();
 }
 
-void Buffer::text(std::string text) {
-    std::istringstream ss{move(text)};
+void Buffer::text(std::string str) {
+    std::istringstream ss{move(str)};
 
-    for (std::string line; getline(ss, line);) {
+    text(ss);
+}
+
+void Buffer::text(std::istream &stream) {
+    _lines.clear();
+
+    for (std::string line; getline(stream, line);) {
         _lines.emplace_back(std::move(line));
+    }
+}
+
+void Buffer::text(std::ostream &stream) const {
+    if (_lines.empty()) {
+        return;
+    }
+
+    stream << std::string{_lines.back()};
+    for (size_t i = 1; i < _lines.size(); ++i) {
+
+        stream << "\n" << std::string{_lines.at(i)};
     }
 }

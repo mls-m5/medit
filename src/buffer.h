@@ -2,6 +2,7 @@
 
 #include "cursor.h"
 #include "text/fstring.h"
+#include <iosfwd>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -35,8 +36,11 @@ public:
     //! Remove the character before the cursor
     Cursor erase(Cursor cur);
 
-    std::string text();
+    std::string text() const;
     void text(std::string);
+
+    void text(std::istream &);
+    void text(std::ostream &) const;
 
 private:
     std::vector<FString> _lines;

@@ -6,4 +6,6 @@
 class IMode {
 public:
     virtual void keyPress(const KeyEvent c, Editor &) = 0;
+
+    virtual ~IMode() = default;
 };
