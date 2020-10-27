@@ -1,4 +1,4 @@
-#include "buffer.h"
+#include "text/buffer.h"
 #include <sstream>
 
 Cursor Buffer::fixCursor(Cursor cursor) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cursor.h"
+#include "text/cursor.h"
 #include "text/fstring.h"
 #include <iosfwd>
 #include <string>

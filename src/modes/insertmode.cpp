@@ -1,6 +1,6 @@
 
 #include "insertmode.h"
-#include "editor.h"
+#include "views/editor.h"
 
 void InsertMode::keyPress(const KeyEvent event, Editor &e) {
     if (event.key == Key::Backspace) {
@@ -20,7 +20,6 @@ void InsertMode::keyPress(const KeyEvent event, Editor &e) {
             return;
         }
         e.cursor().y -= 1;
-        //        e.cursor = buffer().fixCursor({e.cursor.x, e.cursor.y - 1});
     }
     else if (event.key == Key::Text) {
         e.cursor(e.buffer().insert(event.symbol, e.cursor()));

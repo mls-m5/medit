@@ -1,6 +1,6 @@
 
 #include "file.h"
-#include "buffer.h"
+#include "text/buffer.h"
 #include <fstream>
 
 File::File(std::filesystem::__cxx11::path path) : _path(path) {}

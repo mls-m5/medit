@@ -1,13 +1,12 @@
 #pragma once
 
-#include "buffer.h"
 #include "meditfwd.h"
+#include "text/buffer.h"
 #include "views/iview.h"
 #include <memory>
 
 class BufferView : public virtual IView {
 public:
-    //    BufferView() = default;
     BufferView(std::unique_ptr<Buffer> buffer) : _buffer(std::move(buffer)) {}
     BufferView(const BufferView &) = delete;
     BufferView &operator=(const BufferView &) = delete;

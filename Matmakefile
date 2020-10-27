@@ -4,9 +4,9 @@
 
 cpp = clang++
 
-config += c++17
-
-config += modules #treat includes as separate
+config +=
+   c++17
+   modules #treat includes as separate
 
 flags +=
    -W
@@ -35,7 +35,7 @@ includes +=
    src
    test
 
-buffer_test.src += src/buffer.cpp src/text/fstring.cpp
+buffer_test.src += src/text/buffer.cpp src/text/fstring.cpp
 
 keysettings_test.out = %
 

@@ -1,9 +1,9 @@
 
-#include "editor.h"
 #include "files/file.h"
 #include "modes/insertmode.h"
 #include "screen/ncursesscreen.h"
 #include "views/bufferview.h"
+#include "views/editor.h"
 #include <string>
 #include <vector>
 

@@ -1,9 +1,9 @@
 #pragma once
 
-//#include "buffer.h"
-#include "cursor.h"
+//#include "text/buffer.h"
 #include "meditfwd.h"
 #include "modes/imode.h"
+#include "text/cursor.h"
 #include "views/bufferview.h"
 
 class Editor : public BufferView {

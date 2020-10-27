@@ -1,6 +1,6 @@
 
-#include "editor.h"
-#include "buffer.h"
+#include "views/editor.h"
+#include "text/buffer.h"
 #include "keys/keyevent.h"
 #include "modes/imode.h"
 #include "screen/iscreen.h"
