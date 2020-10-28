@@ -1,11 +1,11 @@
 #pragma once
 
-#include "keys/keyevent.h"
 #include "meditfwd.h"
+#include <string_view>
 
 class IMode {
 public:
-    virtual void keyPress(const KeyEvent &, Editor &) = 0;
+    virtual void keyPress(IEnvironment &) = 0;
     virtual std::string_view name() = 0;
 
     virtual ~IMode() = default;

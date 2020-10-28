@@ -1,6 +1,6 @@
 
 #include "files/file.h"
-#include "modes/insertmode.h"
+#include "modes/normalmode.h"
 #include "screen/ncursesscreen.h"
 #include "script/environment.h"
 #include "views/bufferview.h"
@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
     Environment env;
     env.editor(&editor);
 
-    editor.mode(std::make_unique<InsertMode>(env));
+    editor.mode(createNormalMode());
 
     std::unique_ptr<IFile> file;
     if (argc > 1) {
@@ -32,11 +32,13 @@ int main(int argc, char **argv) {
     }
 
     editor.draw(screen);
+    editor.updateCursor(screen);
+
     while (true) {
         auto c = screen.getInput();
         env.key(c);
         screen.clear();
-        editor.keyPress(c);
+        editor.keyPress(env);
 
         editor.draw(screen);
 

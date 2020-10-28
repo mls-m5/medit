@@ -35,7 +35,7 @@ public:
         _mode = move(mode);
     }
 
-    void keyPress(const KeyEvent &key);
+    void keyPress(IEnvironment &env);
 
     void updateCursor(IScreen &screen) const;
 };

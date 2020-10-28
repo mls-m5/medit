@@ -11,7 +11,7 @@ class Mode : public IMode {
 public:
     Mode(std::string name, KeyMap map);
 
-    void keyPress(const KeyEvent &, Editor &) override;
+    void keyPress(IEnvironment &env) override;
 
     std::string_view name() override {
         return _name;

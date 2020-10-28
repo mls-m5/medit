@@ -2,15 +2,16 @@
 
 #include "keys/keyevent.h"
 #include "modes/imode.h"
-#include "script/environment.h"
+
+#include <memory>
+
+std::unique_ptr<IMode> createInsertMode();
 
 class InsertMode : public IMode {
-    IEnvironment &_env;
-
 public:
-    InsertMode(IEnvironment &env) : _env(env) {}
+    InsertMode() {}
 
-    void keyPress(const KeyEvent &c, Editor &) override;
+    void keyPress(IEnvironment &) override;
 
     std::string_view name() override;
 };

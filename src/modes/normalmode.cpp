@@ -1,10 +1,18 @@
 
 #include "normalmode.h"
+#include "modes/mode.h"
 
-void NormalMode::keyPress(const KeyEvent &event, Editor &) {
-    //    switch (event.key) { case Key::Text: }
-}
+std::unique_ptr<IMode> createNormalMode() {
+    auto map = KeyMap{{
+        {{"h"}, "editor.previous"},
+        {{"l"}, "editor.next"},
+        {{"j"}, "editor.down"},
+        {{"k"}, "editor.up"},
+        {{Key::Backspace}, "editor.prevous"},
+        {{Key::Escape}, "editor.normalmode"},
+        {{"i"}, "editor.insertmode"},
+    }};
+    map.defaultAction("");
 
-std::string_view NormalMode::name() {
-    return "normal";
+    return std::make_unique<Mode>("normal", std::move(map));
 }

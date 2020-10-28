@@ -8,3 +8,4 @@ class IView;
 class IMode;
 class Editor;
 class IFile;
+class IEnvironment;

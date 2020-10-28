@@ -120,6 +120,15 @@ public:
         return size() == 1 && _data.front() == c;
     }
 
+    constexpr bool operator==(const Utf8Char &other) const {
+        for (size_t i = 0; i < _data.size(); ++i) {
+            if (_data[i] != other._data[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     operator std::string_view() const {
         return std::string_view{_data.begin(), size()};
     }

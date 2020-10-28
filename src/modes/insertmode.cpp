@@ -1,36 +1,17 @@
 
 #include "insertmode.h"
-#include "script/matscript.h"
-#include "views/editor.h"
+#include "modes/mode.h"
 
-void InsertMode::keyPress(const KeyEvent &event, Editor &e) {
-    switch (event.key) {
-    case Key::Backspace:
-        e.cursor(e.buffer().erase(e.cursor()));
-        break;
-    case Key::Left:
-        run("editor.previous", _env);
-        break;
-    case Key::Right:
-        run("editor.next", _env);
-        break;
-    case Key::Down:
-        run("editor.down", _env);
-        break;
-    case Key::Up:
-        run("editor.up", _env);
-        break;
-    case Key::Escape:
-        run("editor.normalmode", _env);
-        break;
-    case Key::Text:
-        e.cursor(e.buffer().insert(event.symbol, e.cursor()));
-        break;
-    default:
-        break;
-    }
-}
+std::unique_ptr<IMode> createInsertMode() {
+    auto map = KeyMap{{
+        {{Key::Left}, "editor.previous"},
+        {{Key::Right}, "editor.next"},
+        {{Key::Down}, "editor.down"},
+        {{Key::Up}, "editor.up"},
+        {{Key::Backspace}, "editor.erase"},
+        {{Key::Escape}, "editor.normalmode"},
+    }};
+    map.defaultAction("editor.insert");
 
-std::string_view InsertMode::name() {
-    return "insert";
+    return std::make_unique<Mode>("insert", std::move(map));
 }

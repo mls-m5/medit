@@ -1,12 +1,17 @@
 
 
 #include "mode.h"
+#include "script/matscript.h"
 
-Mode::Mode(std::string name, KeyMap map) {
-    _name = name;
-    _keyMap = map;
-}
+Mode::Mode(std::string name, KeyMap map)
+    : _name(std::move(name)), _keyMap(std::move(map)) {}
 
-void Mode::keyPress(const KeyEvent event, Editor &) {
-    auto action = _keyMap.find(event)
+void Mode::keyPress(IEnvironment &env) {
+    auto action = _keyMap.find(env.key());
+    if (!action.empty()) {
+        run(action, env);
+    }
+    else {
+        run(_keyMap.defaultAction(), env);
+    }
 }

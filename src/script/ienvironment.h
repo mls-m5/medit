@@ -6,5 +6,5 @@
 class IEnvironment {
 public:
     virtual Editor &editor() = 0;
-    virtual KeyEvent key() = 0;
+    virtual KeyEvent key() const = 0;
 };

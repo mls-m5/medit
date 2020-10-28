@@ -4,6 +4,7 @@
 #include "modes/normalmode.h"
 #include <functional>
 #include <map>
+#include <sstream>
 
 namespace {
 std::map<std::string_view, std::function<void(IEnvironment &)>> editorCommands =
@@ -40,23 +41,38 @@ std::map<std::string_view, std::function<void(IEnvironment &)>> editorCommands =
             },
         },
         {
-            "editor.insertmode",
+            "editor.insert",
             [](IEnvironment &env) {
-                env.editor().mode(std::make_unique<InsertMode>(env));
+                auto &e = env.editor();
+                auto event = env.key();
+                e.cursor(e.buffer().insert(event.symbol, e.cursor()));
             },
         },
         {
-            "editor.normalmode",
+            "editor.erase",
             [](IEnvironment &env) {
-                env.editor().mode(std::make_unique<NormalMode>(env));
+                auto &e = env.editor();
+                e.cursor(e.buffer().erase(e.cursor()));
             },
+        },
+        {
+            "editor.insertmode",
+            [](IEnvironment &env) { env.editor().mode(createInsertMode()); },
+        },
+        {
+            "editor.normalmode",
+            [](IEnvironment &env) { env.editor().mode(createNormalMode()); },
         },
 };
 }
 
-void run(std::string_view command, IEnvironment &env) {
-    auto f = editorCommands.find(command);
-    if (f != editorCommands.end()) {
-        (f->second)(env);
+void run(std::string command, IEnvironment &env) {
+    auto ss = std::istringstream{std::move(command)};
+
+    for (std::string line; getline(ss, line);) {
+        auto f = editorCommands.find(line);
+        if (f != editorCommands.end()) {
+            (f->second)(env);
+        }
     }
 }

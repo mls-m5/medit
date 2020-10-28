@@ -56,7 +56,7 @@ NCursesScreen::NCursesScreen() {
 KeyEvent NCursesScreen::getInput() {
     const auto c = getch();
     if (auto f = keytranslations.find(c); f != keytranslations.end()) {
-        return KeyEvent{.key = f->second.key, .symbol = f->second.text};
+        return KeyEvent{f->second.key, f->second.text};
     }
     else if ((c & 0b11111111) == c) {
         Utf8Char uc{static_cast<char>(c)};
@@ -65,10 +65,10 @@ KeyEvent NCursesScreen::getInput() {
             uc[i] = getch();
         }
 
-        return KeyEvent{.key = Key::Text, .symbol = uc};
+        return KeyEvent{Key::Text, uc};
     }
     else {
-        return KeyEvent{.key = Key::Text, .symbol = c};
+        return KeyEvent{Key::Text, c};
     }
 }
 

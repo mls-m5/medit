@@ -5,9 +5,9 @@
 #include "screen/iscreen.h"
 #include "text/buffer.h"
 
-void Editor::keyPress(const KeyEvent &event) {
+void Editor::keyPress(IEnvironment &env) {
     if (_mode) {
-        _mode->keyPress(event, *this);
+        _mode->keyPress(env);
     }
 }
 

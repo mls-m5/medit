@@ -23,7 +23,7 @@ public:
         return *_editor;
     }
 
-    KeyEvent key() override {
+    KeyEvent key() const override {
         return _lastKeyEvent;
     }
 };
