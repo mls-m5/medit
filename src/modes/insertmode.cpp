@@ -4,8 +4,8 @@
 
 std::unique_ptr<IMode> createInsertMode() {
     auto map = KeyMap{{
-        {{Key::Left}, "editor.previous"},
-        {{Key::Right}, "editor.next"},
+        {{Key::Left}, "editor.left"},
+        {{Key::Right}, "editor.right"},
         {{Key::Down}, "editor.down"},
         {{Key::Up}, "editor.up"},
         {{Key::Backspace}, "editor.erase"},

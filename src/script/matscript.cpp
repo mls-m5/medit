@@ -10,34 +10,34 @@ namespace {
 std::map<std::string_view, std::function<void(IEnvironment &)>> editorCommands =
     {
         {
-            "editor.previous",
+            "editor.left",
             [](IEnvironment &env) {
                 auto &e = env.editor();
-                e.cursor(e.buffer().prev(e.cursor()));
+                e.cursor(left(e.cursor()));
             },
         },
         {
-            "editor.next",
+            "editor.right",
             [](IEnvironment &env) {
                 auto &e = env.editor();
-                e.cursor(e.buffer().next(e.cursor()));
+                e.cursor(right(e.cursor()));
             },
         },
         {
             "editor.up",
             [](IEnvironment &env) {
                 auto &e = env.editor();
-                if (e.cursor().y == 0) {
+                if (e.cursor().y() == 0) {
                     return;
                 }
-                e.cursor().y -= 1;
+                e.cursor().y() -= 1;
             },
         },
         {
             "editor.down",
             [](IEnvironment &env) {
                 auto &e = env.editor();
-                e.cursor().y += 1;
+                e.cursor().y() += 1;
             },
         },
         {

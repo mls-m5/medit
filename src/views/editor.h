@@ -13,7 +13,7 @@ private:
 
 public:
     Editor(std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>())
-        : BufferView(std::move(buffer)) {}
+        : BufferView(std::move(buffer)), _cursor(this->buffer()) {}
     Editor(const Editor &) = delete;
     Editor(Editor &&) = default;
     Editor &operator=(const Editor &) = delete;

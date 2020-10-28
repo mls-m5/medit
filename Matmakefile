@@ -35,7 +35,10 @@ includes +=
    src
    test
 
-buffer_test.src += src/text/buffer.cpp src/text/fstring.cpp
+buffer_test.src +=
+   src/text/buffer.cpp
+   src/text/fstring.cpp
+   src/text/cursor.cpp
 
 keysettings_test.out = %
 

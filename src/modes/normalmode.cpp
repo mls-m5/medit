@@ -4,8 +4,12 @@
 
 std::unique_ptr<IMode> createNormalMode() {
     auto map = KeyMap{{
-        {{"h"}, "editor.previous"},
-        {{"l"}, "editor.next"},
+        {{Key::Left}, "editor.left"},
+        {{Key::Right}, "editor.right"},
+        {{Key::Down}, "editor.down"},
+        {{Key::Up}, "editor.up"},
+        {{"h"}, "editor.left"},
+        {{"l"}, "editor.right"},
         {{"j"}, "editor.down"},
         {{"k"}, "editor.up"},
         {{Key::Backspace}, "editor.prevous"},

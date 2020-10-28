@@ -26,11 +26,6 @@ public:
         return _lines;
     }
 
-    // Make sure that the cursor does not exeede the buffer
-    [[nodiscard]] Cursor fixCursor(Cursor cursor);
-    [[nodiscard]] Cursor prev(Cursor cursor);
-    [[nodiscard]] Cursor next(Cursor cursor); // todo: implement this
-
     Cursor insert(Utf8Char c, Cursor cur);
 
     //! Remove the character before the cursor

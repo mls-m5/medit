@@ -1,6 +1,6 @@
 
-#include "text/buffer.h"
 #include "mls-unit-test/unittest.h"
+#include "text/buffer.h"
 #include <string_view>
 
 TEST_SUIT_BEGIN
@@ -16,8 +16,8 @@ TEST_CASE("fill with text") {
 
     auto returnText = buffer.text();
 
-    ASSERT_EQ(returnText.size(), testText.size());
     ASSERT_EQ(returnText, testText);
+    ASSERT_EQ(returnText.size(), testText.size());
 }
 
 TEST_CASE("remove character") {
@@ -26,7 +26,7 @@ TEST_CASE("remove character") {
 
     Buffer buffer{testText};
 
-    buffer.erase({.x = 3, .y = 0});
+    buffer.erase({buffer, 3, 0});
 
     ASSERT_EQ(buffer.text(), resultText);
 }
@@ -37,7 +37,7 @@ TEST_CASE("remove character on second line") {
 
     Buffer buffer{testText};
 
-    buffer.erase({.x = 3, .y = 1});
+    buffer.erase({buffer, 3, 1});
 
     ASSERT_EQ(buffer.text(), resultText);
 }
@@ -46,13 +46,13 @@ TEST_CASE("remove at invalid cursor without crashing") {
     const std::string_view testText = "apa bepa\n bearne";
 
     auto buffer = Buffer{testText};
-    buffer.erase({100, 0});
-    buffer.erase({1, 100});
+    buffer.erase({buffer, 100, 0});
+    buffer.erase({buffer, 1, 100});
 }
 
 TEST_CASE("try to insert to empty buffer") {
     auto buffer = Buffer{};
-    buffer.insert("a", {0, 0});
+    buffer.insert("a", {buffer, 0, 0});
 }
 
 TEST_CASE("split newlines") {
@@ -61,7 +61,7 @@ TEST_CASE("split newlines") {
 
     ASSERT_EQ(buffer.lines().size(), 2);
 
-    buffer.insert("\n", {10, 1});
+    buffer.insert("\n", {buffer, 10, 1});
     ASSERT_EQ(buffer.lines().size(), 3);
 }
 
@@ -70,7 +70,7 @@ TEST_CASE("insert at position") {
     const auto compText = std::string_view{"apa bepa\n boearne"};
     auto buffer = Buffer{testText};
 
-    buffer.insert('o', {2, 1});
+    buffer.insert('o', {buffer, 2, 1});
     ASSERT_EQ(buffer.text(), compText);
 }
 
