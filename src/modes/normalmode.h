@@ -4,11 +4,11 @@
 #include "modes/imode.h"
 #include "script/environment.h"
 
-class InsertMode : public IMode {
+class NormalMode : public IMode {
     IEnvironment &_env;
 
 public:
-    InsertMode(IEnvironment &env) : _env(env) {}
+    NormalMode(IEnvironment &env) : _env(env) {}
 
     void keyPress(const KeyEvent &c, Editor &) override;
 

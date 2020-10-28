@@ -18,6 +18,7 @@ const auto keytranslations = std::map<int16_t, KeyTranslation>{
     {259, {Key::Up}},
     {260, {Key::Left}},
     {261, {Key::Right}},
+    {27, {Key::Escape}},
 };
 
 } // namespace
@@ -54,7 +55,10 @@ NCursesScreen::NCursesScreen() {
 
 KeyEvent NCursesScreen::getInput() {
     const auto c = getch();
-    if ((c & 0b11111111) == c) {
+    if (auto f = keytranslations.find(c); f != keytranslations.end()) {
+        return KeyEvent{.key = f->second.key, .symbol = f->second.text};
+    }
+    else if ((c & 0b11111111) == c) {
         Utf8Char uc{static_cast<char>(c)};
         auto size = utf8size(c);
         for (size_t i = 1; i < size; ++i) {
@@ -62,9 +66,6 @@ KeyEvent NCursesScreen::getInput() {
         }
 
         return KeyEvent{.key = Key::Text, .symbol = uc};
-    }
-    else if (auto f = keytranslations.find(c); f != keytranslations.end()) {
-        return KeyEvent{.key = f->second.key, .symbol = f->second.text};
     }
     else {
         return KeyEvent{.key = Key::Text, .symbol = c};

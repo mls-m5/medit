@@ -2,6 +2,7 @@
 #include "files/file.h"
 #include "modes/insertmode.h"
 #include "screen/ncursesscreen.h"
+#include "script/environment.h"
 #include "views/bufferview.h"
 #include "views/editor.h"
 #include <string>
@@ -16,8 +17,10 @@ int main(int argc, char **argv) {
     NCursesScreen screen;
 
     Editor editor;
-    InsertMode insertMode;
-    editor.mode(&insertMode);
+    Environment env;
+    env.editor(&editor);
+
+    editor.mode(std::make_unique<InsertMode>(env));
 
     std::unique_ptr<IFile> file;
     if (argc > 1) {
@@ -31,6 +34,7 @@ int main(int argc, char **argv) {
     editor.draw(screen);
     while (true) {
         auto c = screen.getInput();
+        env.key(c);
         screen.clear();
         editor.keyPress(c);
 

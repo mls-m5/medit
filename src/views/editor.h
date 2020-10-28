@@ -9,7 +9,7 @@
 class Editor : public BufferView {
 private:
     Cursor _cursor;
-    IMode *_mode = nullptr;
+    std::unique_ptr<IMode> _mode = nullptr;
 
 public:
     Editor(std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>())
@@ -31,8 +31,8 @@ public:
         _cursor = c;
     }
 
-    void mode(IMode *mode) {
-        _mode = mode;
+    void mode(std::unique_ptr<IMode> mode) {
+        _mode = move(mode);
     }
 
     void keyPress(const KeyEvent &key);

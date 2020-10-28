@@ -4,6 +4,7 @@
 
 enum class Key {
     Unknown,
+    Any,
     Text,
     Up,
     Down,
@@ -11,6 +12,7 @@ enum class Key {
     Right,
     Backspace,
     Return,
+    Escape,
 };
 
 class KeyEvent {

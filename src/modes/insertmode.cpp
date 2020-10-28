@@ -1,28 +1,33 @@
 
 #include "insertmode.h"
+#include "script/matscript.h"
 #include "views/editor.h"
 
-void InsertMode::keyPress(const KeyEvent event, Editor &e) {
-    if (event.key == Key::Backspace) {
+void InsertMode::keyPress(const KeyEvent &event, Editor &e) {
+    switch (event.key) {
+    case Key::Backspace:
         e.cursor(e.buffer().erase(e.cursor()));
-    }
-    else if (event.key == Key::Left) {
-        e.cursor(e.buffer().prev(e.cursor()));
-    }
-    else if (event.key == Key::Right) {
-        e.cursor(e.buffer().next(e.cursor()));
-    }
-    else if (event.key == Key::Down) {
-        e.cursor().y += 1;
-    }
-    else if (event.key == Key::Up) {
-        if (e.cursor().y == 0) {
-            return;
-        }
-        e.cursor().y -= 1;
-    }
-    else if (event.key == Key::Text) {
+        break;
+    case Key::Left:
+        run("editor.previous", _env);
+        break;
+    case Key::Right:
+        run("editor.next", _env);
+        break;
+    case Key::Down:
+        run("editor.down", _env);
+        break;
+    case Key::Up:
+        run("editor.up", _env);
+        break;
+    case Key::Escape:
+        run("editor.normalmode", _env);
+        break;
+    case Key::Text:
         e.cursor(e.buffer().insert(event.symbol, e.cursor()));
+        break;
+    default:
+        break;
     }
 }
 
