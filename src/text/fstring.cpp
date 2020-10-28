@@ -1,7 +1,10 @@
 
 #include "text/fstring.h"
 
-FString::FString(const std::string &str, FormatType f) {
+FString::FString(const std::string &str, FormatType f)
+    : FString(std::string_view{str}, f) {}
+
+FString::FString(std::string_view str, FormatType f) {
     _content.reserve(str.size()); // First guess
     for (size_t i = 0; i < str.size();) {
         auto res = Utf8Char::fromChar(str.data() + i);

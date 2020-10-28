@@ -25,3 +25,7 @@ void InsertMode::keyPress(const KeyEvent event, Editor &e) {
         e.cursor(e.buffer().insert(event.symbol, e.cursor()));
     }
 }
+
+std::string_view InsertMode::name() {
+    return "insert";
+}

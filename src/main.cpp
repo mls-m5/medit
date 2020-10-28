@@ -36,7 +36,9 @@ int main(int argc, char **argv) {
 
         editor.draw(screen);
 
-        screen.draw(40, screen.height() - 1, std::string{c.symbol});
+        screen.draw(40,
+                    screen.height() - 1,
+                    std::string{c.symbol} + c.symbol.byteRepresentation());
 
         editor.updateCursor(screen);
 

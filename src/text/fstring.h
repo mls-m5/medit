@@ -13,6 +13,7 @@ public:
 
     // Convert from a standard string to a fstring
     FString(const std::string &str, FormatType f = {});
+    FString(std::string_view str, FormatType f = {});
     operator std::string() const;
 
     [[nodiscard]] auto size() const {

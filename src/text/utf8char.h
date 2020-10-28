@@ -123,4 +123,12 @@ public:
     operator std::string_view() const {
         return std::string_view{_data.begin(), size()};
     }
+
+    std::string byteRepresentation() {
+        std::string ret;
+        for (auto c : _data) {
+            ret += " " + std::to_string(static_cast<unsigned char>(c));
+        }
+        return ret;
+    }
 };
