@@ -12,7 +12,9 @@ enum class Key {
     Right,
     Backspace,
     Return,
+    Space,
     Escape,
+    Cancel,
 };
 
 class KeyEvent {

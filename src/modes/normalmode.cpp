@@ -14,6 +14,8 @@ std::unique_ptr<IMode> createNormalMode() {
         {{"k"}, "editor.up"},
         {{Key::Backspace}, "editor.prevous"},
         {{Key::Escape}, "editor.normalmode"},
+        {{Key::Return}, "editor.down"},
+        {{Key::Space}, "editor.right"},
         {{"i"}, "editor.insertmode"},
     }};
     map.defaultAction("");

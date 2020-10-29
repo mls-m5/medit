@@ -5,6 +5,7 @@
 //! Until i get c++20
 template <class T>
 class span {
+public:
     constexpr span() = default;
     constexpr span(const span &) = default;
     constexpr span(span &&) = default;
@@ -18,7 +19,11 @@ class span {
         return _begin;
     }
 
-    constexpr auto size() {
+    constexpr auto end() {
+        return _end;
+    }
+
+    constexpr size_t size() {
         return _end - _begin;
     }
 

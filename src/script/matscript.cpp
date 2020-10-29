@@ -63,6 +63,7 @@ std::map<std::string_view, std::function<void(IEnvironment &)>> editorCommands =
             "editor.normalmode",
             [](IEnvironment &env) { env.editor().mode(createNormalMode()); },
         },
+        {"quit", [](auto &) { exit(0); }},
 };
 }
 

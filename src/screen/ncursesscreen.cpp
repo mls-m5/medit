@@ -12,20 +12,31 @@ struct KeyTranslation {
 
 //! Keys that starts with ^
 const auto keytranslations = std::map<int16_t, KeyTranslation>{
-    {263, {Key::Backspace}},
+    {KEY_BACKSPACE, {Key::Backspace}},
     {10, {Key::Return, "\n"}},
-    {258, {Key::Down}},
-    {259, {Key::Up}},
-    {260, {Key::Left}},
-    {261, {Key::Right}},
+    {KEY_ENTER, {Key::Return, "\n"}},
+    {32, {Key::Space, " "}},
+    {KEY_DOWN, {Key::Down}},
+    {KEY_UP, {Key::Up}},
+    {KEY_LEFT, {Key::Left}},
+    {KEY_RIGHT, {Key::Right}},
     {27, {Key::Escape}},
+    {KEY_CANCEL, {Key::Cancel}},
 };
 
 } // namespace
 
 void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
     // Todo: Fix formatting
-    ::mvprintw(y, x, std::string{str}.c_str());
+    //    ::mvprintw(y, x, std::string{str}.c_str());
+
+    for (size_t tx = 0; tx < str.size(); ++tx) {
+        auto c = str.at(tx);
+        //        c.f = tx > 4;
+        attron(COLOR_PAIR(c.f));
+        ::mvprintw(y, x + tx, std::string{std::string_view{c}}.c_str());
+        attroff(COLOR_PAIR(c.f));
+    }
 }
 
 void NCursesScreen::refresh() {
@@ -47,10 +58,10 @@ NCursesScreen::NCursesScreen() {
     ::noecho();
 
     ::start_color();
-    ::init_pair(1, COLOR_YELLOW, COLOR_BLACK);
-    ::init_pair(2, COLOR_RED, COLOR_MAGENTA);
+    ::init_pair(1, COLOR_RED, COLOR_BLACK);
+    ::init_pair(2, COLOR_BLUE, COLOR_MAGENTA);
     ::init_pair(3, COLOR_CYAN, COLOR_BLACK);
-    ::init_pair(4, COLOR_BLACK, COLOR_WHITE);
+    ::init_pair(4, COLOR_GREEN, COLOR_WHITE);
 }
 
 KeyEvent NCursesScreen::getInput() {

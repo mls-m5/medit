@@ -1,7 +1,7 @@
 
 #include "views/bufferview.h"
-#include "text/buffer.h"
 #include "screen/iscreen.h"
+#include "text/buffer.h"
 
 BufferView::~BufferView() = default;
 

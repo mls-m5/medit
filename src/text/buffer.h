@@ -26,6 +26,10 @@ public:
         return _lines;
     }
 
+    [[nodiscard]] auto &lines() {
+        return _lines;
+    }
+
     Cursor insert(Utf8Char c, Cursor cur);
 
     //! Remove the character before the cursor

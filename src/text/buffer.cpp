@@ -1,4 +1,5 @@
 #include "text/buffer.h"
+#include "text/colorize.h"
 #include <sstream>
 
 Cursor Buffer::insert(Utf8Char c, Cursor cur) {
@@ -14,6 +15,7 @@ Cursor Buffer::insert(Utf8Char c, Cursor cur) {
     else {
         auto &line = _lines.at(cur.y());
         line.insert(cur.x(), c);
+        colorize(line);
         cur.x() += 1;
     }
 
@@ -36,9 +38,11 @@ Cursor Buffer::erase(Cursor cur) {
         auto &lineAbove = _lines.at(cur.y());
         cur.x() = lineAbove.size();
         lineAbove += oldLine;
+        colorize(lineAbove);
     }
     else {
         line.erase(cur.x() - 1, 1);
+        colorize(line);
         cur.x() -= 1;
     }
     return cur;
@@ -64,6 +68,8 @@ void Buffer::text(std::istream &stream) {
     for (std::string line; getline(stream, line);) {
         _lines.emplace_back(std::move(line));
     }
+
+    colorize(*this);
 }
 
 void Buffer::text(std::ostream &stream) const {
