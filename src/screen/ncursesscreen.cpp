@@ -27,14 +27,11 @@ const auto keytranslations = std::map<int16_t, KeyTranslation>{
 } // namespace
 
 void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
-    // Todo: Fix formatting
-    //    ::mvprintw(y, x, std::string{str}.c_str());
-
+    ::move(y, x);
     for (size_t tx = 0; tx < str.size(); ++tx) {
         auto c = str.at(tx);
-        //        c.f = tx > 4;
         attron(COLOR_PAIR(c.f));
-        ::mvprintw(y, x + tx, std::string{std::string_view{c}}.c_str());
+        ::printw(std::string{std::string_view{c}}.c_str());
         attroff(COLOR_PAIR(c.f));
     }
 }
