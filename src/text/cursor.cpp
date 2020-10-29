@@ -22,7 +22,7 @@ Cursor fix(Cursor cursor) {
     return cursor;
 }
 
-Cursor right(Cursor cursor) {
+Cursor right(Cursor cursor, bool allowLineChange) {
     auto &lines = cursor.buffer().lines();
     if (lines.empty()) {
         return {cursor.buffer()};
@@ -32,11 +32,13 @@ Cursor right(Cursor cursor) {
     auto line = lines.at(cursor.y());
 
     if (cursor.x() == line.size()) {
-        if (cursor.y() == lines.size() - 1) {
-            return cursor;
+        if (allowLineChange) {
+            if (cursor.y() == lines.size() - 1) {
+                return cursor;
+            }
+            cursor.x() = 0;
+            cursor.y() += 1;
         }
-        cursor.x() = 0;
-        cursor.y() += 1;
     }
     else {
         ++cursor.x();
@@ -45,10 +47,10 @@ Cursor right(Cursor cursor) {
     return cursor;
 }
 
-Cursor left(Cursor cursor) {
+Cursor left(Cursor cursor, bool allowLineChange) {
     cursor = fix(cursor);
     if (cursor.x() == 0) {
-        if (cursor.y() > 0) {
+        if (cursor.y() > 0 && allowLineChange) {
             cursor.y() -= 1;
             cursor.x() = cursor.buffer().lines().at(cursor.y()).size();
         }

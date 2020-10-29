@@ -50,7 +50,7 @@ public:
 };
 
 [[nodiscard]] Cursor fix(Cursor cursor);
-[[nodiscard]] Cursor right(Cursor cursor);
-[[nodiscard]] Cursor left(Cursor cursor);
+[[nodiscard]] Cursor right(Cursor cursor, bool allowLineChange = true);
+[[nodiscard]] Cursor left(Cursor cursor, bool allowLineChange = true);
 [[nodiscard]] Cursor home(Cursor cursor);
 [[nodiscard]] Cursor end(Cursor cursor);
