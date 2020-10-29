@@ -53,14 +53,20 @@ void NCursesScreen::cursor(size_t x, size_t y) {
 
 NCursesScreen::NCursesScreen() {
     ::initscr();
+    ::start_color();
     ::raw();
     ::keypad(stdscr, true);
     ::noecho();
 
-    ::start_color();
-    ::init_pair(1, COLOR_RED, COLOR_BLACK);
+    //    init_color(77, 372, 843, 372);
+    // init_color seems to take a value from 0 to 1000
+    // The first 16 indices are also reserved
+    // it could also be good pracice to use ::has_colors()
+    ::init_color(77, 1000, 0, 0);
+    ::init_pair(1, 77, COLOR_BLACK);
+    //    ::init_pair(1, COLOR_RED, COLOR_BLACK);
     ::init_pair(2, COLOR_BLUE, COLOR_MAGENTA);
-    ::init_pair(3, COLOR_CYAN, COLOR_BLACK);
+    ::init_pair(3, COLOR_CYAN, COLOR_BLUE);
     ::init_pair(4, COLOR_GREEN, COLOR_WHITE);
 }
 

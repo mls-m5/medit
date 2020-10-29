@@ -74,4 +74,11 @@ TEST_CASE("insert at position") {
     ASSERT_EQ(buffer.text(), compText);
 }
 
+TEST_CASE("do not remove anything when on first character") {
+    const auto testText = std::string_view{"apa bepa\n bearne"};
+    auto buffer = Buffer{testText};
+    buffer.erase({buffer, 0, 0});
+    ASSERT_EQ(buffer.text(), testText);
+}
+
 TEST_SUIT_END

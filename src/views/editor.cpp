@@ -22,5 +22,5 @@ void Editor::updateCursor(IScreen &screen) const {
         screen.draw(10, screen.height() - 1, _mode->name());
     }
 
-    screen.cursor(x() + _cursor.x(), y() + _cursor.y());
+    screen.cursor(x() + numberWidth() + _cursor.x(), y() + _cursor.y());
 }

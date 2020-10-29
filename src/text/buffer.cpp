@@ -31,14 +31,16 @@ Cursor Buffer::erase(Cursor cur) {
     }
     cur = fix(cur);
     auto &line = _lines.at(cur.y());
-    if (cur.x() == 0 && cur.y() > 0) {
-        auto oldLine = std::move(_lines.at(cur.y()));
-        _lines.erase(_lines.begin() + cur.y());
-        cur.y() -= 1;
-        auto &lineAbove = _lines.at(cur.y());
-        cur.x() = lineAbove.size();
-        lineAbove += oldLine;
-        colorize(lineAbove);
+    if (cur.x() == 0) {
+        if (cur.y() > 0) {
+            auto oldLine = std::move(_lines.at(cur.y()));
+            _lines.erase(_lines.begin() + cur.y());
+            cur.y() -= 1;
+            auto &lineAbove = _lines.at(cur.y());
+            cur.x() = lineAbove.size();
+            lineAbove += oldLine;
+            colorize(lineAbove);
+        }
     }
     else {
         line.erase(cur.x() - 1, 1);

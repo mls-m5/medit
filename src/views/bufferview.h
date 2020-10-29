@@ -32,9 +32,14 @@ public:
         return _y;
     }
 
+    auto numberWidth() const {
+        return _numberWidth;
+    }
+
 private:
     std::unique_ptr<Buffer> _buffer;
 
     size_t _x = 0;
     size_t _y = 0;
+    size_t _numberWidth = 3;
 };
