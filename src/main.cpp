@@ -44,6 +44,9 @@ int main(int argc, char **argv) {
         file->load(editor.buffer());
     }
 
+    editor.width(screen->width());
+    editor.height(screen->width());
+
     editor.draw(*screen);
     editor.updateCursor(*screen);
 

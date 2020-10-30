@@ -24,12 +24,28 @@ public:
         return *_buffer;
     }
 
-    auto x() const {
+    size_t x() const override {
         return _x;
     }
 
-    auto y() const {
+    size_t y() const override {
         return _y;
+    }
+
+    size_t width() const override {
+        return _width;
+    }
+
+    size_t height() const override {
+        return _height;
+    }
+
+    void width(size_t value) {
+        _width = value;
+    }
+
+    void height(size_t value) {
+        _height = value;
     }
 
     auto numberWidth() const {
@@ -41,5 +57,7 @@ private:
 
     size_t _x = 0;
     size_t _y = 0;
+    size_t _width = 0;
+    size_t _height = 0;
     size_t _numberWidth = 3;
 };

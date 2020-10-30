@@ -19,4 +19,7 @@ public:
     size_t y() const override;
     size_t width() const override;
     size_t height() const override;
+
+private:
+    size_t _tabWidth = 3;
 };
