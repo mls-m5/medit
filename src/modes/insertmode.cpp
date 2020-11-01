@@ -10,6 +10,7 @@ std::unique_ptr<IMode> createInsertMode() {
         {{Key::Up}, "editor.up"},
         {{Key::Backspace}, "editor.erase"},
         {{Key::Escape}, "editor.normalmode"},
+        {{Key::KeyCombination}, ""},
     }};
     map.defaultAction("editor.insert");
 

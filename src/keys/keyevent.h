@@ -6,6 +6,7 @@ enum class Key {
     Unknown,
     Any,
     Text,
+    KeyCombination,
     Up,
     Down,
     Left,
@@ -15,6 +16,12 @@ enum class Key {
     Space,
     Escape,
     Cancel,
+};
+
+enum class Modifiers {
+    None = 0,
+    Ctrl = 1 << 0,
+    Alt = 1 << 1,
 };
 
 class KeyEvent {
@@ -27,13 +34,13 @@ public:
 
     KeyEvent(Key key,
              Utf8Char symbol = {},
-             int modifiers = 0,
+             Modifiers modifiers = Modifiers::None,
              bool state = true)
         : key(key), symbol(symbol), modifiers(modifiers), state(state) {}
 
     Key key = Key::Unknown;
     Utf8Char symbol = {};
-    int modifiers = 0;
+    Modifiers modifiers = Modifiers::None;
     bool state = true;
 
     constexpr friend bool operator==(const KeyEvent &a, const KeyEvent &b) {

@@ -82,6 +82,9 @@ KeyEvent NCursesScreen::getInput() {
     if (auto f = keytranslations.find(c); f != keytranslations.end()) {
         return KeyEvent{f->second.key, f->second.text};
     }
+    else if (c < 27) { // ctrl-characters
+        return KeyEvent{Key::KeyCombination, c + 'A' - 1, Modifiers::Ctrl};
+    }
     else if ((c & 0b11111111) == c) {
         Utf8Char uc{static_cast<char>(c)};
         auto size = utf8size(c);
