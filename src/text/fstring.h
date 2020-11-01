@@ -4,6 +4,10 @@
 #include <vector>
 
 class FString {
+    std::vector<FChar> _content;
+    using iterator = std::vector<FChar>::iterator;
+    using const_iterator = std::vector<FChar>::const_iterator;
+
 public:
     FString() = default;
     FString(const FString &) = default;
@@ -14,6 +18,7 @@ public:
     // Convert from a standard string to a fstring
     FString(const std::string &str, FormatType f = {});
     FString(std::string_view str, FormatType f = {});
+    FString(const_iterator begin, const_iterator end);
     operator std::string() const;
 
     [[nodiscard]] auto size() const {
@@ -66,9 +71,15 @@ public:
         return _content.back();
     }
 
+    auto erase(iterator begin, iterator end) {
+        return _content.erase(begin, end);
+    }
+
+    auto erase(iterator it) {
+        return _content.erase(it);
+    }
+
     auto operator+=(const FString &other) {
         _content.insert(_content.end(), other.begin(), other.end());
     }
-
-    std::vector<FChar> _content;
 };

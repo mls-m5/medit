@@ -14,6 +14,9 @@ FString::FString(std::string_view str, FormatType f) {
     }
 }
 
+FString::FString(FString::const_iterator begin, FString::const_iterator end)
+    : _content(begin, end) {}
+
 FString::operator std::string() const {
     std::string str;
     str.reserve(size());

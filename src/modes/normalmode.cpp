@@ -12,6 +12,7 @@ std::unique_ptr<IMode> createNormalMode() {
         {{"l"}, "editor.right"},
         {{"j"}, "editor.down"},
         {{"k"}, "editor.up"},
+        {{"J"}, "editor.join"},
         {{Key::Backspace}, "editor.prevous"},
         {{Key::Escape}, "editor.normalmode"},
         {{Key::Return}, "editor.down"},

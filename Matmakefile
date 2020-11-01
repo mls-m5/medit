@@ -37,9 +37,9 @@ includes +=
 
 buffer_test.src +=
     src/text/*.cpp
-#   src/text/buffer.cpp
-#   src/text/fstring.cpp
-#   src/text/cursor.cpp
+
+cursorops_test.src +=
+    src/text/*.cpp
 
 keysettings_test.out = %
 
