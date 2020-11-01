@@ -50,6 +50,20 @@ std::map<std::string_view, std::function<void(IEnvironment &)>> editorCommands =
             },
         },
         {
+            "editor.split",
+            [](IEnvironment &env) {
+                auto &e = env.editor();
+                e.cursor(split(e.cursor()));
+            },
+        },
+        {
+            "editor.end",
+            [](IEnvironment &env) {
+                auto &e = env.editor();
+                e.cursor(end(e.cursor()));
+            },
+        },
+        {
             "editor.erase",
             [](IEnvironment &env) {
                 auto &e = env.editor();
