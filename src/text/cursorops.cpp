@@ -1,5 +1,5 @@
-
 #include "cursorops.h"
+
 #include "buffer.h"
 #include "colorize.h"
 
@@ -15,10 +15,9 @@ bool isValid(Cursor cursor) {
 }
 
 Cursor fix(Cursor cursor) {
-    auto &buffer = cursor.buffer();
     auto &lines = cursor.buffer().lines();
-    if (buffer.lines().empty()) {
-        cursor = {buffer, 0, 0};
+    if (lines.empty()) {
+        return {cursor.buffer(), 0, 0};
     }
     else if (cursor.y() >= lines.size()) {
         cursor.y() = lines.size() - 1;
@@ -78,8 +77,12 @@ Cursor home(Cursor cursor) {
 }
 
 Cursor end(Cursor cursor) {
+    const auto &lines = cursor.buffer().lines();
+    if (lines.empty()) {
+        return {cursor.buffer()};
+    }
     cursor = fix(cursor);
-    return cursor.x(cursor.buffer().lines().at(cursor.y()).size());
+    return cursor.x(lines.at(cursor.y()).size());
 }
 
 Cursor insert(Utf8Char c, Cursor cur) {
@@ -90,9 +93,6 @@ Cursor insert(Utf8Char c, Cursor cur) {
     cur = fix(cur);
     if (c == '\n') {
         return split(cur);
-        //        lines.insert(lines.begin() + cur.y() + 1, FString{});
-        //        cur.y() += 1;
-        //        cur.x() = 0;
     }
     else {
         auto &line = lines.at(cur.y());
@@ -160,6 +160,9 @@ Cursor join(Cursor cursor) {
 
 Cursor split(Cursor cursor) {
     auto &lines = cursor.buffer().lines();
+    if (lines.empty()) {
+        lines.emplace_back();
+    }
 
     if (cursor.y() >= lines.size()) {
         return fix(cursor);

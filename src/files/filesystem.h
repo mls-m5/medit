@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef USE_EXPERIMENTAL_FILESYSTEME
+#ifdef USE_EXPERIMENTAL_FILESYSTEM
 
 #include <experimental/filesystem>
 

@@ -1,6 +1,5 @@
-
-
 #include "mls-unit-test/unittest.h"
+
 #include "text/buffer.h"
 #include "text/cursorops.h"
 
@@ -137,6 +136,11 @@ TEST_CASE("split line") {
         split({buffer, 8, 0});
         ASSERT_EQ(buffer.text(), resText2);
     }
+}
+
+TEST_CASE("split empty buffer without crashing") {
+    auto buffer = Buffer{};
+    split({buffer, 10, 10});
 }
 
 TEST_SUIT_END
