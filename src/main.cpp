@@ -9,25 +9,20 @@
 #include <string>
 #include <vector>
 
-struct Screen {
-    int width = 0;
-    int height = 0;
-} screen;
-
 int main(int argc, char **argv) {
     std::unique_ptr<IScreen> screen;
     IInput *input;
 
-    if (true) {
-        auto ns = std::make_unique<NCursesScreen>();
-        input = ns.get();
-        screen = std::move(ns);
-    }
-    else {
-        auto ls = std::make_unique<LinuxTerminalScreen>();
-        input = ls.get();
-        screen = std::move(ls);
-    }
+    //    if (true) {
+    auto ns = std::make_unique<NCursesScreen>();
+    input = ns.get();
+    screen = std::move(ns);
+    //    }
+    //    else {
+    //        auto ls = std::make_unique<LinuxTerminalScreen>();
+    //        input = ls.get();
+    //        screen = std::move(ls);
+    //    }
 
     Editor editor;
     Environment env;

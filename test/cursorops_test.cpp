@@ -126,6 +126,7 @@ TEST_CASE("split line") {
     const auto testText = std::string_view{"apa bepa\n bearne\ncepa"};
     const auto resText1 = std::string_view{"apa\n bepa\n bearne\ncepa"};
     const auto resText2 = std::string_view{"apa bepa\n\n bearne\ncepa"};
+    const auto resText3 = std::string_view{"apa bepa\n bearne\ncepa\n"};
     {
         auto buffer = Buffer{testText};
         split({buffer, 3, 0});
@@ -135,6 +136,11 @@ TEST_CASE("split line") {
         auto buffer = Buffer{testText};
         split({buffer, 8, 0});
         ASSERT_EQ(buffer.text(), resText2);
+    }
+    {
+        auto buffer = Buffer{testText};
+        split({buffer, 8, 2});
+        ASSERT_EQ(buffer.text(), resText3);
     }
 }
 
