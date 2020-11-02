@@ -77,6 +77,10 @@ NCursesScreen::NCursesScreen() {
     ::init_pair(5, COLOR_WHITE, 79);
 }
 
+NCursesScreen::~NCursesScreen() {
+    ::endwin();
+}
+
 KeyEvent NCursesScreen::getInput() {
     const auto c = getch();
     if (auto f = keytranslations.find(c); f != keytranslations.end()) {

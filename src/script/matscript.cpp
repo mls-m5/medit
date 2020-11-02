@@ -1,9 +1,9 @@
 #include "matscript.h"
 
+#include "main.h"
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
 #include "text/cursorops.h"
-
 #include <functional>
 #include <map>
 #include <sstream>
@@ -100,7 +100,7 @@ std::map<std::string_view, std::function<void(IEnvironment &)>> editorCommands =
             "editor.normalmode",
             [](IEnvironment &env) { env.editor().mode(createNormalMode()); },
         },
-        {"quit", [](auto &) { exit(0); }},
+        {"quit", [](auto &) { quitMedit(); }},
 };
 }
 

@@ -12,6 +12,7 @@ public:
     void cursor(size_t x, size_t y) override;
 
     NCursesScreen();
+    ~NCursesScreen();
 
     KeyEvent getInput() override;
 

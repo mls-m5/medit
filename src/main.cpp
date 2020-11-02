@@ -9,6 +9,14 @@
 #include <string>
 #include <vector>
 
+namespace {
+bool shouldQuit = false;
+}
+
+void quitMedit() {
+    shouldQuit = true;
+}
+
 int main(int argc, char **argv) {
     std::unique_ptr<IScreen> screen;
     IInput *input;
@@ -46,7 +54,7 @@ int main(int argc, char **argv) {
     editor.draw(*screen);
     editor.updateCursor(*screen);
 
-    while (true) {
+    while (!shouldQuit) {
         auto c = input->getInput();
         env.key(c);
         screen->clear();
