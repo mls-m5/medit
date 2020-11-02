@@ -1,6 +1,7 @@
 
 #include "insertmode.h"
 #include "modes/mode.h"
+#include "modes/parentmode.h"
 
 std::unique_ptr<IMode> createInsertMode() {
     auto map = KeyMap{{
@@ -14,5 +15,5 @@ std::unique_ptr<IMode> createInsertMode() {
     }};
     map.defaultAction("editor.insert");
 
-    return std::make_unique<Mode>("insert", std::move(map));
+    return std::make_unique<Mode>("insert", std::move(map), createParentMode());
 }

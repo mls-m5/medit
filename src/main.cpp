@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
 
     if (file) {
         file->load(editor.buffer());
+        editor.setFile(std::move(file));
     }
 
     editor.width(screen->width());

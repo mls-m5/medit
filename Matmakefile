@@ -28,6 +28,7 @@ main.src =
 main.dir = bin
 main.libs += `pkg-config --libs ncurses` -lstdc++fs
 main.copy += README.md
+main.out = medit
 
 # ======== Tests =====================================
 

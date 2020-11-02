@@ -1,6 +1,8 @@
-#include "normalmode.h"
+// Copyright Mattias Larsson Sköld
 
+#include "normalmode.h"
 #include "modes/mode.h"
+#include "modes/parentmode.h"
 
 std::unique_ptr<IMode> createNormalMode() {
     auto map = KeyMap{{
@@ -26,5 +28,5 @@ std::unique_ptr<IMode> createNormalMode() {
     }};
     map.defaultAction("");
 
-    return std::make_unique<Mode>("normal", std::move(map));
+    return std::make_unique<Mode>("normal", std::move(map), createParentMode());
 }

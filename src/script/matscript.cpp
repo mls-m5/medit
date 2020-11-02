@@ -86,6 +86,13 @@ std::map<std::string_view, std::function<void(IEnvironment &)>> editorCommands =
             },
         },
         {
+            "editor.save",
+            [](IEnvironment &env) {
+                auto &e = env.editor();
+                e.save();
+            },
+        },
+        {
             "editor.insertmode",
             [](IEnvironment &env) { env.editor().mode(createInsertMode()); },
         },
