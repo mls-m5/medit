@@ -1,8 +1,9 @@
-
 #include "matscript.h"
+
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
 #include "text/cursorops.h"
+
 #include <functional>
 #include <map>
 #include <sstream>
@@ -54,6 +55,13 @@ std::map<std::string_view, std::function<void(IEnvironment &)>> editorCommands =
             [](IEnvironment &env) {
                 auto &e = env.editor();
                 e.cursor(split(e.cursor()));
+            },
+        },
+        {
+            "editor.home",
+            [](IEnvironment &env) {
+                auto &e = env.editor();
+                e.cursor(home(e.cursor()));
             },
         },
         {
