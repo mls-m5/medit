@@ -14,17 +14,11 @@ public:
         return _x;
     }
 
-    auto &x() {
-        return _x;
-    }
 
     constexpr auto y() const {
         return _y;
     }
 
-    auto &y() {
-        return _y;
-    }
 
     constexpr Cursor &x(size_t value) {
         _x = value;

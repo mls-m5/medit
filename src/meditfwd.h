@@ -9,3 +9,4 @@ class IMode;
 class Editor;
 class IFile;
 class IEnvironment;
+class BufferView;

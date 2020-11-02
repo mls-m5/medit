@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
     }
 
     editor.width(screen->width());
-    editor.height(screen->width());
+    editor.height(screen->height() - 1); // 1 character for toolbar
     editor.x(0);
     editor.y(0);
 

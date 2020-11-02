@@ -3,6 +3,7 @@
 #include "modes/imode.h"
 #include "screen/iscreen.h"
 #include "text/buffer.h"
+#include "text/cursorops.h"
 
 Editor::~Editor() = default;
 
@@ -26,9 +27,19 @@ void Editor::updateCursor(IScreen &screen) const {
     screen.draw(x() + 5, y(), _file->representation());
 
     screen.cursor(_bufferView.x() + _bufferView.numberWidth() + _cursor.x(),
-                  _bufferView.y() + _cursor.y());
+                  _bufferView.y() + _cursor.y() - _bufferView.scrollPosition());
 }
 
 void Editor::draw(IScreen &screen) {
     _bufferView.draw(screen);
+}
+
+void Editor::fitCursor() {
+    if (_cursor.y() < _bufferView.scrollPosition()) {
+        _bufferView.scrollPosition(_cursor.y());
+    }
+    else if (_cursor.y() + 1 >=
+             _bufferView.height() + _bufferView.scrollPosition()) {
+        _bufferView.scrollPosition(_cursor.y() - _bufferView.height() + 1);
+    }
 }

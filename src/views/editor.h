@@ -37,16 +37,17 @@ public:
         return _bufferView.buffer();
     }
 
-    auto &cursor() {
-        return _cursor;
-    }
-
     auto cursor() const {
         return _cursor;
     }
 
     auto cursor(Cursor c) {
         _cursor = c;
+        const auto &lines = _bufferView.buffer().lines();
+        if (_cursor.y() > lines.size()) {
+            _cursor.y(lines.size());
+        }
+        fitCursor();
     }
 
     void mode(std::unique_ptr<IMode> mode) {
@@ -61,7 +62,7 @@ public:
 
     void height(size_t value) override {
         View::height(value);
-        _bufferView.height(value);
+        _bufferView.height(value - 1);
     }
 
     void width(size_t value) override {
@@ -86,4 +87,8 @@ public:
     size_t y() const override {
         return View::y();
     }
+
+    //! Make sure that the buffer with the cursor is scrolled so that the cursor
+    //! is visible
+    void fitCursor();
 };

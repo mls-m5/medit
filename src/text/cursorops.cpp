@@ -1,7 +1,8 @@
-#include "cursorops.h"
 
+#include "cursorops.h"
 #include "buffer.h"
 #include "colorize.h"
+#include "views/bufferview.h"
 
 bool isValid(Cursor cursor) {
     auto &lines = cursor.buffer().lines();
@@ -20,15 +21,15 @@ Cursor fix(Cursor cursor) {
         return {cursor.buffer(), 0, 0};
     }
     else if (cursor.y() >= lines.size()) {
-        cursor.y() = lines.size() - 1;
+        cursor.y(lines.size() - 1);
     }
 
     auto line = lines.at(cursor.y());
     if (line.empty()) {
-        cursor.x() = 0;
+        cursor.x(0);
     }
     else if (cursor.x() > line.size()) {
-        cursor.x() = line.size();
+        cursor.x(line.size());
     }
     return cursor;
 }
@@ -47,12 +48,12 @@ Cursor right(Cursor cursor, bool allowLineChange) {
             if (cursor.y() == lines.size() - 1) {
                 return cursor;
             }
-            cursor.x() = 0;
-            cursor.y() += 1;
+            cursor.x(0);
+            cursor.y(cursor.y() + 1);
         }
     }
     else {
-        ++cursor.x();
+        cursor.x(cursor.x() + 1);
     }
 
     return cursor;
@@ -62,12 +63,12 @@ Cursor left(Cursor cursor, bool allowLineChange) {
     cursor = fix(cursor);
     if (cursor.x() == 0) {
         if (cursor.y() > 0 && allowLineChange) {
-            cursor.y() -= 1;
-            cursor.x() = cursor.buffer().lines().at(cursor.y()).size();
+            cursor.y(cursor.y() - 1);
+            cursor.x(cursor.buffer().lines().at(cursor.y()).size());
         }
     }
     else {
-        cursor.x() -= 1;
+        cursor.x(cursor.x() - 1);
     }
     return cursor;
 }
@@ -98,7 +99,7 @@ Cursor insert(Utf8Char c, Cursor cur) {
         auto &line = lines.at(cur.y());
         line.insert(cur.x(), c);
         colorize(line);
-        cur.x() += 1;
+        cur.x(cur.x() + 1);
     }
 
     return cur;
@@ -116,14 +117,14 @@ Cursor erase(Cursor cursor) {
     auto &line = lines.at(cursor.y());
     if (cursor.x() == 0) {
         if (cursor.y() > 0) {
-            cursor.y() -= 1;
+            cursor.y(cursor.y() - 1);
             return join(cursor);
         }
     }
     else {
         line.erase(cursor.x() - 1, 1);
         colorize(line);
-        cursor.x() -= 1;
+        cursor.x(cursor.x() - 1);
     }
     return cursor;
 }

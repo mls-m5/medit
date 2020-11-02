@@ -28,8 +28,17 @@ public:
         return _numberWidth;
     }
 
+    void scrollPosition(size_t value) {
+        _scrollPosition = value;
+    }
+
+    auto scrollPosition() const {
+        return _scrollPosition;
+    }
+
 private:
     std::unique_ptr<Buffer> _buffer;
 
     size_t _numberWidth = 3;
+    size_t _scrollPosition = 0;
 };

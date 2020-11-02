@@ -32,14 +32,18 @@ std::map<std::string_view, std::function<void(IEnvironment &)>> editorCommands =
                 if (e.cursor().y() == 0) {
                     return;
                 }
-                e.cursor().y() -= 1;
+                auto cursor = e.cursor();
+                cursor.y(cursor.y() - 1);
+                e.cursor(cursor);
             },
         },
         {
             "editor.down",
             [](IEnvironment &env) {
                 auto &e = env.editor();
-                e.cursor().y() += 1;
+                auto cursor = e.cursor();
+                cursor.y(e.cursor().y() + 1);
+                e.cursor(cursor);
             },
         },
         {

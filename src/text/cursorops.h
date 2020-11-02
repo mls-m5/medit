@@ -1,5 +1,6 @@
 #pragma once
 
+#include "meditfwd.h"
 #include "text/cursor.h"
 #include "text/utf8char.h"
 
