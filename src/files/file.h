@@ -11,4 +11,5 @@ public:
 
     void load(Buffer &) override;
     void save(const Buffer &) override;
+    std::string representation() const override;
 };

@@ -1,9 +1,10 @@
-
 #include "views/editor.h"
 #include "keys/keyevent.h"
 #include "modes/imode.h"
 #include "screen/iscreen.h"
 #include "text/buffer.h"
+
+Editor::~Editor() = default;
 
 void Editor::keyPress(IEnvironment &env) {
     if (_mode) {
@@ -22,5 +23,12 @@ void Editor::updateCursor(IScreen &screen) const {
         screen.draw(10, screen.height() - 1, _mode->name());
     }
 
-    screen.cursor(x() + numberWidth() + _cursor.x(), y() + _cursor.y());
+    screen.draw(x() + 5, y(), _file->representation());
+
+    screen.cursor(_bufferView.x() + _bufferView.numberWidth() + _cursor.x(),
+                  _bufferView.y() + _cursor.y());
+}
+
+void Editor::draw(IScreen &screen) {
+    _bufferView.draw(screen);
 }

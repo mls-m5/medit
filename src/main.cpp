@@ -1,4 +1,3 @@
-
 #include "files/file.h"
 #include "modes/normalmode.h"
 #include "screen/linuxterminalscreen.h"
@@ -21,16 +20,9 @@ int main(int argc, char **argv) {
     std::unique_ptr<IScreen> screen;
     IInput *input;
 
-    //    if (true) {
     auto ns = std::make_unique<NCursesScreen>();
     input = ns.get();
     screen = std::move(ns);
-    //    }
-    //    else {
-    //        auto ls = std::make_unique<LinuxTerminalScreen>();
-    //        input = ls.get();
-    //        screen = std::move(ls);
-    //    }
 
     Editor editor;
     Environment env;
@@ -50,6 +42,8 @@ int main(int argc, char **argv) {
 
     editor.width(screen->width());
     editor.height(screen->width());
+    editor.x(0);
+    editor.y(0);
 
     editor.draw(*screen);
     editor.updateCursor(*screen);

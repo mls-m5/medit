@@ -10,6 +10,7 @@ class Mode : public IMode {
     std::string _name;
     KeyMap _keyMap;
     std::unique_ptr<IMode> _parent;
+    std::string _commandBuffer;
 
 public:
     Mode(std::string name, KeyMap map, std::unique_ptr<IMode> parent = {});

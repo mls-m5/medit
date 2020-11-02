@@ -1,4 +1,3 @@
-
 #include "screen/ncursesscreen.h"
 #include <map>
 #include <ncurses.h>
@@ -11,7 +10,7 @@ struct KeyTranslation {
 };
 
 //! Keys that starts with ^
-const auto keytranslations = std::map<int16_t, KeyTranslation>{
+const auto keytranslations = std::map<int, KeyTranslation>{
     {KEY_BACKSPACE, {Key::Backspace}},
     {10, {Key::Return, "\n"}},
     {KEY_ENTER, {Key::Return, "\n"}},
@@ -87,19 +86,21 @@ KeyEvent NCursesScreen::getInput() {
         return KeyEvent{f->second.key, f->second.text};
     }
     else if (c < 27) { // ctrl-characters
-        return KeyEvent{Key::KeyCombination, c + 'A' - 1, Modifiers::Ctrl};
+        return KeyEvent{Key::KeyCombination,
+                        static_cast<char>(c + 'A' - 1),
+                        Modifiers::Ctrl};
     }
     else if ((c & 0b11111111) == c) {
         Utf8Char uc{static_cast<char>(c)};
-        auto size = utf8size(c);
+        auto size = utf8size(static_cast<char>(c));
         for (size_t i = 1; i < size; ++i) {
-            uc[i] = getch();
+            uc[i] = static_cast<char>(getch());
         }
 
         return KeyEvent{Key::Text, uc};
     }
     else {
-        return KeyEvent{Key::Text, c};
+        return KeyEvent{Key::Text, static_cast<char>(c)};
     }
 }
 
@@ -112,9 +113,9 @@ size_t NCursesScreen::y() const {
 }
 
 size_t NCursesScreen::width() const {
-    return ::COLS;
+    return static_cast<size_t>(::COLS);
 }
 
 size_t NCursesScreen::height() const {
-    return ::LINES;
+    return static_cast<size_t>(::LINES);
 }

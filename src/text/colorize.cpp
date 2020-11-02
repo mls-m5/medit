@@ -15,6 +15,7 @@ const auto wordList = std::vector<std::string>{
     "unsigned",
     "void",
     "short",
+    "include",
 };
 
 void colorizeWord(span<FChar> line) {

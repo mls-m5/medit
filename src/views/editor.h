@@ -7,19 +7,21 @@
 #include "views/bufferview.h"
 #include <memory>
 
-class Editor : public BufferView {
+class Editor : public View {
 private:
+    BufferView _bufferView;
     Cursor _cursor;
-    std::unique_ptr<IMode> _mode = nullptr;
+    std::unique_ptr<IMode> _mode;
     std::unique_ptr<IFile> _file;
 
 public:
     Editor(std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>())
-        : BufferView(std::move(buffer)), _cursor(this->buffer()) {}
+        : _bufferView(std::move(buffer)), _cursor(_bufferView.buffer()) {}
     Editor(const Editor &) = delete;
     Editor(Editor &&) = default;
     Editor &operator=(const Editor &) = delete;
     Editor &operator=(Editor &&) = default;
+    ~Editor() override;
 
     void setFile(std::unique_ptr<IFile> file) {
         _file = std::move(file);
@@ -27,8 +29,12 @@ public:
 
     void save() {
         if (_file) {
-            _file->save(buffer());
+            _file->save(_bufferView.buffer());
         }
+    }
+
+    auto &buffer() {
+        return _bufferView.buffer();
     }
 
     auto &cursor() {
@@ -50,4 +56,34 @@ public:
     void keyPress(IEnvironment &env);
 
     void updateCursor(IScreen &screen) const;
+
+    void draw(IScreen &) override;
+
+    void height(size_t value) override {
+        View::height(value);
+        _bufferView.height(value);
+    }
+
+    void width(size_t value) override {
+        View::width(value);
+        _bufferView.width(value);
+    }
+
+    void x(size_t x) override {
+        View::x();
+        _bufferView.x(x);
+    }
+
+    void y(size_t y) override {
+        View::y();
+        _bufferView.y(y + 1);
+    }
+
+    size_t x() const override {
+        return View::x();
+    }
+
+    size_t y() const override {
+        return View::y();
+    }
 };

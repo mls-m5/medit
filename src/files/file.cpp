@@ -1,4 +1,3 @@
-
 #include "file.h"
 #include "text/buffer.h"
 #include <fstream>
@@ -13,4 +12,8 @@ void File::load(Buffer &buffer) {
 void File::save(const Buffer &buffer) {
     auto file = std::ofstream{_path};
     buffer.text(file);
+}
+
+std::string File::representation() const {
+    return _path.string();
 }
