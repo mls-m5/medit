@@ -5,6 +5,7 @@
 #include "modes/normalmode.h"
 #include "plugin/build.h"
 #include "plugin/clangformat.h"
+#include "plugin/windowcommands.h"
 #include "text/cursorops.h"
 #include <functional>
 #include <map>
@@ -112,6 +113,10 @@ std::map<std::string_view, std::function<void(IEnvironment &)>> editorCommands =
         {
             "editor.build",
             [](IEnvironment &env) { build(env); },
+        },
+        {
+            "editor.escape",
+            [](IEnvironment &env) { escape(env); },
         },
         {
             "editor.insertmode",

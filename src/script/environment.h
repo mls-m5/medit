@@ -6,6 +6,7 @@ class Environment : public IEnvironment {
     Editor *_editor = nullptr;
     KeyEvent _lastKeyEvent;
     Buffer *_console;
+    bool _showConsole = false;
 
 public:
     // Used by handler
@@ -37,5 +38,13 @@ public:
             throw std::runtime_error("no console set");
         }
         return *_console;
+    }
+
+    void showConsole(bool shown) override {
+        _showConsole = shown;
+    }
+
+    bool showConsole() {
+        return _showConsole;
     }
 };
