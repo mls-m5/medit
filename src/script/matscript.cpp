@@ -3,6 +3,7 @@
 #include "main.h"
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
+#include "plugin/clangformat.h"
 #include "text/cursorops.h"
 #include <functional>
 #include <map>
@@ -95,6 +96,10 @@ std::map<std::string_view, std::function<void(IEnvironment &)>> editorCommands =
                 auto &e = env.editor();
                 e.save();
             },
+        },
+        {
+            "editor.format",
+            [](IEnvironment &env) { clangFormat(env); },
         },
         {
             "editor.insertmode",

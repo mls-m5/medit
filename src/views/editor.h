@@ -23,13 +23,23 @@ public:
     Editor &operator=(Editor &&) = default;
     ~Editor() override;
 
-    void setFile(std::unique_ptr<IFile> file) {
+    void file(std::unique_ptr<IFile> file) {
         _file = std::move(file);
+    }
+
+    IFile *file() {
+        return _file.get();
     }
 
     void save() {
         if (_file) {
             _file->save(_bufferView.buffer());
+        }
+    }
+
+    void load() {
+        if (_file) {
+            _file->load(_bufferView.buffer());
         }
     }
 

@@ -6,7 +6,9 @@ File::File(filesystem::path path) : _path(path) {}
 
 void File::load(Buffer &buffer) {
     std::ifstream file(_path);
-    buffer.text(file);
+    if (file.is_open()) {
+        buffer.text(file);
+    }
 }
 
 void File::save(const Buffer &buffer) {
@@ -16,4 +18,8 @@ void File::save(const Buffer &buffer) {
 
 std::string File::representation() const {
     return _path.string();
+}
+
+filesystem::path File::path() const {
+    return _path;
 }
