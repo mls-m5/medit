@@ -29,28 +29,46 @@ public:
     }
 
     auto &lineAt(size_t index) {
+        _changed = true;
+        return _lines.at(index);
+    }
+
+    const auto &lineAt(size_t index) const {
         return _lines.at(index);
     }
 
     void insert(size_t index, FString string) {
         _lines.insert(_lines.begin() + index, std::move(string));
+        changed(true);
     }
 
     void insert(std::vector<FString>::iterator position, FString string) {
         _lines.insert(position, std::move(string));
+        changed(true);
     }
 
     void push_back(FString string = {}) {
         _lines.push_back(std::move(string));
+        changed(true);
     }
 
     void deleteLine(size_t l) {
         _lines.erase(_lines.begin() + l);
+        changed(true);
     }
 
-    //    [[nodiscard]] auto &lines() {
-    //        return _lines;
-    //    }
+    auto changed() const {
+        return _changed;
+    }
+
+    void changed(bool value) {
+        _changed = value;
+    }
+
+    void clear() {
+        _lines.clear();
+        _changed = true;
+    }
 
     std::string text() const;
     void text(std::string);
@@ -60,4 +78,5 @@ public:
 
 private:
     std::vector<FString> _lines;
+    bool _changed = false;
 };

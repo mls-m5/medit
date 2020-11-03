@@ -1,8 +1,9 @@
-#include "matscript.h"
 
+#include "matscript.h"
 #include "main.h"
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
+#include "plugin/build.h"
 #include "plugin/clangformat.h"
 #include "text/cursorops.h"
 #include <functional>
@@ -107,6 +108,10 @@ std::map<std::string_view, std::function<void(IEnvironment &)>> editorCommands =
         {
             "editor.format",
             [](IEnvironment &env) { clangFormat(env); },
+        },
+        {
+            "editor.build",
+            [](IEnvironment &env) { build(env); },
         },
         {
             "editor.insertmode",

@@ -5,6 +5,9 @@
 
 class IEnvironment {
 public:
-    virtual Editor &editor() = 0;
-    virtual KeyEvent key() const = 0;
+    [[nodiscard]] virtual Editor &editor() = 0;
+    [[nodiscard]] virtual Buffer &console() = 0;
+    [[nodiscard]] virtual KeyEvent key() const = 0;
+
+    virtual ~IEnvironment() = default;
 };

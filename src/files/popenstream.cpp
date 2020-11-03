@@ -16,6 +16,7 @@ POpenStream::POpenStreamBuf::~POpenStreamBuf() {
     }
 }
 
-POpenStream::POpenStream(std::string command) : buffer(command) {
+POpenStream::POpenStream(std::string command, bool captureStdErr)
+    : buffer(command, captureStdErr) {
     rdbuf(&buffer);
 }

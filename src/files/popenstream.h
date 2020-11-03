@@ -28,7 +28,7 @@ private:
             }
         }
 
-        ~POpenStreamBuf();
+        ~POpenStreamBuf() override;
 
         static constexpr size_t size = 1024;
         std::array<char, size> buffer;
@@ -37,7 +37,7 @@ private:
     };
 
 public:
-    POpenStream(std::string command);
+    POpenStream(std::string command, bool captureStdErr = false);
 
     POpenStreamBuf buffer;
 };

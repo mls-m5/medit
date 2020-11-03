@@ -16,7 +16,7 @@ public:
     constexpr FChar &operator=(const FChar &) = default;
     constexpr FChar &operator=(FChar &&) = default;
 
-    constexpr FChar(char c) : c(c) {}
+    constexpr FChar(char c, FormatType f = {}) : c(c), f(f) {}
     constexpr FChar(char *begin, size_t size) : c(begin, size) {}
     constexpr FChar(Utf8Char c) : c(c) {}
 

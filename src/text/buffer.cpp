@@ -17,6 +17,7 @@ void Buffer::text(std::string str) {
 }
 
 void Buffer::text(std::istream &stream) {
+    changed(true);
     _lines.clear();
 
     for (std::string line; getline(stream, line);) {

@@ -24,7 +24,10 @@ void Editor::updateCursor(IScreen &screen) const {
         screen.draw(10, screen.height() - 1, _mode->name());
     }
 
-    screen.draw(x() + 5, y(), _file->representation());
+    screen.draw(x() + 5,
+                y(),
+                std::string{_file->representation()} +
+                    (_bufferView.buffer().changed() ? "*" : ""));
 
     screen.cursor(_bufferView.x() + _bufferView.numberWidth() + _cursor.x(),
                   _bufferView.y() + _cursor.y() - _bufferView.scrollPosition());

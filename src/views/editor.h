@@ -34,12 +34,14 @@ public:
     void save() {
         if (_file) {
             _file->save(_bufferView.buffer());
+            _bufferView.buffer().changed(false);
         }
     }
 
     void load() {
         if (_file) {
             _file->load(_bufferView.buffer());
+            _bufferView.buffer().changed(false);
         }
     }
 

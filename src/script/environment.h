@@ -5,6 +5,7 @@
 class Environment : public IEnvironment {
     Editor *_editor = nullptr;
     KeyEvent _lastKeyEvent;
+    Buffer *_console;
 
 public:
     // Used by handler
@@ -23,7 +24,18 @@ public:
         return *_editor;
     }
 
+    void console(Buffer *console) {
+        _console = console;
+    }
+
     KeyEvent key() const override {
         return _lastKeyEvent;
+    }
+
+    Buffer &console() override {
+        if (!_console) {
+            throw std::runtime_error("no console set");
+        }
+        return *_console;
     }
 };

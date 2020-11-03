@@ -7,6 +7,8 @@ std::unique_ptr<IMode> createParentMode() {
     auto map = KeyMap{{
         {KeyEvent{Key::KeyCombination, 'S', Modifiers::Ctrl},
          "editor.format\neditor.save"},
+        {KeyEvent{Key::KeyCombination, 'B', Modifiers::Ctrl},
+         "editor.format\neditor.save\neditor.build"},
         {KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}, "quit"},
     }};
 
