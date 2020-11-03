@@ -13,6 +13,7 @@ std::unique_ptr<IMode> createInsertMode() {
         {{Key::Delete}, "editor.right\neditor.erase"},
         {{Key::Escape}, "editor.normalmode"},
         {{Key::KeyCombination}, ""},
+        {{"\n"}, "editor.split\neditor.copyindentation"},
     }};
     map.defaultAction("editor.insert");
 

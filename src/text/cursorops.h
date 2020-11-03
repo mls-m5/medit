@@ -24,3 +24,6 @@ Cursor deleteLine(Cursor);
 Cursor join(Cursor);
 
 Cursor split(Cursor);
+
+//! Used for auto indentation
+Cursor copyIndentation(Cursor, std::string autoIndentString = "    ");

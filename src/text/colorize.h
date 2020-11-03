@@ -5,7 +5,10 @@
 void colorize(FString &line);
 
 inline void colorize(Buffer &buffer) {
-    for (auto &line : buffer.lines()) {
-        colorize(line);
+    for (size_t i = 0; i < buffer.lines().size(); ++i) {
+        colorize(buffer.lineAt(i));
     }
+    //    for (auto &line : buffer.lines()) {
+    //        colorize(line);
+    //    }
 }

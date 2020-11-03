@@ -12,7 +12,7 @@ struct KeyTranslation {
 //! Keys that starts with ^
 const auto keytranslations = std::map<int, KeyTranslation>{
     {KEY_BACKSPACE, {Key::Backspace}},
-    {10, {Key::Return, "\n"}},
+    {10, {Key::Text, "\n"}},
     {KEY_ENTER, {Key::Return, "\n"}},
     {32, {Key::Space, " "}},
     {KEY_DOWN, {Key::Down}},

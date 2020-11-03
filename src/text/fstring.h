@@ -66,6 +66,14 @@ public:
         return _content.insert(place, value);
     }
 
+    auto insert(iterator position, iterator begin, iterator end) {
+        return _content.insert(position, begin, end);
+    }
+
+    auto insert(iterator position, FString string) {
+        insert(position, string.begin(), string.end());
+    }
+
     auto &emplace_back(Utf8Char c) {
         _content.push_back(c);
         return _content.back();

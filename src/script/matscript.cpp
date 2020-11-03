@@ -98,6 +98,13 @@ std::map<std::string_view, std::function<void(IEnvironment &)>> editorCommands =
             },
         },
         {
+            "editor.copyindentation",
+            [](IEnvironment &env) {
+                auto &e = env.editor();
+                e.cursor(copyIndentation(e.cursor()));
+            },
+        },
+        {
             "editor.format",
             [](IEnvironment &env) { clangFormat(env); },
         },

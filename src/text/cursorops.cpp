@@ -89,14 +89,16 @@ Cursor end(Cursor cursor) {
 Cursor insert(Utf8Char c, Cursor cur) {
     auto &lines = cur.buffer().lines();
     if (lines.empty()) {
-        lines.emplace_back();
+        //        lines.emplace_back();
+        cur.buffer().push_back();
     }
     cur = fix(cur);
     if (c == '\n') {
         return split(cur);
     }
     else {
-        auto &line = lines.at(cur.y());
+        //        auto &line = lines.at(cur.y());
+        auto &line = cur.buffer().lineAt(cur.y());
         line.insert(cur.x(), c);
         colorize(line);
         cur.x(cur.x() + 1);
@@ -114,7 +116,7 @@ Cursor erase(Cursor cursor) {
         return {cursor.buffer()};
     }
     cursor = fix(cursor);
-    auto &line = lines.at(cursor.y());
+    auto &line = cursor.buffer().lineAt(cursor.y());
     if (cursor.x() == 0) {
         if (cursor.y() > 0) {
             cursor.y(cursor.y() - 1);
@@ -130,17 +132,19 @@ Cursor erase(Cursor cursor) {
 }
 
 Cursor deleteLine(Cursor cursor) {
-    auto &lines = cursor.buffer().lines();
+    //    auto &lines = cursor.buffer().lines();
     if (cursor.buffer().lines().empty()) {
         return {cursor.buffer()};
     }
     cursor = fix(cursor);
-    lines.erase(lines.begin() + cursor.y());
+    cursor.buffer().deleteLine(cursor.y());
+    //    lines.erase(lines.begin() + cursor.y());
     return cursor;
 }
 
 Cursor join(Cursor cursor) {
-    auto &lines = cursor.buffer().lines();
+    auto &buffer = cursor.buffer();
+    auto &lines = buffer.lines();
 
     cursor = end(cursor);
 
@@ -148,8 +152,8 @@ Cursor join(Cursor cursor) {
         return cursor;
     }
 
-    auto &line1 = lines.at(cursor.y());
-    auto &line2 = lines.at(cursor.y() + 1);
+    auto &line1 = buffer.lineAt(cursor.y());
+    auto &line2 = buffer.lineAt(cursor.y() + 1);
     auto x = line1.size();
 
     line1 += line2;
@@ -160,9 +164,11 @@ Cursor join(Cursor cursor) {
 }
 
 Cursor split(Cursor cursor) {
+    auto &buffer = cursor.buffer();
     auto &lines = cursor.buffer().lines();
     if (lines.empty()) {
-        lines.emplace_back();
+        cursor.buffer().push_back();
+        //        lines.emplace_back();
     }
 
     if (cursor.y() >= lines.size()) {
@@ -172,21 +178,63 @@ Cursor split(Cursor cursor) {
         const auto &line = lines.at(cursor.y());
 
         if (cursor.x() >= line.size()) {
-            lines.insert(lines.begin() + cursor.y() + 1, FString{});
+            //            lines.insert(lines.begin() + cursor.y() + 1,
+            //            FString{});
+            cursor.buffer().insert(cursor.y() + 1, FString{});
         }
         else {
-            lines.insert(lines.begin() + cursor.y() + 1,
-                         {
-                             line.begin() + cursor.x(),
-                             line.end(),
-                         });
+            //            lines.insert(lines.begin() + cursor.y() + 1,
+            //                         {
+            //                             line.begin() + cursor.x(),
+            //                             line.end(),
+            //                         });
+            cursor.buffer().insert(cursor.y() + 1,
+                                   {
+                                       line.begin() + cursor.x(),
+                                       line.end(),
+                                   });
 
-            auto &l = lines.at(cursor.y());
+            auto &l = buffer.lineAt(cursor.y());
 
             l.erase(l.begin() + cursor.x(), l.end());
         }
         return {cursor.buffer(), 0, cursor.y() + 1};
     }
+}
 
+Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
+    cursor = fix(cursor);
+
+    if (cursor.y() == 0) {
+        return cursor;
+    }
+
+    auto &lines = cursor.buffer().lines();
+
+    auto &line = cursor.buffer().lineAt(cursor.y());
+    auto &lineAbove = lines.at(cursor.y() - 1);
+
+    std::string indentationStr;
+    for (auto c : lineAbove) {
+        if (c.c == ' ' || c.c == '\t') {
+            indentationStr += std::string{c};
+        }
+        else {
+            break;
+        }
+    }
+
+    while (!line.empty() && isspace(line.at(0).c.at(0))) {
+        line.erase(line.begin(), line.begin() + 1);
+    }
+
+    cursor.x(indentationStr.size());
+
+    if (!lineAbove.empty() && lineAbove.at(lineAbove.size() - 1).c == '{') {
+        indentationStr += autoIndentString;
+        cursor.x(cursor.x() + autoIndentString.size());
+    }
+
+    line.insert(line.begin(), FString{indentationStr});
     return cursor;
 }

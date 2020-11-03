@@ -1,5 +1,5 @@
-#include "mls-unit-test/unittest.h"
 
+#include "mls-unit-test/unittest.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
 
@@ -147,6 +147,17 @@ TEST_CASE("split line") {
 TEST_CASE("split empty buffer without crashing") {
     auto buffer = Buffer{};
     split({buffer, 10, 10});
+}
+
+TEST_CASE("copy indentation") {
+    const auto testText = "   \na"sv;
+    const auto resText = "   \n   a"sv;
+    auto buffer = Buffer{testText};
+
+    auto cursor = copyIndentation({buffer, 0, 1});
+
+    ASSERT_EQ(buffer.text(), resText);
+    ASSERT_EQ(cursor.x(), 3);
 }
 
 TEST_SUIT_END
