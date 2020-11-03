@@ -10,6 +10,7 @@ std::unique_ptr<IMode> createInsertMode() {
         {{Key::Down}, "editor.down"},
         {{Key::Up}, "editor.up"},
         {{Key::Backspace}, "editor.erase"},
+        {{Key::Delete}, "editor.right\neditor.erase"},
         {{Key::Escape}, "editor.normalmode"},
         {{Key::KeyCombination}, ""},
     }};

@@ -12,6 +12,7 @@ enum class Key {
     Left,
     Right,
     Backspace,
+    Delete,
     Return,
     Space,
     Escape,

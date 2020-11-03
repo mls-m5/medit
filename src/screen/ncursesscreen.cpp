@@ -21,6 +21,7 @@ const auto keytranslations = std::map<int, KeyTranslation>{
     {KEY_RIGHT, {Key::Right}},
     {27, {Key::Escape}},
     {KEY_CANCEL, {Key::Cancel}},
+    {KEY_DC, {Key::Delete}},
 };
 
 } // namespace
