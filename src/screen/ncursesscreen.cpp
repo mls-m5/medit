@@ -22,6 +22,7 @@ const auto keytranslations = std::map<int, KeyTranslation>{
     {27, {Key::Escape}},
     {KEY_CANCEL, {Key::Cancel}},
     {KEY_DC, {Key::Delete}},
+    {KEY_STAB, {Key::Tab}},
 };
 
 } // namespace
@@ -33,11 +34,11 @@ void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
         auto c = str.at(i);
         attron(COLOR_PAIR(c.f));
         if (c.c == '\t') {
-            ::printw(std::string{std::string(_tabWidth, ' ')}.c_str());
+            ::printw("%s", std::string{std::string(_tabWidth, ' ')}.c_str());
             tx += _tabWidth - 1;
         }
         else {
-            ::printw(std::string{std::string_view{c}}.c_str());
+            ::printw("%s", std::string{std::string_view{c}}.c_str());
         }
         attroff(COLOR_PAIR(c.f));
     }

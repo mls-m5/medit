@@ -4,6 +4,13 @@
 
 class View : public IView {
 public:
+    View() = default;
+    View(size_t width, size_t height) : _width(width), _height(height) {}
+    View(const View &) = delete;
+    View(View &&) = delete;
+    View &operator=(const View &) = delete;
+    View &operator=(View &&) = delete;
+
     size_t x() const override {
         return _x;
     }

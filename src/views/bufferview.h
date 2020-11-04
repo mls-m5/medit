@@ -36,9 +36,15 @@ public:
         return _scrollPosition;
     }
 
+    void showLines(bool value) {
+        _showLines = value;
+        _numberWidth = value * 3;
+    }
+
 private:
     std::unique_ptr<Buffer> _buffer;
 
+    bool _showLines = true;
     size_t _numberWidth = 3;
     size_t _scrollPosition = 0;
 };

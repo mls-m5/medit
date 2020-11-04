@@ -17,6 +17,7 @@ enum class Key {
     Space,
     Escape,
     Cancel,
+    Tab,
 };
 
 enum class Modifiers {

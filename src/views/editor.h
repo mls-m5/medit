@@ -1,13 +1,14 @@
 #pragma once
 
 #include "files/ifile.h"
+#include "keys/ikeysink.h"
 #include "meditfwd.h"
 #include "modes/imode.h"
 #include "text/cursor.h"
 #include "views/bufferview.h"
 #include <memory>
 
-class Editor : public View {
+class Editor : public View, public IKeySink {
 private:
     BufferView _bufferView;
     Cursor _cursor;
@@ -66,15 +67,15 @@ public:
         _mode = move(mode);
     }
 
-    void keyPress(IEnvironment &env);
+    void keyPress(IEnvironment &env) override;
 
-    void updateCursor(IScreen &screen) const;
+    void updateCursor(IScreen &screen) const override;
 
     void draw(IScreen &) override;
 
     void height(size_t value) override {
         View::height(value);
-        _bufferView.height(value - 1);
+        _bufferView.height(value /* - 1*/);
     }
 
     void width(size_t value) override {
@@ -89,7 +90,7 @@ public:
 
     void y(size_t y) override {
         View::y();
-        _bufferView.y(y + 1);
+        _bufferView.y(y /* + 1*/);
     }
 
     size_t x() const override {

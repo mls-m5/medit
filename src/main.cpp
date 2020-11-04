@@ -1,4 +1,5 @@
 #include "files/file.h"
+#include "modes/insertmode.h"
 #include "modes/normalmode.h"
 #include "screen/linuxterminalscreen.h"
 #include "screen/ncursesscreen.h"
@@ -10,7 +11,81 @@
 
 namespace {
 bool shouldQuit = false;
-}
+
+struct MainWindow : public View, public IKeySink {
+    Editor editor;
+    Environment env;
+    BufferView console{std::make_unique<Buffer>()};
+    Editor commandBuffer;
+    size_t split = 10;
+
+    IKeySink *inputFocus = &editor;
+    //    IKeySink *inputFocus = &commandBuffer;
+
+    FString splitString;
+
+    MainWindow(size_t w, size_t h) : View(w, h) {
+        env.editor(&editor);
+        //        env.editor(&commandBuffer);
+        editor.mode(createNormalMode());
+        console.showLines(false);
+        env.console(&console.buffer());
+        for (size_t i = 0; i < width(); ++i) {
+            splitString.insert(splitString.end(), FChar{'-', 6});
+        }
+        commandBuffer.mode(createInsertMode());
+    }
+
+    ~MainWindow() override = default;
+
+    void resize() {
+        //! Todo: Handle layouts better in the future
+        editor.width(width());
+        if (env.showConsole()) {
+            editor.height(height() - split);
+        }
+        else {
+            editor.height(height() - 1);
+        }
+        editor.x(0);
+        editor.y(0);
+
+        console.width(width());
+        console.height(split - 1); // 1 character for toolbar
+        console.x(0);
+        console.y(height() - split + 1);
+
+        commandBuffer.x(0);
+        commandBuffer.y(0);
+        commandBuffer.width(width());
+        commandBuffer.height(1);
+    }
+
+    //! @see IView
+    void draw(IScreen &screen) override {
+        editor.draw(screen);
+        if (env.showConsole()) {
+            console.draw(screen);
+            screen.draw(0, height() - split, splitString);
+        }
+
+        if (inputFocus == &commandBuffer) {
+            commandBuffer.draw(screen);
+        }
+    }
+
+    //! @see IKeySink
+    void updateCursor(IScreen &screen) const override {
+        inputFocus->updateCursor(screen);
+    }
+
+    //! @see IKeySink
+    void keyPress(IEnvironment &env) override {
+        inputFocus->keyPress(env);
+    }
+};
+
+} // namespace
 
 void quitMedit() {
     shouldQuit = true;
@@ -24,11 +99,7 @@ int main(int argc, char **argv) {
     input = ns.get();
     screen = std::move(ns);
 
-    Editor editor;
-    Environment env;
-    env.editor(&editor);
-
-    editor.mode(createNormalMode());
+    MainWindow mainWindow(screen->width(), screen->height());
 
     std::unique_ptr<IFile> file;
     if (argc > 1) {
@@ -36,62 +107,28 @@ int main(int argc, char **argv) {
     }
 
     if (file) {
-        file->load(editor.buffer());
-        editor.file(std::move(file));
+        file->load(mainWindow.editor.buffer());
+        mainWindow.editor.file(std::move(file));
     }
 
-    BufferView console(std::make_unique<Buffer>());
-
-    env.console(&console.buffer());
-
-    size_t split = screen->height() - 1 - 10;
-    //! Todo: Handle layouts better in the future
-    auto resize = [&editor, &console, &screen, split, &env]() {
-        editor.width(screen->width());
-        if (env.showConsole()) {
-            editor.height(split);
-        }
-        else {
-            editor.height(screen->height() - 1);
-        }
-        editor.x(0);
-        editor.y(0);
-
-        console.width(screen->width());
-        console.height(screen->height() - 1 - split); // 1 character for toolbar
-        console.x(0);
-        console.y(split + 1);
-    };
-
-    FString splitString;
-    for (size_t i = 0; i < screen->width(); ++i) {
-        splitString.insert(splitString.end(), FChar{'-', 6});
-    }
-
-    resize();
-    editor.draw(*screen);
-    //    console.draw(*screen);
-    editor.updateCursor(*screen);
-    //    screen->draw(0, split, splitString);
+    mainWindow.resize();
+    mainWindow.draw(*screen);
+    mainWindow.updateCursor(*screen);
 
     while (!shouldQuit) {
         auto c = input->getInput();
-        env.key(c);
+        mainWindow.env.key(c);
         screen->clear();
-        editor.keyPress(env);
-        resize();
+        mainWindow.keyPress(mainWindow.env);
+        mainWindow.resize();
 
-        editor.draw(*screen);
-        if (env.showConsole()) {
-            console.draw(*screen);
-            screen->draw(0, split, splitString);
-        }
+        mainWindow.draw(*screen);
 
         screen->draw(40,
                      screen->height() - 1,
                      std::string{c.symbol} + c.symbol.byteRepresentation());
 
-        editor.updateCursor(*screen);
+        mainWindow.updateCursor(*screen);
 
         screen->refresh();
     }
