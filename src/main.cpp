@@ -50,7 +50,9 @@ int main(int argc, char **argv) {
 
         screen->draw(40,
                      screen->height() - 1,
-                     std::string{c.symbol} + c.symbol.byteRepresentation());
+                     ((c.modifiers == Modifiers::Ctrl) ? "ctrl+'" : "'") +
+                         std::string{c.symbol} + "'" +
+                         c.symbol.byteRepresentation());
 
         mainWindow.updateCursor(*screen);
 

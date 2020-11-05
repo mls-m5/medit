@@ -23,6 +23,18 @@ const auto keytranslations = std::map<int, KeyTranslation>{
     {KEY_CANCEL, {Key::Cancel}},
     {KEY_DC, {Key::Delete}},
     {KEY_STAB, {Key::Tab}},
+    {KEY_F(1), {Key::F1}},
+    {KEY_F(2), {Key::F2}},
+    {KEY_F(3), {Key::F3}},
+    {KEY_F(4), {Key::F4}},
+    {KEY_F(5), {Key::F5}},
+    {KEY_F(6), {Key::F6}},
+    {KEY_F(7), {Key::F7}},
+    {KEY_F(8), {Key::F8}},
+    {KEY_F(9), {Key::F9}},
+    {KEY_F(10), {Key::F10}},
+    {KEY_F(11), {Key::F11}},
+    {KEY_F(12), {Key::F12}},
 };
 
 } // namespace
@@ -90,8 +102,9 @@ KeyEvent NCursesScreen::getInput() {
         return KeyEvent{f->second.key, f->second.text};
     }
     else if (c < 27) { // ctrl-characters
+        // Note that ctrl+space -> 0
         return KeyEvent{Key::KeyCombination,
-                        static_cast<char>(c + 'A' - 1),
+                        c == 0 ? ' ' : static_cast<char>(c + 'A' - 1),
                         Modifiers::Ctrl};
     }
     else if ((c & 0b11111111) == c) {
