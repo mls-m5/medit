@@ -31,8 +31,8 @@ int main(int argc, char **argv) {
     }
 
     if (file) {
-        file->load(mainWindow.editor.buffer());
-        mainWindow.editor.file(std::move(file));
+        file->load(mainWindow._editor.buffer());
+        mainWindow._editor.file(std::move(file));
     }
 
     mainWindow.resize();
@@ -41,9 +41,9 @@ int main(int argc, char **argv) {
 
     while (!shouldQuit) {
         auto c = input->getInput();
-        mainWindow.env.key(c);
+        mainWindow._env.key(c);
         screen->clear();
-        mainWindow.keyPress(mainWindow.env);
+        mainWindow.keyPress(mainWindow._env);
         mainWindow.resize();
 
         mainWindow.draw(*screen);

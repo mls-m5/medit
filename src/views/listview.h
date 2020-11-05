@@ -4,17 +4,27 @@
 #include "text/fstring.h"
 #include "views/scrollview.h"
 #include <any>
+#include <functional>
 #include <vector>
 
-class ListView : public ScrollView, IKeySink {
+class ListView : public ScrollView, public IKeySink {
     struct ListItem;
     std::vector<ListItem> _lines;
+    std::function<void(const std::string &, const std::any &)> _callback;
+    size_t _current = 0;
 
 public:
     ListView();
     ~ListView() override;
 
-    void addLine(FString text, std::any dataContent);
+    void addLine(FString text, std::any dataContent = {});
+    void clear();
+
+    //! What function to call when list item is selected
+    void callBack(
+        std::function<void(const std::string &, const std::any &)> f) {
+        _callback = std::move(f);
+    }
 
     //! @see IView
     void draw(IScreen &) override;

@@ -5,6 +5,7 @@
 
 class FString {
     std::vector<FChar> _content;
+
     using iterator = std::vector<FChar>::iterator;
     using const_iterator = std::vector<FChar>::const_iterator;
 
@@ -19,6 +20,7 @@ public:
     FString(const std::string &str, FormatType f = {});
     FString(std::string_view str, FormatType f = {});
     FString(const_iterator begin, const_iterator end);
+    FString(const char *str) : FString(std::string_view(str)) {}
     operator std::string() const;
 
     [[nodiscard]] auto size() const {

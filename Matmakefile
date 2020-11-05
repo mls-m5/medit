@@ -6,7 +6,7 @@ cpp = clang++-10
 
 config +=
    c++17
-   modules #treat includes as separate
+#   modules #treat includes as separate
 
 define +=
    USE_EXPERIMENTAL_FILESYSTEM
