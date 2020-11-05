@@ -18,10 +18,6 @@ private:
 public:
     Editor(std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>())
         : _bufferView(std::move(buffer)), _cursor(_bufferView.buffer()) {}
-    Editor(const Editor &) = delete;
-    Editor(Editor &&) = default;
-    Editor &operator=(const Editor &) = delete;
-    Editor &operator=(Editor &&) = default;
     ~Editor() override;
 
     void file(std::unique_ptr<IFile> file) {
@@ -67,7 +63,11 @@ public:
         _mode = move(mode);
     }
 
-    void keyPress(IEnvironment &env) override;
+    void showLines(bool value) {
+        _bufferView.showLines(value);
+    }
+
+    bool keyPress(IEnvironment &env) override;
 
     void updateCursor(IScreen &screen) const override;
 

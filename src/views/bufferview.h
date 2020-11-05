@@ -2,16 +2,12 @@
 
 #include "meditfwd.h"
 #include "text/buffer.h"
-#include "views/view.h"
+#include "views/scrollview.h"
 #include <memory>
 
-class BufferView : public View {
+class BufferView : public ScrollView {
 public:
     BufferView(std::unique_ptr<Buffer> buffer) : _buffer(std::move(buffer)) {}
-    BufferView(const BufferView &) = delete;
-    BufferView &operator=(const BufferView &) = delete;
-    BufferView(BufferView &&) = default;
-    BufferView &operator=(BufferView &&) = default;
     ~BufferView() override;
 
     void draw(IScreen &) override;
@@ -24,16 +20,8 @@ public:
         return *_buffer;
     }
 
-    auto numberWidth() const {
+    size_t numberWidth() const {
         return _numberWidth;
-    }
-
-    void scrollPosition(size_t value) {
-        _scrollPosition = value;
-    }
-
-    auto scrollPosition() const {
-        return _scrollPosition;
     }
 
     void showLines(bool value) {
@@ -46,5 +34,4 @@ private:
 
     bool _showLines = true;
     size_t _numberWidth = 3;
-    size_t _scrollPosition = 0;
 };

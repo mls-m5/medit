@@ -2,10 +2,10 @@
 
 #include "ienvironment.h"
 
-class Environment : public IEnvironment {
-    Editor *_editor = nullptr;
+class RootEnvironment : public IEnvironment {
     KeyEvent _lastKeyEvent;
-    Buffer *_console;
+    Editor *_editor = nullptr;
+    Editor *_console;
     bool _showConsole = false;
 
 public:
@@ -25,7 +25,7 @@ public:
         return *_editor;
     }
 
-    void console(Buffer *console) {
+    void console(Editor *console) {
         _console = console;
     }
 
@@ -33,7 +33,7 @@ public:
         return _lastKeyEvent;
     }
 
-    Buffer &console() override {
+    Editor &console() override {
         if (!_console) {
             throw std::runtime_error("no console set");
         }
@@ -46,5 +46,9 @@ public:
 
     bool showConsole() {
         return _showConsole;
+    }
+
+    IEnvironment *parent() override {
+        return nullptr;
     }
 };

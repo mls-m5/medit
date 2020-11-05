@@ -7,6 +7,7 @@
 #include "plugin/clangformat.h"
 #include "plugin/windowcommands.h"
 #include "text/cursorops.h"
+#include "views/editor.h"
 #include <functional>
 #include <map>
 #include <sstream>

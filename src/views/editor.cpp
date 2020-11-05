@@ -7,10 +7,11 @@
 
 Editor::~Editor() = default;
 
-void Editor::keyPress(IEnvironment &env) {
+bool Editor::keyPress(IEnvironment &env) {
     if (_mode) {
-        _mode->keyPress(env);
+        return _mode->keyPress(env);
     }
+    return false;
 }
 
 void Editor::updateCursor(IScreen &screen) const {
@@ -30,7 +31,7 @@ void Editor::updateCursor(IScreen &screen) const {
     //                    (_bufferView.buffer().changed() ? "*" : ""));
 
     screen.cursor(_bufferView.x() + _bufferView.numberWidth() + _cursor.x(),
-                  _bufferView.y() + _cursor.y() - _bufferView.scrollPosition());
+                  _bufferView.y() + _cursor.y() - _bufferView.yScroll());
 }
 
 void Editor::draw(IScreen &screen) {
@@ -38,11 +39,10 @@ void Editor::draw(IScreen &screen) {
 }
 
 void Editor::fitCursor() {
-    if (_cursor.y() < _bufferView.scrollPosition()) {
-        _bufferView.scrollPosition(_cursor.y());
+    if (_cursor.y() < _bufferView.yScroll()) {
+        _bufferView.yScroll(_cursor.y());
     }
-    else if (_cursor.y() + 1 >=
-             _bufferView.height() + _bufferView.scrollPosition()) {
-        _bufferView.scrollPosition(_cursor.y() - _bufferView.height() + 1);
+    else if (_cursor.y() + 1 >= _bufferView.height() + _bufferView.yScroll()) {
+        _bufferView.yScroll(_cursor.y() - _bufferView.height() + 1);
     }
 }

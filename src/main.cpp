@@ -3,7 +3,7 @@
 #include "modes/normalmode.h"
 #include "screen/linuxterminalscreen.h"
 #include "screen/ncursesscreen.h"
-#include "script/environment.h"
+#include "script/rootenvironment.h"
 #include "views/bufferview.h"
 #include "views/editor.h"
 #include <string>
@@ -14,8 +14,8 @@ bool shouldQuit = false;
 
 struct MainWindow : public View, public IKeySink {
     Editor editor;
-    Environment env;
-    BufferView console{std::make_unique<Buffer>()};
+    RootEnvironment env;
+    Editor console{std::make_unique<Buffer>()};
     Editor commandBuffer;
     size_t split = 10;
 
@@ -29,7 +29,7 @@ struct MainWindow : public View, public IKeySink {
         //        env.editor(&commandBuffer);
         editor.mode(createNormalMode());
         console.showLines(false);
-        env.console(&console.buffer());
+        env.console(&console);
         for (size_t i = 0; i < width(); ++i) {
             splitString.insert(splitString.end(), FChar{'-', 6});
         }
@@ -80,8 +80,8 @@ struct MainWindow : public View, public IKeySink {
     }
 
     //! @see IKeySink
-    void keyPress(IEnvironment &env) override {
-        inputFocus->keyPress(env);
+    bool keyPress(IEnvironment &env) override {
+        return inputFocus->keyPress(env);
     }
 };
 

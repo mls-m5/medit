@@ -7,7 +7,7 @@ BufferView::~BufferView() = default;
 void BufferView::draw(IScreen &window) {
     auto fillStr = FString{std::string(width(), ' '), 5};
     for (size_t ty = 0; ty < height(); ++ty) {
-        auto l = ty + _scrollPosition;
+        auto l = ty + yScroll();
         if (l < buffer().lines().size()) {
             auto &line = _buffer->lines().at(l);
 
