@@ -51,4 +51,9 @@ public:
     IEnvironment *parent() override {
         return nullptr;
     }
+
+    void call(std::string value) {
+        if (value == "showlocator") {
+        }
+    }
 };
