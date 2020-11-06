@@ -1,6 +1,6 @@
 #include "mode.h"
 
-#include "script/matscript.h"
+#include "script/standardcommands.h"
 
 Mode::Mode(std::string name, KeyMap map, std::unique_ptr<IMode> parent)
     : _name(std::move(name)), _keyMap(std::move(map)),
@@ -11,12 +11,14 @@ bool Mode::keyPress(IEnvironment &env, bool useDefault) {
     if (_parent && _parent->keyPress(env, false)) {
         return true;
     }
-    if (!action.empty()) {
-        run(action, env);
+    if (action) {
+        env.run(action);
+        //        run(action, env);
         return true;
     }
     else if (useDefault) {
-        run(_keyMap.defaultAction(), env);
+        env.run(_keyMap.defaultAction());
+        //        run(_keyMap.defaultAction(), env);
         return true;
     }
     return false;

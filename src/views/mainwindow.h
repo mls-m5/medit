@@ -1,5 +1,6 @@
 #pragma once
 
+#include "locator.h"
 #include "script/rootenvironment.h"
 #include "views/editor.h"
 #include "views/listview.h"
@@ -8,13 +9,13 @@ struct MainWindow : public View, public IKeySink {
     Editor _editor;
     RootEnvironment _env;
     Editor _console;
-    Editor _commandBuffer;
+    Locator _commandBuffer;
     ListView _testList;
     size_t _split = 10;
 
-    IKeySink *_inputFocus = &_testList;
-    //    IKeySink *inputFocus = &_editor;
-    //    IKeySink *inputFocus = &commandBuffer;
+    //    IKeySink *_inputFocus = &_testList;
+    IKeySink *_inputFocus = &_editor;
+    //    IKeySink *_inputFocus = &_commandBuffer;
 
     FString splitString;
 

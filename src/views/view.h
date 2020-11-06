@@ -43,9 +43,18 @@ public:
         _height = value;
     }
 
+    bool visible() {
+        return _visible;
+    }
+
+    void visible(bool value) {
+        _visible = value;
+    }
+
 private:
     size_t _x = 0;
     size_t _y = 0;
     size_t _width = 0;
     size_t _height = 0;
+    bool _visible = true;
 };

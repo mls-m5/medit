@@ -1,29 +1,25 @@
 #pragma once
 
-#include "ienvironment.h"
+#include "environment.h"
 
-class RootEnvironment : public IEnvironment {
+class RootEnvironment : public Environment {
     KeyEvent _lastKeyEvent;
-    Editor *_editor = nullptr;
     Editor *_console;
     bool _showConsole = false;
 
 public:
-    // Used by handler
-    void editor(Editor *editor) {
-        _editor = editor;
-    }
+    RootEnvironment() : Environment(nullptr) {}
 
     void key(KeyEvent e) {
         _lastKeyEvent = e;
     }
 
-    Editor &editor() override {
-        if (!_editor) {
-            throw std::runtime_error("trying to use editor when not set");
-        }
-        return *_editor;
-    }
+    //    Editor &editor() override {
+    //        if (!_editor) {
+    //            throw std::runtime_error("trying to use editor when not set");
+    //        }
+    //        return *_editor;
+    //    }
 
     void console(Editor *console) {
         _console = console;
@@ -48,8 +44,16 @@ public:
         return _showConsole;
     }
 
-    IEnvironment *parent() override {
-        return nullptr;
+    IEnvironment &parent() override {
+        throw std::runtime_error("trying to access parent of root environment");
+    }
+
+    IEnvironment &root() override {
+        return *this;
+    }
+
+    const IEnvironment &root() const override {
+        return *this;
     }
 
     void call(std::string value) {

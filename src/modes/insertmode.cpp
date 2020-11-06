@@ -5,17 +5,17 @@
 
 std::unique_ptr<IMode> createInsertMode() {
     auto map = KeyMap{{
-        {{Key::Left}, "editor.left"},
-        {{Key::Right}, "editor.right"},
-        {{Key::Down}, "editor.down"},
-        {{Key::Up}, "editor.up"},
-        {{Key::Backspace}, "editor.erase"},
-        {{Key::Delete}, "editor.right\neditor.erase"},
-        {{Key::Escape}, "editor.normalmode"},
-        {{Key::KeyCombination}, ""},
-        {{"\n"}, "editor.split\neditor.copyindentation"},
+        {{Key::Left}, {"editor.left"}},
+        {{Key::Right}, {"editor.right"}},
+        {{Key::Down}, {"editor.down"}},
+        {{Key::Up}, {"editor.up"}},
+        {{Key::Backspace}, {"editor.erase"}},
+        {{Key::Delete}, {"editor.right\neditor.erase"}},
+        {{Key::Escape}, {"editor.normalmode"}},
+        {{Key::KeyCombination}, {}},
+        {{"\n"}, {"editor.split\neditor.copyindentation"}},
     }};
-    map.defaultAction("editor.insert");
+    map.defaultAction({"editor.insert"});
 
     return std::make_unique<Mode>("insert", std::move(map), createParentMode());
 }

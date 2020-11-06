@@ -1,6 +1,7 @@
 #pragma once
 
 #include "keyevent.h"
+#include "script/command.h"
 #include <vector>
 
 struct KeyMatch {
@@ -21,8 +22,8 @@ struct KeyMatch {
 };
 
 class KeyMap {
-    std::string _defaultAction;
-    std::vector<std::pair<KeyMatch, std::string>> _map;
+    CommandBlock _defaultAction;
+    std::vector<std::pair<KeyMatch, CommandBlock>> _map;
 
 public:
     KeyMap() = default;
@@ -31,16 +32,16 @@ public:
     KeyMap &operator=(const KeyMap &) = delete;
     KeyMap &operator=(KeyMap &&) = default;
 
-    KeyMap(std::vector<std::pair<KeyMatch, std::string>> map)
+    KeyMap(std::vector<std::pair<KeyMatch, CommandBlock>> map)
         : _map(std::move(map)) {}
 
-    std::string find(const KeyEvent &event) const;
+    const CommandBlock &find(const KeyEvent &event) const;
 
-    void defaultAction(std::string action) {
+    void defaultAction(CommandBlock action) {
         _defaultAction = std::move(action);
     }
 
-    auto defaultAction() const {
+    CommandBlock defaultAction() const {
         return _defaultAction;
     }
 };

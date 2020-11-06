@@ -2,7 +2,7 @@
 #include "keymap.h"
 #include <algorithm>
 
-std::string KeyMap::find(const KeyEvent &event) const {
+const CommandBlock &KeyMap::find(const KeyEvent &event) const {
     auto f = std::find_if(_map.begin(), _map.end(), [&event](auto &e) {
         return event == e.first.event;
     });

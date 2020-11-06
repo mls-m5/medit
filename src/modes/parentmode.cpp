@@ -6,13 +6,15 @@
 std::unique_ptr<IMode> createParentMode() {
     auto map = KeyMap{{
         {KeyEvent{Key::KeyCombination, 'S', Modifiers::Ctrl},
-         "editor.format\neditor.save"},
+         {"editor.format\neditor.save"}},
         {KeyEvent{Key::KeyCombination, 'B', Modifiers::Ctrl},
-         "editor.format\neditor.save\neditor.build"},
-        {KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}, "quit"},
+         {"editor.format\neditor.save\neditor.build"}},
+        {KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}, {"quit"}},
+        {KeyEvent{Key::KeyCombination, 'K', Modifiers::Ctrl},
+         {"window.locator"}},
     }};
 
-    map.defaultAction("");
+    map.defaultAction({});
 
     return std::make_unique<Mode>("parent", std::move(map));
 }

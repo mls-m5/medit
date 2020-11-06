@@ -10,3 +10,5 @@ class Editor;
 class IFile;
 class IEnvironment;
 class BufferView;
+class Command;
+class CommandBlock;

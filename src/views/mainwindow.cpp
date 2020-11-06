@@ -4,9 +4,8 @@
 #include "modes/normalmode.h"
 #include "screen/iscreen.h"
 
-MainWindow::MainWindow(size_t w, size_t h) : View(w, h) {
+MainWindow::MainWindow(size_t w, size_t h) : View(w, h), _commandBuffer(_env) {
     _env.editor(&_editor);
-    //        env.editor(&commandBuffer);
     _editor.mode(createNormalMode());
     _console.showLines(false);
     _env.console(&_console);
@@ -14,6 +13,7 @@ MainWindow::MainWindow(size_t w, size_t h) : View(w, h) {
         splitString.insert(splitString.end(), FChar{'-', 6});
     }
     _commandBuffer.mode(createInsertMode());
+    _commandBuffer.showLines(false);
 
     _testList.addLine("hello");
     _testList.addLine("there");
@@ -26,7 +26,12 @@ MainWindow::MainWindow(size_t w, size_t h) : View(w, h) {
         _env.showConsole(true); //
         _env.console().buffer().push_back(text);
         _inputFocus = &_editor;
-        _testList.height(0);
+        _testList.visible(false);
+    });
+
+    _env.addCommand("window.show_locator", [this](auto &&) {
+        _testList.visible(true);
+        _inputFocus = &_testList;
     });
 }
 

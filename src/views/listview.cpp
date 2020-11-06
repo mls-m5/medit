@@ -22,6 +22,9 @@ void ListView::clear() {
 }
 
 void ListView::draw(IScreen &screen) {
+    if (!visible()) {
+        return;
+    }
     size_t ty = 0;
 
     FString fillStr{std::string(width(), ' '), 0};
