@@ -28,6 +28,9 @@ int main(int argc, char **argv) {
     if (argc > 1) {
         mainWindow.open(argv[1]);
     }
+    else {
+        mainWindow.updateLocatorBuffer();
+    }
 
     mainWindow.resize();
     mainWindow.draw(*screen);

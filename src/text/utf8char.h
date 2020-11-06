@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <ostream>
 
 constexpr uint8_t utf8size(char first) {
     if ((first & 0b10000000) == 0) {
@@ -139,5 +140,9 @@ public:
             ret += " " + std::to_string(static_cast<unsigned char>(c));
         }
         return ret;
+    }
+
+    friend std::ostream &operator<<(std::ostream &stream, Utf8Char &c) {
+        return stream.write(&c._data.front(), static_cast<ptrdiff_t>(c.size()));
     }
 };

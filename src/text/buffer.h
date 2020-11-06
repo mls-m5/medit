@@ -77,6 +77,6 @@ public:
     void text(std::ostream &) const;
 
 private:
-    std::vector<FString> _lines;
+    std::vector<FString> _lines = {""};
     bool _changed = false;
 };

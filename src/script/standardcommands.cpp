@@ -50,6 +50,13 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
         },
     },
     {
+        "editor.word_begin",
+        [](IEnvironment &env) {
+            auto &e = env.editor();
+            e.cursor(beginWord(e.cursor()));
+        },
+    },
+    {
         "editor.insert",
         [](IEnvironment &env) {
             auto &e = env.editor();

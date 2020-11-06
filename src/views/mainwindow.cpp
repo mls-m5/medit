@@ -82,11 +82,17 @@ bool MainWindow::keyPress(IEnvironment &env) {
 }
 
 void MainWindow::updateLocatorBuffer() {
-    _locator.updateCache(_editor.file()->path());
+    if (_editor.file()) {
+        _locator.updateCache(_editor.file()->path());
+    }
+    else {
+        _locator.updateCache(filesystem::current_path());
+    }
 }
 
 void MainWindow::open(filesystem::path path) {
     auto file = std::make_unique<File>(path);
+    _editor.cursor(Cursor{_editor.buffer()});
     file->load(_editor.buffer());
     _editor.file(std::move(file));
     updateLocatorBuffer();

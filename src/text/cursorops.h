@@ -5,12 +5,15 @@
 #include "text/utf8char.h"
 
 //! Check if cursor is inside buffer range for x and y
-[[nodiscard]] bool isValid(Cursor cursor);
-[[nodiscard]] Cursor fix(Cursor cursor);
-[[nodiscard]] Cursor right(Cursor cursor, bool allowLineChange = true);
-[[nodiscard]] Cursor left(Cursor cursor, bool allowLineChange = true);
-[[nodiscard]] Cursor home(Cursor cursor);
-[[nodiscard]] Cursor end(Cursor cursor);
+[[nodiscard]] bool isValid(Cursor);
+[[nodiscard]] Cursor fix(Cursor);
+[[nodiscard]] Cursor right(Cursor, bool allowLineChange = true);
+[[nodiscard]] Cursor left(Cursor, bool allowLineChange = true);
+[[nodiscard]] Cursor home(Cursor);
+[[nodiscard]] Cursor end(Cursor);
+
+//! Goto the beginning of the current word
+[[nodiscard]] Cursor beginWord(Cursor);
 
 Cursor insert(Utf8Char, Cursor);
 
@@ -27,3 +30,5 @@ Cursor split(Cursor);
 
 //! Used for auto indentation
 Cursor copyIndentation(Cursor, std::string autoIndentString = "    ");
+
+Utf8Char current(Cursor);

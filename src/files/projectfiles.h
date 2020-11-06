@@ -8,5 +8,5 @@ public:
     filesystem::path root(filesystem::path);
 
     std::vector<filesystem::path> allProjectFiles(
-        const filesystem::path &pathInProject, size_t max = 20000);
+        const filesystem::path &pathInProject, size_t max = 100000);
 };

@@ -35,6 +35,10 @@ std::vector<filesystem::path> ProjectFiles::allProjectFiles(
 
     size_t i = 0;
     for (auto path : filesystem::recursive_directory_iterator(root)) {
+        if (path.path().extension() != ".h" &&
+            path.path().extension() != ".cpp") {
+            continue;
+        }
         paths.push_back(path);
         ++i;
         if (i > max) {

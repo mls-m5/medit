@@ -160,4 +160,66 @@ TEST_CASE("copy indentation") {
     ASSERT_EQ(cursor.x(), 3);
 }
 
+TEST_CASE("get current character") {
+    const auto testText = "Apa bepa\ncepa"sv;
+
+    auto buffer = Buffer{testText};
+
+    {
+        auto c = current({buffer, 0, 0});
+        ASSERT_EQ(c, 'A');
+    }
+    {
+        auto c = current({buffer, 8, 0});
+        ASSERT_EQ(c, '\n');
+    }
+    {
+        auto c = current({buffer, 100, 100});
+        ASSERT_EQ(c, '\n');
+    }
+}
+
+TEST_CASE("goto beginning of word") {
+    const auto testText = "Apa bepa\ncepa"sv;
+
+    auto buffer = Buffer{testText};
+    {
+        auto c = beginWord({buffer, 0, 0});
+
+        ASSERT_EQ(c.x(), 0);
+        ASSERT_EQ(c.y(), 0);
+    }
+    {
+        auto c = beginWord({buffer, 2, 0});
+
+        ASSERT_EQ(c.x(), 0);
+        ASSERT_EQ(c.y(), 0);
+    }
+    {
+        auto c = beginWord({buffer, 3, 0});
+
+        ASSERT_EQ(c.x(), 0);
+        ASSERT_EQ(c.y(), 0);
+    }
+    {
+        auto c = beginWord({buffer, 5, 0});
+
+        ASSERT_EQ(c.x(), 4);
+        ASSERT_EQ(c.y(), 0);
+    }
+    {
+        // On the newline character
+        auto c = beginWord({buffer, 8, 0});
+
+        ASSERT_EQ(c.x(), 4);
+        ASSERT_EQ(c.y(), 0);
+    }
+    {
+        auto c = beginWord({buffer, 2, 1});
+
+        ASSERT_EQ(c.x(), 0);
+        ASSERT_EQ(c.y(), 1);
+    }
+}
+
 TEST_SUIT_END

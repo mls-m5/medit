@@ -238,3 +238,42 @@ Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
     line.insert(line.begin(), FString{indentationStr});
     return cursor;
 }
+
+Cursor beginWord(Cursor cursor) {
+    // space = 0, alnum = 1, other = 2
+    auto getType = [](Cursor cursor) {
+        auto c = current(cursor).front();
+        return isalnum(c) ? 1 : ((!isspace(c)) * 2);
+    };
+    //    auto isAlNum = isalnum(current(cursor).front());
+    auto type = getType(cursor);
+
+    while ((cursor.x() > 0 || cursor.y() > 0) && type == 0) {
+        cursor = left(cursor);
+        type = getType(cursor);
+    }
+
+    while (cursor.x() > 0 || cursor.y() > 0) {
+        auto nCursor = left(cursor);
+        auto nType = getType(nCursor);
+        if (nType == type) {
+            cursor = nCursor;
+        }
+        else {
+            return cursor;
+        }
+    }
+    return cursor;
+}
+
+Utf8Char current(Cursor cursor) {
+    cursor = fix(cursor);
+
+    auto &line = cursor.buffer().lineAt(cursor.y());
+
+    if (cursor.x() == line.size()) {
+        return '\n';
+    }
+
+    return line.at(cursor.x()).c;
+}

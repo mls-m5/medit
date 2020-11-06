@@ -13,7 +13,6 @@ Locator::Locator(IEnvironment &env) : _env(&env) {
 }
 
 bool Locator::keyPress(IEnvironment &) {
-    _list.addLine(buffer().text());
     if (_list.keyPress(_env)) {
         return true;
     }
