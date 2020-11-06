@@ -63,6 +63,7 @@ bool ListView::keyPress(IEnvironment &env) {
                 auto &line = _lines.at(_current);
                 if (_callback) {
                     _callback(line.text, line.content);
+                    return true;
                 }
                 else {
                     return false;

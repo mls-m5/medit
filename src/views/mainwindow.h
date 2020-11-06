@@ -34,6 +34,10 @@ struct MainWindow : public View, public IKeySink {
     //! @see IKeySink
     bool keyPress(IEnvironment &env) override;
 
+    void updateLocatorBuffer();
+
+    void open(filesystem::path path);
+
 private:
     void addCommands();
 };

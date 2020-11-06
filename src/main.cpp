@@ -25,14 +25,8 @@ int main(int argc, char **argv) {
 
     MainWindow mainWindow(screen->width(), screen->height());
 
-    std::unique_ptr<IFile> file;
     if (argc > 1) {
-        file = std::make_unique<File>(argv[1]);
-    }
-
-    if (file) {
-        file->load(mainWindow._editor.buffer());
-        mainWindow._editor.file(std::move(file));
+        mainWindow.open(argv[1]);
     }
 
     mainWindow.resize();

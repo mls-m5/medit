@@ -1,5 +1,6 @@
 
 #include "views/mainwindow.h"
+#include "files/file.h"
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
 #include "screen/iscreen.h"
@@ -15,19 +16,13 @@ MainWindow::MainWindow(size_t w, size_t h) : View(w, h), _locator(_env) {
     _locator.mode(createInsertMode());
     _locator.showLines(false);
 
-    //    _testList.addLine("hello");
-    //    _testList.addLine("there");
     _testList.visible(false);
 
-    //    _testList.x(2);
-    //    _testList.y(3);
-    //    _testList.width(20);
-    //    _testList.height(20);
-    _locator.callback([this](auto &&text) {
-        _env.showConsole(true);
-        _env.console().buffer().push_back(text);
+    _locator.callback([this](auto &&path) {
+        //        _env.showConsole(true);
+        //        _env.console().buffer().push_back(path.string());
+        open(path);
         _inputFocus = &_editor;
-        //        _testList.visible(false);
         _locator.visible(false);
     });
 
@@ -36,8 +31,6 @@ MainWindow::MainWindow(size_t w, size_t h) : View(w, h), _locator(_env) {
 
 void MainWindow::addCommands() {
     _env.addCommand("window.show_locator", [this](auto &&) {
-        //        _testList.visible(true);
-        //        _inputFocus = &_testList;
         _locator.visible(true);
         _inputFocus = &_locator;
     });
@@ -86,4 +79,15 @@ void MainWindow::updateCursor(IScreen &screen) const {
 
 bool MainWindow::keyPress(IEnvironment &env) {
     return _inputFocus->keyPress(env);
+}
+
+void MainWindow::updateLocatorBuffer() {
+    _locator.updateCache(_editor.file()->path());
+}
+
+void MainWindow::open(filesystem::path path) {
+    auto file = std::make_unique<File>(path);
+    file->load(_editor.buffer());
+    _editor.file(std::move(file));
+    updateLocatorBuffer();
 }

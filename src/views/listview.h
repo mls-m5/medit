@@ -34,4 +34,6 @@ public:
 
     //! @see IKeySink
     void updateCursor(IScreen &screen) const override;
+
+    void fitCursor() {}
 };
