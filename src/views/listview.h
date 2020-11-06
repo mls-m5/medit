@@ -21,7 +21,7 @@ public:
     void clear();
 
     //! What function to call when list item is selected
-    void callBack(
+    void callback(
         std::function<void(const std::string &, const std::any &)> f) {
         _callback = std::move(f);
     }

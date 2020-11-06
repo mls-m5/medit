@@ -4,7 +4,7 @@
 #include "modes/normalmode.h"
 #include "screen/iscreen.h"
 
-MainWindow::MainWindow(size_t w, size_t h) : View(w, h), _commandBuffer(_env) {
+MainWindow::MainWindow(size_t w, size_t h) : View(w, h), _locator(_env) {
     _env.editor(&_editor);
     _editor.mode(createNormalMode());
     _console.showLines(false);
@@ -12,26 +12,34 @@ MainWindow::MainWindow(size_t w, size_t h) : View(w, h), _commandBuffer(_env) {
     for (size_t i = 0; i < width(); ++i) {
         splitString.insert(splitString.end(), FChar{'-', 6});
     }
-    _commandBuffer.mode(createInsertMode());
-    _commandBuffer.showLines(false);
+    _locator.mode(createInsertMode());
+    _locator.showLines(false);
 
-    _testList.addLine("hello");
-    _testList.addLine("there");
+    //    _testList.addLine("hello");
+    //    _testList.addLine("there");
+    _testList.visible(false);
 
-    _testList.x(2);
-    _testList.y(3);
-    _testList.width(20);
-    _testList.height(20);
-    _testList.callBack([this](auto &&text, auto &&) {
-        _env.showConsole(true); //
+    //    _testList.x(2);
+    //    _testList.y(3);
+    //    _testList.width(20);
+    //    _testList.height(20);
+    _locator.callback([this](auto &&text) {
+        _env.showConsole(true);
         _env.console().buffer().push_back(text);
         _inputFocus = &_editor;
-        _testList.visible(false);
+        //        _testList.visible(false);
+        _locator.visible(false);
     });
 
+    addCommands();
+}
+
+void MainWindow::addCommands() {
     _env.addCommand("window.show_locator", [this](auto &&) {
-        _testList.visible(true);
-        _inputFocus = &_testList;
+        //        _testList.visible(true);
+        //        _inputFocus = &_testList;
+        _locator.visible(true);
+        _inputFocus = &_locator;
     });
 }
 
@@ -52,10 +60,10 @@ void MainWindow::resize() {
     _console.x(0);
     _console.y(height() - _split + 1);
 
-    _commandBuffer.x(0);
-    _commandBuffer.y(0);
-    _commandBuffer.width(width());
-    _commandBuffer.height(1);
+    _locator.x(0);
+    _locator.y(0);
+    _locator.width(width());
+    _locator.height(1);
 }
 
 void MainWindow::draw(IScreen &screen) {
@@ -65,8 +73,8 @@ void MainWindow::draw(IScreen &screen) {
         screen.draw(0, height() - _split, splitString);
     }
 
-    if (_inputFocus == &_commandBuffer) {
-        _commandBuffer.draw(screen);
+    if (_inputFocus == &_locator) {
+        _locator.draw(screen);
     }
 
     _testList.draw(screen);

@@ -130,20 +130,6 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
 };
 }
 
-// void run(std::string command, IEnvironment &env) {
-//    auto commands = parse(command);
-
-//    for (auto &command : commands) {
-//        auto f = editorCommands.find(command);
-//        if (f != editorCommands.end()) {
-//            (f->second)(env);
-//        }
-//        else {
-//            throw std::runtime_error("unknown command: " + command);
-//        }
-//    }
-//}
-
 void addStandardCommands(IEnvironment &env) {
     for (auto &pair : editorCommands) {
         env.addCommand(pair.first, pair.second);

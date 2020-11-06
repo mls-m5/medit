@@ -28,12 +28,18 @@ void ListView::draw(IScreen &screen) {
     size_t ty = 0;
 
     FString fillStr{std::string(width(), ' '), 0};
+    FString selFillStr{std::string(width(), ' '), 4};
 
     for (const auto &l : _lines) {
         if (ty == height()) {
             break;
         }
-        screen.draw(x(), y() + ty, fillStr);
+        if (ty == _current) {
+            screen.draw(x(), y() + ty, selFillStr);
+        }
+        else {
+            screen.draw(x(), y() + ty, fillStr);
+        }
         screen.draw(x(), y() + ty, l.text);
         ++ty;
     }
@@ -55,12 +61,20 @@ bool ListView::keyPress(IEnvironment &env) {
         if (env.key().symbol == '\n') {
             if (!_lines.empty()) {
                 auto &line = _lines.at(_current);
-                _callback(line.text, line.content);
+                if (_callback) {
+                    _callback(line.text, line.content);
+                }
+                else {
+                    return false;
+                }
             }
         }
+        break;
     default:
         return false;
     }
+
+    return false;
 }
 
 void ListView::updateCursor(IScreen &screen) const {

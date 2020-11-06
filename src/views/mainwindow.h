@@ -9,7 +9,7 @@ struct MainWindow : public View, public IKeySink {
     Editor _editor;
     RootEnvironment _env;
     Editor _console;
-    Locator _commandBuffer;
+    Locator _locator;
     ListView _testList;
     size_t _split = 10;
 
@@ -33,4 +33,7 @@ struct MainWindow : public View, public IKeySink {
 
     //! @see IKeySink
     bool keyPress(IEnvironment &env) override;
+
+private:
+    void addCommands();
 };
