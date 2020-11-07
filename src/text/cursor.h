@@ -3,10 +3,12 @@
 #include "meditfwd.h"
 #include <cstddef>
 
-struct Position {
+class Position {
+private:
     size_t _x;
     size_t _y;
 
+public:
     constexpr Position(size_t x = 0, size_t y = 0) : _x(x), _y(y) {}
     constexpr Position(const Position &) = default;
     constexpr Position(Position &&) = default;
@@ -29,13 +31,20 @@ struct Position {
         _y = value;
         return *this;
     }
+
+    constexpr bool operator<(const Position &other) const {
+        if (y() == other.y()) {
+            return x() < other.x();
+        }
+        else {
+            return y() < other.y();
+        }
+    }
 };
 
-struct Cursor : public Position {
+class Cursor : public Position {
 private:
     Buffer *_buffer;
-    //    size_t _x;
-    //    size_t _y;
 
 public:
     constexpr Buffer &buffer() {

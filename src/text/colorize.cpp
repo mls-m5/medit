@@ -7,15 +7,9 @@
 namespace {
 //! Todo: Extract this so it can be customized
 const auto wordList = std::vector<std::string>{
-    "int",
-    "double",
-    "char",
-    "signed",
-    "long",
-    "unsigned",
-    "void",
-    "short",
-    "include",
+    "int",   "double", "char", "signed",  "long",    "unsigned",  "void",
+    "short", "bool",   "auto", "include", "struct",  "class",     "if",
+    "else",  "switch", "case", "public",  "private", "namespace",
 };
 
 void colorizeWord(span<FChar> line) {

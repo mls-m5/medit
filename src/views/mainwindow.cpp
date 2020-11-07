@@ -5,6 +5,7 @@
 #include "modes/normalmode.h"
 #include "screen/iscreen.h"
 #include "text/cursorops.h"
+#include "text/cursorrangeops.h"
 
 MainWindow::MainWindow(size_t w, size_t h) : View(w, h), _locator(_env) {
     _env.editor(&_editor);
@@ -17,11 +18,7 @@ MainWindow::MainWindow(size_t w, size_t h) : View(w, h), _locator(_env) {
     _locator.mode(createInsertMode());
     _locator.showLines(false);
 
-    //    _testList.visible(false);
-
     _locator.callback([this](auto &&path) {
-        //        _env.showConsole(true);
-        //        _env.console().buffer().push_back(path.string());
         open(path);
         _inputFocus = &_editor;
         _locator.visible(false);
@@ -29,7 +26,6 @@ MainWindow::MainWindow(size_t w, size_t h) : View(w, h), _locator(_env) {
 
     _completeView.callback([this](auto &&result) {
         auto cursor = _editor.cursor();
-        //! A bit of a dirty workaround
         for (auto c : result.value) {
             cursor = insert(c, cursor);
         }
@@ -48,7 +44,15 @@ void MainWindow::addCommands() {
 
     _env.addCommand("editor.auto_complete", [this](auto &&) {
         _editor.cursor(fix(_editor.cursor()));
-        auto cursor = beginWord(_editor.cursor());
+
+        Cursor cursor = _editor.cursor();
+        auto currentChar = current(left(cursor)).at(0);
+        if (!isspace(currentChar)) {
+            // If on for example a newline
+            cursor = beginWord(_editor.cursor());
+        }
+        auto range = CursorRange(cursor, _editor.cursor());
+        _completeView.currentText(content(range).front());
         _completeView.triggerShow(_editor.bufferView().cursorPosition(cursor));
     });
 }

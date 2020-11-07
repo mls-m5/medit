@@ -45,6 +45,9 @@ buffer_test.src +=
 cursorops_test.src +=
     src/text/*.cpp
 
+cursorrangeops_test.src +=
+    src/text/*.cpp
+
 keysettings_test.out = %
 
 fstring_test.src += src/text/fstring.cpp

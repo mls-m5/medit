@@ -36,11 +36,12 @@ void ListView::draw(IScreen &screen) {
         }
         if (ty == _current) {
             screen.draw(x(), y() + ty, selFillStr);
+            screen.draw(x(), y() + ty, {std::string{l.text}, 1});
         }
         else {
             screen.draw(x(), y() + ty, fillStr);
+            screen.draw(x(), y() + ty, l.text);
         }
-        screen.draw(x(), y() + ty, l.text);
         ++ty;
     }
 }
@@ -57,12 +58,18 @@ bool ListView::keyPress(IEnvironment &env) {
             ++_current;
         }
         return true;
+    case Key::Escape:
+        if (_callback) {
+            _callback("", -1, {});
+            return true;
+        }
+        return false;
     case Key::Text:
         if (env.key().symbol == '\n') {
             if (!_lines.empty()) {
                 auto &line = _lines.at(_current);
                 if (_callback) {
-                    _callback(line.text, line.content);
+                    _callback(line.text, _current, line.content);
                     return true;
                 }
                 else {

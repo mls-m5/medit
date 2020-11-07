@@ -10,7 +10,8 @@
 class ListView : public ScrollView, public IKeySink {
     struct ListItem;
     std::vector<ListItem> _lines;
-    std::function<void(const std::string &, const std::any &)> _callback;
+    std::function<void(const std::string &, size_t, const std::any &)>
+        _callback;
     size_t _current = 0;
 
 public:
@@ -22,7 +23,7 @@ public:
 
     //! What function to call when list item is selected
     void callback(
-        std::function<void(const std::string &, const std::any &)> f) {
+        std::function<void(const std::string &, size_t, const std::any &)> f) {
         _callback = std::move(f);
     }
 

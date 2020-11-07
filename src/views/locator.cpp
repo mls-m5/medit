@@ -34,8 +34,13 @@ void Locator::draw(IScreen &screen) {
 }
 
 void Locator::callback(std::function<void(filesystem::path)> f) {
-    _list.callback([f, this](auto &&, auto &&path) {
-        f(std::any_cast<filesystem::path>(path));
+    _list.callback([f, this](auto &&, size_t, auto &&path) {
+        if (path.has_value()) {
+            f(std::any_cast<filesystem::path>(path));
+        }
+        else {
+            f({});
+        }
         buffer().clear();
     });
 }

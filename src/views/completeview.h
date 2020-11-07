@@ -13,34 +13,11 @@ public:
         std::string postfix;
     };
 
-    CompleteView() {
-        _list.width(20);
-        _list.height(20);
-    }
+    CompleteView();
 
-    void triggerShow(Position cursorPosition) {
-        //        _cursorPosition = bufferView.cursorPosition(cursor);
-        _cursorPosition = cursorPosition;
-        _list.visible(true);
-        visible(true);
+    void triggerShow(Position cursorPosition);
 
-        //! Make this position next to cursor
-        _list.x(cursorPosition.x());
-        _list.y(cursorPosition.y() + 1);
-        _list.current(0);
-
-        updateCompletion("");
-    }
-
-    void updateCompletion(std::string str) {
-        auto values = _autoComplete.getMatching(str);
-        auto selected = _list.current();
-        _list.clear();
-        for (auto &item : values) {
-            _list.addLine(item.name, item.name);
-        }
-        _list.current(selected);
-    }
+    void updateCompletion(std::string str);
 
     //! @see IView
     void draw(IScreen &screen) override {
@@ -57,17 +34,18 @@ public:
         _list.updateCursor(screen);
     }
 
-    void callback(std::function<void(CompletionResult)> f) {
-        _list.callback([f, this](auto &&, auto &&value) {
-            auto str = std::any_cast<std::string>(value);
-            f({str, ""});
-            visible(false);
-            _list.visible(false);
-        });
+    void callback(std::function<void(CompletionResult)> f);
+
+    void currentText(std::string str) {
+        _currentText = std::move(str);
+        if (visible()) {
+            updateCompletion(_currentText);
+        }
     }
 
 private:
     ListView _list;
     AutoComplete _autoComplete;
     Position _cursorPosition;
+    std::string _currentText;
 };

@@ -20,11 +20,9 @@ public:
         this->text(text);
     }
 
-    Buffer(std::string_view text)
-        : Buffer(std::string(text)){}
+    Buffer(std::string_view text) : Buffer(std::string(text)) {}
 
-              [[nodiscard]] const auto &
-          lines() const {
+    [[nodiscard]] const auto &lines() const {
         return _lines;
     }
 
