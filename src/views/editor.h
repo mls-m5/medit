@@ -46,6 +46,10 @@ public:
         return _bufferView.buffer();
     }
 
+    auto &bufferView() {
+        return _bufferView;
+    }
+
     auto cursor() const {
         return _cursor;
     }

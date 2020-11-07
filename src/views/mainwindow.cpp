@@ -4,6 +4,7 @@
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
 #include "screen/iscreen.h"
+#include "text/cursorops.h"
 
 MainWindow::MainWindow(size_t w, size_t h) : View(w, h), _locator(_env) {
     _env.editor(&_editor);
@@ -16,7 +17,7 @@ MainWindow::MainWindow(size_t w, size_t h) : View(w, h), _locator(_env) {
     _locator.mode(createInsertMode());
     _locator.showLines(false);
 
-    _testList.visible(false);
+    //    _testList.visible(false);
 
     _locator.callback([this](auto &&path) {
         //        _env.showConsole(true);
@@ -26,6 +27,16 @@ MainWindow::MainWindow(size_t w, size_t h) : View(w, h), _locator(_env) {
         _locator.visible(false);
     });
 
+    _completeView.callback([this](auto &&result) {
+        auto cursor = _editor.cursor();
+        //! A bit of a dirty workaround
+        for (auto c : result.value) {
+            cursor = insert(c, cursor);
+        }
+        _editor.cursor(cursor);
+        _inputFocus = &_editor;
+    });
+
     addCommands();
 }
 
@@ -33,6 +44,12 @@ void MainWindow::addCommands() {
     _env.addCommand("window.show_locator", [this](auto &&) {
         _locator.visible(true);
         _inputFocus = &_locator;
+    });
+
+    _env.addCommand("editor.auto_complete", [this](auto &&) {
+        _editor.cursor(fix(_editor.cursor()));
+        auto cursor = beginWord(_editor.cursor());
+        _completeView.triggerShow(_editor.bufferView().cursorPosition(cursor));
     });
 }
 
@@ -70,7 +87,9 @@ void MainWindow::draw(IScreen &screen) {
         _locator.draw(screen);
     }
 
-    _testList.draw(screen);
+    _completeView.draw(screen);
+
+    //    _testList.draw(screen);
 }
 
 void MainWindow::updateCursor(IScreen &screen) const {
@@ -78,6 +97,11 @@ void MainWindow::updateCursor(IScreen &screen) const {
 }
 
 bool MainWindow::keyPress(IEnvironment &env) {
+    if (_inputFocus == &_editor && _completeView.visible()) {
+        if (_completeView.keyPress(env)) {
+            return true; // Otherwise give key events to editor
+        }
+    }
     return _inputFocus->keyPress(env);
 }
 

@@ -81,3 +81,15 @@ bool ListView::keyPress(IEnvironment &env) {
 void ListView::updateCursor(IScreen &screen) const {
     screen.cursor(x(), y() - yScroll() + _current);
 }
+
+void ListView::current(size_t value) {
+    if (_lines.empty()) {
+        _current = 0;
+    }
+    else if (value < _lines.size()) {
+        _current = value;
+    }
+    else {
+        _current = _lines.size() - 1;
+    }
+}

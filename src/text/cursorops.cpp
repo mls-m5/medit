@@ -74,7 +74,8 @@ Cursor left(Cursor cursor, bool allowLineChange) {
 }
 
 Cursor home(Cursor cursor) {
-    return cursor.x(0);
+    cursor.x(0);
+    return cursor;
 }
 
 Cursor end(Cursor cursor) {
@@ -83,7 +84,8 @@ Cursor end(Cursor cursor) {
         return {cursor.buffer()};
     }
     cursor = fix(cursor);
-    return cursor.x(lines.at(cursor.y()).size());
+    cursor.x(lines.at(cursor.y()).size());
+    return cursor;
 }
 
 Cursor insert(Utf8Char c, Cursor cur) {

@@ -2,6 +2,7 @@
 
 #include "locator.h"
 #include "script/rootenvironment.h"
+#include "views/completeview.h"
 #include "views/editor.h"
 #include "views/listview.h"
 
@@ -10,7 +11,8 @@ struct MainWindow : public View, public IKeySink {
     RootEnvironment _env;
     Editor _console;
     Locator _locator;
-    ListView _testList;
+    CompleteView _completeView;
+    //    ListView _testList;
     size_t _split = 10;
 
     //    IKeySink *_inputFocus = &_testList;

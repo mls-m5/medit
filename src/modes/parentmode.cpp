@@ -12,6 +12,8 @@ std::unique_ptr<IMode> createParentMode() {
         {KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}, {"quit"}},
         {KeyEvent{Key::KeyCombination, 'K', Modifiers::Ctrl},
          {"window.show_locator"}},
+        {KeyEvent{Key::KeyCombination, ' ', Modifiers::Ctrl},
+         {"editor.auto_complete"}},
     }};
 
     map.defaultAction({});

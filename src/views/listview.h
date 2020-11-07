@@ -36,4 +36,10 @@ public:
     void updateCursor(IScreen &screen) const override;
 
     void fitCursor() {}
+
+    void current(size_t value);
+
+    auto current() const {
+        return _current;
+    }
 };

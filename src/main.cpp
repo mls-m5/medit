@@ -39,10 +39,10 @@ int main(int argc, char **argv) {
     while (!shouldQuit) {
         auto c = input->getInput();
         mainWindow._env.key(c);
-        screen->clear();
         mainWindow.keyPress(mainWindow._env);
         mainWindow.resize();
 
+        screen->clear();
         mainWindow.draw(*screen);
 
         screen->draw(40,
