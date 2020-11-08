@@ -3,6 +3,9 @@
 class IMode;
 class KeyEvent;
 class Buffer;
+class Position;
+class Cursor;
+class CursorRange;
 class IScreen;
 class IView;
 class IMode;

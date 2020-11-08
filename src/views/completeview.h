@@ -15,7 +15,8 @@ public:
 
     CompleteView();
 
-    void triggerShow(Position cursorPosition);
+    //! @param cursorPosition is the cursors position _on the screen_
+    void triggerShow(Position cursorPosition, IEnvironment &env);
 
     void updateCompletion(std::string str);
 
@@ -46,6 +47,6 @@ public:
 private:
     ListView _list;
     AutoComplete _autoComplete;
-    Position _cursorPosition;
+    //    Position _cursorPosition;
     std::string _currentText;
 };

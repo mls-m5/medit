@@ -29,9 +29,7 @@ public:
         _numberWidth = value * 3;
     }
 
-    Position cursorPosition(Cursor cursor) const {
-        return {x() + cursor.x() + _numberWidth, y() + cursor.y() - yScroll()};
-    }
+    Position cursorPosition(Cursor cursor) const;
 
 private:
     std::unique_ptr<Buffer> _buffer;

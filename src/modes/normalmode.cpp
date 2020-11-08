@@ -35,6 +35,9 @@ std::unique_ptr<IMode> createNormalMode() {
         {{"A"}, {"editor.end\neditor.insertmode"}},
 
         {{"b"}, {"editor.left\neditor.word_begin"}},
+        {{"e"}, {"editor.right\neditor.word_end"}},
+        {{"w"},
+         {"editor.word_end\neditor.right\neditor.word_end\neditor.word_begin"}},
     }};
     map.defaultAction({});
 

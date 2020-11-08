@@ -17,6 +17,16 @@ FString::FString(std::string_view str, FormatType f) {
 FString::FString(FString::const_iterator begin, FString::const_iterator end)
     : _content(begin, end) {}
 
+FString FString::operator+(const FString &other) {
+    FString str;
+    str.reserve(size() + other.size());
+
+    str._content.insert(str._content.begin(), _content.begin(), _content.end());
+    str._content.insert(str._content.end(), other.begin(), other.end());
+
+    return str;
+}
+
 FString::operator std::string() const {
     std::string str;
     str.reserve(size());

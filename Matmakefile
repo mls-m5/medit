@@ -5,7 +5,7 @@
 cpp = clang++-10
 
 config +=
-   c++17
+   c++2a
 #   modules #treat includes as separate
 
 define +=

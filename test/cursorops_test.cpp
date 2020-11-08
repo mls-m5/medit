@@ -184,42 +184,84 @@ TEST_CASE("goto beginning of word") {
 
     auto buffer = Buffer{testText};
     {
-        auto c = beginWord({buffer, 0, 0});
+        auto c = wordBegin({buffer, 0, 0});
 
         ASSERT_EQ(c.x(), 0);
         ASSERT_EQ(c.y(), 0);
     }
     {
-        auto c = beginWord({buffer, 2, 0});
+        auto c = wordBegin({buffer, 2, 0});
 
         ASSERT_EQ(c.x(), 0);
         ASSERT_EQ(c.y(), 0);
     }
     {
-        auto c = beginWord({buffer, 3, 0});
+        auto c = wordBegin({buffer, 3, 0});
 
         ASSERT_EQ(c.x(), 0);
         ASSERT_EQ(c.y(), 0);
     }
     {
-        auto c = beginWord({buffer, 5, 0});
+        auto c = wordBegin({buffer, 5, 0});
 
         ASSERT_EQ(c.x(), 4);
         ASSERT_EQ(c.y(), 0);
     }
     {
         // On the newline character
-        auto c = beginWord({buffer, 8, 0});
+        auto c = wordBegin({buffer, 8, 0});
 
         ASSERT_EQ(c.x(), 4);
         ASSERT_EQ(c.y(), 0);
     }
     {
-        auto c = beginWord({buffer, 2, 1});
+        auto c = wordBegin({buffer, 2, 1});
 
         ASSERT_EQ(c.x(), 0);
         ASSERT_EQ(c.y(), 1);
     }
 }
 
+TEST_CASE("goto end of word") {
+    const auto testText = "Apa bepa\ncepa"sv;
+
+    auto buffer = Buffer{testText};
+    {
+        auto c = wordEnd({buffer, 0, 0});
+
+        ASSERT_EQ(c.x(), 2);
+        ASSERT_EQ(c.y(), 0);
+    }
+    {
+        auto c = wordEnd({buffer, 2, 0});
+
+        ASSERT_EQ(c.x(), 2);
+        ASSERT_EQ(c.y(), 0);
+    }
+    {
+        auto c = wordEnd({buffer, 3, 0});
+
+        ASSERT_EQ(c.x(), 7);
+        ASSERT_EQ(c.y(), 0);
+    }
+    {
+        auto c = wordEnd({buffer, 5, 0});
+
+        ASSERT_EQ(c.x(), 7);
+        ASSERT_EQ(c.y(), 0);
+    }
+    {
+        // On the newline character
+        auto c = wordEnd({buffer, 8, 0});
+
+        ASSERT_EQ(c.x(), 3);
+        ASSERT_EQ(c.y(), 1);
+    }
+    {
+        auto c = wordEnd({buffer, 2, 1});
+
+        ASSERT_EQ(c.x(), 3);
+        ASSERT_EQ(c.y(), 1);
+    }
+}
 TEST_SUIT_END

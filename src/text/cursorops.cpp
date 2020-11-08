@@ -241,13 +241,12 @@ Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
     return cursor;
 }
 
-Cursor beginWord(Cursor cursor) {
+Cursor wordBegin(Cursor cursor) {
     // space = 0, alnum = 1, other = 2
     auto getType = [](Cursor cursor) {
         auto c = current(cursor).front();
         return isalnum(c) ? 1 : ((!isspace(c)) * 2);
     };
-    //    auto isAlNum = isalnum(current(cursor).front());
     auto type = getType(cursor);
 
     while ((cursor.x() > 0 || cursor.y() > 0) && type == 0) {
@@ -257,6 +256,36 @@ Cursor beginWord(Cursor cursor) {
 
     while (cursor.x() > 0 || cursor.y() > 0) {
         auto nCursor = left(cursor);
+        auto nType = getType(nCursor);
+        if (nType == type) {
+            cursor = nCursor;
+        }
+        else {
+            return cursor;
+        }
+    }
+    return cursor;
+}
+
+Cursor wordEnd(Cursor cursor) {
+    // space = 0, alnum = 1, other = 2
+    auto getType = [](Cursor cursor) {
+        auto c = current(cursor).front();
+        return isalnum(c) ? 1 : ((!isspace(c)) * 2);
+    };
+
+    auto &buffer = cursor.buffer();
+
+    auto end = buffer.end();
+    auto type = getType(cursor);
+
+    while (cursor < end && type == 0) {
+        cursor = right(cursor);
+        type = getType(cursor);
+    }
+
+    while (cursor < end) {
+        auto nCursor = right(cursor);
         auto nType = getType(nCursor);
         if (nType == type) {
             cursor = nCursor;

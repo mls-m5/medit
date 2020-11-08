@@ -1,6 +1,6 @@
 #pragma once
 
-#include "text/cursor.h"
+#include "meditfwd.h"
 #include "text/fstring.h"
 #include <iosfwd>
 #include <string>
@@ -67,6 +67,9 @@ public:
         _lines.clear();
         _changed = true;
     }
+
+    Cursor begin();
+    Cursor end();
 
     std::string text() const;
     void text(std::string);

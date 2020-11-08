@@ -1,22 +1,24 @@
 #pragma once
 
 #include "fstring.h"
+#include "icompletionsource.h"
+#include "text/icompletionsource.h"
+#include <memory>
 #include <string>
 
 class AutoComplete {
+
+    std::unique_ptr<ICompletionSource> _source;
+
 public:
-    struct CompletionItem {
-        std::string name;
-        FString description;
-    };
-    using CompletionList = std::vector<CompletionItem>;
+    using CompletionList = ICompletionSource::CompletionList;
 
     AutoComplete();
     ~AutoComplete();
 
     CompletionList getMatching(std::string beginning);
 
-    void populate(CompletionList items);
+    void populate(IEnvironment &);
 
 private:
     CompletionList _items;

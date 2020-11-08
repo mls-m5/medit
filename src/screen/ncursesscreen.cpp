@@ -85,7 +85,7 @@ NCursesScreen::NCursesScreen() {
     ::init_color(80, 400, 500, 500); // Gray
     ::init_pair(1, 77, COLOR_BLACK);
     //    ::init_pair(1, COLOR_RED, COLOR_BLACK);
-    ::init_pair(2, COLOR_BLUE, COLOR_MAGENTA);
+    ::init_pair(2, COLOR_GREEN, COLOR_BLACK);
     ::init_pair(3, COLOR_CYAN, 78); // Line numbers
     ::init_pair(4, COLOR_GREEN, COLOR_WHITE);
     ::init_pair(5, COLOR_WHITE, 79);

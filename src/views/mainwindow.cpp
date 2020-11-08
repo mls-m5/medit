@@ -49,11 +49,12 @@ void MainWindow::addCommands() {
         auto currentChar = current(left(cursor)).at(0);
         if (!isspace(currentChar)) {
             // If on for example a newline
-            cursor = beginWord(_editor.cursor());
+            cursor = wordBegin(_editor.cursor());
         }
         auto range = CursorRange(cursor, _editor.cursor());
         _completeView.currentText(content(range).front());
-        _completeView.triggerShow(_editor.bufferView().cursorPosition(cursor));
+        _completeView.triggerShow(_editor.bufferView().cursorPosition(cursor),
+                                  _env);
     });
 }
 
@@ -123,5 +124,6 @@ void MainWindow::open(filesystem::path path) {
     _editor.cursor(Cursor{_editor.buffer()});
     file->load(_editor.buffer());
     _editor.file(std::move(file));
+    _editor.bufferView().yScroll(0);
     updateLocatorBuffer();
 }

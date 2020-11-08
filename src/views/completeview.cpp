@@ -5,9 +5,7 @@ CompleteView::CompleteView() {
     _list.height(20);
 }
 
-void CompleteView::triggerShow(Position cursorPosition) {
-    //        _cursorPosition = bufferView.cursorPosition(cursor);
-    _cursorPosition = cursorPosition;
+void CompleteView::triggerShow(Position cursorPosition, IEnvironment &env) {
     _list.visible(true);
     visible(true);
 
@@ -16,6 +14,7 @@ void CompleteView::triggerShow(Position cursorPosition) {
     _list.y(cursorPosition.y() + 1);
     _list.current(0);
 
+    _autoComplete.populate(env);
     updateCompletion(_currentText);
 }
 
@@ -24,7 +23,8 @@ void CompleteView::updateCompletion(std::string str) {
     auto selected = _list.current();
     _list.clear();
     for (auto &item : values) {
-        _list.addLine(item.name, item.name);
+        _list.addLine(FString{item.name + " ", 0} + item.description,
+                      item.name);
     }
     _list.current(selected);
 }

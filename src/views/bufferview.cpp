@@ -1,6 +1,7 @@
 #include "views/bufferview.h"
 #include "screen/iscreen.h"
 #include "text/buffer.h"
+#include "text/cursor.h"
 
 BufferView::~BufferView() = default;
 
@@ -34,4 +35,8 @@ void BufferView::draw(IScreen &window) {
             window.draw(0, y() + ty, fillStr);
         }
     }
+}
+
+Position BufferView::cursorPosition(Cursor cursor) const {
+    return {x() + cursor.x() + _numberWidth, y() + cursor.y() - yScroll()};
 }

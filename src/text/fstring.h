@@ -92,4 +92,10 @@ public:
     auto operator+=(const FString &other) {
         _content.insert(_content.end(), other.begin(), other.end());
     }
+
+    void reserve(size_t size) {
+        _content.reserve(size);
+    }
+
+    FString operator+(const FString &other);
 };

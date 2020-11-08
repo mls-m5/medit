@@ -13,7 +13,8 @@
 [[nodiscard]] Cursor end(Cursor);
 
 //! Goto the beginning of the current word
-[[nodiscard]] Cursor beginWord(Cursor);
+[[nodiscard]] Cursor wordBegin(Cursor);
+[[nodiscard]] Cursor wordEnd(Cursor);
 
 Cursor insert(Utf8Char, Cursor);
 

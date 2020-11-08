@@ -1,6 +1,15 @@
 #include "text/buffer.h"
 #include "text/colorize.h"
+#include "text/cursor.h"
 #include <sstream>
+
+Cursor Buffer::begin() {
+    return {*this};
+}
+
+Cursor Buffer::end() {
+    return {*this, _lines.back().size(), _lines.size() - 1};
+}
 
 std::string Buffer::text() const {
     std::ostringstream ss;

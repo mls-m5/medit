@@ -40,6 +40,14 @@ public:
             return y() < other.y();
         }
     }
+
+    constexpr bool operator!=(const Position &other) const {
+        return x() != other.x() || y() != other.y();
+    }
+
+    constexpr bool operator==(const Position &other) const {
+        return x() == other.x() || y() == other.y();
+    }
 };
 
 class Cursor : public Position {
