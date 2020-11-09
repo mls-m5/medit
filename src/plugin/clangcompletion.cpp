@@ -3,10 +3,51 @@
 #include "views/editor.h"
 #include <clang-c/Index.h>
 
+namespace {
+
+struct UnsavedFile {
+    UnsavedFile(std::string content, std::string filename)
+        : content(std::move(content)), filename(std::move(filename)),
+          clangFile({this->content.c_str(),
+                     this->filename.c_str(),
+                     this->content.size()}) {}
+    std::string content;
+    std::string filename;
+    CXUnsavedFile clangFile;
+};
+
+} // namespace
+
+struct ClangCompletion::ClangData {
+    CXIndex index = clang_createIndex(0, 0);
+
+    ~ClangData() {
+        clang_disposeIndex(index);
+    }
+};
+
 std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
-    Cursor cursor, filesystem::path path) {
+    IEnvironment &env) {
+
+    auto path = filesystem::absolute(env.editor().file()->path());
+    auto cursor = env.editor().cursor();
+    auto buffer = env.editor().buffer();
+
     auto locationString = path.string();
-    auto result = clang_codeCompleteAt(nullptr,
+
+    const char *args[2] = {"-std=c++17", "-Iinclude"};
+
+    auto unsavedFile = UnsavedFile{buffer.text(), locationString};
+
+    auto translationUnit = clang_parseTranslationUnit(_data->index,
+                                                      locationString.c_str(),
+                                                      args,
+                                                      2,
+                                                      &unsavedFile.clangFile,
+                                                      1,
+                                                      0);
+
+    auto result = clang_codeCompleteAt(translationUnit,
                                        locationString.c_str(),
                                        cursor.y() + 1,
                                        cursor.x() + 1,
@@ -25,19 +66,36 @@ std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
         CXCompletionString completion = result->Results[i].CompletionString;
 
         // Todo: Iterate over all chunks
-        auto string = clang_getCompletionChunkText(completion, 0);
 
-        auto cStr = clang_getCString(string);
+        CompleteResult listItem;
 
-        ret.push_back({cStr});
+        for (size_t j = 0; j < clang_getNumCompletionChunks(completion); ++j) {
+            auto string = clang_getCompletionChunkText(completion, j);
+            auto kind = clang_getCompletionChunkKind(completion, j);
 
-        clang_disposeString(string);
+            auto cStr = clang_getCString(string);
+
+            if (kind == CXCompletionChunk_TypedText) {
+                listItem.completion += cStr;
+            }
+
+            listItem.description += " ";
+            listItem.description += cStr;
+
+            clang_disposeString(std::move(string));
+        }
+
+        ret.push_back(std::move(listItem));
     }
 
     clang_disposeCodeCompleteResults(result);
 
     return ret;
 }
+
+ClangCompletion::ClangCompletion() : _data(std::make_unique<ClangData>()) {}
+
+ClangCompletion::~ClangCompletion() = default;
 
 bool ClangCompletion::shouldComplete(IEnvironment &env) {
     if (!env.editor().file()) {
@@ -48,12 +106,12 @@ bool ClangCompletion::shouldComplete(IEnvironment &env) {
 }
 
 ICompletionSource::CompletionList ClangCompletion::list(IEnvironment &env) {
-    auto list = complete(env.editor().cursor(), env.editor().file()->path());
+    auto list = complete(env);
 
     ICompletionSource::CompletionList ret;
 
     for (auto l : list) {
-        ret.push_back({l.completion});
+        ret.push_back({l.completion, l.description});
     }
 
     return ret;

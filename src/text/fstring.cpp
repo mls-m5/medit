@@ -10,7 +10,7 @@ FString::FString(std::string_view str, FormatType f) {
         auto res = Utf8Char::fromChar(str.data() + i);
         _content.push_back(res.first);
         _content.back().f = f;
-        i += res.second;
+        i += res.second ? res.second : 1;
     }
 }
 

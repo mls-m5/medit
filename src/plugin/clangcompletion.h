@@ -10,15 +10,22 @@ class ClangCompletion : public ICompletionSource {
 public:
     struct CompleteResult {
         std::string completion;
+        std::string description;
     };
 
-private:
-    std::vector<CompleteResult> complete(Cursor cursor,
-                                         filesystem::path filePath);
+    ClangCompletion();
+    ~ClangCompletion();
 
     //! @see ICompletionSource
     bool shouldComplete(IEnvironment &) override;
 
     //! @ ICompletionSource
     CompletionList list(IEnvironment &env) override;
+
+private:
+    std::vector<CompleteResult> complete(IEnvironment &env);
+
+    struct ClangData;
+
+    std::unique_ptr<ClangData> _data;
 };

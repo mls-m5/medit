@@ -23,7 +23,7 @@ void CompleteView::updateCompletion(std::string str) {
     auto selected = _list.current();
     _list.clear();
     for (auto &item : values) {
-        _list.addLine(FString{item.name + " ", 0} + item.description,
+        _list.addLine(FString{item.name + "     ", 0} + item.description,
                       item.name);
     }
     _list.current(selected);
