@@ -1,14 +1,13 @@
 #pragma once
 
-#include "fstring.h"
+#include "completion/icompletionsource.h"
 #include "icompletionsource.h"
-#include "text/icompletionsource.h"
+#include "text/fstring.h"
 #include <memory>
 #include <string>
 
 class AutoComplete {
-
-    std::unique_ptr<ICompletionSource> _source;
+    std::vector<std::unique_ptr<ICompletionSource>> _sources;
 
 public:
     using CompletionList = ICompletionSource::CompletionList;

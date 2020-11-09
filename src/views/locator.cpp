@@ -2,10 +2,9 @@
 #include "locator.h"
 #include "modes/parentmode.h"
 
-Locator::Locator(IEnvironment &env) : _env(&env) {
+Locator::Locator(IEnvironment &env, ProjectFiles &projectFiles)
+    : _env(&env), _projectFiles(projectFiles) {
     _env.editor(this);
-    //    _list.addLine("hello");
-    //    _list.addLine("there");
     _list.x(0);
     _list.y(1);
     _list.width(20);
@@ -54,17 +53,13 @@ void Locator::visible(bool value) {
     }
 }
 
-void Locator::updateCache(filesystem::path pathInProject) {
-    _fileCache = _projectFiles.allProjectFiles(pathInProject);
-}
-
 void Locator::updateList() {
     const size_t maxFillLen = 20;
     _list.clear();
 
     auto bufferStr = buffer().text();
 
-    for (auto &path : _fileCache) {
+    for (auto &path : _projectFiles.files()) {
         size_t fillLen = 1;
         auto str = path.filename().string();
 

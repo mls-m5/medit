@@ -4,9 +4,18 @@
 #include <vector>
 
 class ProjectFiles {
-public:
-    filesystem::path root(filesystem::path);
+    std::vector<filesystem::path> _fileCache;
 
-    std::vector<filesystem::path> allProjectFiles(
-        const filesystem::path &pathInProject, size_t max = 100000);
+    std::vector<filesystem::path> findProjectFiles(
+        const filesystem::path &pathInProject, size_t max = 100000) const;
+
+public:
+    filesystem::path root(filesystem::path) const;
+
+    void updateCache(const filesystem::path &pathInProject,
+                     size_t max = 100000);
+
+    const auto &files() {
+        return _fileCache;
+    }
 };

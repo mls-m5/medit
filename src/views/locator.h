@@ -10,10 +10,9 @@ class Locator : public Editor {
 public:
     Environment _env;
     ListView _list;
-    ProjectFiles _projectFiles;
-    std::vector<filesystem::path> _fileCache;
+    ProjectFiles &_projectFiles;
 
-    Locator(IEnvironment &env);
+    Locator(IEnvironment &env, ProjectFiles &projectFiles);
     ~Locator() override;
 
     // @see IKeySink
@@ -26,6 +25,5 @@ public:
 
     void visible(bool value);
 
-    void updateCache(filesystem::path pathInProject);
     void updateList();
 };

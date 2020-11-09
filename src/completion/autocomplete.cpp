@@ -1,10 +1,12 @@
 
 
 #include "autocomplete.h"
+#include "plugin/clangcompletion.h"
 #include "wordcompletions.h"
 
 AutoComplete::AutoComplete() {
-    _source = std::make_unique<WordCompletions>();
+    _sources.emplace_back(std::make_unique<ClangCompletion>());
+    _sources.emplace_back(std::make_unique<WordCompletions>());
 }
 
 AutoComplete::~AutoComplete() {}
@@ -23,5 +25,10 @@ AutoComplete::CompletionList AutoComplete::getMatching(std::string beginning) {
 }
 
 void AutoComplete::populate(IEnvironment &env) {
-    _items = _source->list(env);
+    for (auto &source : _sources) {
+        if (source->shouldComplete(env)) {
+            _items = source->list(env);
+            break;
+        }
+    }
 }

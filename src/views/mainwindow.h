@@ -1,5 +1,6 @@
 #pragma once
 
+#include "files/projectfiles.h"
 #include "locator.h"
 #include "script/rootenvironment.h"
 #include "views/completeview.h"
@@ -12,7 +13,7 @@ struct MainWindow : public View, public IKeySink {
     Editor _console;
     Locator _locator;
     CompleteView _completeView;
-    //    ListView _testList;
+    ProjectFiles _project;
     size_t _split = 10;
 
     //    IKeySink *_inputFocus = &_testList;

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "cursorrangeops.h"
-#include "icompletionsource.h"
+#include "completion/icompletionsource.h"
 #include "script/ienvironment.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
@@ -14,13 +13,6 @@ public:
     // @see ICompletions
     CompletionList list(IEnvironment &env) override {
         std::set<std::string> words;
-        //        using namespace std::literals;
-        //        return {
-        //            {"apa", {"a class"s, 2}},
-        //            {"apa2", {"a class"s, 2}},
-        //            {"bepa", {"a function"s, 2}},
-        //            {"cepa", {"a function"s, 2}},
-        //        };
 
         auto &buffer = env.editor().buffer();
         const auto end = buffer.end();
@@ -39,7 +31,6 @@ public:
 
             auto content = std::string{::content(range).front()};
 
-            //            ret.push_back({content});
             words.insert(content);
         }
 
@@ -49,5 +40,10 @@ public:
             ret.push_back({word});
         }
         return ret;
+    }
+
+    //! @see ICompletionSource
+    bool shouldComplete(IEnvironment &) override {
+        return true;
     }
 };

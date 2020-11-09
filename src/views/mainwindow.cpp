@@ -7,7 +7,8 @@
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 
-MainWindow::MainWindow(size_t w, size_t h) : View(w, h), _locator(_env) {
+MainWindow::MainWindow(size_t w, size_t h)
+    : View(w, h), _locator(_env, _project) {
     _env.editor(&_editor);
     _editor.mode(createNormalMode());
     _console.showLines(false);
@@ -112,10 +113,10 @@ bool MainWindow::keyPress(IEnvironment &env) {
 
 void MainWindow::updateLocatorBuffer() {
     if (_editor.file()) {
-        _locator.updateCache(_editor.file()->path());
+        _project.updateCache(_editor.file()->path());
     }
     else {
-        _locator.updateCache(filesystem::current_path());
+        _project.updateCache(filesystem::current_path());
     }
 }
 

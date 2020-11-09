@@ -1,7 +1,7 @@
 
 #include "projectfiles.h"
 
-filesystem::path ProjectFiles::root(filesystem::path path) {
+filesystem::path ProjectFiles::root(filesystem::path path) const {
     path = filesystem::absolute(path);
     do {
         // Just a fast solution
@@ -24,8 +24,13 @@ filesystem::path ProjectFiles::root(filesystem::path path) {
     return {};
 }
 
-std::vector<filesystem::path> ProjectFiles::allProjectFiles(
-    const filesystem::path &pathInProject, size_t max) {
+void ProjectFiles::updateCache(const filesystem::path &pathInProject,
+                               size_t max) {
+    _fileCache = findProjectFiles(pathInProject, max);
+}
+
+std::vector<filesystem::path> ProjectFiles::findProjectFiles(
+    const filesystem::path &pathInProject, size_t max) const {
     auto root = this->root(pathInProject);
 
     if (root.empty()) {

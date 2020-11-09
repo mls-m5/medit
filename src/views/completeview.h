@@ -1,6 +1,6 @@
 #pragma once
 
-#include "text/autocomplete.h"
+#include "completion/autocomplete.h"
 #include "text/cursor.h"
 #include "views/bufferview.h"
 #include "views/listview.h"

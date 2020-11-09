@@ -16,4 +16,6 @@ public:
     virtual ~ICompletionSource() = default;
 
     virtual CompletionList list(IEnvironment &env) = 0;
+
+    virtual bool shouldComplete(IEnvironment &env) = 0;
 };
