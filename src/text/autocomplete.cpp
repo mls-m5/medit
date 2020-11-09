@@ -14,7 +14,7 @@ AutoComplete::CompletionList AutoComplete::getMatching(std::string beginning) {
 
     for (auto &item : _items) {
         //        if (item.name.find(beginning) != std::string::npos) {
-        if (item.name.starts_with(beginning)) {
+        if (item.name.rfind(beginning, 0) != std::string::npos) {
             ret.push_back(item);
         }
     }
