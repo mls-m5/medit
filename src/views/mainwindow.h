@@ -26,7 +26,8 @@ struct MainWindow : public View, public IKeySink {
 
     ~MainWindow() override = default;
 
-    void resize();
+    //! Set width and height to refresh but keep old size
+    void resize(size_t width = 0, size_t height = 0);
 
     //! @see IView
     void draw(IScreen &screen) override;

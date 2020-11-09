@@ -59,8 +59,15 @@ void MainWindow::addCommands() {
     });
 }
 
-void MainWindow::resize() {
+void MainWindow::resize(size_t w, size_t h) {
     //! Todo: Handle layouts better in the future
+    //!
+    if (w) {
+        width(w);
+    }
+    if (h) {
+        height(h);
+    }
     _editor.width(width());
     if (_env.showConsole()) {
         _editor.height(height() - _split);

@@ -30,6 +30,7 @@ enum class Key {
     F10,
     F11,
     F12,
+    Resize, // Window resize event
 };
 
 enum class Modifiers {

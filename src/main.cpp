@@ -38,9 +38,14 @@ int main(int argc, char **argv) {
 
     while (!shouldQuit) {
         auto c = input->getInput();
-        mainWindow._env.key(c);
-        mainWindow.keyPress(mainWindow._env);
-        mainWindow.resize();
+        if (c == Key::Resize) {
+            mainWindow.resize(screen->width(), screen->height());
+        }
+        else {
+            mainWindow._env.key(c);
+            mainWindow.keyPress(mainWindow._env);
+            mainWindow.resize();
+        }
 
         screen->clear();
         mainWindow.draw(*screen);
