@@ -46,7 +46,7 @@ void MainWindow::addCommands() {
         _editor.cursor(fix(_editor.cursor()));
 
         Cursor cursor = _editor.cursor();
-        auto currentChar = current(left(cursor)).at(0);
+        auto currentChar = content(left(cursor)).at(0);
         if (!isspace(currentChar)) {
             // If on for example a newline
             cursor = wordBegin(_editor.cursor());

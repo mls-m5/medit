@@ -36,7 +36,7 @@ public:
     //! @see IKeySink
     void updateCursor(IScreen &screen) const override;
 
-    void fitCursor() {}
+    void fitCursor();
 
     void current(size_t value);
 

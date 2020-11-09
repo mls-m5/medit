@@ -39,10 +39,12 @@ void Editor::draw(IScreen &screen) {
 }
 
 void Editor::fitCursor() {
-    if (_cursor.y() < _bufferView.yScroll()) {
-        _bufferView.yScroll(_cursor.y());
-    }
-    else if (_cursor.y() + 1 >= _bufferView.height() + _bufferView.yScroll()) {
-        _bufferView.yScroll(_cursor.y() - _bufferView.height() + 1);
-    }
+    bufferView().fitPosition(_cursor);
+    //    if (_cursor.y() < _bufferView.yScroll()) {
+    //        _bufferView.yScroll(_cursor.y());
+    //    }
+    //    else if (_cursor.y() + 1 >= _bufferView.height() +
+    //    _bufferView.yScroll()) {
+    //        _bufferView.yScroll(_cursor.y() - _bufferView.height() + 1);
+    //    }
 }

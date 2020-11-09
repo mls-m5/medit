@@ -32,4 +32,4 @@ Cursor split(Cursor);
 //! Used for auto indentation
 Cursor copyIndentation(Cursor, std::string autoIndentString = "    ");
 
-Utf8Char current(Cursor);
+Utf8Char content(Cursor);

@@ -166,15 +166,15 @@ TEST_CASE("get current character") {
     auto buffer = Buffer{testText};
 
     {
-        auto c = current({buffer, 0, 0});
+        auto c = content({buffer, 0, 0});
         ASSERT_EQ(c, 'A');
     }
     {
-        auto c = current({buffer, 8, 0});
+        auto c = content({buffer, 8, 0});
         ASSERT_EQ(c, '\n');
     }
     {
-        auto c = current({buffer, 100, 100});
+        auto c = content({buffer, 100, 100});
         ASSERT_EQ(c, '\n');
     }
 }

@@ -15,5 +15,7 @@ public:
         return _yScroll;
     }
 
+    void fitPosition(Position localPosition);
+
     void contentHeight(size_t value);
 };
