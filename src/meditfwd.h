@@ -3,6 +3,7 @@
 class IMode;
 class KeyEvent;
 class Buffer;
+class FChar;
 class Position;
 class Cursor;
 class CursorRange;
@@ -15,3 +16,4 @@ class IEnvironment;
 class BufferView;
 class Command;
 class CommandBlock;
+class ClangModel;

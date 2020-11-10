@@ -1,4 +1,5 @@
 #include "clangcompletion.h"
+#include "plugin/clang/clangmodel.h"
 #include "script/ienvironment.h"
 #include "views/editor.h"
 #include <clang-c/Index.h>
@@ -18,14 +19,6 @@ struct UnsavedFile {
 
 } // namespace
 
-struct ClangCompletion::ClangData {
-    CXIndex index = clang_createIndex(0, 0);
-
-    ~ClangData() {
-        clang_disposeIndex(index);
-    }
-};
-
 std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
     IEnvironment &env) {
 
@@ -39,7 +32,7 @@ std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
 
     auto unsavedFile = UnsavedFile{buffer.text(), locationString};
 
-    auto translationUnit = clang_parseTranslationUnit(_data->index,
+    auto translationUnit = clang_parseTranslationUnit(_model->index,
                                                       locationString.c_str(),
                                                       args,
                                                       2,
@@ -51,8 +44,8 @@ std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
                                        locationString.c_str(),
                                        cursor.y() + 1,
                                        cursor.x() + 1,
-                                       nullptr,
-                                       0,
+                                       &unsavedFile.clangFile,
+                                       1,
                                        clang_defaultCodeCompleteOptions());
 
     if (!result) {
@@ -93,7 +86,7 @@ std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
     return ret;
 }
 
-ClangCompletion::ClangCompletion() : _data(std::make_unique<ClangData>()) {}
+ClangCompletion::ClangCompletion() : _model(getClangModel()) {}
 
 ClangCompletion::~ClangCompletion() = default;
 

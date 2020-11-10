@@ -26,10 +26,12 @@ main.src =
    src/**.cpp
 
 main.sysincludes=
-   /usr/lib/llvm-10/include/
+   /usr/lib/llvm-11/include
+#   /usr/lib/llvm-10/include/
+#   /usr/lib/llvm-9/include/
 
 main.dir = bin
-main.libs += `pkg-config --libs ncurses` -lstdc++fs -lclang
+main.libs += `pkg-config --libs ncurses` -lstdc++fs -lclang-11
 main.copy += README.md
 main.out = medit
 

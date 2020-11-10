@@ -12,6 +12,10 @@ public:
         return *_buffer;
     }
 
+    constexpr Buffer &buffer() const {
+        return *_buffer;
+    }
+
     constexpr Cursor(Buffer &buffer, size_t x = 0, size_t y = 0)
         : Position(x, y), _buffer(&buffer) {}
 

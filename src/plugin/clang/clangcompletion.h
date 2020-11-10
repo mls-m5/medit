@@ -23,9 +23,6 @@ public:
     CompletionList list(IEnvironment &env) override;
 
 private:
+    ClangModel *_model;
     std::vector<CompleteResult> complete(IEnvironment &env);
-
-    struct ClangData;
-
-    std::unique_ptr<ClangData> _data;
 };

@@ -17,7 +17,7 @@ public:
         auto &buffer = env.editor().buffer();
         const auto end = buffer.end();
 
-        for (auto cursor = buffer.begin(); cursor != buffer.end();
+        for (auto cursor = buffer.begin(); cursor != end;
              cursor = wordEnd(cursor)) {
 
             auto start = wordBegin(cursor);

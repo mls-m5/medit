@@ -18,7 +18,6 @@ void quitMedit() {
 int main(int argc, char **argv) {
     std::unique_ptr<IScreen> screen;
     IInput *input;
-
     auto ns = std::make_unique<NCursesScreen>();
     input = ns.get();
     screen = std::move(ns);

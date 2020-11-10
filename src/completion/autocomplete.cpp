@@ -1,7 +1,7 @@
 
 
 #include "autocomplete.h"
-#include "plugin/clangcompletion.h"
+#include "plugin/clang/clangcompletion.h"
 #include "wordcompletions.h"
 
 AutoComplete::AutoComplete() {

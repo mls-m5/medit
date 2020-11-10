@@ -1,8 +1,8 @@
 
 
-#include "cursorrangeops.h"
-#include "cursorops.h"
+#include "text/cursorrangeops.h"
 #include "text/buffer.h"
+#include "text/cursorops.h"
 
 //! Returns a list with at least one element
 std::vector<FString> content(CursorRange range) {
@@ -24,4 +24,11 @@ std::vector<FString> content(CursorRange range) {
     res.back().erase(res.back().begin() + end.x(), res.back().end());
 
     return res;
+}
+
+void format(CursorRange range, FormatType format) {
+    for (auto it = range.beginCursor(); it < range.endCursor();
+         it = right(it)) {
+        contentPtr(it)->f = format;
+    }
 }

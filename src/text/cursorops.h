@@ -33,3 +33,4 @@ Cursor split(Cursor);
 Cursor copyIndentation(Cursor, std::string autoIndentString = "    ");
 
 Utf8Char content(Cursor);
+FChar *contentPtr(Cursor);

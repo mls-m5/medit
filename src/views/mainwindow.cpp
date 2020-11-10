@@ -3,6 +3,7 @@
 #include "files/file.h"
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
+#include "plugin/clang/clangannotation.h"
 #include "screen/iscreen.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
@@ -48,9 +49,12 @@ void MainWindow::addCommands() {
 
         Cursor cursor = _editor.cursor();
         auto currentChar = content(left(cursor)).at(0);
-        if (!isspace(currentChar)) {
+        if (isalnum(currentChar)) {
             // If on for example a newline
             cursor = wordBegin(_editor.cursor());
+        }
+        else {
+            cursor = _editor.cursor(); // I.e. Empty string
         }
         auto range = CursorRange(cursor, _editor.cursor());
         _completeView.currentText(content(range).front());
@@ -101,8 +105,6 @@ void MainWindow::draw(IScreen &screen) {
     }
 
     _completeView.draw(screen);
-
-    //    _testList.draw(screen);
 }
 
 void MainWindow::updateCursor(IScreen &screen) const {
@@ -134,4 +136,5 @@ void MainWindow::open(filesystem::path path) {
     _editor.file(std::move(file));
     _editor.bufferView().yScroll(0);
     updateLocatorBuffer();
+    clangAnnotate(_editor);
 }

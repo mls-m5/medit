@@ -91,7 +91,6 @@ Cursor end(Cursor cursor) {
 Cursor insert(Utf8Char c, Cursor cur) {
     auto &lines = cur.buffer().lines();
     if (lines.empty()) {
-        //        lines.emplace_back();
         cur.buffer().push_back();
     }
     cur = fix(cur);
@@ -99,7 +98,6 @@ Cursor insert(Utf8Char c, Cursor cur) {
         return split(cur);
     }
     else {
-        //        auto &line = lines.at(cur.y());
         auto &line = cur.buffer().lineAt(cur.y());
         line.insert(cur.x(), c);
         colorize(line);
@@ -134,13 +132,11 @@ Cursor erase(Cursor cursor) {
 }
 
 Cursor deleteLine(Cursor cursor) {
-    //    auto &lines = cursor.buffer().lines();
     if (cursor.buffer().lines().empty()) {
         return {cursor.buffer()};
     }
     cursor = fix(cursor);
     cursor.buffer().deleteLine(cursor.y());
-    //    lines.erase(lines.begin() + cursor.y());
     return cursor;
 }
 
@@ -170,7 +166,6 @@ Cursor split(Cursor cursor) {
     auto &lines = cursor.buffer().lines();
     if (lines.empty()) {
         cursor.buffer().push_back();
-        //        lines.emplace_back();
     }
 
     if (cursor.y() >= lines.size()) {
@@ -180,16 +175,9 @@ Cursor split(Cursor cursor) {
         const auto &line = lines.at(cursor.y());
 
         if (cursor.x() >= line.size()) {
-            //            lines.insert(lines.begin() + cursor.y() + 1,
-            //            FString{});
             cursor.buffer().insert(cursor.y() + 1, FString{});
         }
         else {
-            //            lines.insert(lines.begin() + cursor.y() + 1,
-            //                         {
-            //                             line.begin() + cursor.x(),
-            //                             line.end(),
-            //                         });
             cursor.buffer().insert(cursor.y() + 1,
                                    {
                                        line.begin() + cursor.x(),
@@ -307,4 +295,16 @@ Utf8Char content(Cursor cursor) {
     }
 
     return line.at(cursor.x()).c;
+}
+
+FChar *contentPtr(Cursor cursor) {
+    cursor = fix(cursor);
+
+    auto &line = cursor.buffer().lineAt(cursor.y());
+
+    if (cursor.x() == line.size()) {
+        return nullptr;
+    }
+
+    return &line.at(cursor.x());
 }
