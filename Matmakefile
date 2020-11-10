@@ -38,6 +38,7 @@ main.out = medit
 # ======== Tests =====================================
 
 src = test/%.cpp
+out = test %
 
 dir = bin/test
 includes +=
@@ -53,7 +54,7 @@ cursorops_test.src +=
 cursorrangeops_test.src +=
     src/text/*.cpp
 
-keysettings_test.out = %
+keysettings_test.out = test %
 
 fstring_test.src += src/text/fstring.cpp
 

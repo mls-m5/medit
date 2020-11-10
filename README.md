@@ -21,4 +21,4 @@ _ [ ] Undo/Redo
 Requirements
 -------------------------------
   
-libclang-10
+libclang-10/9
