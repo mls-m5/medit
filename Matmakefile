@@ -83,3 +83,10 @@ fstring_test.src += src/text/fstring.cpp
 
 utf8char_test.out = test %
 
+bufferkeymap_test.src +=
+    src/text/*.cpp
+    src/script/command.cpp
+    src/script/parser.cpp
+
+
+

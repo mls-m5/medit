@@ -50,7 +50,9 @@ std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
 
     if (!result) {
         //! Todo: Handle this better
-        throw std::runtime_error("failed completion");
+        //        throw std::runtime_error("failed completion");
+
+        return {};
     }
 
     std::vector<CompleteResult> ret;

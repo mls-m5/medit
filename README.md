@@ -7,8 +7,8 @@ Todo:
 - [x] Quick-open
 - [ ] Multi-letter vim combinations
 - [ ] Visual mode
+- [ ] Undo/Redo
 - [ ] Ide-tools
-_ [ ] Undo/Redo
   - [ ] Rename
   - [ ] Goto definition
   - [ ] Switch header/source

@@ -16,6 +16,8 @@ std::unique_ptr<IMode> createParentMode() {
          {"editor.auto_complete"}},
     }};
 
+    auto bufferMap = BufferKeyMap{};
+
     map.defaultAction({});
 
     return std::make_unique<Mode>("parent", std::move(map));

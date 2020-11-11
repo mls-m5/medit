@@ -2,9 +2,12 @@
 
 #include "script/standardcommands.h"
 
-Mode::Mode(std::string name, KeyMap map, std::unique_ptr<IMode> parent)
+Mode::Mode(std::string name,
+           KeyMap map,
+           std::unique_ptr<IMode> parent,
+           BufferKeyMap bufferMap)
     : _name(std::move(name)), _keyMap(std::move(map)),
-      _parent(std::move(parent)) {}
+      /* _bufferMap(std::move(bufferMap)),*/ _parent(std::move(parent)) {}
 
 bool Mode::keyPress(IEnvironment &env, bool useDefault) {
     auto action = _keyMap.find(env.key());

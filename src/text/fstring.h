@@ -55,6 +55,14 @@ public:
         return _content.at(index);
     }
 
+    [[nodiscard]] auto front() const {
+        return _content.front();
+    }
+
+    [[nodiscard]] auto back() const {
+        return _content.back();
+    }
+
     auto erase(size_t pos, size_t size) {
         return _content.erase(_content.begin() + pos,
                               _content.begin() + (pos + size));
@@ -98,4 +106,8 @@ public:
     }
 
     FString operator+(const FString &other);
+
+    friend bool operator<(const FString &a, const FString &b) {
+        return true;
+    }
 };

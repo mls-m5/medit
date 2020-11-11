@@ -41,5 +41,8 @@ std::unique_ptr<IMode> createNormalMode() {
     }};
     map.defaultAction({});
 
-    return std::make_unique<Mode>("normal", std::move(map), createParentMode());
+    BufferKeyMap bufferMap{};
+
+    return std::make_unique<Mode>(
+        "normal", std::move(map), createParentMode(), std::move(bufferMap));
 }

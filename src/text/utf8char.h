@@ -121,13 +121,19 @@ public:
         return size() == 1 && _data.front() == c;
     }
 
-    constexpr bool operator==(const Utf8Char &other) const {
-        for (size_t i = 0; i < _data.size(); ++i) {
-            if (_data[i] != other._data[i]) {
+    friend constexpr bool operator==(const Utf8Char &self,
+                                     const Utf8Char &other) {
+        for (size_t i = 0; i < self._data.size(); ++i) {
+            if (self._data[i] != other._data[i]) {
                 return false;
             }
         }
         return true;
+    }
+
+    friend constexpr bool operator!=(const Utf8Char &self,
+                                     const Utf8Char &other) {
+        return !(self == other);
     }
 
     operator std::string_view() const {
