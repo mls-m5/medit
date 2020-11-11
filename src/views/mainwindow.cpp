@@ -3,10 +3,10 @@
 #include "files/file.h"
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
-#include "plugin/clang/clangannotation.h"
 #include "screen/iscreen.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
+#include "clang/clangannotation.h"
 
 MainWindow::MainWindow(size_t w, size_t h)
     : View(w, h), _locator(_env, _project) {

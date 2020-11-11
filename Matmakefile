@@ -18,22 +18,44 @@ flags +=
    -Wno-sign-compare
    -g
 
-## Main target
-main.includes +=
+includes +=
    include
    src
-main.src = 
+   plugin/include
+   plugin/clang/include
+
+dir = bin
+
+# ==== Plugins ======================================
+
+standardplugins.out = shared %
+
+standardplugins.src =
+   plugin/*.cpp
+
+
+## -- clangplugin -----------------------------------
+
+clangplugin.sysincludes=
+   /usr/lib/llvm-9/include/
+#   /usr/lib/llvm-11/include
+#   /usr/lib/llvm-10/include/
+
+clangplugin.out = shared %
+clangplugin.src = plugin/clang/**.cpp
+clangplugin.libs += -lclang-9
+
+
+# ==== Main target ==================================
+
+main.src =
    src/**.cpp
 
-main.sysincludes=
-   /usr/lib/llvm-11/include
-#   /usr/lib/llvm-10/include/
-#   /usr/lib/llvm-9/include/
-
-main.dir = bin
-main.libs += `pkg-config --libs ncurses` -lstdc++fs -lclang-11
+main.libs += `pkg-config --libs ncurses` -lstdc++fs
 main.copy += README.md
+main.link += standardplugins clangplugin
 main.out = medit
+
 
 # ======== Tests =====================================
 
@@ -41,6 +63,7 @@ src = test/%.cpp
 out = test %
 
 dir = bin/test
+
 includes +=
    src
    test
@@ -58,4 +81,5 @@ keysettings_test.out = test %
 
 fstring_test.src += src/text/fstring.cpp
 
-utf8char_test.src.out = %
+utf8char_test.out = test %
+

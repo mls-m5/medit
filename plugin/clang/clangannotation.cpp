@@ -1,9 +1,9 @@
 
-#include "plugin/clang/clangannotation.h"
+#include "clang/clangannotation.h"
 #include "files/extensions.h"
-#include "plugin/clang/clangmodel.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
+#include "clang/clangmodel.h"
 
 struct Range {
     Position begin, end;

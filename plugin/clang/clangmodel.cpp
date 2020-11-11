@@ -1,4 +1,4 @@
-#include "clangmodel.h"
+#include "clang/clangmodel.h"
 #include "clang-c/Index.h"
 
 ClangModel *getClangModel() {

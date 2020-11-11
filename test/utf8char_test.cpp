@@ -1,6 +1,6 @@
 
 #include "mls-unit-test/unittest.h"
-#include "utf8char.h"
+#include "text/utf8char.h"
 
 TEST_SUIT_BEGIN
 

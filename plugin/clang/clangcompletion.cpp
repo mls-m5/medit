@@ -1,7 +1,7 @@
-#include "clangcompletion.h"
-#include "plugin/clang/clangmodel.h"
+#include "clang/clangcompletion.h"
 #include "script/ienvironment.h"
 #include "views/editor.h"
+#include "clang/clangmodel.h"
 #include <clang-c/Index.h>
 
 namespace {

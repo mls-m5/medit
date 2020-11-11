@@ -1,8 +1,8 @@
 
 
 #include "autocomplete.h"
-#include "plugin/clang/clangcompletion.h"
 #include "wordcompletions.h"
+#include "clang/clangcompletion.h"
 
 AutoComplete::AutoComplete() {
     _sources.emplace_back(std::make_unique<ClangCompletion>());
