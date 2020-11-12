@@ -15,7 +15,7 @@ public:
     //! @returns last key pressed
     [[nodiscard]] virtual KeyEvent key() const = 0;
 
-    //! @returns parent environment, or nullptr if no parent present
+    //! @returns parent environment
     [[nodiscard]] virtual IEnvironment &parent() = 0;
 
     [[nodiscard]] virtual IEnvironment &root() = 0;

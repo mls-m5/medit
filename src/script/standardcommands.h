@@ -7,5 +7,3 @@
 #include <vector>
 
 void addStandardCommands(IEnvironment &env);
-
-// void run(Command command, IEnvironment &env);
