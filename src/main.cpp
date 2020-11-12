@@ -1,3 +1,4 @@
+#include "main.h"
 #include "files/file.h"
 #include "screen/ncursesscreen.h"
 #include "script/rootenvironment.h"
@@ -6,14 +7,14 @@
 #include <string>
 #include <vector>
 
-namespace {
-bool shouldQuit = false;
+// namespace {
+// bool shouldQuit = false;
 
-} // namespace
+//} // namespace
 
-void quitMedit() {
-    shouldQuit = true;
-}
+// void quitMedit() {
+//    shouldQuit = true;
+//}
 
 int main(int argc, char **argv) {
     std::unique_ptr<IScreen> screen;
@@ -35,7 +36,7 @@ int main(int argc, char **argv) {
     mainWindow.draw(*screen);
     mainWindow.updateCursor(*screen);
 
-    while (!shouldQuit) {
+    while (!medit::main::shouldQuit) {
         auto c = input->getInput();
         if (c == Key::Resize) {
             mainWindow.resize(screen->width(), screen->height());

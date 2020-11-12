@@ -1,5 +1,3 @@
-
-
 #include "keys/bufferkeymap.h"
 #include "mls-unit-test/unittest.h"
 

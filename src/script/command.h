@@ -1,6 +1,5 @@
 #pragma once
 
-#include "script/parser.h"
 #include <string>
 #include <vector>
 

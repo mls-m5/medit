@@ -42,5 +42,11 @@ public:
         return true;
     }
 
+    IEnvironment() = default;
+    IEnvironment(const IEnvironment &) = delete;
+    IEnvironment &operator=(const IEnvironment &) = delete;
+    IEnvironment(IEnvironment &&) = delete;
+    IEnvironment &operator=(IEnvironment &&) = delete;
+
     virtual ~IEnvironment() = default;
 };

@@ -48,12 +48,25 @@ clangplugin.libs += -lclang-9
 
 # ==== Main target ==================================
 
-main.src =
-   src/**.cpp
+core.src +=
+   src/completion/**.cpp
+   src/files/**.cpp
+   src/keys/**.cpp
+   src/modes/**.cpp
+   src/screen/**.cpp
+   src/text/**.cpp
+   src/script/**.cpp
+   src/views/**.cpp
 
-main.libs += `pkg-config --libs ncurses` -lstdc++fs
+core.out = shared core
+core.libs += `pkg-config --libs ncurses` -lstdc++fs
+core.link +=  standardplugins clangplugin
+
+main.src = src/main.cpp
+#   src/**.cpp
+
 main.copy += README.md
-main.link += standardplugins clangplugin
+main.link += core
 main.out = medit
 
 
@@ -61,32 +74,30 @@ main.out = medit
 
 src = test/%.cpp
 out = test %
+link = core
 
-dir = bin/test
+dir = bin
 
 includes +=
    src
    test
 
-buffer_test.src +=
-    src/text/*.cpp
+buffer_test.src += #
 
-cursorops_test.src +=
-    src/text/*.cpp
+cursorops_test.src += #
 
-cursorrangeops_test.src +=
-    src/text/*.cpp
+cursorrangeops_test.src += #
 
-keysettings_test.out = test %
+keysettings_test.src += #
 
-fstring_test.src += src/text/fstring.cpp
+fstring_test.src += #
 
-utf8char_test.out = test %
+utf8char_test.src += #
 
-bufferkeymap_test.src +=
-    src/text/*.cpp
-    src/script/command.cpp
-    src/script/parser.cpp
+bufferkeymap_test.src += #
+
+mode_test.src += #
+
 
 
 

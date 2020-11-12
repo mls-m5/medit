@@ -1,3 +1,12 @@
 #pragma once
 
-void quitMedit();
+namespace medit {
+namespace main {
+
+inline bool shouldQuit = false;
+} // namespace main
+} // namespace medit
+
+void quitMedit() {
+    medit::main::shouldQuit = true;
+}
