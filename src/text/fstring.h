@@ -105,6 +105,10 @@ public:
         _content.reserve(size);
     }
 
+    void clear() {
+        _content.clear();
+    }
+
     FString operator+(const FString &other);
 
     friend bool operator<(const FString &a, const FString &b) {

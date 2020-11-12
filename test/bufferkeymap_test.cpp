@@ -12,7 +12,7 @@ TEST_CASE("create") {
     }};
 }
 
-TEST_CASE("match whole") {
+TEST_CASE("no match") {
     auto map = BufferKeyMap{BufferKeyMap::MapType{
         {
             {"hello"},
@@ -20,9 +20,10 @@ TEST_CASE("match whole") {
         },
     }};
 
-    auto m = map.match("hello");
+    auto m = map.match("apa");
 
-    ASSERT_EQ(m, map.Match);
+    ASSERT_EQ(m.first, map.NoMatch);
+    ASSERT_EQ(m.second, nullptr);
 }
 
 TEST_CASE("partial match") {
@@ -35,7 +36,22 @@ TEST_CASE("partial match") {
 
     auto m = map.match("hel");
 
-    ASSERT_EQ(m, map.PartialMatch);
+    ASSERT_EQ(m.first, map.PartialMatch);
+    ASSERT_EQ(m.second, nullptr);
+}
+
+TEST_CASE("match") {
+    auto map = BufferKeyMap{BufferKeyMap::MapType{
+        {
+            {"hello"},
+            {""},
+        },
+    }};
+
+    auto m = map.match("hello");
+
+    ASSERT_EQ(m.first, map.Match);
+    ASSERT_NE(m.second, nullptr);
 }
 
 TEST_SUIT_END

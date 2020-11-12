@@ -2,6 +2,7 @@
 
 #include "script/command.h"
 #include "text/fstring.h"
+#include <optional>
 
 class BufferKeyMap {
 public:
@@ -13,18 +14,20 @@ public:
         PartialMatch,
     };
 
-    MatchType match(const FString &str) {
+    //! @returns second = CommandBlock pointing to matching commandblock if
+    //! match else second = nullptr, first = kind of match
+    std::pair<MatchType, CommandBlock *> match(const FString &str) {
         auto best = NoMatch;
         for (auto &item : _map) {
             auto m = match(item.first, str);
             if (m == Match) {
-                return Match;
+                return {Match, &item.second};
             }
             else if (m == PartialMatch) {
                 best = PartialMatch;
             }
         }
-        return best;
+        return {best, nullptr};
     }
 
     BufferKeyMap(MapType map) : _map(std::move(map)) {}

@@ -64,6 +64,13 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
         },
     },
     {
+        "editor.delete_line",
+        [](IEnvironment &env) {
+            auto &e = env.editor();
+            e.cursor(deleteLine(e.cursor()));
+        },
+    },
+    {
         "editor.insert",
         [](IEnvironment &env) {
             auto &e = env.editor();

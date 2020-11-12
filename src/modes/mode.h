@@ -10,11 +10,12 @@ class Mode : public IMode {
 
     std::string _name;
     KeyMap _keyMap;
-    std::unique_ptr<IMode> _parent;
     std::string _commandBuffer;
     bool _bufferMode = false;
-    std::vector<Utf8Char> _bufferTriggers;
+    //    std::vector<KeyEvent> _bufferTriggers;
+    FString _buffer;
     BufferKeyMap _bufferMap;
+    std::unique_ptr<IMode> _parent;
 
 public:
     Mode(std::string name,
@@ -22,7 +23,7 @@ public:
          std::unique_ptr<IMode> parent = {},
          BufferKeyMap bufferMap = {});
 
-    bool keyPress(IEnvironment &env, bool useDefault = true) override;
+    bool keyPress(IEnvironment &env) override;
 
     std::string_view name() override {
         return _name;

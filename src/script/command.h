@@ -51,7 +51,7 @@ public:
     }
 
     operator bool() const {
-        return !list.empty();
+        return !list.empty() || _command;
     }
 
     ~CommandBlock() = default;
