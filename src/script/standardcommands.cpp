@@ -80,6 +80,14 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
         },
     },
     {
+        "editor.delete_iw",
+        [](IEnvironment &env) {
+            auto &e = env.editor();
+            auto cursor = e.cursor();
+            e.cursor(erase({wordBegin(cursor), right(wordEnd(cursor))}));
+        },
+    },
+    {
         "editor.insert",
         [](IEnvironment &env) {
             auto &e = env.editor();
