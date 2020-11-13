@@ -42,8 +42,8 @@ std::unique_ptr<IMode> createNormalMode() {
     map.defaultAction({});
 
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
-        //        {{"dw"}, {"editor.delete_word"}},
         {{"dd"}, {"editor.delete_line"}},
+        {{"dw"}, {"editor.delete_word"}},
     }};
 
     return std::make_unique<Mode>(

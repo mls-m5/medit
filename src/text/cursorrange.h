@@ -19,6 +19,9 @@ public:
         fixOrder();
     }
 
+    //! Convert a cursor to a empty range
+    constexpr CursorRange(Cursor both) : CursorRange(both, both) {}
+
     constexpr CursorRange(Cursor begin, Cursor end)
         : CursorRange(begin.buffer(), begin, end) {}
 

@@ -6,10 +6,10 @@
 class FString {
     std::vector<FChar> _content;
 
+public:
     using iterator = std::vector<FChar>::iterator;
     using const_iterator = std::vector<FChar>::const_iterator;
 
-public:
     FString() = default;
     FString(const FString &) = default;
     FString(FString &&) = default;

@@ -50,4 +50,45 @@ TEST_CASE("multi line content") {
     }
 }
 
+TEST_CASE("erase empty range") {
+    const auto testText = "apa bepa\ncepa"sv;
+    const auto resText = "apa"sv;
+
+    // Do nothing  with empty range
+    auto buffer = Buffer{testText};
+    buffer.changed(false);
+
+    auto cursor = erase({buffer, {1, 0}, {1, 0}});
+
+    ASSERT_EQ(buffer.text(), testText);
+    ASSERT_EQ(cursor.x(), 1);
+    ASSERT_EQ(cursor.y(), 0);
+    ASSERT_EQ(buffer.changed(), false);
+}
+
+TEST_CASE("erase range - single line") {
+    const auto testText = "ape beba\ncepa\ndepo"sv;
+    const auto resText = "aeba\ncepa\ndepo"sv;
+    auto buffer = Buffer{testText};
+
+    auto cursor = erase({buffer, {1, 0}, {5, 0}});
+
+    ASSERT_EQ(buffer.text(), resText);
+    ASSERT_EQ(cursor.x(), 1);
+    ASSERT_EQ(cursor.y(), 0);
+}
+
+TEST_CASE("erase range - multiline") {
+    const auto testText = "apa bepa\ncepa\ndepo"sv;
+    const auto resText = "apo"sv;
+    auto buffer = Buffer{testText};
+
+    auto cursor = erase({buffer, {1, 0}, {2, 2}});
+
+    ASSERT_EQ(buffer.text(), resText);
+    ASSERT_EQ(buffer.lines().size(), 1);
+    ASSERT_EQ(cursor.x(), 1);
+    ASSERT_EQ(cursor.y(), 0);
+}
+
 TEST_SUIT_END

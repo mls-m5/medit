@@ -31,12 +31,13 @@ public:
         return *this;
     }
 
-    constexpr bool operator<(const Position &other) const {
-        if (y() == other.y()) {
-            return x() < other.x();
+    friend constexpr bool operator<(const Position &self,
+                                    const Position &other) {
+        if (self.y() == other.y()) {
+            return self.x() < other.x();
         }
         else {
-            return y() < other.y();
+            return self.y() < other.y();
         }
     }
 
@@ -44,7 +45,8 @@ public:
         return x() != other.x() || y() != other.y();
     }
 
-    constexpr bool operator==(const Position &other) const {
-        return x() == other.x() || y() == other.y();
+    friend constexpr bool operator==(const Position &self,
+                                     const Position &other) {
+        return self.x() == other.x() && self.y() == other.y();
     }
 };

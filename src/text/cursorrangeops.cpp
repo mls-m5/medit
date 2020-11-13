@@ -12,7 +12,7 @@ std::vector<FString> content(CursorRange range) {
     auto &buffer = begin.buffer();
 
     if (begin.y() == end.y()) {
-        auto line = buffer.lineAt(begin.y());
+        auto line = buffer.lineAtConst(begin.y());
         return {{line.begin() + begin.x(), line.begin() + end.x()}};
     }
 
@@ -31,4 +31,33 @@ void format(CursorRange range, FormatType format) {
          it = right(it)) {
         contentPtr(it)->f = format;
     }
+}
+
+Cursor erase(CursorRange range) {
+    auto begin = fix(range.beginCursor());
+    auto end = fix(range.endCursor());
+
+    if (begin == end) {
+        return range.beginCursor();
+    }
+
+    auto &buffer = begin.buffer();
+
+    if (begin.y() == end.y()) {
+        auto &line = buffer.lineAt(begin.y());
+        line.erase(line.begin() + begin.x(), line.begin() + end.x());
+        return begin;
+    }
+
+    {
+        auto &line = buffer.lineAt(begin.y());
+        line.erase(line.begin() + begin.x(), line.end());
+
+        auto &backLine = buffer.lineAt(end.y());
+        line.insert(line.end(), backLine.begin() + end.x(), backLine.end());
+    }
+
+    buffer.deleteLine(begin.y() + 1, end.y() - begin.y());
+
+    return range.beginCursor();
 }

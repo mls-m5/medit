@@ -1,6 +1,11 @@
 #include "keys/bufferkeymap.h"
 #include "mls-unit-test/unittest.h"
 
+//! To be able to print nullptr
+std::ostream &operator<<(std::ostream &s, std::nullptr_t) {
+    return s << static_cast<void *>(nullptr);
+}
+
 TEST_SUIT_BEGIN
 
 TEST_CASE("create") {

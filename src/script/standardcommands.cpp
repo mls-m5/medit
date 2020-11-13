@@ -8,6 +8,7 @@
 #include "plugin/windowcommands.h"
 #include "script/parser.h"
 #include "text/cursorops.h"
+#include "text/cursorrangeops.h"
 #include "views/editor.h"
 #include <functional>
 #include <map>
@@ -68,6 +69,14 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
         [](IEnvironment &env) {
             auto &e = env.editor();
             e.cursor(deleteLine(e.cursor()));
+        },
+    },
+    {
+        "editor.delete_word",
+        [](IEnvironment &env) {
+            auto &e = env.editor();
+            auto cursor = e.cursor();
+            e.cursor(erase({cursor, right(wordEnd(cursor))}));
         },
     },
     {

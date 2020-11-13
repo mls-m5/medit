@@ -8,8 +8,9 @@
 #include <vector>
 
 class Buffer {
-
 public:
+    using iterator = std::vector<FString>::iterator;
+
     Buffer() = default;
     Buffer(const Buffer &) = default;
     Buffer(Buffer &&) = default;
@@ -20,18 +21,21 @@ public:
         this->text(text);
     }
 
-    Buffer(std::string_view text) : Buffer(std::string(text)) {}
+    Buffer(std::string_view text)
+        : Buffer(std::string(text)){}
 
     [[nodiscard]] const auto &lines() const {
         return _lines;
     }
 
+    //! Get a line and trigger changed
     auto &lineAt(size_t index) {
         _changed = true;
         return _lines.at(index);
     }
 
-    const auto &lineAt(size_t index) const {
+    //! Get a line without trigger changed
+    const auto &lineAtConst(size_t index) const {
         return _lines.at(index);
     }
 
@@ -40,7 +44,7 @@ public:
         changed(true);
     }
 
-    void insert(std::vector<FString>::iterator position, FString string) {
+    void insert(iterator position, FString string) {
         _lines.insert(position, std::move(string));
         changed(true);
     }
@@ -50,8 +54,11 @@ public:
         changed(true);
     }
 
-    void deleteLine(size_t l) {
-        _lines.erase(_lines.begin() + l);
+    void deleteLine(size_t l, size_t numLines = 1) {
+        if (numLines == 0) {
+            return;
+        }
+        _lines.erase(_lines.begin() + l, _lines.begin() + l + numLines);
         changed(true);
     }
 
