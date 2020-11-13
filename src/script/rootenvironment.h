@@ -14,13 +14,6 @@ public:
         _lastKeyEvent = e;
     }
 
-    //    Editor &editor() override {
-    //        if (!_editor) {
-    //            throw std::runtime_error("trying to use editor when not set");
-    //        }
-    //        return *_editor;
-    //    }
-
     void console(Editor *console) {
         _console = console;
     }

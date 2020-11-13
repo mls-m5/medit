@@ -26,4 +26,14 @@ public:
     constexpr Cursor(Cursor &&) = default;
     constexpr Cursor &operator=(const Cursor &) = default;
     constexpr Cursor &operator=(Cursor &&) = default;
+
+    Cursor &operator++();
+
+    //! Returns a pointer because somtimes there is no character (like when
+    //! there is a line-break
+    FChar *operator*();
+
+    FChar *operator->() {
+        return **this;
+    }
 };

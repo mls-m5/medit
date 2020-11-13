@@ -6,8 +6,8 @@
 
 //! Returns a list with at least one element
 std::vector<FString> content(CursorRange range) {
-    auto begin = fix(range.beginCursor());
-    auto end = fix(range.endCursor());
+    auto begin = fix(range.begin());
+    auto end = fix(range.end());
 
     auto &buffer = begin.buffer();
 
@@ -27,18 +27,22 @@ std::vector<FString> content(CursorRange range) {
 }
 
 void format(CursorRange range, FormatType format) {
-    for (auto it = range.beginCursor(); it < range.endCursor();
-         it = right(it)) {
-        contentPtr(it)->f = format;
+    //    for (auto it = range.begin(); it < range.end();
+    //         it = right(it)) {
+    for (auto it : range) {
+        if (it) {
+            it->f = format;
+        }
+        //        contentPtr(it)->f = format;
     }
 }
 
 Cursor erase(CursorRange range) {
-    auto begin = fix(range.beginCursor());
-    auto end = fix(range.endCursor());
+    auto begin = fix(range.begin());
+    auto end = fix(range.end());
 
     if (begin == end) {
-        return range.beginCursor();
+        return range.begin();
     }
 
     auto &buffer = begin.buffer();
@@ -59,5 +63,5 @@ Cursor erase(CursorRange range) {
 
     buffer.deleteLine(begin.y() + 1, end.y() - begin.y());
 
-    return range.beginCursor();
+    return range.begin();
 }

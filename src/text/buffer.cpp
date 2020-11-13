@@ -1,5 +1,5 @@
 #include "text/buffer.h"
-#include "text/colorize.h"
+//#include "text/colorize.h"
 #include "text/cursor.h"
 #include <sstream>
 
@@ -33,7 +33,7 @@ void Buffer::text(std::istream &stream) {
         _lines.emplace_back(std::move(line));
     }
 
-    colorize(*this);
+    //    colorize(*this);
 }
 
 void Buffer::text(std::ostream &stream) const {

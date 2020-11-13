@@ -1,7 +1,7 @@
 
 #include "cursorops.h"
 #include "buffer.h"
-#include "colorize.h"
+#include "syntax/basichighligting.h"
 #include "views/bufferview.h"
 
 bool isValid(Cursor cursor) {
@@ -100,7 +100,7 @@ Cursor insert(Utf8Char c, Cursor cur) {
     else {
         auto &line = cur.buffer().lineAt(cur.y());
         line.insert(cur.x(), c);
-        colorize(line);
+        //        colorize(line);
         cur.x(cur.x() + 1);
     }
 
@@ -125,7 +125,7 @@ Cursor erase(Cursor cursor) {
     }
     else {
         line.erase(cursor.x() - 1, 1);
-        colorize(line);
+        //        colorize(line);
         cursor.x(cursor.x() - 1);
     }
     return cursor;
@@ -156,7 +156,7 @@ Cursor join(Cursor cursor) {
 
     line1 += line2;
     deleteLine({cursor.buffer(), 0, cursor.y() + 1});
-    colorize(line1);
+    //    colorize(line1);
 
     return {cursor.buffer(), x, cursor.y()};
 }

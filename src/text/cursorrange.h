@@ -36,28 +36,28 @@ public:
         }
     }
 
-    constexpr Cursor beginCursor() const {
+    constexpr Cursor begin() const {
         return {*_buffer, _begin.x(), _begin.y()};
     }
 
-    constexpr auto begin() const {
+    constexpr auto beginPosition() const {
         return _begin;
     }
 
-    constexpr Cursor endCursor() const {
+    constexpr Cursor end() const {
         return {*_buffer, _end.x(), _end.y()};
     }
 
-    constexpr auto end() const {
+    constexpr auto endPosition() const {
         return _end;
     }
 
-    constexpr void begin(Position value) {
+    constexpr void beginPosition(Position value) {
         _begin = value;
         fixOrder();
     }
 
-    constexpr void end(Position value) {
+    constexpr void endPosition(Position value) {
         _end = value;
         fixOrder();
     }

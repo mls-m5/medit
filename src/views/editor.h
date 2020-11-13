@@ -14,6 +14,7 @@ private:
     Cursor _cursor;
     std::unique_ptr<IMode> _mode;
     std::unique_ptr<IFile> _file;
+    IHighlight *_highlight = nullptr;
 
 public:
     Editor(std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>())
@@ -26,6 +27,15 @@ public:
 
     IFile *file() {
         return _file.get();
+    }
+
+    filesystem::path path() {
+        if (_file) {
+            return _file->path();
+        }
+        else {
+            return {};
+        }
     }
 
     void save() {

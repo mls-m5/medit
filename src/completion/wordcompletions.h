@@ -37,7 +37,7 @@ public:
         CompletionList ret;
         ret.reserve(words.size());
         for (auto &word : words) {
-            ret.push_back({word});
+            ret.push_back({word, ""});
         }
         return ret;
     }

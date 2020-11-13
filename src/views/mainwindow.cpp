@@ -4,9 +4,10 @@
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
 #include "screen/iscreen.h"
+#include "syntax/basichighligting.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
-#include "clang/clangannotation.h"
+#include "clang/clanghighlight.h"
 
 MainWindow::MainWindow(size_t w, size_t h)
     : View(w, h), _locator(_env, _project) {
@@ -36,7 +37,12 @@ MainWindow::MainWindow(size_t w, size_t h)
     });
 
     addCommands();
+
+    _highlighting.push_back(std::make_unique<ClangHighlight>());
+    _highlighting.push_back(std::make_unique<BasicHighlighting>());
 }
+
+MainWindow::~MainWindow() = default;
 
 void MainWindow::addCommands() {
     _env.addCommand("window.show_locator", [this](auto &&) {
@@ -65,7 +71,6 @@ void MainWindow::addCommands() {
 
 void MainWindow::resize(size_t w, size_t h) {
     //! Todo: Handle layouts better in the future
-    //!
     if (w) {
         width(w);
     }
@@ -114,10 +119,17 @@ void MainWindow::updateCursor(IScreen &screen) const {
 bool MainWindow::keyPress(IEnvironment &env) {
     if (_inputFocus == &_editor && _completeView.visible()) {
         if (_completeView.keyPress(env)) {
+            updateHighlighting();
             return true; // Otherwise give key events to editor
         }
     }
-    return _inputFocus->keyPress(env);
+    if (_inputFocus->keyPress(env)) {
+        updateHighlighting();
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 void MainWindow::updateLocatorBuffer() {
@@ -136,5 +148,19 @@ void MainWindow::open(filesystem::path path) {
     _editor.file(std::move(file));
     _editor.bufferView().yScroll(0);
     updateLocatorBuffer();
-    clangAnnotate(_editor);
+
+    updateHighlighting();
+}
+
+void MainWindow::updateHighlighting() {
+    if (_editor.buffer().oldColors()) {
+        for (auto &highlight : _highlighting) {
+            if (highlight->shouldEnable(_editor.path())) {
+                highlight->highlight(_editor);
+
+                _editor.buffer().oldColors(false);
+                break;
+            }
+        }
+    }
 }

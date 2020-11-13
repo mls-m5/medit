@@ -14,17 +14,16 @@ struct MainWindow : public View, public IKeySink {
     Locator _locator;
     CompleteView _completeView;
     ProjectFiles _project;
+    std::vector<std::unique_ptr<IHighlight>> _highlighting;
     size_t _split = 10;
 
-    //    IKeySink *_inputFocus = &_testList;
     IKeySink *_inputFocus = &_editor;
-    //    IKeySink *_inputFocus = &_commandBuffer;
 
     FString splitString;
 
     MainWindow(size_t w, size_t h);
 
-    ~MainWindow() override = default;
+    ~MainWindow() override;
 
     //! Set width and height to refresh but keep old size
     void resize(size_t width = 0, size_t height = 0);
@@ -41,6 +40,8 @@ struct MainWindow : public View, public IKeySink {
     void updateLocatorBuffer();
 
     void open(filesystem::path path);
+
+    void updateHighlighting();
 
 private:
     void addCommands();

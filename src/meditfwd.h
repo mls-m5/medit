@@ -17,3 +17,4 @@ class BufferView;
 class Command;
 class CommandBlock;
 class ClangModel;
+class IHighlight;

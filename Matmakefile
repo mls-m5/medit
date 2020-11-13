@@ -57,6 +57,7 @@ core.src +=
    src/text/**.cpp
    src/script/**.cpp
    src/views/**.cpp
+   src/syntax/**.cpp
 
 core.out = shared core
 core.libs += `pkg-config --libs ncurses` -lstdc++fs
@@ -95,10 +96,11 @@ bufferkeymap_test.src += #
 
 mode_test.src += #
 
-clang_autocomplete_test.src += #
 clang_autocomplete_test.link += clangplugin
 clang_autocomplete_test.copy = test/res/complete_test1.cpp
 
+clang_annotation_test.link += clangplugin
+clang_autocomplete_test.copy = test/res/annotation_test1.cpp
 
 
 

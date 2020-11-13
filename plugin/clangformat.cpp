@@ -1,5 +1,6 @@
 
 #include "plugin/clangformat.h"
+#include "files/extensions.h"
 #include "views/editor.h"
 
 void clangFormat(IEnvironment &env) {
@@ -11,7 +12,7 @@ void clangFormat(IEnvironment &env) {
 
     auto path = file->path();
 
-    if (path.extension() != ".cpp" && path.extension() != ".h") {
+    if (!isCpp(path)) {
         return;
     }
 

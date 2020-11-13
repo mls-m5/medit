@@ -52,7 +52,6 @@ TEST_CASE("multi line content") {
 
 TEST_CASE("erase empty range") {
     const auto testText = "apa bepa\ncepa"sv;
-    const auto resText = "apa"sv;
 
     // Do nothing  with empty range
     auto buffer = Buffer{testText};
@@ -89,6 +88,24 @@ TEST_CASE("erase range - multiline") {
     ASSERT_EQ(buffer.lines().size(), 1);
     ASSERT_EQ(cursor.x(), 1);
     ASSERT_EQ(cursor.y(), 0);
+}
+
+TEST_CASE("format range") {
+    const auto testText = "apa bepa\ncepa\ndepo"sv;
+
+    auto buffer = Buffer{testText};
+
+    auto range = CursorRange{buffer, {1, 0}, {2, 1}};
+
+    format(range, 4);
+
+    for (auto c : range) {
+        if (c) {
+            ASSERT_EQ(c->f, 4);
+        }
+    }
+
+    ASSERT_EQ(buffer.begin()->f, 0);
 }
 
 TEST_SUIT_END

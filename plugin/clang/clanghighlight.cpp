@@ -1,9 +1,11 @@
 
-#include "clang/clangannotation.h"
+#include "clang/clanghighlight.h"
 #include "files/extensions.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
 #include "clang/clangmodel.h"
+
+namespace {
 
 struct Range {
     Position begin, end;
@@ -32,7 +34,7 @@ void clangAnnotate(Editor &editor) {
     }
     auto model = getClangModel();
 
-    auto path = editor.file()->path();
+    auto path = filesystem::absolute(editor.file()->path());
 
     if (!isCpp(path)) {
         return;
@@ -86,4 +88,14 @@ void clangAnnotate(Editor &editor) {
     };
 
     clang_visitChildren(cursor, cvisitor, static_cast<void *>(&visitor));
+}
+
+} // namespace
+
+bool ClangHighlight::shouldEnable(filesystem::path path) {
+    return isCpp(path);
+}
+
+void ClangHighlight::highlight(Editor &editor) {
+    clangAnnotate(editor);
 }

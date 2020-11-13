@@ -7,15 +7,6 @@
 #include <string>
 #include <vector>
 
-// namespace {
-// bool shouldQuit = false;
-
-//} // namespace
-
-// void quitMedit() {
-//    shouldQuit = true;
-//}
-
 int main(int argc, char **argv) {
     std::unique_ptr<IScreen> screen;
     IInput *input;

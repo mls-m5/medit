@@ -11,6 +11,7 @@ bool Editor::keyPress(IEnvironment &env) {
     if (_mode) {
         return _mode->keyPress(env);
     }
+
     return false;
 }
 

@@ -26,7 +26,7 @@ void ListView::draw(IScreen &screen) {
     if (!visible()) {
         return;
     }
-    size_t ty = yScroll();
+    //    size_t ty = yScroll();
 
     FString fillStr{std::string(width(), ' '), 0};
     FString selFillStr{std::string(width(), ' '), 4};

@@ -21,8 +21,7 @@ public:
         this->text(text);
     }
 
-    Buffer(std::string_view text)
-        : Buffer(std::string(text)){}
+    Buffer(std::string_view text) : Buffer(std::string(text)) {}
 
     [[nodiscard]] const auto &lines() const {
         return _lines;
@@ -68,6 +67,17 @@ public:
 
     void changed(bool value) {
         _changed = value;
+        if (value) {
+            _oldColors = true;
+        }
+    }
+
+    void oldColors(bool value) {
+        _oldColors = value;
+    }
+
+    bool oldColors() const {
+        return _oldColors;
     }
 
     void clear() {
@@ -90,4 +100,5 @@ public:
 private:
     std::vector<FString> _lines = {""};
     bool _changed = false;
+    bool _oldColors = false;
 };

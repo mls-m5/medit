@@ -1,15 +1,16 @@
 
-#include "colorize.h"
+#include "basichighligting.h"
 #include "span.h"
+#include "views/editor.h"
 #include <string>
 #include <vector>
 
 namespace {
 //! Todo: Extract this so it can be customized
 const auto wordList = std::vector<std::string>{
-    //    "int",   "double", "char", "signed",  "long",    "unsigned",  "void",
-    //    "short", "bool",   "auto", "include", "struct",  "class",     "if",
-    //    "else",  "switch", "case", "public",  "private", "namespace",
+    "int",   "double", "char", "signed",  "long",    "unsigned",  "void",
+    "short", "bool",   "auto", "include", "struct",  "class",     "if",
+    "else",  "switch", "case", "public",  "private", "namespace",
 };
 
 void colorizeWord(span<FChar> line) {
@@ -42,8 +43,6 @@ int charType(const Utf8Char &c) {
     return isalnum(c.front());
 }
 
-} // namespace
-
 void colorize(FString &line) {
     if (line.empty()) {
         return;
@@ -59,12 +58,20 @@ void colorize(FString &line) {
             lastType = type;
         }
     }
-    //    for (auto &c : line) {
-    //        if (c.c == 'a') {
-    //            c.f = 1;
-    //        }
-    //        else {
-    //            c.f = 0;
-    //        }
-    //    }
+}
+
+inline void colorize(Buffer &buffer) {
+    for (size_t i = 0; i < buffer.lines().size(); ++i) {
+        colorize(buffer.lineAt(i));
+    }
+}
+
+} // namespace
+
+bool BasicHighlighting::shouldEnable(filesystem::path) {
+    return true;
+}
+
+void BasicHighlighting::highlight(Editor &editor) {
+    colorize(editor.buffer());
 }
