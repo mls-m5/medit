@@ -63,8 +63,6 @@ core.libs += `pkg-config --libs ncurses` -lstdc++fs
 core.link +=  standardplugins clangplugin
 
 main.src = src/main.cpp
-#   src/**.cpp
-
 main.copy += README.md
 main.link += core
 main.out = medit
@@ -75,7 +73,6 @@ main.out = medit
 src = test/%.cpp
 out = test %
 link = core
-
 dir = bin
 
 includes +=
@@ -97,6 +94,10 @@ utf8char_test.src += #
 bufferkeymap_test.src += #
 
 mode_test.src += #
+
+clang_autocomplete_test.src += #
+clang_autocomplete_test.link += clangplugin
+clang_autocomplete_test.copy = test/res/complete_test1.cpp
 
 
 

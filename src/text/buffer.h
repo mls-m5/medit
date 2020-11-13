@@ -80,6 +80,9 @@ public:
 
     std::string text() const;
     void text(std::string);
+    void text(std::string_view str) {
+        text(std::string{str});
+    }
 
     void text(std::istream &);
     void text(std::ostream &) const;

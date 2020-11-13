@@ -5,7 +5,8 @@ Todo:
 - [x] Show/hide console
 - [x] Resize window
 - [x] Quick-open
-- [ ] Multi-letter vim combinations
+- [x] Multi-letter vim combinations
+  - [ ] Implement a lot of them
 - [ ] Visual mode
 - [ ] Undo/Redo
 - [ ] Ide-tools
