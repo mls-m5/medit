@@ -1,11 +1,6 @@
 #include "keys/bufferkeymap.h"
 #include "mls-unit-test/unittest.h"
 
-//! To be able to print nullptr
-std::ostream &operator<<(std::ostream &s, std::nullptr_t) {
-    return s << static_cast<void *>(nullptr);
-}
-
 TEST_SUIT_BEGIN
 
 TEST_CASE("create") {
@@ -28,7 +23,7 @@ TEST_CASE("no match") {
     auto m = map.match("apa");
 
     ASSERT_EQ(m.first, map.NoMatch);
-    ASSERT_EQ(m.second, nullptr);
+    EXPECT(!m.second);
 }
 
 TEST_CASE("partial match") {
@@ -42,7 +37,7 @@ TEST_CASE("partial match") {
     auto m = map.match("hel");
 
     ASSERT_EQ(m.first, map.PartialMatch);
-    ASSERT_EQ(m.second, nullptr);
+    EXPECT(!m.second);
 }
 
 TEST_CASE("match") {
@@ -56,7 +51,7 @@ TEST_CASE("match") {
     auto m = map.match("hello");
 
     ASSERT_EQ(m.first, map.Match);
-    ASSERT_NE(m.second, nullptr);
+    EXPECT(m.second);
 }
 
 TEST_SUIT_END
