@@ -1,6 +1,7 @@
 
 #include "clang/clanghighlight.h"
 #include "files/extensions.h"
+#include "files/ifile.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
 #include "clang/clangmodel.h"

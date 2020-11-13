@@ -1,6 +1,7 @@
 
 #include "plugin/clangformat.h"
 #include "files/extensions.h"
+#include "files/ifile.h"
 #include "views/editor.h"
 
 void clangFormat(IEnvironment &env) {

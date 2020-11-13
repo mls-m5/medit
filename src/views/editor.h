@@ -1,6 +1,6 @@
 #pragma once
 
-#include "files/ifile.h"
+#include "files/filesystem.h"
 #include "keys/ikeysink.h"
 #include "meditfwd.h"
 #include "modes/imode.h"
@@ -17,40 +17,20 @@ private:
     IHighlight *_highlight = nullptr;
 
 public:
-    Editor(std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>())
-        : _bufferView(std::move(buffer)), _cursor(_bufferView.buffer()) {}
+    Editor(std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>());
     ~Editor() override;
 
-    void file(std::unique_ptr<IFile> file) {
-        _file = std::move(file);
-    }
+    void file(std::unique_ptr<IFile> file);
 
     IFile *file() {
         return _file.get();
     }
 
-    filesystem::path path() {
-        if (_file) {
-            return _file->path();
-        }
-        else {
-            return {};
-        }
-    }
+    filesystem::path path();
 
-    void save() {
-        if (_file) {
-            _file->save(_bufferView.buffer());
-            _bufferView.buffer().changed(false);
-        }
-    }
+    void save();
 
-    void load() {
-        if (_file) {
-            _file->load(_bufferView.buffer());
-            _bufferView.buffer().changed(false);
-        }
-    }
+    void load();
 
     auto &buffer() {
         return _bufferView.buffer();
@@ -81,15 +61,15 @@ public:
         _bufferView.showLines(value);
     }
 
-    bool keyPress(IEnvironment &env) override;
+    bool keyPress(IEnvironment &) override;
 
-    void updateCursor(IScreen &screen) const override;
+    void updateCursor(IScreen &) const override;
 
     void draw(IScreen &) override;
 
     void height(size_t value) override {
         View::height(value);
-        _bufferView.height(value /* - 1*/);
+        _bufferView.height(value);
     }
 
     void width(size_t value) override {
@@ -104,7 +84,7 @@ public:
 
     void y(size_t y) override {
         View::y();
-        _bufferView.y(y /* + 1*/);
+        _bufferView.y(y);
     }
 
     size_t x() const override {
