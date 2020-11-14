@@ -3,6 +3,8 @@
 #include "files/file.h"
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
+#include "plugin/clangformat.h"
+#include "plugin/jsonformat.h"
 #include "screen/iscreen.h"
 #include "syntax/basichighligting.h"
 #include "text/cursorops.h"
@@ -40,6 +42,9 @@ MainWindow::MainWindow(size_t w, size_t h)
 
     _highlighting.push_back(std::make_unique<ClangHighlight>());
     _highlighting.push_back(std::make_unique<BasicHighlighting>());
+
+    _formatting.push_back(std::make_unique<ClangFormat>());
+    _formatting.push_back(std::make_unique<JsonFormat>());
 }
 
 MainWindow::~MainWindow() = default;
@@ -66,6 +71,12 @@ void MainWindow::addCommands() {
         _completeView.currentText(content(range).front());
         _completeView.triggerShow(_editor.bufferView().cursorPosition(cursor),
                                   _env);
+    });
+
+    _env.addCommand("editor.format", [this](auto &&) {
+        for (auto &format : _formatting) {
+            format->format(_editor);
+        }
     });
 }
 

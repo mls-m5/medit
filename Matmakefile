@@ -23,6 +23,7 @@ includes +=
    src
    plugin/include
    plugin/clang/include
+   lib/json.h/include
 
 dir = bin
 
@@ -95,6 +96,9 @@ utf8char_test.src += #
 bufferkeymap_test.src += #
 
 mode_test.src += #
+
+project_test.src += #
+project_test.copy = test/res/.medit.json
 
 clang_autocomplete_test.link += clangplugin
 clang_autocomplete_test.copy = test/res/complete_test1.cpp

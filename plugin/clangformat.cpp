@@ -4,20 +4,21 @@
 #include "files/ifile.h"
 #include "views/editor.h"
 
-void clangFormat(IEnvironment &env) {
-    auto &e = env.editor();
-    auto file = e.file();
+bool ClangFormat::format(Editor &editor) {
+    auto file = editor.file();
     if (!file) {
-        return;
+        return false;
     }
 
     auto path = file->path();
 
     if (!isCpp(path)) {
-        return;
+        return false;
     }
 
-    e.save();
+    editor.save();
     system(("clang-format " + std::string{path} + " -i").c_str());
-    e.load();
+    editor.load();
+
+    return true;
 }

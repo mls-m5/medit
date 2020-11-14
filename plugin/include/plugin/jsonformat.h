@@ -2,7 +2,7 @@
 
 #include "syntax/IFormat.h"
 
-class ClangFormat : public IFormat {
+class JsonFormat : public IFormat {
 public:
     //! @see IFormat
     bool format(Editor &);
