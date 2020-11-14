@@ -21,6 +21,9 @@ public:
     [[nodiscard]] virtual IEnvironment &root() = 0;
     [[nodiscard]] const virtual IEnvironment &root() const = 0;
 
+    [[nodiscard]] virtual Project &project() = 0;
+    [[nodiscard]] virtual Palette &palette() = 0;
+
     virtual void addCommand(std::string,
                             std::function<void(IEnvironment &)>) = 0;
 
@@ -29,8 +32,6 @@ public:
 
     //! Run a single command, returne true on success and false on fail
     virtual bool run(const Command &command) = 0;
-
-    virtual Project &project() = 0;
 
     inline bool run(const CommandBlock &commands) {
         if (commands._command && !run(commands._command)) {

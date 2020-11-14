@@ -1,4 +1,5 @@
 #include "screen/ncursesscreen.h"
+#include "syntax/color.h"
 #include <map>
 #include <ncurses.h>
 
@@ -146,4 +147,25 @@ size_t NCursesScreen::width() const {
 
 size_t NCursesScreen::height() const {
     return static_cast<size_t>(::LINES);
+}
+
+size_t NCursesScreen::addStyle(const Color &fg, const Color &bg) {
+    ++_lastColor;
+
+    ::init_color(_lastColor,
+                 fg.r() * 1000 / 255,
+                 fg.g() * 1000 / 255,
+                 fg.b() * 1000 / 255);
+
+    ++_lastColor;
+
+    ::init_color(_lastColor,
+                 bg.r() * 1000 / 255,
+                 bg.g() * 1000 / 255,
+                 bg.b() * 1000 / 255);
+
+    ++_lastStyle;
+
+    ::init_pair(_lastStyle, _lastColor - 1, _lastColor);
+    return _lastStyle;
 }

@@ -7,8 +7,9 @@
 #include "views/completeview.h"
 #include "views/editor.h"
 #include "views/listview.h"
+#include "views/window.h"
 
-struct MainWindow : public View, public IKeySink {
+struct MainWindow : public Window {
     Editor _editor;
     RootEnvironment _env;
     Editor _console;
@@ -18,6 +19,7 @@ struct MainWindow : public View, public IKeySink {
     size_t _split = 10;
     FString splitString;
     IKeySink *_inputFocus = &_editor;
+    std::unique_ptr<IWindow> _activePopup;
 
     //! Move these
     std::vector<std::unique_ptr<IHighlight>> _highlighting;
@@ -44,6 +46,10 @@ struct MainWindow : public View, public IKeySink {
     void open(filesystem::path path);
 
     void updateHighlighting();
+
+    void showPopup(std::unique_ptr<IWindow> popup);
+
+    void resetFocus();
 
 private:
     void addCommands();

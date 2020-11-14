@@ -65,7 +65,7 @@ core.libs += `pkg-config --libs ncurses` -lstdc++fs
 core.link +=  standardplugins clangplugin
 
 main.src = src/main.cpp
-main.copy += README.md
+main.copy += README.md data/oblivion.json
 main.link += core
 main.out = medit
 
@@ -96,6 +96,8 @@ utf8char_test.src += #
 bufferkeymap_test.src += #
 
 mode_test.src += #
+
+palette_test.src += #
 
 project_test.src += #
 project_test.copy = test/res/.medit.json

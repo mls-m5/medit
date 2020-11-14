@@ -89,4 +89,9 @@ public:
         }
         return false;
     }
+
+    //! @see IEnvironment
+    Palette &palette() override {
+        return root().palette();
+    }
 };

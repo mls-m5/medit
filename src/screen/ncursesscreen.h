@@ -23,4 +23,10 @@ public:
 
 private:
     size_t _tabWidth = 3;
+
+    size_t _lastStyle = 0;
+    size_t _lastColor = 16;
+
+    //! @see IScreen interface
+    size_t addStyle(const Color &fg, const Color &bg);
 };

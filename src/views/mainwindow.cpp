@@ -1,5 +1,6 @@
 
 #include "views/mainwindow.h"
+#include "files/config.h"
 #include "files/file.h"
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
@@ -9,6 +10,7 @@
 #include "syntax/basichighligting.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
+#include "views/messagebox.h"
 #include "clang/clanghighlight.h"
 
 MainWindow::MainWindow(size_t w, size_t h)
@@ -18,6 +20,8 @@ MainWindow::MainWindow(size_t w, size_t h)
     _console.showLines(false);
     _env.console(&_console);
     _env.project(&_project);
+    _env.palette().load(findConfig("data/oblivion.json"));
+
     for (size_t i = 0; i < width(); ++i) {
         splitString.insert(splitString.end(), FChar{'-', 6});
     }
@@ -41,7 +45,7 @@ MainWindow::MainWindow(size_t w, size_t h)
 
     addCommands();
 
-    _highlighting.push_back(std::make_unique<ClangHighlight>());
+    //    _highlighting.push_back(std::make_unique<ClangHighlight>());
     _highlighting.push_back(std::make_unique<BasicHighlighting>());
 
     _formatting.push_back(std::make_unique<ClangFormat>());
@@ -79,6 +83,10 @@ void MainWindow::addCommands() {
             format->format(_editor);
         }
     });
+
+    _env.addCommand("messagebox", [this](auto &&) {
+        showPopup(std::make_unique<MessageBox>());
+    });
 }
 
 void MainWindow::resize(size_t w, size_t h) {
@@ -111,6 +119,12 @@ void MainWindow::resize(size_t w, size_t h) {
 }
 
 void MainWindow::draw(IScreen &screen) {
+    if (_env.palette().update(screen)) {
+        for (auto &highligting : _highlighting) {
+            highligting->update(_env.palette());
+        }
+    }
+
     _editor.draw(screen);
     if (_env.showConsole()) {
         _console.draw(screen);
@@ -122,6 +136,10 @@ void MainWindow::draw(IScreen &screen) {
     }
 
     _completeView.draw(screen);
+
+    if (_activePopup) {
+        _activePopup->draw(screen);
+    }
 }
 
 void MainWindow::updateCursor(IScreen &screen) const {
@@ -135,8 +153,13 @@ bool MainWindow::keyPress(IEnvironment &env) {
             return true; // Otherwise give key events to editor
         }
     }
+
     if (_inputFocus->keyPress(env)) {
         updateHighlighting();
+        if (_activePopup && _activePopup->isClosed()) {
+            _activePopup = nullptr;
+            resetFocus();
+        }
         return true;
     }
     else {
@@ -175,4 +198,13 @@ void MainWindow::updateHighlighting() {
             }
         }
     }
+}
+
+void MainWindow::showPopup(std::unique_ptr<IWindow> popup) {
+    _activePopup = std::move(popup);
+    _inputFocus = _activePopup.get();
+}
+
+void MainWindow::resetFocus() {
+    _inputFocus = &_editor;
 }

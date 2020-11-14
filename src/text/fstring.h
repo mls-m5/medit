@@ -21,6 +21,7 @@ public:
     FString(std::string_view str, FormatType f = {});
     FString(const_iterator begin, const_iterator end);
     FString(const char *str) : FString(std::string_view(str)) {}
+    FString(size_t len, FChar c);
     operator std::string() const;
 
     [[nodiscard]] auto size() const {

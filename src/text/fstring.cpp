@@ -17,6 +17,13 @@ FString::FString(std::string_view str, FormatType f) {
 FString::FString(FString::const_iterator begin, FString::const_iterator end)
     : _content(begin, end) {}
 
+FString::FString(size_t len, FChar value) {
+    _content.resize(len);
+    for (auto &c : _content) {
+        c = value;
+    }
+}
+
 FString FString::operator+(const FString &other) {
     FString str;
     str.reserve(size() + other.size());

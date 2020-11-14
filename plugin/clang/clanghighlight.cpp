@@ -100,3 +100,5 @@ bool ClangHighlight::shouldEnable(filesystem::path path) {
 void ClangHighlight::highlight(Editor &editor) {
     clangAnnotate(editor);
 }
+
+void ClangHighlight::update(const Palette &palette) {}

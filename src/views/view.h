@@ -2,7 +2,7 @@
 
 #include <views/iview.h>
 
-class View : public IView {
+class View : public virtual IView {
 public:
     View() = default;
     View(size_t width, size_t height) : _width(width), _height(height) {}

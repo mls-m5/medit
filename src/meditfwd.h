@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 class IMode;
 class KeyEvent;
 class Buffer;
@@ -19,3 +21,5 @@ class CommandBlock;
 class ClangModel;
 class IHighlight;
 class Project;
+class Color;
+class Palette;

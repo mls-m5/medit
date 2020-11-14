@@ -1,9 +1,15 @@
 
 #include "basichighligting.h"
 #include "span.h"
+#include "syntax/palette.h"
 #include "views/editor.h"
 #include <string>
 #include <vector>
+
+struct BasicHighlighting::Format {
+    FormatType textFormat = 0;
+    FormatType statement = 0;
+};
 
 namespace {
 //! Todo: Extract this so it can be customized
@@ -13,7 +19,7 @@ const auto wordList = std::vector<std::string>{
     "else",  "switch", "case", "public",  "private", "namespace",
 };
 
-void colorizeWord(span<FChar> line) {
+void colorizeWord(span<FChar> line, const BasicHighlighting::Format &f) {
     for (auto &word : wordList) {
         if (word.size() != line.size()) {
             continue;
@@ -29,13 +35,13 @@ void colorizeWord(span<FChar> line) {
 
         if (i == word.size()) {
             for (auto &c : line) {
-                c.f = 1;
+                c.f = f.statement;
             }
             return;
         }
     }
     for (auto &c : line) {
-        c.f = 0;
+        c.f = f.textFormat;
     }
 }
 
@@ -43,7 +49,8 @@ int charType(const Utf8Char &c) {
     return isalnum(c.front());
 }
 
-void colorize(FString &line) {
+} // namespace
+void BasicHighlighting::colorize(FString &line) {
     if (line.empty()) {
         return;
     }
@@ -53,20 +60,23 @@ void colorize(FString &line) {
         int type = charType(line.at(i).c);
 
         if (type != lastType) {
-            colorizeWord(span<FChar>{&line.at(lastWord), &line.at(i)});
+            colorizeWord(span<FChar>{&line.at(lastWord), &line.at(i)},
+                         *_format);
             lastWord = i;
             lastType = type;
         }
     }
 }
 
-inline void colorize(Buffer &buffer) {
+void BasicHighlighting::colorize(Buffer &buffer) {
     for (size_t i = 0; i < buffer.lines().size(); ++i) {
         colorize(buffer.lineAt(i));
     }
 }
 
-} // namespace
+BasicHighlighting::BasicHighlighting() : _format(std::make_unique<Format>()) {}
+
+BasicHighlighting::~BasicHighlighting() = default;
 
 bool BasicHighlighting::shouldEnable(filesystem::path) {
     return true;
@@ -74,4 +84,9 @@ bool BasicHighlighting::shouldEnable(filesystem::path) {
 
 void BasicHighlighting::highlight(Editor &editor) {
     colorize(editor.buffer());
+}
+
+void BasicHighlighting::update(const Palette &palette) {
+    _format->textFormat = palette.getFormat("text");
+    _format->statement = palette.getFormat("def:statement");
 }

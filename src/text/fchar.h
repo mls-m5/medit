@@ -2,7 +2,7 @@
 
 #include "utf8char.h"
 
-using FormatType = int;
+#include "formattype.h"
 
 // A char with format
 class FChar {
