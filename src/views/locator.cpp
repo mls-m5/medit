@@ -2,7 +2,7 @@
 #include "locator.h"
 #include "modes/parentmode.h"
 
-Locator::Locator(IEnvironment &env, ProjectFiles &projectFiles)
+Locator::Locator(IEnvironment &env, Project &projectFiles)
     : _env(&env), _projectFiles(projectFiles) {
     _env.editor(this);
     _list.x(0);

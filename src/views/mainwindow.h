@@ -1,6 +1,6 @@
 #pragma once
 
-#include "files/projectfiles.h"
+#include "files/project.h"
 #include "locator.h"
 #include "script/rootenvironment.h"
 #include "syntax/IFormat.h"
@@ -14,7 +14,7 @@ struct MainWindow : public View, public IKeySink {
     Editor _console;
     Locator _locator;
     CompleteView _completeView;
-    ProjectFiles _project;
+    Project _project;
     size_t _split = 10;
     FString splitString;
     IKeySink *_inputFocus = &_editor;

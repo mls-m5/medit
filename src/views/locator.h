@@ -1,7 +1,7 @@
 #pragma once
 
 #include "files/filesystem.h"
-#include "files/projectfiles.h"
+#include "files/project.h"
 #include "script/environment.h"
 #include "views/editor.h"
 #include "views/listview.h"
@@ -10,9 +10,9 @@ class Locator : public Editor {
 public:
     Environment _env;
     ListView _list;
-    ProjectFiles &_projectFiles;
+    Project &_projectFiles;
 
-    Locator(IEnvironment &env, ProjectFiles &projectFiles);
+    Locator(IEnvironment &env, Project &projectFiles);
     ~Locator() override;
 
     // @see IKeySink

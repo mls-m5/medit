@@ -3,7 +3,7 @@
 #include "filesystem.h"
 #include <vector>
 
-class ProjectFiles {
+class Project {
 
 public:
     struct Settings {

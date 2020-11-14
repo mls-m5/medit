@@ -66,6 +66,10 @@ public:
         return *_parent;
     }
 
+    Project &project() override {
+        return root().project();
+    }
+
     // @see IEnvironment
     void showConsole(bool shown) override {
         root().showConsole(shown);

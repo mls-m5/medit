@@ -18,3 +18,4 @@ class Command;
 class CommandBlock;
 class ClangModel;
 class IHighlight;
+class Project;

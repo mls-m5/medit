@@ -1,5 +1,5 @@
 
-#include "projectfiles.h"
+#include "project.h"
 #include "files/extensions.h"
 #include "json/json.h"
 #include <fstream>
@@ -11,7 +11,7 @@ const std::string_view projectFileName = ".medit.json";
 
 }
 
-filesystem::path ProjectFiles::root(filesystem::path path) const {
+filesystem::path Project::root(filesystem::path path) const {
     path = filesystem::absolute(path);
 
     do {
@@ -36,13 +36,12 @@ filesystem::path ProjectFiles::root(filesystem::path path) const {
     return {};
 }
 
-void ProjectFiles::updateCache(const filesystem::path &pathInProject,
-                               size_t max) {
+void Project::updateCache(const filesystem::path &pathInProject, size_t max) {
     _fileCache = findProjectFiles(pathInProject, max);
     loadProjectFile();
 }
 
-std::vector<filesystem::path> ProjectFiles::findProjectFiles(
+std::vector<filesystem::path> Project::findProjectFiles(
     const filesystem::path &pathInProject, size_t max) {
     auto &root = _settings.root;
     root = this->root(pathInProject);
@@ -68,7 +67,7 @@ std::vector<filesystem::path> ProjectFiles::findProjectFiles(
     return paths;
 }
 
-void ProjectFiles::loadProjectFile() {
+void Project::loadProjectFile() {
     auto projectFile = _settings.root / projectFileName;
     if (!filesystem::exists(projectFile)) {
         return;

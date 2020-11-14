@@ -30,6 +30,8 @@ public:
     //! Run a single command, returne true on success and false on fail
     virtual bool run(const Command &command) = 0;
 
+    virtual Project &project() = 0;
+
     inline bool run(const CommandBlock &commands) {
         if (commands._command && !run(commands._command)) {
             return false;

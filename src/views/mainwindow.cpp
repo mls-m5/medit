@@ -17,6 +17,7 @@ MainWindow::MainWindow(size_t w, size_t h)
     _editor.mode(createNormalMode());
     _console.showLines(false);
     _env.console(&_console);
+    _env.project(&_project);
     for (size_t i = 0; i < width(); ++i) {
         splitString.insert(splitString.end(), FChar{'-', 6});
     }

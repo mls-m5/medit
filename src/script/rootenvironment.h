@@ -1,10 +1,12 @@
 #pragma once
 
 #include "environment.h"
+#include "meditfwd.h"
 
 class RootEnvironment : public Environment {
     KeyEvent _lastKeyEvent;
     Editor *_console;
+    Project *_project;
     bool _showConsole = false;
 
 public:
@@ -47,6 +49,17 @@ public:
 
     const IEnvironment &root() const override {
         return *this;
+    }
+
+    void project(Project *project) {
+        _project = project;
+    }
+
+    Project &project() override {
+        if (!_project) {
+            throw std::runtime_error("no project defined");
+        }
+        return *_project;
     }
 
     void call(std::string value) {

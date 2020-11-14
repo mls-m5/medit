@@ -11,7 +11,7 @@ class Mode : public IMode {
     std::string _name;
     KeyMap _keyMap;
     std::string _commandBuffer;
-    bool _bufferMode = false;
+    //    bool _bufferMode = false;
     //    std::vector<KeyEvent> _bufferTriggers;
     FString _buffer;
     BufferKeyMap _bufferMap;
