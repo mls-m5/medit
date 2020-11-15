@@ -4,6 +4,7 @@
 #include "main.h"
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
+#include "modes/visualmode.h"
 #include "plugin/build.h"
 #include "plugin/clangformat.h"
 #include "plugin/windowcommands.h"
@@ -122,7 +123,13 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
         "editor.erase",
         [](IEnvironment &env) {
             auto &e = env.editor();
-            e.cursor(erase(e.cursor()));
+            auto selection = e.selection();
+            if (selection.empty()) {
+                e.cursor(erase(e.cursor()));
+            }
+            else {
+                e.cursor(erase(selection));
+            }
         },
     },
     {
@@ -161,6 +168,10 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
     {
         "editor.normalmode",
         [](IEnvironment &env) { env.editor().mode(createNormalMode()); },
+    },
+    {
+        "editor.visualmode",
+        [](IEnvironment &env) { env.editor().mode(createVisualMode()); },
     },
     {
         "editor.switch_header",

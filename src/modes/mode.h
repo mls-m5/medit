@@ -16,6 +16,8 @@ class Mode : public IMode {
     FString _buffer;
     BufferKeyMap _bufferMap;
     std::unique_ptr<IMode> _parent;
+    std::function<void(Editor &)> _start;
+    std::function<void(Editor &)> _exit;
 
 public:
     Mode(std::string name,
@@ -24,6 +26,24 @@ public:
          BufferKeyMap bufferMap = {});
 
     bool keyPress(IEnvironment &env) override;
+
+    void startCallback(std::function<void(Editor &)> f) {
+        _start = f;
+    }
+    void exitCallback(std::function<void(Editor &)> f) {
+        _exit = f;
+    }
+
+    void start(Editor &editor) override {
+        if (_start) {
+            _start(editor);
+        }
+    }
+    void exit(Editor &editor) override {
+        if (_exit) {
+            _exit(editor);
+        }
+    }
 
     std::string_view name() override {
         return _name;

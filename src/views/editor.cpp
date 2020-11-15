@@ -51,7 +51,11 @@ Cursor Editor::cursor(Cursor c) {
 }
 
 void Editor::mode(std::unique_ptr<IMode> mode) {
+    if (_mode) {
+        _mode->exit(*this);
+    }
     _mode = move(mode);
+    _mode->start(*this);
 }
 
 bool Editor::keyPress(IEnvironment &env) {

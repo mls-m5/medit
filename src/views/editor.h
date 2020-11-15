@@ -4,14 +4,17 @@
 #include "keys/ikeysink.h"
 #include "meditfwd.h"
 #include "text/cursor.h"
+#include "text/cursorrange.h"
 #include "text/formattype.h"
 #include "views/bufferview.h"
 #include <memory>
+#include <optional>
 
 class Editor : public View, public IKeySink {
 private:
     BufferView _bufferView;
     Cursor _cursor;
+    std::optional<Cursor> _selectionAnchor;
     std::unique_ptr<IMode> _mode;
     std::unique_ptr<IFile> _file;
     FormatType _background;
@@ -45,6 +48,23 @@ public:
     }
 
     Cursor cursor(Cursor c);
+
+    void anchor(Cursor cursor) {
+        _selectionAnchor = {cursor};
+    }
+
+    void clearSelection() {
+        _selectionAnchor = {};
+    }
+
+    CursorRange selection() {
+        if (_selectionAnchor) {
+            return {*_selectionAnchor, _cursor};
+        }
+        else {
+            return {_cursor};
+        }
+    }
 
     void mode(std::unique_ptr<IMode> mode);
 

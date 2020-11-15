@@ -45,6 +45,8 @@ std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
     auto ss = std::istringstream(project.settings().flags);
     auto includes = std::vector<std::string>{};
 
+    //    filesystem::current_path(project.settings().root);
+
     for (std::string s; ss >> s;) {
         includes.push_back(s);
     }

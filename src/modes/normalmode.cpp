@@ -23,7 +23,7 @@ std::unique_ptr<IMode> createNormalMode() {
              {"editor.home\neditor.split\neditor.insertmode\neditor.up\neditor."
               "copyindentation"}},
             {{Key::Backspace}, {"editor.left"}},
-            {{"X"}, {"editor.left"}},
+            {{"X"}, {"editor.erase"}},
             {{Key::Delete}, {"editor.right\neditor.erase"}},
             {{"x"}, {"editor.right\neditor.erase"}},
             {{Key::Escape}, {"editor.escape"}},
@@ -31,6 +31,7 @@ std::unique_ptr<IMode> createNormalMode() {
             {{"\n"}, {"editor.down"}},
             {{Key::Space}, {"editor.right"}},
             {{"i"}, {"editor.insertmode"}},
+            {{"v"}, {"editor.visualmode"}},
             {{"I"}, {"editor.home\neditor.insertmode"}},
             {{"a"}, {"editor.right\neditor.insertmode"}},
             {{"A"}, {"editor.end\neditor.insertmode"}},
