@@ -25,6 +25,10 @@ public:
         return _fileCache;
     }
 
+    //! When in a cpp-file find the corresponding .h-file. And vice versa
+    //! @return path to file if found or empty path if not found
+    filesystem::path findSwitchHeader(filesystem::path);
+
 private:
     std::vector<filesystem::path> _fileCache;
 

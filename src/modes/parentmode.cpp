@@ -5,6 +5,7 @@
 
 std::unique_ptr<IMode> createParentMode() {
     auto map = KeyMap{{
+        {{Key::F4}, {"editor.switch_header"}},
         {KeyEvent{Key::KeyCombination, 'S', Modifiers::Ctrl},
          {"editor.format\neditor.save"}},
         {KeyEvent{Key::KeyCombination, 'B', Modifiers::Ctrl},
@@ -14,6 +15,7 @@ std::unique_ptr<IMode> createParentMode() {
          {"window.show_locator"}},
         {KeyEvent{Key::KeyCombination, ' ', Modifiers::Ctrl},
          {"editor.auto_complete"}},
+
     }};
 
     auto bufferMap = BufferKeyMap{};

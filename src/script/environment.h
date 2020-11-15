@@ -14,6 +14,8 @@ class Environment : public IEnvironment {
 
     Context _context;
 
+    std::map<std::string, Variable> _variables;
+
 public:
     Environment(IEnvironment *parent) : _parent(parent) {
         addStandardCommands(*this);
@@ -94,4 +96,19 @@ public:
     //    IPalette &palette() override {
     //        return root().palette();
     //    }
+
+    //! @see IEnvironment
+    void set(std::string name, Variable variable) override {
+        _variables[name] = variable;
+    }
+
+    //! @see IEnvironment
+    std::optional<Variable> get(std::string name) const override {
+        if (auto f = _variables.find(name); f != _variables.end()) {
+            return {f->second};
+        }
+        else {
+            return {};
+        }
+    }
 };

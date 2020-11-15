@@ -1,5 +1,6 @@
 
 #include "standardcommands.h"
+#include "files/project.h"
 #include "main.h"
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
@@ -159,6 +160,16 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
     {
         "editor.normalmode",
         [](IEnvironment &env) { env.editor().mode(createNormalMode()); },
+    },
+    {
+        "editor.switch_header",
+        [](IEnvironment &env) {
+            auto path = env.project().findSwitchHeader(env.editor().path());
+            if (!path.empty()) {
+                env.set("path", path.string());
+                env.run(CommandBlock{"editor.open"});
+            }
+        },
     },
     {"quit", [](auto &) { quitMedit(); }},
 };

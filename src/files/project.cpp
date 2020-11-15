@@ -41,6 +41,44 @@ void Project::updateCache(const filesystem::path &pathInProject, size_t max) {
     loadProjectFile();
 }
 
+filesystem::path Project::findSwitchHeader(filesystem::path path) {
+    if (path.empty()) {
+        return {};
+    }
+    auto extension = path.extension();
+    if (!isCpp(path)) {
+        return {};
+    }
+
+    bool isHeader = isCppHeader(path);
+
+    auto stem = path.stem();
+
+    //    std::vector<filesystem::path> candidates;
+
+    for (auto &file : _fileCache) {
+        if (file.stem() == stem) {
+            if (file == path) {
+                continue;
+            }
+            if (!isCpp(file)) {
+                continue;
+            }
+            if (isHeader && isCppHeader(file)) {
+                continue;
+            }
+            if (!isHeader && isCppSource(file)) {
+                continue;
+            }
+            //! Todo: If more than one select the nearest one
+            //            candidates.push_back(file);
+            return file;
+        }
+    }
+
+    return {};
+}
+
 std::vector<filesystem::path> Project::findProjectFiles(
     const filesystem::path &pathInProject, size_t max) {
     auto &root = _settings.root;

@@ -84,6 +84,13 @@ void MainWindow::addCommands() {
         }
     });
 
+    _env.addCommand("editor.open", [this](auto &&) {
+        auto path = _env.get("path");
+        if (path) {
+            open(path->value());
+        }
+    });
+
     _env.addCommand("messagebox", [this](auto &&) {
         showPopup(std::make_unique<MessageBox>());
     });

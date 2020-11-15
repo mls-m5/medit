@@ -3,6 +3,7 @@
 #include "keys/keyevent.h"
 #include "meditfwd.h"
 #include "script/command.h"
+#include "script/variable.h"
 #include <functional>
 #include <string>
 
@@ -44,6 +45,9 @@ public:
         }
         return true;
     }
+
+    virtual void set(std::string name, Variable variable) = 0;
+    virtual std::optional<Variable> get(std::string name) const = 0;
 
     IEnvironment() = default;
     IEnvironment(const IEnvironment &) = delete;
