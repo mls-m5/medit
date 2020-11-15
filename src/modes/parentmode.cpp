@@ -5,9 +5,9 @@
 
 std::unique_ptr<IMode> createParentMode() {
     auto map = KeyMap{{
-        {{Key::F4}, {"editor.switch_header"}},
+        {KeyEvent{Key::F4}, {"editor.switch_header"}},
         {KeyEvent{Key::KeyCombination, 'O', Modifiers::Ctrl},
-         {"editor.format\neditor.open"}},
+         {"editor.format\neditor.show_open"}},
         {KeyEvent{Key::KeyCombination, 'S', Modifiers::Ctrl},
          {"editor.format\neditor.save"}},
         {KeyEvent{Key::KeyCombination, 'B', Modifiers::Ctrl},

@@ -96,7 +96,7 @@ void MainWindow::addCommands() {
         showPopup(std::make_unique<MessageBox>());
     });
 
-    _env.addCommand("editor.open", [this](auto &&) {
+    _env.addCommand("editor.show_open", [this](auto &&) {
         auto path = _editor.path();
         if (path.empty()) {
             path = filesystem::current_path();
@@ -208,7 +208,7 @@ void MainWindow::open(filesystem::path path) {
     }
     _editor.file(std::move(file));
     _editor.bufferView().yScroll(0);
-    _editor.mode(createNormalMode());
+    //    _editor.mode(createNormalMode());
     updateLocatorBuffer();
 
     updateHighlighting();

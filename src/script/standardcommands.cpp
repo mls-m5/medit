@@ -7,6 +7,7 @@
 #include "plugin/build.h"
 #include "plugin/clangformat.h"
 #include "plugin/windowcommands.h"
+#include "script/environment.h"
 #include "script/parser.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
@@ -167,7 +168,7 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
             auto path = env.project().findSwitchHeader(env.editor().path());
             if (!path.empty()) {
                 env.set("path", path.string());
-                env.run(CommandBlock{"editor.open"});
+                env.run(parse("editor.open"));
             }
         },
     },
