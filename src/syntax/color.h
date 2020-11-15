@@ -19,6 +19,12 @@ public:
         }
     }
 
+    constexpr Color(unsigned char r,
+                    unsigned char g,
+                    unsigned char b,
+                    bool notSet = false)
+        : _r(r), _g(g), _b(b), _notSet(notSet) {}
+
     constexpr auto r() const {
         return _r;
     }

@@ -6,7 +6,7 @@
 #include <fstream>
 
 struct Palette::Style {
-    Color color;
+    Color color = {255, 255, 255, true};
     Color background;
     //    bool noBackground = true;
     //    bool noForeground = true;
