@@ -27,13 +27,10 @@ std::vector<FString> content(CursorRange range) {
 }
 
 void format(CursorRange range, FormatType format) {
-    //    for (auto it = range.begin(); it < range.end();
-    //         it = right(it)) {
     for (auto it : range) {
         if (it) {
             it->f = format;
         }
-        //        contentPtr(it)->f = format;
     }
 }
 
@@ -81,6 +78,10 @@ bool operator==(CursorRange range, std::string_view str) {
     size_t i = 0;
 
     for (auto c : range) {
+        if (i >= str.size()) {
+            return false;
+            break;
+        }
         if (c == nullptr) {
             if (str.at(i) != '\n') {
                 return false;
@@ -92,9 +93,6 @@ bool operator==(CursorRange range, std::string_view str) {
             }
         }
         ++i;
-        if (i >= str.size()) {
-            break;
-        }
     }
 
     if (i == str.size()) {

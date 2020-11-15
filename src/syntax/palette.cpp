@@ -8,7 +8,8 @@
 struct Palette::Style {
     Color color;
     Color background;
-    bool noBackground = true;
+    //    bool noBackground = true;
+    //    bool noForeground = true;
     FormatType f = 0;
 
     void setProperty(std::string_view name, Color value) {
@@ -17,7 +18,17 @@ struct Palette::Style {
         }
         else if (name == "background") {
             background = value;
-            noBackground = false;
+            //            noBackground = false;
+        }
+    }
+
+    void setStandard(Color fg, Color bg) {
+        if (!color) {
+            color = fg;
+        }
+        if (!background) {
+            background = bg;
+            //            noBackground = false;
         }
     }
 };
@@ -48,16 +59,26 @@ void Palette::load(std::istream &stream) {
         return;
     }
 
+    Style standardStyle;
+
     if (auto f = json.find("style"); f != json.end()) {
         for (auto &style : *f) {
+            auto &s = _styles[style.name];
             for (auto &property : style) {
-                _styles[style.name].setProperty(property.name,
-                                                getColor(property.value));
+                s.setProperty(property.name, getColor(property.value));
+            }
+
+            if (style.name == standardFormatName) {
+                standardStyle = s;
             }
         }
     }
     else {
         return;
+    }
+
+    for (auto &style : _styles) {
+        style.second.setStandard(standardStyle.color, standardStyle.background);
     }
 }
 
@@ -92,6 +113,18 @@ bool Palette::update(IScreen &screen) {
                 screen.addStyle(style.second.color, style.second.background);
         }
         _isChanged = false;
+
+        _basicPalette = IPalette::BasicPalette{
+            .standard = getFormat("text"),
+            .statement = getFormat("def:statement"),
+            .comment = getFormat("def:comment"),
+            .currentLine = getFormat("current-line"),
+            .string = getFormat("def:string"),
+        };
+
+        auto standardStyle = _styles[standardFormatName];
+        screen.addStyle(standardStyle.color, standardStyle.background, 0);
+        screen.addStyle(standardStyle.color, standardStyle.background, 1);
 
         return true;
     }

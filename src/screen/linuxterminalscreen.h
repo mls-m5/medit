@@ -2,6 +2,7 @@
 
 #include "screen/iinput.h"
 #include "screen/iscreen.h"
+#include "syntax/palette.h"
 
 class LinuxTerminalScreen : public IScreen, public IInput {
 public:
@@ -18,6 +19,17 @@ public:
     size_t width() const override;
     size_t height() const override;
 
+    const IPalette &palette() const override {
+        return _palette;
+    }
+
+    IPalette &palette() override {
+        return _palette;
+    }
+
     //! IInput
     KeyEvent getInput() override;
+
+private:
+    Palette _palette;
 };

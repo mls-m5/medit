@@ -1,6 +1,7 @@
 
 #include "locator.h"
 #include "modes/parentmode.h"
+#include "text/buffer.h"
 
 Locator::Locator(IEnvironment &env, Project &projectFiles)
     : _env(&env), _projectFiles(projectFiles) {
@@ -71,8 +72,9 @@ void Locator::updateList() {
             fillLen = maxFillLen - str.size();
         }
 
-        _list.addLine(path.filename().string() + std::string(fillLen, ' ') +
-                          path.string(),
+        _list.addLine(FString{path.filename().string() +
+                                  std::string(fillLen, ' ') + path.string(),
+                              1},
                       path);
     }
 }

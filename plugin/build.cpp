@@ -2,6 +2,7 @@
 #include "plugin/build.h"
 #include "files/popenstream.h"
 #include "files/project.h"
+#include "text/buffer.h"
 #include "views/editor.h"
 
 void build(IEnvironment &env) {
@@ -11,6 +12,8 @@ void build(IEnvironment &env) {
     consoleBuffer.push_back(std::string{"trying to build..."});
 
     auto &project = env.project();
+
+    filesystem::current_path(project.settings().root);
 
     POpenStream stream(project.settings().buildCommand, true);
 

@@ -49,17 +49,17 @@ void init() {
     // init_color seems to take a value from 0 to 1000
     // The first 16 indices are also reserved
     // it could also be good pracice to use ::has_colors()
-    ::init_color(77, 1000, 0, 0);    // Intensive red
-    ::init_color(78, 0, 0, 300);     // Dark blue
-    ::init_color(79, 50, 50, 100);   // Dark blue
-    ::init_color(80, 400, 500, 500); // Gray
-    ::init_pair(1, 77, COLOR_BLACK);
-    //    ::init_pair(1, COLOR_RED, COLOR_BLACK);
-    ::init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    ::init_pair(3, COLOR_CYAN, 78); // Line numbers
-    ::init_pair(4, COLOR_GREEN, COLOR_WHITE);
-    ::init_pair(5, COLOR_WHITE, 79);
-    ::init_pair(6, COLOR_WHITE, 80); // split color
+    //    ::init_color(77, 1000, 0, 0);    // Intensive red
+    //    ::init_color(78, 0, 0, 300);     // Dark blue
+    //    ::init_color(79, 50, 50, 100);   // Dark blue
+    //    ::init_color(80, 400, 500, 500); // Gray
+    //    ::init_pair(1, 77, COLOR_BLACK);
+    //    //    ::init_pair(1, COLOR_RED, COLOR_BLACK);
+    //    ::init_pair(2, COLOR_GREEN, COLOR_BLACK);
+    //    ::init_pair(3, COLOR_CYAN, 78); // Line numbers
+    //    ::init_pair(4, COLOR_GREEN, COLOR_WHITE);
+    //    ::init_pair(5, COLOR_WHITE, 79);
+    //    ::init_pair(6, COLOR_WHITE, 80); // split color
 }
 
 } // namespace
@@ -149,7 +149,7 @@ size_t NCursesScreen::height() const {
     return static_cast<size_t>(::LINES);
 }
 
-size_t NCursesScreen::addStyle(const Color &fg, const Color &bg) {
+size_t NCursesScreen::addStyle(const Color &fg, const Color &bg, size_t index) {
     ++_lastColor;
 
     ::init_color(_lastColor,
@@ -164,8 +164,13 @@ size_t NCursesScreen::addStyle(const Color &fg, const Color &bg) {
                  bg.g() * 1000 / 255,
                  bg.b() * 1000 / 255);
 
-    ++_lastStyle;
-
-    ::init_pair(_lastStyle, _lastColor - 1, _lastColor);
-    return _lastStyle;
+    if (index == std::numeric_limits<size_t>::max()) {
+        ++_lastStyle;
+        ::init_pair(_lastStyle, _lastColor - 1, _lastColor);
+        return _lastStyle;
+    }
+    else {
+        ::init_pair(index, _lastColor - 1, _lastColor);
+        return index;
+    }
 }

@@ -29,7 +29,7 @@ public:
 
     //! Get a line and trigger changed
     auto &lineAt(size_t index) {
-        _changed = true;
+        changed(true);
         return _lines.at(index);
     }
 
@@ -82,11 +82,13 @@ public:
 
     void clear() {
         _lines.clear();
-        _changed = true;
+        changed(true);
     }
 
     Cursor begin();
     Cursor end();
+    FChar front() const;
+    FChar back() const;
 
     std::string text() const;
     void text(std::string);

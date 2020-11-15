@@ -15,6 +15,7 @@ public:
             _r = stoi({&color.at(1), 2});
             _g = stoi({&color.at(3), 2});
             _b = stoi({&color.at(5), 2});
+            _notSet = false;
         }
     }
 
@@ -30,8 +31,13 @@ public:
         return _b;
     }
 
+    constexpr operator bool() const {
+        return !_notSet;
+    }
+
 private:
     unsigned char _r = 0, _g = 0, _b = 0;
+    bool _notSet = true;
 
     static unsigned char stoi(std::string_view str) {
         return ctoi(str.front()) * 16 + ctoi(str.back());

@@ -17,7 +17,7 @@ struct MainWindow : public Window {
     CompleteView _completeView;
     Project _project;
     size_t _split = 10;
-    FString splitString;
+    FString _splitString;
     IKeySink *_inputFocus = &_editor;
     std::unique_ptr<IWindow> _activePopup;
 

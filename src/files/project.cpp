@@ -54,7 +54,7 @@ std::vector<filesystem::path> Project::findProjectFiles(
 
     size_t i = 0;
     for (auto path : filesystem::recursive_directory_iterator(root)) {
-        if (!isCpp(path) && !isJson(path)) {
+        if (!isCpp(path) && !isJson(path) && !isMarkdown(path)) {
             continue;
         }
         paths.push_back(path);

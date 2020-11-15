@@ -8,6 +8,7 @@
 #include "plugin/jsonformat.h"
 #include "screen/iscreen.h"
 #include "syntax/basichighligting.h"
+#include "syntax/ipalette.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "views/messagebox.h"
@@ -20,11 +21,9 @@ MainWindow::MainWindow(IScreen &screen)
     _console.showLines(false);
     _env.console(&_console);
     _env.project(&_project);
-    _env.palette().load(findConfig("data/oblivion.json"));
+    //    _env.palette().load(findConfig("data/oblivion.json"));
+    screen.palette().load(findConfig("data/oblivion.json"));
 
-    for (size_t i = 0; i < width(); ++i) {
-        splitString.insert(splitString.end(), FChar{'-', 6});
-    }
     _locator.mode(createInsertMode());
     _locator.showLines(false);
 
@@ -117,6 +116,8 @@ void MainWindow::resize(size_t w, size_t h) {
     _locator.y(0);
     _locator.width(width());
     _locator.height(1);
+
+    _splitString = FString{width(), FChar{'-', 6}};
 }
 
 void MainWindow::draw(IScreen &screen) {
@@ -125,7 +126,7 @@ void MainWindow::draw(IScreen &screen) {
     _editor.draw(screen);
     if (_env.showConsole()) {
         _console.draw(screen);
-        screen.draw(0, height() - _split, splitString);
+        screen.draw(0, height() - _split, _splitString);
     }
 
     if (_inputFocus == &_locator) {
@@ -185,11 +186,11 @@ void MainWindow::open(filesystem::path path) {
 }
 
 void MainWindow::updatePalette(IScreen &screen) {
-    if (_env.palette().update(screen)) {
+    if (screen.palette().update(screen)) {
         for (auto &highligting : _highlighting) {
-            highligting->update(_env.palette());
+            highligting->update(screen.palette());
         }
-        _editor.updatePalette(_env.palette());
+        _editor.updatePalette(screen.palette());
     }
 }
 

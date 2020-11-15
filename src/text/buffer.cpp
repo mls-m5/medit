@@ -11,6 +11,20 @@ Cursor Buffer::end() {
     return {*this, _lines.back().size(), _lines.size() - 1};
 }
 
+FChar Buffer::front() const {
+    if (_lines.empty() || _lines.front().empty()) {
+        std::out_of_range("buffer is empty when calling front()");
+    }
+    return _lines.front().front();
+}
+
+FChar Buffer::back() const {
+    if (_lines.empty() || _lines.front().empty()) {
+        std::out_of_range("buffer is empty when calling back()");
+    }
+    return _lines.back().back();
+}
+
 std::string Buffer::text() const {
     std::ostringstream ss;
 
@@ -32,8 +46,6 @@ void Buffer::text(std::istream &stream) {
     for (std::string line; getline(stream, line);) {
         _lines.emplace_back(std::move(line));
     }
-
-    //    colorize(*this);
 }
 
 void Buffer::text(std::ostream &stream) const {

@@ -3,8 +3,8 @@
 #include "files/filesystem.h"
 #include "keys/ikeysink.h"
 #include "meditfwd.h"
-#include "modes/imode.h"
 #include "text/cursor.h"
+#include "text/formattype.h"
 #include "views/bufferview.h"
 #include <memory>
 
@@ -40,22 +40,13 @@ public:
         return _bufferView;
     }
 
-    auto cursor() const {
+    Cursor cursor() const {
         return _cursor;
     }
 
-    auto cursor(Cursor c) {
-        _cursor = c;
-        const auto &lines = _bufferView.buffer().lines();
-        if (_cursor.y() > lines.size()) {
-            _cursor.y(lines.size());
-        }
-        fitCursor();
-    }
+    Cursor cursor(Cursor c);
 
-    void mode(std::unique_ptr<IMode> mode) {
-        _mode = move(mode);
-    }
+    void mode(std::unique_ptr<IMode> mode);
 
     void showLines(bool value) {
         _bufferView.showLines(value);
@@ -88,12 +79,12 @@ public:
     }
 
     void x(size_t x) override {
-        View::x();
+        View::x(x);
         _bufferView.x(x);
     }
 
     void y(size_t y) override {
-        View::y();
+        View::y(y);
         _bufferView.y(y);
     }
 

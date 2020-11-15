@@ -2,6 +2,7 @@
 
 #include "screen/iinput.h"
 #include "screen/iscreen.h"
+#include "syntax/palette.h"
 
 class NCursesScreen : public IScreen, public IInput {
 public:
@@ -21,12 +22,22 @@ public:
     size_t width() const override;
     size_t height() const override;
 
+    const IPalette &palette() const override {
+        return _palette;
+    }
+
+    IPalette &palette() override {
+        return _palette;
+    }
+
 private:
+    Palette _palette;
+
     size_t _tabWidth = 3;
 
-    size_t _lastStyle = 0;
+    size_t _lastStyle = 10;
     size_t _lastColor = 16;
 
     //! @see IScreen interface
-    size_t addStyle(const Color &fg, const Color &bg) override;
+    size_t addStyle(const Color &fg, const Color &bg, size_t index) override;
 };

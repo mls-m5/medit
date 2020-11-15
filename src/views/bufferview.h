@@ -1,13 +1,12 @@
 #pragma once
 
 #include "meditfwd.h"
-#include "text/buffer.h"
 #include "views/scrollview.h"
 #include <memory>
 
 class BufferView : public ScrollView {
 public:
-    BufferView(std::unique_ptr<Buffer> buffer) : _buffer(std::move(buffer)) {}
+    BufferView(std::unique_ptr<Buffer> buffer);
     ~BufferView() override;
 
     void draw(IScreen &) override;

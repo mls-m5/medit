@@ -2,6 +2,7 @@
 #include "files/file.h"
 #include "files/filesystem.h"
 #include "mls-unit-test/unittest.h"
+#include "text/buffer.h"
 #include "views/editor.h"
 #include "clang/clanghighlight.h"
 

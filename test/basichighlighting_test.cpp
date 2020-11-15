@@ -21,7 +21,7 @@ TEST_CASE("create") {
     BasicHighlighting hl;
 }
 
-TEST_CASE("format all ") {
+TEST_CASE("format all to default") {
     BasicHighlighting hl;
     Editor editor;
 
@@ -29,7 +29,8 @@ TEST_CASE("format all ") {
 
     MockPalette palette;
 
-    palette.mock_getFormat_const_1.returnValue(4);
+    palette.mock_palette_const_0.returnValue(
+        IPalette::BasicPalette{.standard = 4, .statement = 2});
 
     hl.update(palette);
 
@@ -38,6 +39,45 @@ TEST_CASE("format all ") {
     for (auto c : editor.buffer()) {
         ASSERT_EQ(c->f, 4);
     }
+}
+
+TEST_CASE("format keyword") {
+    BasicHighlighting hl;
+    Editor editor;
+
+    editor.buffer().text("int hello"s);
+
+    MockPalette palette;
+
+    palette.mock_palette_const_0.returnValue(
+        IPalette::BasicPalette{.standard = 1, .statement = 2});
+
+    hl.update(palette);
+
+    hl.highlight(editor);
+
+    ASSERT_EQ(editor.buffer().front().f, 2);
+    ASSERT_EQ(editor.buffer().back().f, 1);
+}
+
+TEST_CASE("partial match") {
+
+    BasicHighlighting hl;
+    Editor editor;
+
+    editor.buffer().text("inte automatic"s);
+
+    MockPalette palette;
+
+    palette.mock_palette_const_0.returnValue(
+        IPalette::BasicPalette{.standard = 1, .statement = 2});
+
+    hl.update(palette);
+
+    hl.highlight(editor);
+
+    ASSERT_EQ(editor.buffer().front().f, 1);
+    ASSERT_EQ(editor.buffer().back().f, 1);
 }
 
 TEST_SUIT_END

@@ -114,9 +114,13 @@ TEST_CASE("operator ==") {
 
     auto res = range == "hello";
     auto res2 = range == "there";
+    auto res3 = range == "hellooo";
+    auto res4 = range == "hell";
 
     ASSERT_EQ(res, true);
     ASSERT_EQ(res2, false);
+    ASSERT_EQ(res3, false);
+    ASSERT_EQ(res4, false);
 }
 
 TEST_SUIT_END

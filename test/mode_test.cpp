@@ -2,6 +2,7 @@
 #include "mls-unit-test/unittest.h"
 #include "mock/script/mockenvironment.h"
 #include "modes/mode.h"
+#include "text/buffer.h"
 #include "views/editor.h"
 
 std::unique_ptr<IMode> createTestMode(bool enableDefaultAction = false) {

@@ -1,11 +1,15 @@
 #include "views/bufferview.h"
 #include "screen/iscreen.h"
+#include "syntax/ipalette.h"
 #include "text/buffer.h"
 #include "text/cursor.h"
 
 BufferView::~BufferView() = default;
 
-void BufferView::draw(IScreen &window) {
+BufferView::BufferView(std::unique_ptr<Buffer> buffer)
+    : _buffer(std::move(buffer)) {}
+
+void BufferView::draw(IScreen &screen) {
     if (!visible()) {
         return;
     }
@@ -15,24 +19,25 @@ void BufferView::draw(IScreen &window) {
         if (l < buffer().lines().size()) {
             auto &line = _buffer->lines().at(l);
 
-            window.draw(x() + _numberWidth, y() + ty, line);
+            screen.draw(x() + _numberWidth, y() + ty, line);
 
             if (_showLines) {
                 const auto lineNum = l + 1;
+                auto lineFormat = screen.palette().palette().lineNumbers;
                 size_t fill = 0;
                 if (lineNum < 10) {
                     fill += 1;
                 }
-                window.draw(
+                screen.draw(
                     x(),
                     y() + ty,
                     {std::string(fill, ' ') + std::to_string(lineNum) + " ",
-                     3});
+                     lineFormat});
                 ++l;
             }
         }
         else {
-            window.draw(0, y() + ty, fillStr);
+            screen.draw(0, y() + ty, fillStr);
         }
     }
 }

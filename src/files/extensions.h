@@ -10,3 +10,7 @@ inline bool isCpp(const filesystem::path &path) {
 inline bool isJson(const filesystem::path &path) {
     return path.extension() == ".json";
 }
+
+inline bool isMarkdown(const filesystem::path &path) {
+    return path.extension() == ".md";
+}

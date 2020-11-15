@@ -2,6 +2,7 @@
 #include "views/listview.h"
 #include "screen/iscreen.h"
 #include "script/ienvironment.h"
+#include "syntax/ipalette.h"
 #include "text/cursor.h"
 
 struct ListView::ListItem {
@@ -26,10 +27,11 @@ void ListView::draw(IScreen &screen) {
     if (!visible()) {
         return;
     }
-    //    size_t ty = yScroll();
 
-    FString fillStr{std::string(width(), ' '), 0};
-    FString selFillStr{std::string(width(), ' '), 4};
+    auto &palette = screen.palette().palette();
+
+    FString fillStr{std::string(width(), ' '), palette.standard};
+    FString selFillStr{std::string(width(), ' '), palette.currentLine};
 
     for (size_t ty = 0, i = yScroll(); ty < height() && i < _lines.size();
          ++i, ++ty) {
@@ -39,7 +41,10 @@ void ListView::draw(IScreen &screen) {
         }
         if (i == _current) {
             screen.draw(x(), y() + ty, selFillStr);
-            screen.draw(x(), y() + ty, {std::string{l.text}, 1});
+            screen.draw(
+                x(),
+                y() + ty,
+                {std::string{l.text}, screen.palette().palette().currentLine});
         }
         else {
             screen.draw(x(), y() + ty, fillStr);

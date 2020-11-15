@@ -1,6 +1,7 @@
 
 #include "plugin/jsonformat.h"
 #include "files/extensions.h"
+#include "text/buffer.h"
 #include "views/editor.h"
 #include "json/json.h"
 

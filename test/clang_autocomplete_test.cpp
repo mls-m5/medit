@@ -2,6 +2,7 @@
 #include "files/file.h"
 #include "mls-unit-test/unittest.h"
 #include "mock/script/mockenvironment.h"
+#include "text/buffer.h"
 #include "text/cursorops.h"
 #include "views/editor.h"
 #include "clang/clangcompletion.h"

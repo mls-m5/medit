@@ -40,6 +40,20 @@ void Editor::load() {
     }
 }
 
+Cursor Editor::cursor(Cursor c) {
+    _cursor = c;
+    const auto &lines = _bufferView.buffer().lines();
+    if (_cursor.y() > lines.size()) {
+        _cursor.y(lines.size());
+    }
+    fitCursor();
+    return _cursor;
+}
+
+void Editor::mode(std::unique_ptr<IMode> mode) {
+    _mode = move(mode);
+}
+
 bool Editor::keyPress(IEnvironment &env) {
     if (_mode) {
         return _mode->keyPress(env);
@@ -65,7 +79,7 @@ void Editor::updateCursor(IScreen &screen) const {
 }
 
 void Editor::updatePalette(const IPalette &palette) {
-    _background = palette.getFormat("text");
+    _background = palette.getFormat(standardFormatName);
 }
 
 void Editor::draw(IScreen &screen) {

@@ -8,11 +8,6 @@
 #include <string>
 #include <vector>
 
-struct BasicHighlighting::Format {
-    FormatType textFormat = 0;
-    FormatType statement = 0;
-};
-
 namespace {
 //! Todo: Extract this so it can be customized
 const auto wordList = std::vector<std::string>{
@@ -21,9 +16,10 @@ const auto wordList = std::vector<std::string>{
     "else",  "switch", "case", "public",  "private", "namespace",
 };
 
-void highlightWord(CursorRange word) {
+void highlightWord(CursorRange word, const IPalette::BasicPalette &palette) {
     for (auto &w : wordList) {
         if (word == w) {
+            ::format(word, palette.statement);
             break;
         }
     }
@@ -31,10 +27,20 @@ void highlightWord(CursorRange word) {
 
 } // namespace
 
-void BasicHighlighting::colorize(Buffer &buffer) {
+BasicHighlighting::BasicHighlighting() = default;
+
+BasicHighlighting::~BasicHighlighting() = default;
+
+bool BasicHighlighting::shouldEnable(filesystem::path) {
+    return true;
+}
+
+void BasicHighlighting::highlight(Editor &editor) {
+    auto &buffer = editor.buffer();
+
     for (auto c : buffer) {
         if (c) {
-            c->f = _format->textFormat;
+            c->f = _palette.standard;
         }
     }
 
@@ -44,23 +50,33 @@ void BasicHighlighting::colorize(Buffer &buffer) {
 
         auto range = CursorRange{b, right(c)};
 
-        highlightWord(range);
+        highlightWord(range, _palette);
+    }
+
+    for (size_t i = 0; i < buffer.lines().size(); ++i) {
+        auto &line = buffer.lineAt(i);
+        for (size_t i = 1; i < line.size(); ++i) {
+
+            if (line.at(i - 1).c == '/' && line.at(i).c == '/') {
+                --i;
+                for (; i < line.size(); ++i) {
+                    auto &c = line.at(i);
+                    c.f = _palette.comment;
+                }
+                break;
+            }
+        }
+        //        if (line.size() >= 2) {
+
+        //            if (line.at(0).c == '/' && line.at(1).c == '/') {
+        //                for (auto &c : line) {
+        //                    c.f = _palette.comment;
+        //                }
+        //            }
+        //        }
     }
 }
 
-BasicHighlighting::BasicHighlighting() : _format(std::make_unique<Format>()) {}
-
-BasicHighlighting::~BasicHighlighting() = default;
-
-bool BasicHighlighting::shouldEnable(filesystem::path) {
-    return true;
-}
-
-void BasicHighlighting::highlight(Editor &editor) {
-    colorize(editor.buffer());
-}
-
 void BasicHighlighting::update(const IPalette &palette) {
-    _format->textFormat = palette.getFormat("text");
-    _format->statement = palette.getFormat("def:statement");
+    _palette = palette.palette();
 }

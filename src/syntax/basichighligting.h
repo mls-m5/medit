@@ -1,6 +1,7 @@
 #pragma once
 
 #include "syntax/ihighlight.h"
+#include "syntax/ipalette.h"
 #include "text/buffer.h"
 #include <memory>
 
@@ -17,7 +18,5 @@ public:
     void update(const IPalette &palette) override;
 
 private:
-    void colorize(Buffer &buffer);
-
-    std::unique_ptr<Format> _format;
+    IPalette::BasicPalette _palette;
 };

@@ -1,6 +1,7 @@
 #include "clang/clangcompletion.h"
 #include "files/ifile.h"
 #include "script/ienvironment.h"
+#include "text/buffer.h"
 #include "views/editor.h"
 #include "clang/clangmodel.h"
 #include <clang-c/Index.h>

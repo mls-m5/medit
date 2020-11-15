@@ -2,14 +2,14 @@
 
 #include "environment.h"
 #include "meditfwd.h"
-#include "syntax/palette.h"
+//#include "syntax/palette.h"
 
 class RootEnvironment : public Environment {
     KeyEvent _lastKeyEvent;
     Editor *_console;
     Project *_project;
     bool _showConsole = false;
-    Palette _palette;
+    //    Palette _palette;
 
 public:
     RootEnvironment() : Environment(nullptr) {}
@@ -58,9 +58,9 @@ public:
     }
 
     //! @see IEnvironment
-    Palette &palette() override {
-        return _palette;
-    }
+    //    Palette &palette() override {
+    //        return _palette;
+    //    }
 
     Project &project() override {
         if (!_project) {
