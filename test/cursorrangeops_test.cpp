@@ -105,7 +105,7 @@ TEST_CASE("format range") {
         }
     }
 
-    ASSERT_EQ(buffer.begin()->f, 0);
+    ASSERT_EQ(buffer.begin()->f, 1);
 }
 
 TEST_CASE("operator ==") {

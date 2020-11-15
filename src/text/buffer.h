@@ -82,6 +82,7 @@ public:
 
     void clear() {
         _lines.clear();
+        _lines.push_back({});
         changed(true);
     }
 

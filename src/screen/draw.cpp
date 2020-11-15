@@ -1,5 +1,6 @@
 #include "screen/draw.h"
 #include "screen/iscreen.h"
+#include "views/iview.h"
 
 void fillRect(IScreen &screen,
               const FChar &fill,
@@ -12,4 +13,12 @@ void fillRect(IScreen &screen,
     for (size_t i = 0; i < height; ++i) {
         screen.draw(x, y + i, str);
     }
+}
+
+void fillRect(IScreen &screen, const FChar &c, const IView &view) {
+    fillRect(screen, c, view.x(), view.y(), view.width(), view.height());
+}
+
+void draw(IScreen &screen, size_t x, size_t y, const FString &str) {
+    screen.draw(x, y, str);
 }

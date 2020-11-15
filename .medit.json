@@ -1,3 +1,4 @@
 {
-    "build": "matmake"
+    "build": "matmake",
+    "flags": "-Isrc -Iinclude -Iplugin/include -Iplugin/clang/include -Ilib/json.h/include"
 }

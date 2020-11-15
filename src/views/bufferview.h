@@ -33,6 +33,6 @@ public:
 private:
     std::unique_ptr<Buffer> _buffer;
 
-    bool _showLines = true;
+    bool _showLines = false;
     size_t _numberWidth = 3;
 };

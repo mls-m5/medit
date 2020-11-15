@@ -5,6 +5,7 @@
 class IMode;
 class KeyEvent;
 class Buffer;
+class FString;
 class FChar;
 class Position;
 class Cursor;

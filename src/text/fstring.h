@@ -17,10 +17,11 @@ public:
     FString &operator=(FString &&) = default;
 
     // Convert from a standard string to a fstring
-    FString(const std::string &str, FormatType f = {});
-    FString(std::string_view str, FormatType f = {});
+    FString(const std::string &str, FormatType f = 1);
+    FString(std::string_view str, FormatType f = 1);
     FString(const_iterator begin, const_iterator end);
-    FString(const char *str) : FString(std::string_view(str)) {}
+    FString(const char *str, FormatType f = 1)
+        : FString(std::string_view(str), f) {}
     FString(size_t len, FChar c);
     operator std::string() const;
 
@@ -111,8 +112,4 @@ public:
     }
 
     FString operator+(const FString &other);
-
-    friend bool operator<(const FString &a, const FString &b) {
-        return true;
-    }
 };

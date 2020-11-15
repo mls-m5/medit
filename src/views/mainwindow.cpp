@@ -11,6 +11,7 @@
 #include "syntax/ipalette.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
+#include "views/inputbox.h"
 #include "views/messagebox.h"
 #include "clang/clanghighlight.h"
 
@@ -18,10 +19,10 @@ MainWindow::MainWindow(IScreen &screen)
     : View(screen.width(), screen.height()), _locator(_env, _project) {
     _env.editor(&_editor);
     _editor.mode(createNormalMode());
+    _editor.showLines(true);
     _console.showLines(false);
     _env.console(&_console);
     _env.project(&_project);
-    //    _env.palette().load(findConfig("data/oblivion.json"));
     screen.palette().load(findConfig("data/oblivion.json"));
 
     _locator.mode(createInsertMode());
@@ -93,6 +94,17 @@ void MainWindow::addCommands() {
 
     _env.addCommand("messagebox", [this](auto &&) {
         showPopup(std::make_unique<MessageBox>());
+    });
+
+    _env.addCommand("editor.open", [this](auto &&) {
+        auto path = _editor.path();
+        if (path.empty()) {
+            path = filesystem::current_path();
+        }
+        auto input =
+            std::make_unique<InputBox>("Path to open: ", path.string());
+        input->callback([this](std::string value) { open(value); });
+        showPopup(std::move(input));
     });
 }
 
@@ -182,9 +194,18 @@ void MainWindow::updateLocatorBuffer() {
 }
 
 void MainWindow::open(filesystem::path path) {
+    if (path.empty()) {
+        return;
+    }
+    path = filesystem::absolute(path);
     auto file = std::make_unique<File>(path);
     _editor.cursor(Cursor{_editor.buffer()});
-    file->load(_editor.buffer());
+    if (filesystem::exists(path)) {
+        file->load(_editor.buffer());
+    }
+    else {
+        _editor.buffer().clear();
+    }
     _editor.file(std::move(file));
     _editor.bufferView().yScroll(0);
     updateLocatorBuffer();
