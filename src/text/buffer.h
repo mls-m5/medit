@@ -27,6 +27,10 @@ public:
         return _lines;
     }
 
+    [[nodiscard]] bool empty() const {
+        return _lines.empty() || (_lines.size() == 0 && _lines.front().empty());
+    }
+
     //! Get a line and trigger changed
     auto &lineAt(size_t index) {
         changed(true);

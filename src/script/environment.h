@@ -61,7 +61,7 @@ public:
 
     // @see IEnvironment
     IEnvironment &parent() override {
-        if (_parent) {
+        if (!_parent) {
             throw std::runtime_error(
                 "trying to access unset parent in enviroment");
         }
@@ -89,7 +89,12 @@ public:
             action->second(*this);
             return true;
         }
-        return false;
+        if (_parent) {
+            return parent().run(command);
+        }
+        else {
+            return false;
+        }
     }
 
     //! @see IEnvironment
@@ -108,6 +113,9 @@ public:
             return {f->second};
         }
         else {
+            if (_parent) {
+                return _parent->get(std::move(name));
+            }
             return {};
         }
     }

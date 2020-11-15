@@ -1,10 +1,12 @@
 #include "clang/clangcompletion.h"
 #include "files/ifile.h"
+#include "files/project.h"
 #include "script/ienvironment.h"
 #include "text/buffer.h"
 #include "views/editor.h"
 #include "clang/clangmodel.h"
 #include <clang-c/Index.h>
+#include <fstream>
 
 namespace {
 
@@ -29,21 +31,44 @@ std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
     auto buffer = env.editor().buffer();
 
     auto locationString = path.string();
+    std::string tmpPath = locationString;
 
-    const char *args[2] = {"-std=c++17", "-Iinclude"};
+    if (buffer.changed()) {
+        tmpPath = "/tmp/comp_file_aoesutnhaoe.cpp";
+        std::ofstream file(tmpPath);
+        buffer.text(file);
+
+        locationString = tmpPath;
+    }
+
+    auto &project = env.project();
+    auto ss = std::istringstream(project.settings().flags);
+    auto includes = std::vector<std::string>{};
+
+    for (std::string s; ss >> s;) {
+        includes.push_back(s);
+    }
+
+    auto args = std::vector<const char *>{};
+    for (auto &i : includes) {
+        args.push_back(i.c_str());
+    }
+
+    //    const char *args[2] = {"-std=c++17", "-Iinclude"};
 
     auto unsavedFile = UnsavedFile{buffer.text(), locationString};
 
     auto translationUnit = clang_parseTranslationUnit(_model->index,
                                                       locationString.c_str(),
-                                                      args,
-                                                      2,
+                                                      // tmpPath.c_str(),
+                                                      args.data(),
+                                                      args.size(),
                                                       &unsavedFile.clangFile,
                                                       1,
                                                       0);
 
     auto result = clang_codeCompleteAt(translationUnit,
-                                       locationString.c_str(),
+                                       tmpPath.c_str(),
                                        cursor.y() + 1,
                                        cursor.x() + 1,
                                        &unsavedFile.clangFile,

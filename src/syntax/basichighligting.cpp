@@ -38,6 +38,10 @@ bool BasicHighlighting::shouldEnable(filesystem::path) {
 void BasicHighlighting::highlight(Editor &editor) {
     auto &buffer = editor.buffer();
 
+    if (buffer.empty()) {
+        return;
+    }
+
     for (auto c : buffer) {
         if (c) {
             c->f = _palette.standard;

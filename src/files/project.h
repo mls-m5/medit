@@ -9,6 +9,7 @@ public:
     struct Settings {
         filesystem::path root;
         std::string buildCommand;
+        std::string flags;
         std::string formatCommand;
     };
 

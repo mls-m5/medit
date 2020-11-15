@@ -122,4 +122,8 @@ void Project::loadProjectFile() {
     if (it != json.end()) {
         _settings.buildCommand = it->value;
     }
+
+    if (auto it = json.find("flags"); it != json.end()) {
+        _settings.flags = it->value;
+    }
 }
