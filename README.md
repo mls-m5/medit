@@ -10,6 +10,7 @@ Todo:
 - [ ] Visual mode
 - [ ] Undo/Redo
 - [ ] Buffered screen output
+- [ ] Delayed syntax highlighting
 - [x] Save files
 - [ ] Ide-tools
   - [x] Switch headers/source
