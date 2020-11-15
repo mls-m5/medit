@@ -2,7 +2,9 @@
 #include "files/file.h"
 #include "keys/keyevent.h"
 #include "modes/imode.h"
+#include "screen/draw.h"
 #include "screen/iscreen.h"
+#include "syntax/palette.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
 
@@ -48,6 +50,7 @@ bool Editor::keyPress(IEnvironment &env) {
 
 void Editor::updateCursor(IScreen &screen) const {
     constexpr auto debug = true;
+
     if (debug) {
         screen.draw(1,
                     screen.height() - 1,
@@ -61,7 +64,13 @@ void Editor::updateCursor(IScreen &screen) const {
                   _bufferView.y() + _cursor.y() - _bufferView.yScroll());
 }
 
+void Editor::updatePalette(const IPalette &palette) {
+    _background = palette.getFormat("text");
+}
+
 void Editor::draw(IScreen &screen) {
+    fillRect(screen, {' ', _background}, x(), y(), width(), height());
+
     _bufferView.draw(screen);
 }
 

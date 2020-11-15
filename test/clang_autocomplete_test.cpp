@@ -1,7 +1,7 @@
 
 #include "files/file.h"
 #include "mls-unit-test/unittest.h"
-#include "mock/script/mockienvironment.h"
+#include "mock/script/mockenvironment.h"
 #include "text/cursorops.h"
 #include "views/editor.h"
 #include "clang/clangcompletion.h"
@@ -19,7 +19,7 @@ TEST_CASE("create") {
 TEST_CASE("simple complete") {
     auto completion = std::make_unique<ClangCompletion>();
     auto editor = Editor();
-    auto env = MockIEnvironment();
+    auto env = MockEnvironment();
     env.mock_editor_0.returnValueRef(editor);
 
     editor.file(std::make_unique<File>(testPath1));

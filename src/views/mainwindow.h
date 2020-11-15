@@ -25,7 +25,7 @@ struct MainWindow : public Window {
     std::vector<std::unique_ptr<IHighlight>> _highlighting;
     std::vector<std::unique_ptr<IFormat>> _formatting;
 
-    MainWindow(size_t w, size_t h);
+    MainWindow(IScreen &screen);
 
     ~MainWindow() override;
 
@@ -45,6 +45,10 @@ struct MainWindow : public Window {
 
     void open(filesystem::path path);
 
+    //! Initialize palette colors
+    void updatePalette(IScreen &screen);
+
+    //! Update all editors with new highlighting
     void updateHighlighting();
 
     void showPopup(std::unique_ptr<IWindow> popup);

@@ -101,4 +101,4 @@ void ClangHighlight::highlight(Editor &editor) {
     clangAnnotate(editor);
 }
 
-void ClangHighlight::update(const Palette &palette) {}
+void ClangHighlight::update(const IPalette &palette) {}

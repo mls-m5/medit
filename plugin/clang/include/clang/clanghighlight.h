@@ -13,5 +13,5 @@ public:
 
     // IHighlight interface
 public:
-    void update(const Palette &palette);
+    void update(const IPalette &palette);
 };

@@ -3,7 +3,7 @@
 #include "mls-unit-test/mock.h"
 #include "script/ienvironment.h"
 
-class MockIEnvironment : public IEnvironment {
+class MockEnvironment : public IEnvironment {
 public:
     MOCK_METHOD0(Editor &, editor, (), override);
     MOCK_METHOD0(Editor &, console, (), override);
@@ -11,7 +11,7 @@ public:
     MOCK_METHOD0(IEnvironment &, parent, (), override);
     MOCK_METHOD0(IEnvironment &, root, (), override);
     MOCK_METHOD0(Project &, project, (), override);
-    MOCK_METHOD0(Palette &, palette, (), override);
+    MOCK_METHOD0(IPalette &, palette, (), override);
     MOCK_CONST_METHOD0(IEnvironment &, root, (), override);
     MOCK_METHOD2(void,
                  addCommand,

@@ -108,4 +108,15 @@ TEST_CASE("format range") {
     ASSERT_EQ(buffer.begin()->f, 0);
 }
 
+TEST_CASE("operator ==") {
+    auto buffer = Buffer{"hello"sv};
+    auto range = CursorRange{buffer.begin(), buffer.end()};
+
+    auto res = range == "hello";
+    auto res2 = range == "there";
+
+    ASSERT_EQ(res, true);
+    ASSERT_EQ(res2, false);
+}
+
 TEST_SUIT_END

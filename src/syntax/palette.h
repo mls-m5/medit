@@ -2,22 +2,22 @@
 
 #include "files/filesystem.h"
 #include "meditfwd.h"
+#include "syntax/ipalette.h"
 #include "text/formattype.h"
 #include <iosfwd>
 #include <map>
 
-class Palette {
+class Palette : public IPalette {
     struct Style;
 
     bool _isChanged = true;
 
-public:
-    Palette();
-    ~Palette();
     std::map<std::string, Color> _palette;
     std::map<std::string, Style> _styles;
 
-    FormatType getFormat(std::string name) const;
+public:
+    Palette();
+    ~Palette();
 
     void load(std::istream &stream);
     void load(filesystem::path);
@@ -27,6 +27,7 @@ public:
         return stream;
     }
 
+    FormatType getFormat(std::string name) const;
     Color getColor(std::string_view name) const;
     Color getStyleColor(std::string_view name) const;
 

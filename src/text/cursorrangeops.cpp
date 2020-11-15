@@ -65,3 +65,42 @@ Cursor erase(CursorRange range) {
 
     return range.begin();
 }
+
+bool operator==(CursorRange range, std::string_view str) {
+    // Only for non utf-8 chars for now
+
+    if (str.empty()) {
+        if (range.empty()) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    size_t i = 0;
+
+    for (auto c : range) {
+        if (c == nullptr) {
+            if (str.at(i) != '\n') {
+                return false;
+            }
+        }
+        else {
+            if (c->c.at(0) != str.at(i)) {
+                return false;
+            }
+        }
+        ++i;
+        if (i >= str.size()) {
+            break;
+        }
+    }
+
+    if (i == str.size()) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}

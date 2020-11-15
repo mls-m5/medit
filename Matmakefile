@@ -108,5 +108,6 @@ clang_autocomplete_test.copy = test/res/complete_test1.cpp
 clang_annotation_test.link += clangplugin
 clang_autocomplete_test.copy = test/res/annotation_test1.cpp
 
+basichighlighting_test.src += #
 
 

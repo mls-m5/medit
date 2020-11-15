@@ -28,5 +28,5 @@ private:
     size_t _lastColor = 16;
 
     //! @see IScreen interface
-    size_t addStyle(const Color &fg, const Color &bg);
+    size_t addStyle(const Color &fg, const Color &bg) override;
 };

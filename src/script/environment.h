@@ -91,7 +91,7 @@ public:
     }
 
     //! @see IEnvironment
-    Palette &palette() override {
+    IPalette &palette() override {
         return root().palette();
     }
 };

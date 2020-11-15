@@ -10,13 +10,13 @@ public:
 
     BasicHighlighting();
     ~BasicHighlighting();
+
     // @see IHighlight
     bool shouldEnable(filesystem::path) override;
     void highlight(Editor &) override;
-    void update(const Palette &palette) override;
+    void update(const IPalette &palette) override;
 
 private:
-    void colorize(FString &line);
     void colorize(Buffer &buffer);
 
     std::unique_ptr<Format> _format;

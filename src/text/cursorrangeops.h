@@ -9,3 +9,5 @@ std::vector<FString> content(CursorRange range);
 Cursor erase(CursorRange range);
 
 void format(CursorRange, FormatType);
+
+bool operator==(CursorRange, std::string_view);

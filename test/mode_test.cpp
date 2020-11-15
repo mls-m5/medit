@@ -1,6 +1,6 @@
 #include "keys/bufferkeymap.h"
 #include "mls-unit-test/unittest.h"
-#include "mock/script/mockienvironment.h"
+#include "mock/script/mockenvironment.h"
 #include "modes/mode.h"
 #include "views/editor.h"
 
@@ -29,7 +29,7 @@ TEST_CASE("create mode") {
 
 TEST_CASE("match keypress") {
     auto mode = createTestMode();
-    auto env = MockIEnvironment();
+    auto env = MockEnvironment();
     auto editor = Editor{};
 
     env.mock_editor_0.returnValueRef(editor);
@@ -51,7 +51,7 @@ TEST_CASE("match keypress") {
 
 TEST_CASE("default action") {
     auto mode = createTestMode(true);
-    auto env = MockIEnvironment();
+    auto env = MockEnvironment();
     auto editor = Editor{};
 
     env.mock_run_1.returnValue(true);
@@ -64,7 +64,7 @@ TEST_CASE("default action") {
 
 TEST_CASE("buffered keypress") {
     auto mode = createTestMode();
-    auto env = MockIEnvironment{};
+    auto env = MockEnvironment{};
     auto editor = Editor{};
 
     env.mock_editor_0.returnValueRef(editor);

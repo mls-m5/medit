@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
     input = ns.get();
     screen = std::move(ns);
 
-    MainWindow mainWindow(screen->width(), screen->height());
+    MainWindow mainWindow(*screen);
 
     if (argc > 1) {
         mainWindow.open(argv[1]);

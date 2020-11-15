@@ -2,6 +2,8 @@
 #include "basichighligting.h"
 #include "span.h"
 #include "syntax/palette.h"
+#include "text/cursorops.h"
+#include "text/cursorrangeops.h"
 #include "views/editor.h"
 #include <string>
 #include <vector>
@@ -19,58 +21,30 @@ const auto wordList = std::vector<std::string>{
     "else",  "switch", "case", "public",  "private", "namespace",
 };
 
-void colorizeWord(span<FChar> line, const BasicHighlighting::Format &f) {
-    for (auto &word : wordList) {
-        if (word.size() != line.size()) {
-            continue;
-        }
-
-        size_t i = 0;
-
-        for (; i < line.size() && i < word.size(); ++i) {
-            if (!((line.begin() + i)->c == word.at(i))) {
-                break;
-            }
-        }
-
-        if (i == word.size()) {
-            for (auto &c : line) {
-                c.f = f.statement;
-            }
-            return;
+void highlightWord(CursorRange word) {
+    for (auto &w : wordList) {
+        if (word == w) {
+            break;
         }
     }
-    for (auto &c : line) {
-        c.f = f.textFormat;
-    }
-}
-
-int charType(const Utf8Char &c) {
-    return isalnum(c.front());
 }
 
 } // namespace
-void BasicHighlighting::colorize(FString &line) {
-    if (line.empty()) {
-        return;
-    }
-    size_t lastWord = 0;
-    int lastType = charType(line.at(0).c);
-    for (size_t i = 1; i < line.size(); ++i) {
-        int type = charType(line.at(i).c);
-
-        if (type != lastType) {
-            colorizeWord(span<FChar>{&line.at(lastWord), &line.at(i)},
-                         *_format);
-            lastWord = i;
-            lastType = type;
-        }
-    }
-}
 
 void BasicHighlighting::colorize(Buffer &buffer) {
-    for (size_t i = 0; i < buffer.lines().size(); ++i) {
-        colorize(buffer.lineAt(i));
+    for (auto c : buffer) {
+        if (c) {
+            c->f = _format->textFormat;
+        }
+    }
+
+    for (auto c = wordEnd(buffer.begin()); c < buffer.end();
+         c = wordEnd(right(c))) {
+        auto b = wordBegin(c);
+
+        auto range = CursorRange{b, right(c)};
+
+        highlightWord(range);
     }
 }
 
@@ -86,7 +60,7 @@ void BasicHighlighting::highlight(Editor &editor) {
     colorize(editor.buffer());
 }
 
-void BasicHighlighting::update(const Palette &palette) {
+void BasicHighlighting::update(const IPalette &palette) {
     _format->textFormat = palette.getFormat("text");
     _format->statement = palette.getFormat("def:statement");
 }

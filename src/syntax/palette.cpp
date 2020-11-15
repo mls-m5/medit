@@ -8,6 +8,7 @@
 struct Palette::Style {
     Color color;
     Color background;
+    bool noBackground = true;
     FormatType f = 0;
 
     void setProperty(std::string_view name, Color value) {
@@ -16,6 +17,7 @@ struct Palette::Style {
         }
         else if (name == "background") {
             background = value;
+            noBackground = false;
         }
     }
 };

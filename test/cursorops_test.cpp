@@ -264,4 +264,5 @@ TEST_CASE("goto end of word") {
         ASSERT_EQ(c.y(), 1);
     }
 }
+
 TEST_SUIT_END

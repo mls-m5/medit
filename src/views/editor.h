@@ -14,7 +14,7 @@ private:
     Cursor _cursor;
     std::unique_ptr<IMode> _mode;
     std::unique_ptr<IFile> _file;
-    //    IHighlight *_highlight = nullptr;
+    FormatType _background;
 
 public:
     Editor(std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>());
@@ -65,6 +65,8 @@ public:
 
     void updateCursor(IScreen &) const override;
 
+    void updatePalette(const IPalette &palette);
+
     void draw(IScreen &) override;
 
     void height(size_t value) override {
@@ -75,6 +77,14 @@ public:
     void width(size_t value) override {
         View::width(value);
         _bufferView.width(value);
+    }
+
+    size_t width() const override {
+        return View::width();
+    }
+
+    size_t height() const override {
+        return View::height();
     }
 
     void x(size_t x) override {

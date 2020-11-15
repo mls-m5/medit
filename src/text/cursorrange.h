@@ -62,6 +62,10 @@ public:
         fixOrder();
     }
 
+    constexpr bool empty() const {
+        return _begin == _end;
+    }
+
     constexpr Buffer &buffer() {
         return *_buffer;
     }

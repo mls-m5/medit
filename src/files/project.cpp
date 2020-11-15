@@ -74,7 +74,11 @@ void Project::loadProjectFile() {
     }
 
     auto json = Json{};
-    std::fstream(projectFile) >> json;
+    try {
+        std::fstream(projectFile) >> json;
+    }
+    catch (Json::ParsingError &) {
+    }
 
     auto it = json.find("build");
     if (it != json.end()) {

@@ -13,8 +13,8 @@
 #include "views/messagebox.h"
 #include "clang/clanghighlight.h"
 
-MainWindow::MainWindow(size_t w, size_t h)
-    : View(w, h), _locator(_env, _project) {
+MainWindow::MainWindow(IScreen &screen)
+    : View(screen.width(), screen.height()), _locator(_env, _project) {
     _env.editor(&_editor);
     _editor.mode(createNormalMode());
     _console.showLines(false);
@@ -47,6 +47,7 @@ MainWindow::MainWindow(size_t w, size_t h)
 
     //    _highlighting.push_back(std::make_unique<ClangHighlight>());
     _highlighting.push_back(std::make_unique<BasicHighlighting>());
+    updatePalette(screen);
 
     _formatting.push_back(std::make_unique<ClangFormat>());
     _formatting.push_back(std::make_unique<JsonFormat>());
@@ -119,11 +120,7 @@ void MainWindow::resize(size_t w, size_t h) {
 }
 
 void MainWindow::draw(IScreen &screen) {
-    if (_env.palette().update(screen)) {
-        for (auto &highligting : _highlighting) {
-            highligting->update(_env.palette());
-        }
-    }
+    updatePalette(screen);
 
     _editor.draw(screen);
     if (_env.showConsole()) {
@@ -185,6 +182,15 @@ void MainWindow::open(filesystem::path path) {
     updateLocatorBuffer();
 
     updateHighlighting();
+}
+
+void MainWindow::updatePalette(IScreen &screen) {
+    if (_env.palette().update(screen)) {
+        for (auto &highligting : _highlighting) {
+            highligting->update(_env.palette());
+        }
+        _editor.updatePalette(_env.palette());
+    }
 }
 
 void MainWindow::updateHighlighting() {

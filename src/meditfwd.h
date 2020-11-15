@@ -22,4 +22,5 @@ class ClangModel;
 class IHighlight;
 class Project;
 class Color;
-class Palette;
+class IPalette;
+// class Palette;
