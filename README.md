@@ -9,15 +9,15 @@ Todo:
   - [ ] Implement a lot of them
 - [ ] Visual mode
 - [ ] Undo/Redo
-- [ ] Buffered screen output
-- [ ] Delayed syntax highlighting
+- [x] Buffered screen output
+- [ ] Delayed syntax highlighting
 - [x] Save files
 - [ ] Ide-tools
   - [x] Switch headers/source
   - [ ] Rename symbol
   - [ ] Goto definition
-  - [ ] Switch header/source
-  - [ ] Auto complete
+  - [x] Switch header/source
+  - [x] Auto complete
     - [x] Clang based autocomplete
   - [ ] Basic syntax highlighting
     - [ ] Clang-based syntax highlighting

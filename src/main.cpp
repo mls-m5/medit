@@ -1,5 +1,6 @@
 #include "main.h"
 #include "files/file.h"
+#include "screen/bufferedscreen.h"
 #include "screen/ncursesscreen.h"
 #include "script/rootenvironment.h"
 #include "views/bufferview.h"
@@ -11,8 +12,10 @@ int main(int argc, char **argv) {
     std::unique_ptr<IScreen> screen;
     IInput *input;
     auto ns = std::make_unique<NCursesScreen>();
+    auto bs = std::make_unique<BufferedScreen>(ns.get(), ns.get());
+
     input = ns.get();
-    screen = std::move(ns);
+    screen = std::move(bs);
 
     MainWindow mainWindow(*screen);
 
@@ -26,6 +29,7 @@ int main(int argc, char **argv) {
     mainWindow.resize();
     mainWindow.draw(*screen);
     mainWindow.updateCursor(*screen);
+    screen->refresh();
 
     while (!medit::main::shouldQuit) {
         auto c = input->getInput();

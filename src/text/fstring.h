@@ -99,6 +99,10 @@ public:
         return _content.erase(it);
     }
 
+    void resize(size_t size, FChar fill) {
+        _content.resize(size, fill);
+    }
+
     auto operator+=(const FString &other) {
         _content.insert(_content.end(), other.begin(), other.end());
     }
