@@ -1,3 +1,6 @@
 [submodule "test/mls-unit-test"]
 	path = test/mls-unit-test
 	url = https://github.com/mls-m5/mls-unit-test
+[submodule "lib/json.h"]
+	path = lib/json.h
+	url = https://github.com/mls-m5/json.h.git
