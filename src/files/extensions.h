@@ -21,3 +21,11 @@ inline bool isJson(const filesystem::path &path) {
 inline bool isMarkdown(const filesystem::path &path) {
     return path.extension() == ".md";
 }
+
+inline bool isMake(const filesystem::path &path) {
+    return path.filename() == "Makefile";
+}
+
+inline bool isMatmake(const filesystem::path &path) {
+    return path.filename() == "Matmakefile";
+}
