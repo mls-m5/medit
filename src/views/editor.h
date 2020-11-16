@@ -17,7 +17,7 @@ private:
     std::optional<Cursor> _selectionAnchor;
     std::unique_ptr<IMode> _mode;
     std::unique_ptr<IFile> _file;
-    FormatType _background;
+    FormatType _background = 1;
 
 public:
     Editor(std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>());
@@ -30,6 +30,10 @@ public:
     }
 
     filesystem::path path();
+
+    void background(FormatType c) {
+        _background = c;
+    }
 
     void save();
 
