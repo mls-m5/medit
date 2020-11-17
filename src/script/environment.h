@@ -7,12 +7,13 @@
 #include <map>
 
 class Environment : public IEnvironment {
-    using Context = std::map<std::string, std::function<void(IEnvironment &)>>;
+    using Functions =
+        std::map<std::string, std::function<void(IEnvironment &)>>;
 
     IEnvironment *_parent = nullptr;
     Editor *_editor = nullptr;
 
-    Context _context;
+    Functions _context;
 
     std::map<std::string, Variable> _variables;
 
@@ -70,6 +71,10 @@ public:
 
     Project &project() override {
         return root().project();
+    }
+
+    Context &context() override {
+        return root().context();
     }
 
     // @see IEnvironment

@@ -59,6 +59,7 @@ core.src +=
    src/script/**.cpp
    src/views/**.cpp
    src/syntax/**.cpp
+   src/core/**.cpp
 
 core.out = shared core
 core.libs += `pkg-config --libs ncurses` -lstdc++fs

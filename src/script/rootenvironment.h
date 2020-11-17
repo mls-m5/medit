@@ -9,10 +9,12 @@ class RootEnvironment : public Environment {
     Editor *_console;
     Project *_project;
     bool _showConsole = false;
+    Context &_context;
     //    Palette _palette;
 
 public:
-    RootEnvironment() : Environment(nullptr) {}
+    RootEnvironment(Context &context)
+        : Environment(nullptr), _context(context) {}
 
     void key(KeyEvent e) {
         _lastKeyEvent = e;
@@ -55,6 +57,10 @@ public:
 
     void project(Project *project) {
         _project = project;
+    }
+
+    Context &context() override {
+        return _context;
     }
 
     //! @see IEnvironment

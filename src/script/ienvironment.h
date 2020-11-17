@@ -25,6 +25,8 @@ public:
     [[nodiscard]] virtual Project &project() = 0;
     //    [[nodiscard]] virtual IPalette &palette() = 0;
 
+    [[nodiscard]] virtual Context &context() = 0;
+
     virtual void addCommand(std::string,
                             std::function<void(IEnvironment &)>) = 0;
 

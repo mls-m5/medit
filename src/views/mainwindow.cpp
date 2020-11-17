@@ -1,5 +1,7 @@
 
 #include "views/mainwindow.h"
+#include "core/context.h"
+#include "core/timer.h"
 #include "files/config.h"
 #include "files/file.h"
 #include "modes/insertmode.h"
@@ -15,8 +17,9 @@
 #include "views/messagebox.h"
 #include "clang/clanghighlight.h"
 
-MainWindow::MainWindow(IScreen &screen)
-    : View(screen.width(), screen.height()), _locator(_env, _project) {
+MainWindow::MainWindow(IScreen &screen, Context &context)
+    : View(screen.width(), screen.height()), _locator(_env, _project),
+      _env(context) {
     _env.editor(&_editor);
     _editor.mode(createNormalMode());
     _editor.showLines(true);
@@ -224,16 +227,24 @@ void MainWindow::updatePalette(IScreen &screen) {
 }
 
 void MainWindow::updateHighlighting() {
-    if (_editor.buffer().oldColors()) {
-        for (auto &highlight : _highlighting) {
-            if (highlight->shouldEnable(_editor.path())) {
-                highlight->highlight(_editor);
+    auto &timer = _env.context().timer();
+    if (_updateTimeHandle) {
+        timer.cancel(_updateTimeHandle);
+        _updateTimeHandle = 0;
+    }
 
-                _editor.buffer().oldColors(false);
-                break;
+    timer.setTimeout(1s, [&] {
+        if (_editor.buffer().oldColors()) {
+            for (auto &highlight : _highlighting) {
+                if (highlight->shouldEnable(_editor.path())) {
+                    highlight->highlight(_editor);
+
+                    _editor.buffer().oldColors(false);
+                    break;
+                }
             }
         }
-    }
+    });
 }
 
 void MainWindow::showPopup(std::unique_ptr<IWindow> popup) {

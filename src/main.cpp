@@ -1,5 +1,7 @@
 #include "main.h"
+#include "core/context.h"
 #include "core/jobqueue.h"
+#include "core/timer.h"
 #include "files/file.h"
 #include "screen/bufferedscreen.h"
 #include "screen/ncursesscreen.h"
@@ -18,7 +20,12 @@ int main(int argc, char **argv) {
     input = ns.get();
     screen = std::move(bs);
 
-    MainWindow mainWindow(*screen);
+    JobQueue queue;
+    JobQueue guiQueue;
+    Timer timer;
+    Context context(queue, timer);
+
+    MainWindow mainWindow(*screen, context);
 
     if (argc > 1) {
         mainWindow.open(argv[1]);
@@ -32,39 +39,58 @@ int main(int argc, char **argv) {
     mainWindow.updateCursor(*screen);
     screen->refresh();
 
-    JobQueue queue;
+    std::thread timerThread([&] { timer.loop(); });
+    std::thread jobThread([&] { queue.loop(); });
+    std::thread guiThread([&] { guiQueue.loop(); });
+
+    auto handleKey = [&](KeyEvent c) {
+        if (c == Key::Resize) {
+            mainWindow.resize(screen->width(), screen->height());
+        }
+        else {
+            mainWindow._env.key(c);
+            mainWindow.keyPress(mainWindow._env);
+            mainWindow.resize();
+        }
+
+        screen->clear();
+        mainWindow.draw(*screen);
+
+        screen->draw(40,
+                     screen->height() - 1,
+                     ((c.modifiers == Modifiers::Ctrl) ? "ctrl+'" : "'") +
+                         std::string{c.symbol} + "'" +
+                         c.symbol.byteRepresentation());
+
+        mainWindow.updateCursor(*screen);
+
+        screen->refresh();
+    };
+
     std::thread inputThread([&] {
         while (!medit::main::shouldQuit) {
             auto c = input->getInput();
 
-            if (c == Key::Resize) {
-                mainWindow.resize(screen->width(), screen->height());
-            }
-            else {
-                mainWindow._env.key(c);
-                mainWindow.keyPress(mainWindow._env);
-                mainWindow.resize();
+            // Todo: in the future check main window for unsaved changes here
+            // too
+            if (c == KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}) {
+                break;
             }
 
-            screen->clear();
-            mainWindow.draw(*screen);
-
-            screen->draw(40,
-                         screen->height() - 1,
-                         ((c.modifiers == Modifiers::Ctrl) ? "ctrl+'" : "'") +
-                             std::string{c.symbol} + "'" +
-                             c.symbol.byteRepresentation());
-
-            mainWindow.updateCursor(*screen);
-
-            screen->refresh();
+            guiQueue.addTask([&, c] {
+                handleKey(c); //
+            });
         }
 
         queue.stop();
+        timer.stop();
+        guiQueue.stop();
     });
 
-    queue.loop();
     inputThread.join();
+    guiThread.join();
+    jobThread.join();
+    timerThread.join();
 
     return 0;
 }

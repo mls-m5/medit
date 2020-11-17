@@ -66,8 +66,7 @@ void BufferedScreen::draw(size_t x, size_t y, const FString &str) {
 void BufferedScreen::refresh() {
     _canvas->resize(_backend->width(), _backend->height());
     _canvas->refresh(*_backend);
-
-    //    _backend->refresh();
+    _backend->refresh();
 }
 
 void BufferedScreen::clear() {

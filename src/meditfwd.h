@@ -24,4 +24,7 @@ class IHighlight;
 class Project;
 class Color;
 class IPalette;
-// class Palette;
+
+class Timer;
+class JobQueue;
+class Context;

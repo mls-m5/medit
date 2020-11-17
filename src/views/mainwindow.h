@@ -2,6 +2,7 @@
 
 #include "files/project.h"
 #include "locator.h"
+#include "meditfwd.h"
 #include "script/rootenvironment.h"
 #include "syntax/IFormat.h"
 #include "views/completeview.h"
@@ -20,12 +21,13 @@ struct MainWindow : public Window {
     FString _splitString;
     IKeySink *_inputFocus = &_editor;
     std::unique_ptr<IWindow> _activePopup;
+    size_t _updateTimeHandle = 0;
 
     //! Move these
     std::vector<std::unique_ptr<IHighlight>> _highlighting;
     std::vector<std::unique_ptr<IFormat>> _formatting;
 
-    MainWindow(IScreen &screen);
+    MainWindow(IScreen &screen, Context &context);
 
     ~MainWindow() override;
 
