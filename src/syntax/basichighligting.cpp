@@ -4,6 +4,7 @@
 #include "syntax/palette.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
+#include "text/words.h"
 #include "views/editor.h"
 #include <string>
 #include <vector>
@@ -48,15 +49,11 @@ void BasicHighlighting::highlight(Editor &editor) {
         }
     }
 
-    for (auto c = wordEnd(buffer.begin()); c < buffer.end();
-         c = wordEnd(right(c))) {
-        auto b = wordBegin(c);
-
-        auto range = CursorRange{b, right(c)};
-
-        highlightWord(range, _palette);
+    for (auto word : Words(buffer)) {
+        highlightWord(word, _palette);
     }
 
+    // Identify comment
     for (size_t i = 0; i < buffer.lines().size(); ++i) {
         auto &line = buffer.lineAt(i);
         for (size_t i = 1; i < line.size(); ++i) {
@@ -70,14 +67,6 @@ void BasicHighlighting::highlight(Editor &editor) {
                 break;
             }
         }
-        //        if (line.size() >= 2) {
-
-        //            if (line.at(0).c == '/' && line.at(1).c == '/') {
-        //                for (auto &c : line) {
-        //                    c.f = _palette.comment;
-        //                }
-        //            }
-        //        }
     }
 }
 

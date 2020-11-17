@@ -4,6 +4,7 @@
 #include "files/ifile.h"
 #include "text/buffer.h"
 #include "text/cursorrangeops.h"
+#include "text/words.h"
 #include "views/editor.h"
 #include "clang/clangmodel.h"
 
@@ -53,43 +54,57 @@ void clangAnnotate(Editor &editor) {
 
     auto cursor = clang_getTranslationUnitCursor(translationUnit);
 
-    auto file = clang_getFile(translationUnit, nullptr);
+    auto file = clang_getFile(translationUnit, locationString.c_str());
 
-    auto visitor = [&editor, &file](CXCursor cursor,
-                                    CXCursor /*parent*/) -> CXChildVisitResult {
-        auto kind = clang_getCursorKind(cursor);
-        auto range = getRange(cursor);
+    if (false) {
 
-        if (!clang_File_isEqual(file, range.file)) {
-            //        if (file != range.file) {
-            return CXChildVisit_Recurse;
-        }
+        auto visitor = [&editor,
+                        &file](CXCursor cursor,
+                               CXCursor /*parent*/) -> CXChildVisitResult {
+            auto kind = clang_getCursorKind(cursor);
+            auto range = getRange(cursor);
 
-        auto r = CursorRange{editor.buffer(), range.begin, range.end};
+            if (!clang_File_isEqual(file, range.file)) {
+                //        if (file != range.file) {
+                return CXChildVisit_Recurse;
+            }
 
-        format(r, 3);
-        switch (kind) {
-        case CXCursor_Namespace:
-        case CXCursor_CXXMethod:
-        case CXCursor_IfStmt:
+            auto r = CursorRange{editor.buffer(), range.begin, range.end};
+
             format(r, 3);
+            switch (kind) {
+            case CXCursor_Namespace:
+            case CXCursor_CXXMethod:
+            case CXCursor_IfStmt:
+                format(r, 3);
 
-        default:
-            break;
+            default:
+                break;
+            }
+
+            return CXChildVisit_Recurse;
+        };
+
+        auto cvisitor = +[](CXCursor cursor,
+                            CXCursor parent,
+                            CXClientData voidData) -> CXChildVisitResult {
+            auto &data = *static_cast<decltype(visitor) *>(voidData);
+
+            return data(cursor, parent);
+        };
+
+        clang_visitChildren(cursor, cvisitor, static_cast<void *>(&visitor));
+    }
+    else {
+        for (auto word : Words(buffer)) {
+            auto location = clang_getLocation(translationUnit,
+                                              file,
+                                              word.begin().y() + 1,
+                                              word.begin().x() + 1);
+            auto ccursor = clang_getCursor(translationUnit, location);
+            auto kind = clang_getCursorKind(ccursor);
         }
-
-        return CXChildVisit_Recurse;
-    };
-
-    auto cvisitor = +[](CXCursor cursor,
-                        CXCursor parent,
-                        CXClientData voidData) -> CXChildVisitResult {
-        auto &data = *static_cast<decltype(visitor) *>(voidData);
-
-        return data(cursor, parent);
-    };
-
-    clang_visitChildren(cursor, cvisitor, static_cast<void *>(&visitor));
+    }
 }
 
 } // namespace

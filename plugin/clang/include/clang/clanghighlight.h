@@ -11,7 +11,6 @@ public:
     bool shouldEnable(filesystem::path path);
     void highlight(Editor &buffer);
 
-    // IHighlight interface
-public:
+    //! @see IHighlight
     void update(const IPalette &palette);
 };

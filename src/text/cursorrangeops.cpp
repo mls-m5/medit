@@ -3,6 +3,7 @@
 #include "text/cursorrangeops.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
+#include <iostream>
 
 //! Returns a list with at least one element
 std::vector<FString> content(CursorRange range) {
@@ -101,4 +102,16 @@ bool operator==(CursorRange range, std::string_view str) {
     else {
         return false;
     }
+}
+
+std::ostream &operator<<(std::ostream &stream, CursorRange range) {
+    for (auto c : range) {
+        if (c) {
+            stream.write(&c->c.front(), c->c.size());
+        }
+        else {
+            stream << "\n";
+        }
+    }
+    return stream;
 }

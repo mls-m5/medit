@@ -1,5 +1,6 @@
 #pragma once
 
+#include "buffer.h"
 #include "cursor.h"
 
 #include <utility>
@@ -18,6 +19,10 @@ public:
 
         fixOrder();
     }
+
+    //! The whole buffer
+    constexpr CursorRange(Buffer &buffer)
+        : _buffer(&buffer), _begin(buffer.begin()), _end(buffer.end()) {}
 
     //! Convert a cursor to a empty range
     constexpr CursorRange(Cursor both) : CursorRange(both, both) {}
