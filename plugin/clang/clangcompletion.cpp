@@ -28,7 +28,7 @@ std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
 
     auto path = filesystem::absolute(env.editor().file()->path());
     auto cursor = env.editor().cursor();
-    auto buffer = env.editor().buffer();
+    auto &buffer = env.editor().buffer();
 
     auto locationString = path.string();
     std::string tmpPath = locationString;

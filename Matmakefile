@@ -67,6 +67,7 @@ core.link +=  standardplugins clangplugin
 main.src = src/main.cpp
 main.copy += README.md data/oblivion.json
 main.link += core
+main.libs +=  -pthread
 main.out = medit
 
 

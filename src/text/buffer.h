@@ -12,18 +12,20 @@ public:
     using iterator = std::vector<FString>::iterator;
 
     Buffer() = default;
-    Buffer(const Buffer &) = default;
+    Buffer(const Buffer &) = delete;
     Buffer(Buffer &&) = default;
-    Buffer &operator=(const Buffer &) = default;
+    Buffer &operator=(const Buffer &) = delete;
     Buffer &operator=(Buffer &&) = default;
 
     Buffer(std::string text) {
         this->text(text);
     }
 
-    Buffer(std::string_view text) : Buffer(std::string(text)) {}
+    Buffer(std::string_view text)
+        : Buffer(std::string(text)){}
 
-    [[nodiscard]] const auto &lines() const {
+              [[nodiscard]] const auto &
+          lines() const {
         return _lines;
     }
 
