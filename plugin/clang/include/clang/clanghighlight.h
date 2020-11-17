@@ -2,8 +2,7 @@
 
 #include "meditfwd.h"
 #include "syntax/ihighlight.h"
-
-// void clangAnnotate(Editor &);
+#include "syntax/ipalette.h"
 
 class ClangHighlight : public IHighlight {
 public:
@@ -13,4 +12,7 @@ public:
 
     //! @see IHighlight
     void update(const IPalette &palette);
+
+private:
+    IPalette::BasicPalette _palette;
 };

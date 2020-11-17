@@ -2,6 +2,8 @@
 #include "clang/clanghighlight.h"
 #include "files/extensions.h"
 #include "files/ifile.h"
+#include "getformat.h"
+#include "syntax/ipalette.h"
 #include "text/buffer.h"
 #include "text/cursorrangeops.h"
 #include "text/words.h"
@@ -31,7 +33,13 @@ Range getRange(CXCursor cursor) {
     return range;
 }
 
-void clangAnnotate(Editor &editor) {
+} // namespace
+
+bool ClangHighlight::shouldEnable(filesystem::path path) {
+    return isCpp(path);
+}
+
+void ClangHighlight::highlight(Editor &editor) {
     if (!editor.file()) {
         return;
     }
@@ -52,11 +60,10 @@ void clangAnnotate(Editor &editor) {
     auto translationUnit = clang_parseTranslationUnit(
         model->index, locationString.c_str(), args, 2, nullptr, 0, 0);
 
-    auto cursor = clang_getTranslationUnitCursor(translationUnit);
-
     auto file = clang_getFile(translationUnit, locationString.c_str());
 
     if (false) {
+        auto cursor = clang_getTranslationUnitCursor(translationUnit);
 
         auto visitor = [&editor,
                         &file](CXCursor cursor,
@@ -102,19 +109,12 @@ void clangAnnotate(Editor &editor) {
                                               word.begin().y() + 1,
                                               word.begin().x() + 1);
             auto ccursor = clang_getCursor(translationUnit, location);
-            auto kind = clang_getCursorKind(ccursor);
+            CXCursorKind kind = clang_getCursorKind(ccursor);
+            format(word, getFormat(kind, _palette));
         }
     }
 }
 
-} // namespace
-
-bool ClangHighlight::shouldEnable(filesystem::path path) {
-    return isCpp(path);
+void ClangHighlight::update(const IPalette &palette) {
+    _palette = palette.palette();
 }
-
-void ClangHighlight::highlight(Editor &editor) {
-    clangAnnotate(editor);
-}
-
-void ClangHighlight::update(const IPalette &palette) {}

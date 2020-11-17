@@ -116,10 +116,12 @@ bool Palette::update(IScreen &screen) {
 
         _basicPalette = IPalette::BasicPalette{
             .standard = getFormat("text"),
+            .identifier = getFormat("def:identifier"),
             .statement = getFormat("def:statement"),
             .comment = getFormat("def:comment"),
             .currentLine = getFormat("current-line"),
             .string = getFormat("def:string"),
+            .type = getFormat("def:type"),
         };
 
         auto standardStyle = _styles[standardFormatName];

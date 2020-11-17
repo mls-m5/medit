@@ -8,8 +8,8 @@
 class IPalette {
 public:
     struct BasicPalette {
-        FormatType standard, lineNumbers, statement, comment, currentLine,
-            string;
+        FormatType standard, identifier, lineNumbers, statement, comment,
+            currentLine, string, type;
     };
 
     virtual ~IPalette() = default;

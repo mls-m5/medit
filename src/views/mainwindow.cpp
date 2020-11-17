@@ -45,7 +45,7 @@ MainWindow::MainWindow(IScreen &screen)
 
     addCommands();
 
-    //    _highlighting.push_back(std::make_unique<ClangHighlight>());
+    _highlighting.push_back(std::make_unique<ClangHighlight>());
     _highlighting.push_back(std::make_unique<BasicHighlighting>());
     updatePalette(screen);
 
