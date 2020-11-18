@@ -243,6 +243,7 @@ void MainWindow::updateHighlighting() {
                     break;
                 }
             }
+            _env.context().redrawScreen();
         }
     });
 }

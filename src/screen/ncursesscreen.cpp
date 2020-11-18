@@ -99,6 +99,7 @@ NCursesScreen::NCursesScreen() {
 
 NCursesScreen::~NCursesScreen() {
     ::endwin();
+    system("reset");
 }
 
 KeyEvent NCursesScreen::getInput() {

@@ -3,7 +3,6 @@
 #include <thread>
 
 size_t Timer::setTimeout(Timer::DurationT duration, std::function<void()> f) {
-
     if (!_isRunning) {
         return 0;
     }
@@ -44,8 +43,6 @@ void Timer::loop() {
             _mutex.lock();
             while (!_triggers.empty()) {
                 auto nextTime = _triggers.front().time;
-
-                auto time = std::chrono::high_resolution_clock::now();
                 if (nextTime < std::chrono::system_clock::now()) {
                     auto next = std::move(_triggers.front());
                     _triggers.erase(_triggers.begin());

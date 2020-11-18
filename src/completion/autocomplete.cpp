@@ -18,6 +18,13 @@ AutoComplete::CompletionList AutoComplete::getMatching(std::string beginning) {
         if (item.name.rfind(beginning, 0) != std::string::npos) {
             ret.push_back(item);
         }
+
+        // Match parts (this does not work that good)
+        //        if (item.name.find(beginning) != std::string::npos) {
+        //            ret.push_back(item);
+        //        }
+
+        // Just pass everything
         //        ret.push_back(item);
     }
 

@@ -62,6 +62,8 @@ void ClangHighlight::highlight(Editor &editor) {
 
     auto file = clang_getFile(translationUnit, locationString.c_str());
 
+    format(buffer, _palette.standard);
+
     for (auto word : Words(buffer)) {
         auto location = clang_getLocation(
             translationUnit, file, word.begin().y() + 1, word.begin().x() + 1);

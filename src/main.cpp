@@ -11,6 +11,38 @@
 #include <thread>
 #include <vector>
 
+namespace {
+
+void refreshScreen(IWindow &window, IScreen &screen) {
+    screen.clear();
+    window.draw(screen);
+
+    //    screen->draw(40,
+    //                 screen->height() - 1,
+    //                 ((c.modifiers == Modifiers::Ctrl) ? "ctrl+'" : "'") +
+    //                     std::string{c.symbol} + "'" +
+    //                     c.symbol.byteRepresentation());
+
+    window.updateCursor(screen);
+
+    screen.refresh();
+};
+
+void handleKey(KeyEvent c, MainWindow &mainWindow, IScreen &screen) {
+    if (c == Key::Resize) {
+        mainWindow.resize(screen.width(), screen.height());
+    }
+    else {
+        mainWindow._env.key(c);
+        mainWindow.keyPress(mainWindow._env);
+        mainWindow.resize();
+    }
+
+    refreshScreen(mainWindow, screen);
+};
+
+} // namespace
+
 int main(int argc, char **argv) {
     std::unique_ptr<IScreen> screen;
     IInput *input;
@@ -26,6 +58,12 @@ int main(int argc, char **argv) {
     Context context(queue, timer);
 
     MainWindow mainWindow(*screen, context);
+
+    context.refreshScreenFunc([&] {
+        guiQueue.addTask([&] {
+            refreshScreen(mainWindow, *screen); //
+        });
+    });
 
     if (argc > 1) {
         mainWindow.open(argv[1]);
@@ -43,30 +81,6 @@ int main(int argc, char **argv) {
     std::thread jobThread([&] { queue.loop(); });
     std::thread guiThread([&] { guiQueue.loop(); });
 
-    auto handleKey = [&](KeyEvent c) {
-        if (c == Key::Resize) {
-            mainWindow.resize(screen->width(), screen->height());
-        }
-        else {
-            mainWindow._env.key(c);
-            mainWindow.keyPress(mainWindow._env);
-            mainWindow.resize();
-        }
-
-        screen->clear();
-        mainWindow.draw(*screen);
-
-        screen->draw(40,
-                     screen->height() - 1,
-                     ((c.modifiers == Modifiers::Ctrl) ? "ctrl+'" : "'") +
-                         std::string{c.symbol} + "'" +
-                         c.symbol.byteRepresentation());
-
-        mainWindow.updateCursor(*screen);
-
-        screen->refresh();
-    };
-
     std::thread inputThread([&] {
         while (!medit::main::shouldQuit) {
             auto c = input->getInput();
@@ -78,7 +92,7 @@ int main(int argc, char **argv) {
             }
 
             guiQueue.addTask([&, c] {
-                handleKey(c); //
+                handleKey(c, mainWindow, *screen); //
             });
         }
 

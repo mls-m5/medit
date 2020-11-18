@@ -8,7 +8,7 @@
 class FChar {
 public:
     Utf8Char c;
-    FormatType f = {};
+    FormatType f = 1;
 
     constexpr FChar() = default;
     constexpr FChar(const FChar &) = default;
