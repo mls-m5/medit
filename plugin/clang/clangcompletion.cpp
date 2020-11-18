@@ -1,4 +1,5 @@
 #include "clang/clangcompletion.h"
+#include "clangflags.h"
 #include "files/ifile.h"
 #include "files/project.h"
 #include "script/ienvironment.h"
@@ -9,9 +10,8 @@
 #include <fstream>
 
 namespace {
-
-struct UnsavedFile {
-    UnsavedFile(std::string content, std::string filename)
+struct ClangUnsavedFile {
+    ClangUnsavedFile(std::string content, std::string filename)
         : content(std::move(content)), filename(std::move(filename)),
           clangFile({this->content.c_str(),
                      this->filename.c_str(),
@@ -19,6 +19,31 @@ struct UnsavedFile {
     std::string content;
     std::string filename;
     CXUnsavedFile clangFile;
+};
+
+struct ClangTranslationUnit {
+    CXTranslationUnit translationUnit = 0;
+    ClangFlags clangFlags;
+
+    ClangTranslationUnit(CXIndex index,
+                         Project &project,
+                         ClangUnsavedFile &unsavedFile,
+                         filesystem::path path)
+        : clangFlags(project) {
+        auto locationString = path.string();
+
+        translationUnit = clang_parseTranslationUnit(index,
+                                                     locationString.c_str(),
+                                                     clangFlags.args.data(),
+                                                     clangFlags.args.size(),
+                                                     &unsavedFile.clangFile,
+                                                     1,
+                                                     0);
+    }
+
+    ~ClangTranslationUnit() {
+        clang_disposeTranslationUnit(translationUnit);
+    }
 };
 
 } // namespace
@@ -42,35 +67,16 @@ std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
     }
 
     auto &project = env.project();
-    auto ss = std::istringstream(project.settings().flags);
-    auto includes = std::vector<std::string>{};
 
-    //    filesystem::current_path(project.settings().root);
+    auto clangFlags = ClangFlags{project};
 
-    for (std::string s; ss >> s;) {
-        includes.push_back(s);
-    }
+    auto unsavedFile = ClangUnsavedFile{buffer.text(), tmpPath};
 
-    auto args = std::vector<const char *>{};
-    for (auto &i : includes) {
-        args.push_back(i.c_str());
-    }
+    auto tu =
+        ClangTranslationUnit{_model->index, project, unsavedFile, tmpPath};
 
-    //    const char *args[2] = {"-std=c++17", "-Iinclude"};
-
-    auto unsavedFile = UnsavedFile{buffer.text(), locationString};
-
-    auto translationUnit = clang_parseTranslationUnit(_model->index,
-                                                      locationString.c_str(),
-                                                      // tmpPath.c_str(),
-                                                      args.data(),
-                                                      args.size(),
-                                                      &unsavedFile.clangFile,
-                                                      1,
-                                                      0);
-
-    auto result = clang_codeCompleteAt(translationUnit,
-                                       tmpPath.c_str(),
+    auto result = clang_codeCompleteAt(tu.translationUnit,
+                                       locationString.c_str(),
                                        cursor.y() + 1,
                                        cursor.x() + 1,
                                        &unsavedFile.clangFile,
@@ -89,7 +95,7 @@ std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
     for (size_t i = 0; i < result->NumResults; ++i) {
         CXCompletionString completion = result->Results[i].CompletionString;
 
-        // Todo: Iterate over all chunks
+        // Todo: Iterate over all chunks and handle different types
 
         CompleteResult listItem;
 

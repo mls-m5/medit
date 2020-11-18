@@ -15,7 +15,6 @@ filesystem::path Project::root(filesystem::path path) const {
     path = filesystem::absolute(path);
 
     do {
-
         if (filesystem::exists(path / projectFileName)) {
             return path;
         }
@@ -33,7 +32,11 @@ filesystem::path Project::root(filesystem::path path) const {
 
     } while (!path.empty());
 
-    return {};
+    if (path.empty()) {
+        return {};
+    }
+
+    return path.parent_path();
 }
 
 void Project::updateCache(const filesystem::path &pathInProject, size_t max) {
