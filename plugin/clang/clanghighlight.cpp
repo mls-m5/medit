@@ -1,5 +1,6 @@
 
 #include "clang/clanghighlight.h"
+#include "clangcontext.h"
 #include "files/extensions.h"
 #include "files/ifile.h"
 #include "getformat.h"
@@ -39,7 +40,8 @@ bool ClangHighlight::shouldEnable(filesystem::path path) {
     return isCpp(path);
 }
 
-void ClangHighlight::highlight(Editor &editor) {
+void ClangHighlight::highlight(IEnvironment &env) {
+    auto &editor = env.editor();
     if (!editor.file()) {
         return;
     }
@@ -55,23 +57,29 @@ void ClangHighlight::highlight(Editor &editor) {
 
     auto &buffer = editor.buffer();
 
-    const char *args[2] = {"-std=c++17", "-Iinclude"};
+    //    const char *args[2] = {"-std=c++17", "-Iinclude"};
 
-    auto translationUnit = clang_parseTranslationUnit(
-        model->index, locationString.c_str(), args, 2, nullptr, 0, 0);
+    //    auto translationUnit = clang_parseTranslationUnit(
+    //        model->index, locationString.c_str(), args, 2, nullptr, 0, 0);
 
-    auto file = clang_getFile(translationUnit, locationString.c_str());
+    auto context = ClangContext{env, *model};
 
-    format(buffer, IPalette::standard);
+    if (context.translationUnit) {
+        auto file =
+            clang_getFile(context.translationUnit, locationString.c_str());
 
-    for (auto word : Words(buffer)) {
-        auto location = clang_getLocation(
-            translationUnit, file, word.begin().y() + 1, word.begin().x() + 1);
-        auto ccursor = clang_getCursor(translationUnit, location);
-        CXCursorKind kind = clang_getCursorKind(ccursor);
-        format(word, getFormat(kind));
+        format(buffer, IPalette::standard);
+
+        for (auto word : Words(buffer)) {
+            auto location = clang_getLocation(context.translationUnit,
+                                              file,
+                                              word.begin().y() + 1,
+                                              word.begin().x() + 1);
+            auto ccursor = clang_getCursor(context.translationUnit, location);
+            CXCursorKind kind = clang_getCursorKind(ccursor);
+            format(word, getFormat(kind));
+        }
     }
 }
 
-void ClangHighlight::update(const IPalette &palette) {
-}
+void ClangHighlight::update(const IPalette &palette) {}

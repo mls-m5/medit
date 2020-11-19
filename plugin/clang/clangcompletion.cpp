@@ -1,48 +1,21 @@
 #include "clang/clangcompletion.h"
-#include "clangflags.h"
-#include "clangtranslationunit.h"
-#include "clangunsavedfiles.h"
-#include "files/ifile.h"
-#include "files/project.h"
+#include "clangcontext.h"
 #include "script/ienvironment.h"
-#include "text/buffer.h"
-#include "views/editor.h"
 #include "clang/clangmodel.h"
 #include <clang-c/Index.h>
-#include <fstream>
 
 std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
     IEnvironment &env) {
 
-    auto path = filesystem::absolute(env.editor().file()->path());
+    auto context = ClangContext{env, *_model};
+
     auto cursor = env.editor().cursor();
-    auto &buffer = env.editor().buffer();
 
-    auto locationString = path.string();
-    std::string tmpPath = locationString;
-
-    if (buffer.changed()) {
-        tmpPath = "/tmp/comp_file_aoesutnhaoe.cpp";
-        std::ofstream file(tmpPath);
-        buffer.text(file);
-
-        locationString = tmpPath;
-    }
-
-    auto &project = env.project();
-
-    auto clangFlags = ClangFlags{project};
-
-    auto unsavedFile = ClangUnsavedFile{buffer.text(), tmpPath};
-
-    auto tu =
-        ClangTranslationUnit{_model->index, project, unsavedFile, tmpPath};
-
-    auto result = clang_codeCompleteAt(tu.translationUnit,
-                                       locationString.c_str(),
+    auto result = clang_codeCompleteAt(context.translationUnit,
+                                       context.locationString.c_str(),
                                        cursor.y() + 1,
                                        cursor.x() + 1,
-                                       &unsavedFile.clangFile,
+                                       &context.unsavedFile.clangFile,
                                        1,
                                        clang_defaultCodeCompleteOptions());
 

@@ -1,7 +1,9 @@
 
 #include "files/file.h"
 #include "files/filesystem.h"
+#include "files/project.h"
 #include "mls-unit-test/unittest.h"
+#include "mock/script/mockenvironment.h"
 #include "text/buffer.h"
 #include "views/editor.h"
 #include "clang/clanghighlight.h"
@@ -12,21 +14,29 @@ TEST_SUIT_BEGIN
 
 TEST_CASE("basic coloring unsaved file") {
     Editor editor;
+    Project project;
+    MockEnvironment env;
+    env.mock_editor_0.returnValueRef(editor);
+    env.mock_project_0.returnValueRef(project);
     ClangHighlight highligt;
 
     editor.file(std::make_unique<File>(testPath1));
     editor.load();
 
-    highligt.highlight(editor);
+    highligt.highlight(env);
 }
 
 TEST_CASE("basic coloring") {
     Editor editor;
+    Project project;
+    MockEnvironment env;
+    env.mock_editor_0.returnValueRef(editor);
+    env.mock_project_0.returnValueRef(project);
     ClangHighlight highligt;
 
     editor.file(std::make_unique<File>(testPath1));
 
-    highligt.highlight(editor);
+    highligt.highlight(env);
 }
 
 TEST_SUIT_END

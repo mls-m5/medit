@@ -156,7 +156,6 @@ Cursor join(Cursor cursor) {
 
     line1 += line2;
     deleteLine({cursor.buffer(), 0, cursor.y() + 1});
-    //    colorize(line1);
 
     return {cursor.buffer(), x, cursor.y()};
 }

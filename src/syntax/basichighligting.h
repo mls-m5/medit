@@ -14,7 +14,7 @@ public:
 
     // @see IHighlight
     bool shouldEnable(filesystem::path) override;
-    void highlight(Editor &) override;
+    void highlight(IEnvironment &) override;
     void update(const IPalette &palette) override;
 
 private:

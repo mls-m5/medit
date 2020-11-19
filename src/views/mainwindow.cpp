@@ -236,7 +236,7 @@ void MainWindow::updateHighlighting() {
         if (_editor.buffer().oldColors()) {
             for (auto &highlight : _highlighting) {
                 if (highlight->shouldEnable(_editor.path())) {
-                    highlight->highlight(_editor);
+                    highlight->highlight(_env);
 
                     _editor.buffer().oldColors(false);
                     break;

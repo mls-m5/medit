@@ -1,5 +1,6 @@
 
 #include "mls-unit-test/unittest.h"
+#include "mock/script/mockenvironment.h"
 #include "mock/syntax/mockpalette.h"
 #include "syntax/basichighligting.h"
 #include "syntax/palette.h"
@@ -24,15 +25,16 @@ TEST_CASE("create") {
 TEST_CASE("format all to default") {
     BasicHighlighting hl;
     Editor editor;
+    MockEnvironment env;
+    env.mock_editor_0.returnValueRef(editor);
 
     editor.buffer().text("hello"s);
 
     MockPalette palette;
 
-
     hl.update(palette);
 
-    hl.highlight(editor);
+    hl.highlight(env);
 
     for (auto c : editor.buffer()) {
         ASSERT_EQ(c->f, 1);
@@ -42,15 +44,16 @@ TEST_CASE("format all to default") {
 TEST_CASE("format keyword") {
     BasicHighlighting hl;
     Editor editor;
+    MockEnvironment env;
+    env.mock_editor_0.returnValueRef(editor);
 
     editor.buffer().text("int hello"s);
 
     MockPalette palette;
 
-
     hl.update(palette);
 
-    hl.highlight(editor);
+    hl.highlight(env);
 
     ASSERT_EQ(editor.buffer().front().f, IPalette::statement);
     ASSERT_EQ(editor.buffer().back().f, 1);
@@ -60,15 +63,16 @@ TEST_CASE("partial match") {
 
     BasicHighlighting hl;
     Editor editor;
+    MockEnvironment env;
+    env.mock_editor_0.returnValueRef(editor);
 
     editor.buffer().text("inte automatic"s);
 
     MockPalette palette;
 
-
     hl.update(palette);
 
-    hl.highlight(editor);
+    hl.highlight(env);
 
     ASSERT_EQ(editor.buffer().front().f, 1);
     ASSERT_EQ(editor.buffer().back().f, 1);

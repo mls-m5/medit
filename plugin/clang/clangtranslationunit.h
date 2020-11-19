@@ -28,4 +28,12 @@ struct ClangTranslationUnit {
     ~ClangTranslationUnit() {
         clang_disposeTranslationUnit(translationUnit);
     }
+    ClangTranslationUnit(ClangTranslationUnit &&other)
+        : translationUnit(
+              std::exchange(other.translationUnit, CXTranslationUnit{})),
+          clangFlags(std::move(other.clangFlags)) {}
+
+    operator CXTranslationUnit() {
+        return translationUnit;
+    }
 };

@@ -1,5 +1,6 @@
 
 #include "basichighligting.h"
+#include "script/ienvironment.h"
 #include "span.h"
 #include "syntax/palette.h"
 #include "text/cursorops.h"
@@ -36,7 +37,8 @@ bool BasicHighlighting::shouldEnable(filesystem::path) {
     return true;
 }
 
-void BasicHighlighting::highlight(Editor &editor) {
+void BasicHighlighting::highlight(IEnvironment &env) {
+    auto &editor = env.editor();
     auto &buffer = editor.buffer();
 
     if (buffer.empty()) {
