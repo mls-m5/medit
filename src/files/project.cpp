@@ -95,8 +95,9 @@ std::vector<filesystem::path> Project::findProjectFiles(
 
     size_t i = 0;
     for (auto path : filesystem::recursive_directory_iterator(root)) {
-        if (!isCpp(path) && !isJson(path) && !isMarkdown(path) &&
-            !isMatmake(path) && !isMake(path)) {
+        //        if (!isCpp(path) && !isJson(path) && !isMarkdown(path) &&
+        //            !isMatmake(path) && !isMake(path)) {
+        if (!isKnownExtension(path)) {
             continue;
         }
         paths.push_back(path);
