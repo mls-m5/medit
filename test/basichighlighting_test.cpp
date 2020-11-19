@@ -29,15 +29,13 @@ TEST_CASE("format all to default") {
 
     MockPalette palette;
 
-    palette.mock_palette_const_0.returnValue(
-        IPalette::BasicPalette{.standard = 4, .statement = 2});
 
     hl.update(palette);
 
     hl.highlight(editor);
 
     for (auto c : editor.buffer()) {
-        ASSERT_EQ(c->f, 4);
+        ASSERT_EQ(c->f, 1);
     }
 }
 
@@ -49,14 +47,12 @@ TEST_CASE("format keyword") {
 
     MockPalette palette;
 
-    palette.mock_palette_const_0.returnValue(
-        IPalette::BasicPalette{.standard = 1, .statement = 2});
 
     hl.update(palette);
 
     hl.highlight(editor);
 
-    ASSERT_EQ(editor.buffer().front().f, 2);
+    ASSERT_EQ(editor.buffer().front().f, IPalette::statement);
     ASSERT_EQ(editor.buffer().back().f, 1);
 }
 
@@ -69,8 +65,6 @@ TEST_CASE("partial match") {
 
     MockPalette palette;
 
-    palette.mock_palette_const_0.returnValue(
-        IPalette::BasicPalette{.standard = 1, .statement = 2});
 
     hl.update(palette);
 

@@ -96,6 +96,14 @@ Color Palette::getColor(std::string_view name) const {
     return {};
 }
 
+Palette::Style *Palette::getStyle(const std::string &name) {
+    if (auto f = _styles.find(name); f != _styles.end()) {
+        return &f->second;
+    }
+
+    return nullptr;
+}
+
 Color Palette::getStyleColor(std::string_view name) const {
     if (auto f = std::find_if(_styles.begin(),
                               _styles.end(),
@@ -106,6 +114,19 @@ Color Palette::getStyleColor(std::string_view name) const {
     return {};
 }
 
+void Palette::setFormat(IScreen &screen, Style *style, size_t index) {
+    if (!index) {
+        throw std::invalid_argument("index needs to be more than 0");
+    }
+
+    if (!style) {
+        return;
+    }
+
+    screen.addStyle(style->color, style->background, index);
+    style->f = index;
+}
+
 bool Palette::update(IScreen &screen) {
     if (_isChanged) {
         for (auto &style : _styles) {
@@ -114,15 +135,20 @@ bool Palette::update(IScreen &screen) {
         }
         _isChanged = false;
 
-        _basicPalette = IPalette::BasicPalette{
-            .standard = getFormat("text"),
-            .identifier = getFormat("def:identifier"),
-            .statement = getFormat("def:statement"),
-            .comment = getFormat("def:comment"),
-            .currentLine = getFormat("current-line"),
-            .string = getFormat("def:string"),
-            .type = getFormat("def:type"),
+
+        auto fixFormat = [&](const std::string &name, size_t index) {
+            if (auto style = getStyle(name)) {
+                setFormat(screen, style, index);
+            }
         };
+
+        fixFormat("text", BasicPalette::standard);
+        fixFormat("def:identifier", BasicPalette::identifier);
+        fixFormat("def:statement", BasicPalette::statement);
+        fixFormat("def:comment", BasicPalette::comment);
+        fixFormat("def:current-line", BasicPalette::currentLine);
+        fixFormat("def:string", BasicPalette::string);
+        fixFormat("def:type", BasicPalette::type);
 
         auto standardStyle = _styles[standardFormatName];
         screen.addStyle(standardStyle.color, standardStyle.background, 0);

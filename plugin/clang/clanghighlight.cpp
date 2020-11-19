@@ -62,17 +62,16 @@ void ClangHighlight::highlight(Editor &editor) {
 
     auto file = clang_getFile(translationUnit, locationString.c_str());
 
-    format(buffer, _palette.standard);
+    format(buffer, IPalette::standard);
 
     for (auto word : Words(buffer)) {
         auto location = clang_getLocation(
             translationUnit, file, word.begin().y() + 1, word.begin().x() + 1);
         auto ccursor = clang_getCursor(translationUnit, location);
         CXCursorKind kind = clang_getCursorKind(ccursor);
-        format(word, getFormat(kind, _palette));
+        format(word, getFormat(kind));
     }
 }
 
 void ClangHighlight::update(const IPalette &palette) {
-    _palette = palette.palette();
 }

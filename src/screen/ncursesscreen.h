@@ -31,11 +31,15 @@ public:
     }
 
 private:
+    void init();
+
+    bool _hasColors = true;
+
     Palette _palette;
 
     size_t _tabWidth = 3;
 
-    size_t _lastStyle = 10;
+    size_t _lastStyle = 16;
     size_t _lastColor = 16;
 
     //! @see IScreen interface

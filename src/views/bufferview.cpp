@@ -23,7 +23,7 @@ void BufferView::draw(IScreen &screen) {
 
             if (_showLines) {
                 const auto lineNum = l + 1;
-                auto lineFormat = screen.palette().palette().lineNumbers;
+                auto lineFormat = IPalette::lineNumbers;
                 size_t fill = 0;
                 if (lineNum < 10) {
                     fill += 1;

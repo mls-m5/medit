@@ -11,5 +11,4 @@ public:
 
     MOCK_METHOD1(bool, update, (IScreen & screen), override);
 
-    MOCK_CONST_METHOD0(const BasicPalette &, palette, (), override);
 };

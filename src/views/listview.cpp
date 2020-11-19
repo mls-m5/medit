@@ -28,10 +28,8 @@ void ListView::draw(IScreen &screen) {
         return;
     }
 
-    auto &palette = screen.palette().palette();
-
-    FString fillStr{std::string(width(), ' '), palette.standard};
-    FString selFillStr{std::string(width(), ' '), palette.currentLine};
+    FString fillStr{std::string(width(), ' '), IPalette::standard};
+    FString selFillStr{std::string(width(), ' '), IPalette::currentLine};
 
     for (size_t ty = 0, i = yScroll(); ty < height() && i < _lines.size();
          ++i, ++ty) {
@@ -42,9 +40,7 @@ void ListView::draw(IScreen &screen) {
         if (i == _current) {
             screen.draw(x(), y() + ty, selFillStr);
             screen.draw(
-                x(),
-                y() + ty,
-                {std::string{l.text}, screen.palette().palette().currentLine});
+                x(), y() + ty, {std::string{l.text}, IPalette::currentLine});
         }
         else {
             screen.draw(x(), y() + ty, fillStr);

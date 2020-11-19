@@ -14,5 +14,4 @@ public:
     void update(const IPalette &palette);
 
 private:
-    IPalette::BasicPalette _palette;
 };

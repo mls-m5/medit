@@ -18,5 +18,4 @@ public:
     void update(const IPalette &palette) override;
 
 private:
-    IPalette::BasicPalette _palette;
 };

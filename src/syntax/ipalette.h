@@ -7,10 +7,24 @@
 
 class IPalette {
 public:
-    struct BasicPalette {
-        FormatType standard, identifier, lineNumbers, statement, comment,
-            currentLine, string, type;
+    enum BasicPalette : FormatType {
+        standard = 1,
+
+        identifier,
+        statement,
+        type,
+
+        comment,
+        lineNumbers,
+
+        currentLine,
+        string
     };
+    //    struct BasicPalette {
+
+    //        FormatType standard, identifier, lineNumbers, statement, comment,
+    //            currentLine, string, type;
+    //    };
 
     virtual ~IPalette() = default;
 
@@ -21,5 +35,4 @@ public:
     virtual bool update(IScreen &screen) = 0;
 
     //! Used to get the most basic colors used most often
-    virtual const BasicPalette &palette() const = 0;
 };

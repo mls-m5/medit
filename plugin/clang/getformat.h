@@ -5,7 +5,7 @@
 
 namespace {
 
-FormatType getFormat(CXCursorKind kind, IPalette::BasicPalette palette) {
+FormatType getFormat(CXCursorKind kind) {
     switch (kind) {
     case CXCursor_UnexposedDecl:
     case CXCursor_StructDecl:
@@ -19,7 +19,7 @@ FormatType getFormat(CXCursorKind kind, IPalette::BasicPalette palette) {
     case CXCursor_ParmDecl:
     case CXCursor_TypedefDecl:
     case CXCursor_CXXMethod:
-        return palette.type;
+        return IPalette::type;
 
     case CXCursor_Namespace:
     case CXCursor_LinkageSpec:
@@ -60,12 +60,12 @@ FormatType getFormat(CXCursorKind kind, IPalette::BasicPalette palette) {
     case CXCursor_CallExpr:
     case CXCursor_ObjCMessageExpr:
     case CXCursor_BlockExpr:
-        return palette.identifier;
+        return IPalette::identifier;
     case CXCursor_IntegerLiteral:
     case CXCursor_FloatingLiteral:
     case CXCursor_ImaginaryLiteral:
     case CXCursor_StringLiteral:
-        return palette.string;
+        return IPalette::string;
     case CXCursor_CharacterLiteral:
     case CXCursor_ParenExpr:
     case CXCursor_UnaryOperator:

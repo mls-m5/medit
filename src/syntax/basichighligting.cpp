@@ -17,10 +17,10 @@ const auto wordList = std::vector<std::string>{
     "else",  "switch", "case", "public",  "private", "namespace",
 };
 
-void highlightWord(CursorRange word, const IPalette::BasicPalette &palette) {
+void highlightWord(CursorRange word) {
     for (auto &w : wordList) {
         if (word == w) {
-            ::format(word, palette.statement);
+            ::format(word, IPalette::statement);
             break;
         }
     }
@@ -45,12 +45,12 @@ void BasicHighlighting::highlight(Editor &editor) {
 
     for (auto c : buffer) {
         if (c) {
-            c->f = _palette.standard;
+            c->f = IPalette::standard;
         }
     }
 
     for (auto word : Words(buffer)) {
-        highlightWord(word, _palette);
+        highlightWord(word);
     }
 
     // Identify comment
@@ -62,7 +62,7 @@ void BasicHighlighting::highlight(Editor &editor) {
                 --i;
                 for (; i < line.size(); ++i) {
                     auto &c = line.at(i);
-                    c.f = _palette.comment;
+                    c.f = IPalette::comment;
                 }
                 break;
             }
@@ -71,5 +71,4 @@ void BasicHighlighting::highlight(Editor &editor) {
 }
 
 void BasicHighlighting::update(const IPalette &palette) {
-    _palette = palette.palette();
 }

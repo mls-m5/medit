@@ -64,7 +64,7 @@ void InputBox::updateCursor(IScreen &screen) const {
 
 void InputBox::draw(IScreen &screen) {
     width(screen.width() - x());
-    ::fillRect(screen, {' ', screen.palette().palette().standard}, *this);
+    ::fillRect(screen, {' ', IPalette::standard}, *this);
     ::draw(screen, x() + 1, y() + 1, _title);
 
     _entry.draw(screen);

@@ -12,12 +12,14 @@ inline const std::string standardFormatName = "text";
 class Palette : public IPalette {
     struct Style;
 
-    BasicPalette _basicPalette;
 
     bool _isChanged = true;
 
     std::map<std::string, Color> _palette;
     std::map<std::string, Style> _styles;
+
+    void setFormat(IScreen &screen, Style *, size_t index);
+    Style *getStyle(const std::string &name);
 
 public:
     Palette();
@@ -39,7 +41,4 @@ public:
     //! @see IPalette
     void load(std::istream &stream);
     //! @see IPalette
-    const BasicPalette &palette() const override {
-        return _basicPalette;
-    }
 };

@@ -38,9 +38,27 @@ const auto keytranslations = std::map<int, KeyTranslation>{
     {KEY_F(12), {Key::F12}},
 };
 
-void init() {
+} // namespace
+
+void NCursesScreen::init() {
     ::initscr();
-    ::start_color();
+
+    if (!has_colors()) {
+        _hasColors = false;
+    }
+
+    if (auto s = getenv("COLORTERM");
+        s && s == std::string{"drop-down-terminal"}) {
+        // Todo: use reduced palette
+        _hasColors = false;
+    }
+
+    if (_hasColors) {
+        ::start_color();
+    }
+    else {
+        ::init_pair(1, COLOR_WHITE, COLOR_BLACK);
+    }
     ::raw();
     ::keypad(stdscr, true);
     ::noecho();
@@ -62,14 +80,14 @@ void init() {
     //    ::init_pair(6, COLOR_WHITE, 80); // split color
 }
 
-} // namespace
-
 void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
     ::move(y, x);
     for (size_t tx = 0, i = 0; i < str.size() && tx < width() - this->x();
          ++tx, ++i) {
         auto c = str.at(i);
-        attron(COLOR_PAIR(c.f));
+        if (_hasColors) {
+            attron(COLOR_PAIR(c.f));
+        }
         if (c.c == '\t') {
             ::printw("%s", std::string{std::string(_tabWidth, ' ')}.c_str());
             tx += _tabWidth - 1;
@@ -77,7 +95,9 @@ void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
         else {
             ::printw("%s", std::string{std::string_view{c}}.c_str());
         }
-        attroff(COLOR_PAIR(c.f));
+        if (_hasColors) {
+            attroff(COLOR_PAIR(c.f));
+        }
     }
 }
 
