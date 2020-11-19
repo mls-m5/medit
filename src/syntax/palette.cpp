@@ -129,12 +129,7 @@ void Palette::setFormat(IScreen &screen, Style *style, size_t index) {
 
 bool Palette::update(IScreen &screen) {
     if (_isChanged) {
-        for (auto &style : _styles) {
-            style.second.f =
-                screen.addStyle(style.second.color, style.second.background);
-        }
         _isChanged = false;
-
 
         auto fixFormat = [&](const std::string &name, size_t index) {
             if (auto style = getStyle(name)) {
@@ -143,10 +138,11 @@ bool Palette::update(IScreen &screen) {
         };
 
         fixFormat("text", BasicPalette::standard);
+        fixFormat("current-line", BasicPalette::currentLine);
+        fixFormat("line-numbers", BasicPalette::lineNumbers);
         fixFormat("def:identifier", BasicPalette::identifier);
         fixFormat("def:statement", BasicPalette::statement);
         fixFormat("def:comment", BasicPalette::comment);
-        fixFormat("def:current-line", BasicPalette::currentLine);
         fixFormat("def:string", BasicPalette::string);
         fixFormat("def:type", BasicPalette::type);
 

@@ -38,6 +38,17 @@ const auto keytranslations = std::map<int, KeyTranslation>{
     {KEY_F(12), {Key::F12}},
 };
 
+void reducedPalette() {
+    ::init_pair(IPalette::standard, COLOR_WHITE, COLOR_BLACK);
+    ::init_pair(IPalette::statement, COLOR_RED, COLOR_BLACK);
+    ::init_pair(IPalette::identifier, COLOR_RED, COLOR_BLACK);
+    ::init_pair(IPalette::comment, COLOR_BLUE, COLOR_BLACK);
+    ::init_pair(IPalette::lineNumbers, COLOR_BLUE, COLOR_BLACK);
+    ::init_pair(IPalette::currentLine, COLOR_WHITE, COLOR_BLACK);
+    ::init_pair(IPalette::string, COLOR_YELLOW, COLOR_BLACK);
+    ::init_pair(IPalette::type, COLOR_RED, COLOR_BLACK);
+}
+
 } // namespace
 
 void NCursesScreen::init() {
@@ -47,37 +58,24 @@ void NCursesScreen::init() {
         _hasColors = false;
     }
 
-    if (auto s = getenv("COLORTERM");
-        s && s == std::string{"drop-down-terminal"}) {
+    if (auto s = getenv("GJS_PATH");
+        s && std::string{s}.find("drop-down") != std::string::npos) {
+        // Special case for gnome drop down terminal
         // Todo: use reduced palette
+
         _hasColors = false;
     }
 
+    ::start_color();
     if (_hasColors) {
-        ::start_color();
     }
     else {
-        ::init_pair(1, COLOR_WHITE, COLOR_BLACK);
+        //        ::init_pair(1, COLOR_WHITE, COLOR_BLACK);
+        reducedPalette();
     }
     ::raw();
     ::keypad(stdscr, true);
     ::noecho();
-
-    //    init_color(77, 372, 843, 372);
-    // init_color seems to take a value from 0 to 1000
-    // The first 16 indices are also reserved
-    // it could also be good pracice to use ::has_colors()
-    //    ::init_color(77, 1000, 0, 0);    // Intensive red
-    //    ::init_color(78, 0, 0, 300);     // Dark blue
-    //    ::init_color(79, 50, 50, 100);   // Dark blue
-    //    ::init_color(80, 400, 500, 500); // Gray
-    //    ::init_pair(1, 77, COLOR_BLACK);
-    //    //    ::init_pair(1, COLOR_RED, COLOR_BLACK);
-    //    ::init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    //    ::init_pair(3, COLOR_CYAN, 78); // Line numbers
-    //    ::init_pair(4, COLOR_GREEN, COLOR_WHITE);
-    //    ::init_pair(5, COLOR_WHITE, 79);
-    //    ::init_pair(6, COLOR_WHITE, 80); // split color
 }
 
 void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
@@ -85,9 +83,9 @@ void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
     for (size_t tx = 0, i = 0; i < str.size() && tx < width() - this->x();
          ++tx, ++i) {
         auto c = str.at(i);
-        if (_hasColors) {
-            attron(COLOR_PAIR(c.f));
-        }
+        //        if (_hasColors) {
+        attron(COLOR_PAIR(c.f));
+        //        }
         if (c.c == '\t') {
             ::printw("%s", std::string{std::string(_tabWidth, ' ')}.c_str());
             tx += _tabWidth - 1;
@@ -95,9 +93,9 @@ void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
         else {
             ::printw("%s", std::string{std::string_view{c}}.c_str());
         }
-        if (_hasColors) {
-            attroff(COLOR_PAIR(c.f));
-        }
+        //        if (_hasColors) {
+        attroff(COLOR_PAIR(c.f));
+        //        }
     }
 }
 
@@ -171,6 +169,10 @@ size_t NCursesScreen::height() const {
 }
 
 size_t NCursesScreen::addStyle(const Color &fg, const Color &bg, size_t index) {
+    if (!_hasColors) {
+        return 1;
+    }
+
     ++_lastColor;
 
     ::init_color(_lastColor,

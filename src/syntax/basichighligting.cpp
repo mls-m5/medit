@@ -67,8 +67,15 @@ void BasicHighlighting::highlight(Editor &editor) {
                 break;
             }
         }
+
+        if (!line.empty()) {
+            if (line.front().c == '#') {
+                for (auto &c : line) {
+                    c.f = IPalette::comment;
+                }
+            }
+        }
     }
 }
 
-void BasicHighlighting::update(const IPalette &palette) {
-}
+void BasicHighlighting::update(const IPalette &palette) {}

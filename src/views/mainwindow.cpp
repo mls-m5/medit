@@ -211,7 +211,6 @@ void MainWindow::open(filesystem::path path) {
     }
     _editor.file(std::move(file));
     _editor.bufferView().yScroll(0);
-    //    _editor.mode(createNormalMode());
     updateLocatorBuffer();
 
     updateHighlighting();
