@@ -78,8 +78,12 @@ void Editor::updateCursor(IScreen &screen) const {
         screen.draw(10, screen.height() - 1, _mode->name());
     }
 
-    screen.cursor(_bufferView.x() + _bufferView.numberWidth() + _cursor.x(),
-                  _bufferView.y() + _cursor.y() - _bufferView.yScroll());
+    // Make the cursor appear as it is on the line but can stay on same x
+    // position between longer lines
+    auto tmpCursor = fix(_cursor);
+
+    screen.cursor(_bufferView.x() + _bufferView.numberWidth() + tmpCursor.x(),
+                  _bufferView.y() + tmpCursor.y() - _bufferView.yScroll());
 }
 
 void Editor::updatePalette(const IPalette &palette) {
