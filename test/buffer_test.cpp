@@ -20,4 +20,24 @@ TEST_CASE("fill with text") {
     ASSERT_EQ(returnText.size(), testText.size());
 }
 
+TEST_CASE("insert string single line") {
+    const std::string_view testText = "apa bepa";
+    {
+        Buffer buffer{"apa"};
+        buffer.singleLine(true);
+
+        buffer.insert(0, testText);
+
+        ASSERT_EQ(buffer.text(), "apa bepaapa");
+    }
+    {
+        Buffer buffer{"apa"};
+        buffer.singleLine(true);
+
+        buffer.insert(1, testText);
+
+        ASSERT_EQ(buffer.text(), "apaapa bepa");
+    }
+}
+
 TEST_SUIT_END

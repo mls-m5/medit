@@ -272,10 +272,6 @@ Cursor wordEnd(Cursor cursor) {
         type = getType(cursor);
     }
 
-    //    if (type == 0) {
-    //        return buffer.end();
-    //    }
-
     while (cursor < end) {
         auto nCursor = right(cursor);
         auto nType = getType(nCursor);

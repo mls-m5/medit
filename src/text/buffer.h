@@ -21,11 +21,10 @@ public:
         this->text(text);
     }
 
-    Buffer(std::string_view text)
-        : Buffer(std::string(text)){}
+    Buffer(std::string_view text) : Buffer(std::string(text)) {}
+    Buffer(const char *text) : Buffer(std::string{text}) {}
 
-              [[nodiscard]] const auto &
-          lines() const {
+    [[nodiscard]] const auto &lines() const {
         return _lines;
     }
 
@@ -45,12 +44,14 @@ public:
     }
 
     void insert(size_t index, FString string) {
-        _lines.insert(_lines.begin() + index, std::move(string));
-        changed(true);
-    }
-
-    void insert(iterator position, FString string) {
-        _lines.insert(position, std::move(string));
+        if (_singleLine) {
+            auto pos =
+                (index == 0) ? _lines.front().begin() : _lines.front().end();
+            _lines.front().insert(pos, string);
+        }
+        else {
+            _lines.insert(_lines.begin() + index, std::move(string));
+        }
         changed(true);
     }
 
@@ -63,7 +64,12 @@ public:
         if (numLines == 0) {
             return;
         }
-        _lines.erase(_lines.begin() + l, _lines.begin() + l + numLines);
+        else if (_lines.size() > 1) {
+            _lines.erase(_lines.begin() + l, _lines.begin() + l + numLines);
+        }
+        else {
+            _lines.front().clear();
+        }
         changed(true);
     }
 
@@ -82,6 +88,7 @@ public:
         _oldColors = value;
     }
 
+    //! If the color needs updating
     bool oldColors() const {
         return _oldColors;
     }
@@ -106,8 +113,17 @@ public:
     void text(std::istream &);
     void text(std::ostream &) const;
 
+    void singleLine(bool value) {
+        _singleLine = value;
+    }
+
+    bool singleLine() {
+        return _singleLine;
+    }
+
 private:
     std::vector<FString> _lines = {""};
     bool _changed = false;
     bool _oldColors = false;
+    bool _singleLine = false;
 };

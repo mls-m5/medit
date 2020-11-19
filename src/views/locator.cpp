@@ -6,6 +6,7 @@
 Locator::Locator(IEnvironment &env, Project &projectFiles)
     : _env(&env), _projectFiles(projectFiles) {
     _env.editor(this);
+    buffer().singleLine(true);
     _list.x(0);
     _list.y(1);
     _list.width(20);
