@@ -1,5 +1,7 @@
 #include "clang/clangcompletion.h"
 #include "clangflags.h"
+#include "clangtranslationunit.h"
+#include "clangunsavedfiles.h"
 #include "files/ifile.h"
 #include "files/project.h"
 #include "script/ienvironment.h"
@@ -8,45 +10,6 @@
 #include "clang/clangmodel.h"
 #include <clang-c/Index.h>
 #include <fstream>
-
-namespace {
-struct ClangUnsavedFile {
-    ClangUnsavedFile(std::string content, std::string filename)
-        : content(std::move(content)), filename(std::move(filename)),
-          clangFile({this->content.c_str(),
-                     this->filename.c_str(),
-                     this->content.size()}) {}
-    std::string content;
-    std::string filename;
-    CXUnsavedFile clangFile;
-};
-
-struct ClangTranslationUnit {
-    CXTranslationUnit translationUnit = 0;
-    ClangFlags clangFlags;
-
-    ClangTranslationUnit(CXIndex index,
-                         Project &project,
-                         ClangUnsavedFile &unsavedFile,
-                         filesystem::path path)
-        : clangFlags(project) {
-        auto locationString = path.string();
-
-        translationUnit = clang_parseTranslationUnit(index,
-                                                     locationString.c_str(),
-                                                     clangFlags.args.data(),
-                                                     clangFlags.args.size(),
-                                                     &unsavedFile.clangFile,
-                                                     1,
-                                                     0);
-    }
-
-    ~ClangTranslationUnit() {
-        clang_disposeTranslationUnit(translationUnit);
-    }
-};
-
-} // namespace
 
 std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
     IEnvironment &env) {
