@@ -48,6 +48,7 @@ void ClangHighlight::highlight(IEnvironment &env) {
                                               word.begin().x() + 1);
             auto ccursor = clang_getCursor(context.translationUnit, location);
             auto kind = clang_getCursorKind(ccursor);
+
             format(word, getFormat(kind));
         }
     }

@@ -61,14 +61,32 @@ struct ClangContext {
 
         unsigned int line, col;
         auto start = clang_getRangeStart(extent);
-        clang_getSpellingLocation(start, &range.file, &line, &col, nullptr);
+        //        clang_getSpellingLocation(start, &range.file, &line, &col,
+        //        nullptr);
+        clang_getFileLocation(start, &range.file, &line, &col, nullptr);
         range.begin = {col - 1, line - 1};
 
         auto end = clang_getRangeEnd(extent);
-        clang_getSpellingLocation(end, nullptr, &line, &col, nullptr);
+        //        clang_getSpellingLocation(end, nullptr, &line, &col, nullptr);
+        clang_getFileLocation(end, nullptr, &line, &col, nullptr);
         range.end = {col - 1, line - 1};
 
         return range;
+    }
+
+    struct ClangLocation {
+        CXFile file;
+        Position position;
+    };
+
+    static ClangLocation getLocation(CXCursor cursor) {
+        unsigned int line, col;
+        ClangLocation location;
+        auto cxLocation = clang_getCursorLocation(cursor);
+        clang_getFileLocation(cxLocation, &location.file, &line, &col, nullptr);
+        location.position.x(col - 1);
+        location.position.y(line - 1);
+        return location;
     }
 
     CXCursor getClangCursor(Cursor cursor) {
