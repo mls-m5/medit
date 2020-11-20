@@ -232,7 +232,7 @@ Cursor wordBegin(Cursor cursor) {
     // space = 0, alnum = 1, other = 2
     auto getType = [](Cursor cursor) {
         auto c = content(cursor).front();
-        return isalnum(c) ? 1 : ((!isspace(c)) * 2);
+        return (isalnum(c) || c == '_') ? 1 : ((!isspace(c)) * 2);
     };
     auto type = getType(cursor);
 
@@ -258,7 +258,7 @@ Cursor wordEnd(Cursor cursor) {
     // space = 0, alnum = 1, other = 2
     auto getType = [](Cursor cursor) {
         auto c = content(cursor).front();
-        return isalnum(c) ? 1 : ((!isspace(c)) * 2);
+        return (isalnum(c) || c == '_') ? 1 : ((!isspace(c)) * 2);
     };
 
     auto &buffer = cursor.buffer();
