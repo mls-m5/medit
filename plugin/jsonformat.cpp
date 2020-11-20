@@ -19,7 +19,7 @@ bool JsonFormat::format(Editor &editor) {
                 editor.buffer().text(formatted);
             }
         }
-        catch (Json::ParsingError &e) {
+        catch (std::exception &e) {
         }
         return true;
     }
