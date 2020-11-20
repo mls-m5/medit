@@ -20,7 +20,6 @@ FormatType getFormat(CXCursorKind kind) {
     case CXCursor_TypedefDecl:
     case CXCursor_CXXMethod:
         return IPalette::type;
-
     case CXCursor_Namespace:
     case CXCursor_LinkageSpec:
     case CXCursor_Constructor:

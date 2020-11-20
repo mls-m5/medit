@@ -20,11 +20,6 @@ public:
         currentLine,
         string
     };
-    //    struct BasicPalette {
-
-    //        FormatType standard, identifier, lineNumbers, statement, comment,
-    //            currentLine, string, type;
-    //    };
 
     virtual ~IPalette() = default;
 

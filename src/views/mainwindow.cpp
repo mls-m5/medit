@@ -164,6 +164,13 @@ void MainWindow::draw(IScreen &screen) {
 
 void MainWindow::updateCursor(IScreen &screen) const {
     _inputFocus->updateCursor(screen);
+
+    auto c = _env.key();
+    screen.draw(40,
+                screen.height() - 1,
+                ((c.modifiers == Modifiers::Ctrl) ? "ctrl+'" : "'") +
+                    std::string{c.symbol} + "'" +
+                    c.symbol.byteRepresentation());
 }
 
 bool MainWindow::keyPress(IEnvironment &env) {

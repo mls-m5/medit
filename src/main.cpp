@@ -17,12 +17,6 @@ void refreshScreen(IWindow &window, IScreen &screen) {
     screen.clear();
     window.draw(screen);
 
-    //    screen->draw(40,
-    //                 screen->height() - 1,
-    //                 ((c.modifiers == Modifiers::Ctrl) ? "ctrl+'" : "'") +
-    //                     std::string{c.symbol} + "'" +
-    //                     c.symbol.byteRepresentation());
-
     window.updateCursor(screen);
 
     screen.refresh();

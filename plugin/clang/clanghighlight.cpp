@@ -45,6 +45,7 @@ void ClangHighlight::highlight(IEnvironment &env) {
     if (!editor.file()) {
         return;
     }
+
     auto model = getClangModel();
 
     auto path = filesystem::absolute(editor.file()->path());
@@ -56,11 +57,6 @@ void ClangHighlight::highlight(IEnvironment &env) {
     auto locationString = path.string();
 
     auto &buffer = editor.buffer();
-
-    //    const char *args[2] = {"-std=c++17", "-Iinclude"};
-
-    //    auto translationUnit = clang_parseTranslationUnit(
-    //        model->index, locationString.c_str(), args, 2, nullptr, 0, 0);
 
     auto context = ClangContext{env, *model};
 
@@ -76,7 +72,7 @@ void ClangHighlight::highlight(IEnvironment &env) {
                                               word.begin().y() + 1,
                                               word.begin().x() + 1);
             auto ccursor = clang_getCursor(context.translationUnit, location);
-            CXCursorKind kind = clang_getCursorKind(ccursor);
+            auto kind = clang_getCursorKind(ccursor);
             format(word, getFormat(kind));
         }
     }
