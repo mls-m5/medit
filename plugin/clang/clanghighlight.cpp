@@ -11,31 +11,6 @@
 #include "views/editor.h"
 #include "clang/clangmodel.h"
 
-namespace {
-
-struct Range {
-    Position begin, end;
-    CXFile file;
-};
-
-Range getRange(CXCursor cursor) {
-    Range range;
-    auto extent = clang_getCursorExtent(cursor);
-
-    unsigned int line, col;
-    auto start = clang_getRangeStart(extent);
-    clang_getSpellingLocation(start, &range.file, &line, &col, nullptr);
-    range.begin = {col, line};
-
-    auto end = clang_getRangeEnd(extent);
-    clang_getSpellingLocation(end, nullptr, &line, &col, nullptr);
-    range.end = {col, line};
-
-    return range;
-}
-
-} // namespace
-
 bool ClangHighlight::shouldEnable(filesystem::path path) {
     return isCpp(path);
 }
@@ -48,7 +23,7 @@ void ClangHighlight::highlight(IEnvironment &env) {
 
     auto model = getClangModel();
 
-    auto path = filesystem::absolute(editor.file()->path());
+    auto path = filesystem::absolute(editor.path());
 
     if (!isCpp(path)) {
         return;

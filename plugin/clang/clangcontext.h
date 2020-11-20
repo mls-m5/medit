@@ -49,4 +49,33 @@ struct ClangContext {
 
     ClangContext(IEnvironment &env, ClangModel &model)
         : unsavedFile(getUnsaved(env)), translationUnit(init(env, model)) {}
+
+    struct Range {
+        Position begin, end;
+        CXFile file;
+    };
+
+    static Range getRange(CXCursor cursor) {
+        Range range;
+        auto extent = clang_getCursorExtent(cursor);
+
+        unsigned int line, col;
+        auto start = clang_getRangeStart(extent);
+        clang_getSpellingLocation(start, &range.file, &line, &col, nullptr);
+        range.begin = {col - 1, line - 1};
+
+        auto end = clang_getRangeEnd(extent);
+        clang_getSpellingLocation(end, nullptr, &line, &col, nullptr);
+        range.end = {col - 1, line - 1};
+
+        return range;
+    }
+
+    CXCursor getClangCursor(Cursor cursor) {
+        auto file = clang_getFile(translationUnit, locationString.c_str());
+
+        auto location = clang_getLocation(
+            translationUnit, file, cursor.y() + 1, cursor.x() + 1);
+        return clang_getCursor(translationUnit, location);
+    }
 };

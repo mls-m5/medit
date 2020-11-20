@@ -13,6 +13,7 @@
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
+#include "clang/clangnavigation.h" // extract to plugin later
 #include <functional>
 #include <map>
 
@@ -174,6 +175,10 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
         [](IEnvironment &env) { env.editor().mode(createVisualMode()); },
     },
     {
+        "editor.goto_definition",
+        [](IEnvironment &env) { ClangNavigation::gotoSymbol(env); },
+    },
+    {
         "editor.switch_header",
         [](IEnvironment &env) {
             auto path = env.project().findSwitchHeader(env.editor().path());
@@ -185,7 +190,7 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
     },
     {"quit", [](auto &) { quitMedit(); }},
 };
-}
+} // namespace
 
 void addStandardCommands(IEnvironment &env) {
     for (auto &pair : editorCommands) {

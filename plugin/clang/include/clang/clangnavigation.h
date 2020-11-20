@@ -3,5 +3,6 @@
 #include "meditfwd.h"
 
 class ClangNavigation {
-    void gotoSymbol(IEnvironment &env);
+public:
+    static void gotoSymbol(IEnvironment &env);
 };
