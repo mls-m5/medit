@@ -19,6 +19,8 @@ public:
         return *_buffer;
     }
 
+    void buffer(std::unique_ptr<Buffer> buffer);
+
     size_t numberWidth() const {
         return _numberWidth;
     }

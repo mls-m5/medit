@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     JobQueue queue;
     JobQueue guiQueue;
     Timer timer;
-    Context context(queue, timer);
+    Context context(queue, guiQueue, timer);
 
     MainWindow mainWindow(*screen, context);
 
@@ -59,12 +59,14 @@ int main(int argc, char **argv) {
         });
     });
 
-    if (argc > 1) {
-        mainWindow.open(argv[1]);
-    }
-    else {
-        mainWindow.updateLocatorBuffer();
-    }
+    guiQueue.addTask([argc, argv, &mainWindow] {
+        if (argc > 1) {
+            mainWindow.open(argv[1]);
+        }
+        else {
+            mainWindow.updateLocatorBuffer();
+        }
+    });
 
     mainWindow.resize();
     mainWindow.draw(*screen);
@@ -73,7 +75,6 @@ int main(int argc, char **argv) {
 
     std::thread timerThread([&] { timer.loop(); });
     std::thread jobThread([&] { queue.loop(); });
-    std::thread guiThread([&] { guiQueue.loop(); });
 
     std::thread inputThread([&] {
         while (!medit::main::shouldQuit) {
@@ -95,8 +96,12 @@ int main(int argc, char **argv) {
         guiQueue.stop();
     });
 
+    //    std::thread guiThread([&] { guiQueue.loop(); });
+    guiQueue.loop(); // Make sure that the guiThread is the same thread that
+                     // created everything
+
     inputThread.join();
-    guiThread.join();
+    //    guiThread.join();
     jobThread.join();
     timerThread.join();
 

@@ -24,6 +24,7 @@ class IHighlight;
 class Project;
 class Color;
 class IPalette;
+class IAnnotation;
 
 class Timer;
 class JobQueue;

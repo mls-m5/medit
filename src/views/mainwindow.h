@@ -4,7 +4,7 @@
 #include "locator.h"
 #include "meditfwd.h"
 #include "script/rootenvironment.h"
-#include "syntax/IFormat.h"
+#include "syntax/iformat.h"
 #include "views/completeview.h"
 #include "views/editor.h"
 #include "views/listview.h"
@@ -26,6 +26,7 @@ struct MainWindow : public Window {
     //! Move these
     std::vector<std::unique_ptr<IHighlight>> _highlighting;
     std::vector<std::unique_ptr<IFormat>> _formatting;
+    std::vector<std::unique_ptr<IAnnotation>> _annotation;
 
     MainWindow(IScreen &screen, Context &context);
 

@@ -5,6 +5,7 @@
 #include <iosfwd>
 #include <string>
 #include <string_view>
+#include <thread>
 #include <vector>
 
 class Buffer {
@@ -25,25 +26,30 @@ public:
     Buffer(const char *text) : Buffer(std::string{text}) {}
 
     [[nodiscard]] const auto &lines() const {
+        forceThread();
         return _lines;
     }
 
     [[nodiscard]] bool empty() const {
+        forceThread();
         return _lines.empty() || (_lines.size() == 0 && _lines.front().empty());
     }
 
     //! Get a line and trigger changed
     auto &lineAt(size_t index) {
+        forceThread();
         changed(true);
         return _lines.at(index);
     }
 
     //! Get a line without trigger changed
     const auto &lineAtConst(size_t index) const {
+        forceThread();
         return _lines.at(index);
     }
 
     void insert(size_t index, FString string) {
+        forceThread();
         if (_singleLine) {
             auto pos =
                 (index == 0) ? _lines.front().begin() : _lines.front().end();
@@ -56,11 +62,13 @@ public:
     }
 
     void push_back(FString string = {}) {
+        forceThread();
         _lines.push_back(std::move(string));
         changed(true);
     }
 
     void deleteLine(size_t l, size_t numLines = 1) {
+        forceThread();
         if (numLines == 0) {
             return;
         }
@@ -94,10 +102,15 @@ public:
     }
 
     void clear() {
+        forceThread();
         _lines.clear();
         _lines.push_back({});
+        //        _lines = {{}};
         changed(true);
     }
+
+    //! Create a cursor from a position
+    Cursor cursor(Position pos);
 
     Cursor begin();
     Cursor end();
@@ -121,9 +134,17 @@ public:
         return _singleLine;
     }
 
+    void forceThread() const {
+        if (std::this_thread::get_id() != _threadId) {
+            throw std::runtime_error(
+                "buffer called from another thread than the one starded from");
+        }
+    }
+
 private:
     std::vector<FString> _lines = {""};
     bool _changed = false;
     bool _oldColors = false;
     bool _singleLine = false;
+    std::thread::id _threadId = std::this_thread::get_id();
 };

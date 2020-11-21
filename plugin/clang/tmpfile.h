@@ -1,10 +1,7 @@
 // Copyright Mattias Larsson Sköld 2020
 #pragma once
 
-#include <experimental/filesystem>
 #include <random>
-
-namespace filesystem = std::experimental::filesystem;
 
 //! Creates a path to a temporary file in /tmp folder on creation and removes
 //! file when destructed

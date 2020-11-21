@@ -27,9 +27,6 @@ class Timer {
     bool _isRunning = false;
     size_t nextRef = 0;
 
-    const std::chrono::duration<double> _waitTime =
-        std::chrono::duration<double>{.1};
-
 public:
     size_t setTimeout(DurationT duration, std::function<void()> f);
 

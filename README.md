@@ -15,7 +15,7 @@ Todo:
 - [ ] Ide-tools
   - [x] Switch headers/source
   - [ ] Rename symbol
-  - [ ] Goto definition
+  - [x] Goto definition
   - [x] Switch header/source
   - [x] Auto complete
     - [x] Clang based autocomplete

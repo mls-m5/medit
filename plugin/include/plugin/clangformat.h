@@ -1,6 +1,6 @@
 #pragma once
 
-#include "syntax/IFormat.h"
+#include "syntax/iformat.h"
 
 class ClangFormat : public IFormat {
 public:

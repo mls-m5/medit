@@ -1,6 +1,7 @@
 
 #include "views/mainwindow.h"
 #include "core/context.h"
+#include "core/jobqueue.h"
 #include "core/timer.h"
 #include "files/config.h"
 #include "files/file.h"
@@ -15,11 +16,12 @@
 #include "text/cursorrangeops.h"
 #include "views/inputbox.h"
 #include "views/messagebox.h"
+#include "clang/clangannotation.h"
 #include "clang/clanghighlight.h"
 
 MainWindow::MainWindow(IScreen &screen, Context &context)
-    : View(screen.width(), screen.height()), _locator(_env, _project),
-      _env(context) {
+    : View(screen.width(), screen.height()), _env(context),
+      _locator(_env, _project) {
     _env.editor(&_editor);
     _editor.mode(createNormalMode());
     _editor.showLines(true);
@@ -54,6 +56,8 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
 
     _formatting.push_back(std::make_unique<ClangFormat>());
     _formatting.push_back(std::make_unique<JsonFormat>());
+
+    _annotation.push_back(std::make_unique<ClangAnnotation>());
 }
 
 MainWindow::~MainWindow() = default;
@@ -209,6 +213,7 @@ void MainWindow::open(filesystem::path path) {
     }
     path = filesystem::absolute(path);
     auto file = std::make_unique<File>(path);
+    _editor.buffer(std::make_unique<Buffer>());
     _editor.cursor(Cursor{_editor.buffer()});
     if (filesystem::exists(path)) {
         file->load(_editor.buffer());
@@ -234,24 +239,39 @@ void MainWindow::updatePalette(IScreen &screen) {
 
 void MainWindow::updateHighlighting() {
     auto &timer = _env.context().timer();
+    auto &queue = _env.context().guiQueue();
     if (_updateTimeHandle) {
         timer.cancel(_updateTimeHandle);
         _updateTimeHandle = 0;
     }
 
-    timer.setTimeout(1s, [&] {
-        if (_editor.buffer().oldColors()) {
-            for (auto &highlight : _highlighting) {
-                if (highlight->shouldEnable(_editor.path())) {
-                    highlight->highlight(_env);
+    if (_editor.buffer().oldColors()) {
+        timer.setTimeout(1s, [&] {
+            if (_editor.buffer().oldColors()) {
 
-                    _editor.buffer().oldColors(false);
-                    break;
-                }
+                queue.addTask([&] {
+                    for (auto &highlight : _highlighting) {
+                        if (highlight->shouldEnable(_editor.path())) {
+                            highlight->highlight(_env);
+
+                            _editor.buffer().oldColors(false);
+                            break;
+                        }
+                    }
+
+                    //                for (auto &annotation : _annotation) {
+                    //                    if
+                    //                    (annotation->shouldEnable(_editor.path()))
+                    //                    {
+                    //                        annotation->annotate(_env);
+                    //                        break;
+                    //                    }
+                    //                }
+                    _env.context().redrawScreen();
+                });
             }
-            _env.context().redrawScreen();
-        }
-    });
+        });
+    }
 }
 
 void MainWindow::showPopup(std::unique_ptr<IWindow> popup) {

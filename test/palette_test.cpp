@@ -10,6 +10,7 @@ TEST_SUIT_BEGIN
 
 TEST_CASE("color") {
     auto color = Color{"#abcdef"};
+    
 
     ASSERT_EQ(color.r(), 0xab);
     ASSERT_EQ(color.g(), 0xcd);

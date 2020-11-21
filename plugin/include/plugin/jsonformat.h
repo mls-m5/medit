@@ -1,6 +1,6 @@
 #pragma once
 
-#include "syntax/IFormat.h"
+#include "syntax/iformat.h"
 
 class JsonFormat : public IFormat {
 public:

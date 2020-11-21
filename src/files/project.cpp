@@ -129,6 +129,22 @@ void Project::loadProjectFile() {
     }
 
     if (auto it = json.find("flags"); it != json.end()) {
-        _settings.flags = it->value;
+        _settings.flags.clear();
+
+        if (it->type == Json::String) {
+            auto ss = std::istringstream();
+            _settings.flags = std::vector<std::string>{};
+            for (std::string s; ss >> s;) {
+                _settings.flags.push_back(s);
+            }
+        }
+        else if (it->type == Json::Array) {
+            _settings.flags.clear();
+            for (auto &value : *it) {
+                if (value.type == Json::String) {
+                    _settings.flags.push_back(value.value);
+                }
+            }
+        }
     }
 }

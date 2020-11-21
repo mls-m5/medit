@@ -3,11 +3,13 @@
 #include <functional>
 #include <mutex>
 #include <queue>
+#include <thread>
 
 class JobQueue {
     std::queue<std::function<void()>> _queue;
     std::mutex _waitMutex;
     bool _running = true;
+    std::thread::id _threadId = {};
 
 public:
     //! Wait for another task to come in
@@ -47,8 +49,20 @@ public:
     }
 
     void loop() {
+        _threadId = std::this_thread::get_id();
         while (_running) {
             work();
         }
+    }
+
+    void forceThisThread() {
+        if (!isThisThread()) {
+            throw std::runtime_error("function called from wrong thread");
+        }
+    }
+
+    //! @returns true if the calling thread is the same as the one called loop
+    bool isThisThread() {
+        return std::this_thread::get_id() == _threadId;
     }
 };

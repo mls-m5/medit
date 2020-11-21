@@ -39,11 +39,15 @@ public:
 
     void load();
 
-    auto &buffer() {
+    Buffer &buffer() {
         return _bufferView.buffer();
     }
 
-    auto &bufferView() {
+    void buffer(std::unique_ptr<Buffer> buffer) {
+        _bufferView.buffer(std::move(buffer));
+    }
+
+    BufferView &bufferView() {
         return _bufferView;
     }
 

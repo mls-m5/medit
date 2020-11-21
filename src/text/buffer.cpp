@@ -3,15 +3,23 @@
 #include "text/cursor.h"
 #include <sstream>
 
+Cursor Buffer::cursor(Position pos) {
+    forceThread();
+    return {*this, pos};
+}
+
 Cursor Buffer::begin() {
+    forceThread();
     return {*this};
 }
 
 Cursor Buffer::end() {
+    forceThread();
     return {*this, _lines.back().size(), _lines.size() - 1};
 }
 
 FChar Buffer::front() const {
+    forceThread();
     if (_lines.empty() || _lines.front().empty()) {
         std::out_of_range("buffer is empty when calling front()");
     }
@@ -19,6 +27,7 @@ FChar Buffer::front() const {
 }
 
 FChar Buffer::back() const {
+    forceThread();
     if (_lines.empty() || _lines.front().empty()) {
         std::out_of_range("buffer is empty when calling back()");
     }
@@ -40,6 +49,7 @@ void Buffer::text(std::string str) {
 }
 
 void Buffer::text(std::istream &stream) {
+    forceThread();
     changed(true);
     _lines.clear();
 
@@ -49,13 +59,13 @@ void Buffer::text(std::istream &stream) {
 }
 
 void Buffer::text(std::ostream &stream) const {
+    forceThread();
     if (_lines.empty()) {
         return;
     }
 
     stream << std::string{_lines.front()};
     for (size_t i = 1; i < _lines.size(); ++i) {
-
         stream << "\n" << std::string{_lines.at(i)};
     }
 }

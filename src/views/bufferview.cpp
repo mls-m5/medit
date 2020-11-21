@@ -42,6 +42,10 @@ void BufferView::draw(IScreen &screen) {
     }
 }
 
+void BufferView::buffer(std::unique_ptr<Buffer> buffer) {
+    _buffer = std::move(buffer);
+}
+
 Position BufferView::cursorPosition(Cursor cursor) const {
     return {x() + cursor.x() + _numberWidth, y() + cursor.y() - yScroll()};
 }
