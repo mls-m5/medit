@@ -113,6 +113,16 @@ void MainWindow::addCommands() {
         input->callback([this](std::string value) { open(value); });
         showPopup(std::move(input));
     });
+
+    _env.addCommand("show_console", [this](auto &env) {
+        env.showConsole(true);
+        _inputFocus = &_console;
+    });
+
+    _env.addCommand("escape", [this](IEnvironment &env) {
+        env.showConsole(false);
+        _inputFocus = &_editor;
+    });
 }
 
 void MainWindow::resize(size_t w, size_t h) {
@@ -186,6 +196,13 @@ bool MainWindow::keyPress(IEnvironment &env) {
     }
 
     if (_inputFocus->keyPress(env)) {
+        // Todo: Handle this for reallz in the future
+        if (_inputFocus == &_editor) {
+            _env.editor(&_editor);
+        }
+        if (_inputFocus == &_console) {
+            _env.editor(&_console);
+        }
         updateHighlighting();
         if (_activePopup && _activePopup->isClosed()) {
             _activePopup = nullptr;
@@ -245,28 +262,26 @@ void MainWindow::updateHighlighting() {
         _updateTimeHandle = 0;
     }
 
-    if (_editor.buffer().oldColors()) {
+    if (_editor.buffer().isColorsOld()) {
         _updateTimeHandle = timer.setTimeout(1s, [&] {
-            if (_editor.buffer().oldColors()) {
+            if (_editor.buffer().isColorsOld()) {
 
                 queue.addTask([&] {
                     for (auto &highlight : _highlighting) {
                         if (highlight->shouldEnable(_editor.path())) {
                             highlight->highlight(_env);
 
-                            _editor.buffer().oldColors(false);
+                            _editor.buffer().isColorsOld(false);
                             break;
                         }
                     }
 
-                    //                for (auto &annotation : _annotation) {
-                    //                    if
-                    //                    (annotation->shouldEnable(_editor.path()))
-                    //                    {
-                    //                        annotation->annotate(_env);
-                    //                        break;
-                    //                    }
-                    //                }
+                    for (auto &annotation : _annotation) {
+                        if (annotation->shouldEnable(_editor.path())) {
+                            annotation->annotate(_env);
+                            break;
+                        }
+                    }
                     _env.context().redrawScreen();
                 });
             }

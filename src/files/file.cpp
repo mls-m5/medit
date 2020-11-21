@@ -8,7 +8,7 @@ void File::load(Buffer &buffer) {
     std::ifstream file(_path);
     if (file.is_open()) {
         buffer.text(file);
-        buffer.changed(false);
+        buffer.isChanged(false);
     }
 }
 

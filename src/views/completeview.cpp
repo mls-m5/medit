@@ -15,13 +15,6 @@ void CompleteView::triggerShow(IEnvironment &env) {
     _list.visible(true);
     visible(true);
 
-    //    _cursorPosition = cursorPosition;
-
-    //! Make this position next to cursor
-    //    _list.x(cursorPosition.x());
-    //    _list.y(cursorPosition.y() + 1);
-    //    _list.current(0);
-
     _autoComplete.populate(env);
     updateCompletion(_currentText);
 }

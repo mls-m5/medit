@@ -42,6 +42,5 @@ private:
 
     ListView _list;
     AutoComplete _autoComplete;
-    Position _cursorPosition;
     std::string _currentText;
 };

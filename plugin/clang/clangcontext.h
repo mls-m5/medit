@@ -28,7 +28,7 @@ struct ClangContext {
         locationString = path.string();
         tmpPath = locationString;
 
-        if (buffer.changed()) {
+        if (buffer.isChanged()) {
             tmpFile.emplace(".cpp");
             tmpPath = tmpFile->path.string();
             std::ofstream file(tmpPath);

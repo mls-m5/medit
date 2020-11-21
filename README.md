@@ -5,10 +5,13 @@ Todo:
 - [x] Show/hide console
 - [x] Resize window
 - [x] Quick-open
-- [x] Multi-letter vim combinations
+- [ ] Vim
+  - [x] Multi-letter vim combinations
   - [ ] Implement a lot of them
-- [ ] Visual mode
+  - [ ] Visual mode
+  - [ ] Registers
 - [ ] Undo/Redo
+- [ ] Multiple open editors
 - [x] Buffered screen output
 - [ ] Delayed syntax highlighting
 - [x] Save files

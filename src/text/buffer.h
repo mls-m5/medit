@@ -2,6 +2,7 @@
 
 #include "meditfwd.h"
 #include "text/fstring.h"
+#include <chrono>
 #include <iosfwd>
 #include <string>
 #include <string_view>
@@ -38,7 +39,7 @@ public:
     //! Get a line and trigger changed
     auto &lineAt(size_t index) {
         forceThread();
-        changed(true);
+        isChanged(true);
         return _lines.at(index);
     }
 
@@ -58,13 +59,13 @@ public:
         else {
             _lines.insert(_lines.begin() + index, std::move(string));
         }
-        changed(true);
+        isChanged(true);
     }
 
     void push_back(FString string = {}) {
         forceThread();
         _lines.push_back(std::move(string));
-        changed(true);
+        isChanged(true);
     }
 
     void deleteLine(size_t l, size_t numLines = 1) {
@@ -78,27 +79,35 @@ public:
         else {
             _lines.front().clear();
         }
-        changed(true);
+        isChanged(true);
     }
 
-    auto changed() const {
-        return _changed;
+    auto isChanged() const {
+        return _changedTime > _savedTime;
     }
 
-    void changed(bool value) {
-        _changed = value;
+    void isChanged(bool value) {
+        //        _changed = value;
         if (value) {
-            _oldColors = true;
+            _changedTime = std::chrono::high_resolution_clock::now();
+            //            _oldColors = true;
+        }
+        else {
+            _savedTime = std::chrono::high_resolution_clock::now();
         }
     }
 
-    void oldColors(bool value) {
-        _oldColors = value;
+    void isColorsOld(bool value) {
+        if (value) {
+        }
+        else {
+            _formattedTime = std::chrono::high_resolution_clock ::now();
+        }
     }
 
     //! If the color needs updating
-    bool oldColors() const {
-        return _oldColors;
+    bool isColorsOld() const {
+        return _formattedTime < _changedTime;
     }
 
     void clear() {
@@ -106,7 +115,7 @@ public:
         _lines.clear();
         _lines.push_back({});
         //        _lines = {{}};
-        changed(true);
+        isChanged(true);
     }
 
     //! Create a cursor from a position
@@ -126,6 +135,17 @@ public:
     void text(std::istream &);
     void text(std::ostream &) const;
 
+    friend std::ostream &operator<<(std::ostream &stream,
+                                    const Buffer &buffer) {
+        buffer.text(stream);
+        return stream;
+    }
+
+    friend std::istream &operator>>(std::istream &stream, Buffer &buffer) {
+        buffer.text(stream);
+        return stream;
+    }
+
     void singleLine(bool value) {
         _singleLine = value;
     }
@@ -143,8 +163,13 @@ public:
 
 private:
     std::vector<FString> _lines = {""};
-    bool _changed = false;
-    bool _oldColors = false;
+    //    bool _changed = false;
+    //    bool _oldColors = false;
     bool _singleLine = false;
     std::thread::id _threadId = std::this_thread::get_id();
+
+    using TimePoint = std::chrono::high_resolution_clock::time_point;
+    TimePoint _changedTime;
+    TimePoint _formattedTime;
+    TimePoint _savedTime;
 };

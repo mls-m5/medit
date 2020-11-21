@@ -18,19 +18,34 @@ bool ClangAnnotation::annotate(IEnvironment &env) {
         ss << " " << flag;
     }
 
-    auto file = std::ofstream{tmpFile.path};
-    file << env.editor().buffer().text();
+    std::ofstream{tmpFile.path} << env.editor().buffer();
+    //    auto file = std::ofstream{tmpFile.path};
+    //    file << env.editor().buffer().text();
     //    env.editor().buffer().text(file);
 
-    POpenStream pstream(ss.str());
+    auto command = ss.str();
+
+    POpenStream pstream(command, true);
 
     // Todo parse message in future
 
+    bool shouldShow = false;
+
     for (std::string line; getline(pstream, line);) {
+        if (!shouldShow) {
+            env.console().buffer().clear();
+        }
         env.console().buffer().push_back(line);
+        shouldShow = true;
     }
 
-    env.showConsole(true);
+    if (shouldShow) {
+        env.showConsole(true);
+    }
+
+    //    // Test
+    //    env.showConsole(true);
+    //    env.console().buffer().push_back(command);
 
     return true;
 }

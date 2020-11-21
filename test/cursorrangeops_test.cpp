@@ -55,14 +55,14 @@ TEST_CASE("erase empty range") {
 
     // Do nothing  with empty range
     auto buffer = Buffer{testText};
-    buffer.changed(false);
+    buffer.isChanged(false);
 
     auto cursor = erase({buffer, {1, 0}, {1, 0}});
 
     ASSERT_EQ(buffer.text(), testText);
     ASSERT_EQ(cursor.x(), 1);
     ASSERT_EQ(cursor.y(), 0);
-    ASSERT_EQ(buffer.changed(), false);
+    ASSERT_EQ(buffer.isChanged(), false);
 }
 
 TEST_CASE("erase range - single line") {

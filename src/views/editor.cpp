@@ -2,6 +2,7 @@
 #include "files/file.h"
 #include "keys/keyevent.h"
 #include "modes/imode.h"
+#include "modes/normalmode.h"
 #include "screen/draw.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
@@ -11,7 +12,8 @@
 Editor::~Editor() = default;
 
 Editor::Editor(std::unique_ptr<Buffer> buffer)
-    : _bufferView(std::move(buffer)), _cursor(_bufferView.buffer()) {}
+    : _bufferView(std::move(buffer)), _cursor(_bufferView.buffer()),
+      _mode(createNormalMode()) {}
 
 void Editor::file(std::unique_ptr<IFile> file) {
     _file = std::move(file);
@@ -29,14 +31,14 @@ filesystem::path Editor::path() {
 void Editor::save() {
     if (_file) {
         _file->save(_bufferView.buffer());
-        _bufferView.buffer().changed(false);
+        _bufferView.buffer().isChanged(false);
     }
 }
 
 void Editor::load() {
     if (_file) {
         _file->load(_bufferView.buffer());
-        _bufferView.buffer().changed(false);
+        _bufferView.buffer().isChanged(false);
     }
 }
 

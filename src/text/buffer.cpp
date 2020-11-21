@@ -50,7 +50,7 @@ void Buffer::text(std::string str) {
 
 void Buffer::text(std::istream &stream) {
     forceThread();
-    changed(true);
+    isChanged(true);
     _lines.clear();
 
     for (std::string line; getline(stream, line);) {

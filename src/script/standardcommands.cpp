@@ -159,10 +159,6 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
         [](IEnvironment &env) { build(env); },
     },
     {
-        "editor.escape",
-        [](IEnvironment &env) { escape(env); },
-    },
-    {
         "editor.insertmode",
         [](IEnvironment &env) { env.editor().mode(createInsertMode()); },
     },

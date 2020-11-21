@@ -26,7 +26,7 @@ std::unique_ptr<IMode> createNormalMode() {
             {{"X"}, {"editor.erase"}},
             {{Key::Delete}, {"editor.right\neditor.erase"}},
             {{"x"}, {"editor.right\neditor.erase"}},
-            {{Key::Escape}, {"editor.escape"}},
+            {{Key::Escape}, {"escape"}},
             {{Key::Return}, {"editor.down"}},
             {{"\n"}, {"editor.down"}},
             {{Key::Space}, {"editor.right"}},
