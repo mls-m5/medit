@@ -1,18 +1,26 @@
 #include "completeview.h"
+#include "keys/keyevent.h"
+#include "script/ienvironment.h"
+#include "text/cursorops.h"
+#include "text/cursorrange.h"
+#include "text/cursorrangeops.h"
+#include "views/editor.h"
 
 CompleteView::CompleteView() {
     _list.width(20);
     _list.height(20);
 }
 
-void CompleteView::triggerShow(Position cursorPosition, IEnvironment &env) {
+void CompleteView::triggerShow(IEnvironment &env) {
     _list.visible(true);
     visible(true);
 
+    //    _cursorPosition = cursorPosition;
+
     //! Make this position next to cursor
-    _list.x(cursorPosition.x());
-    _list.y(cursorPosition.y() + 1);
-    _list.current(0);
+    //    _list.x(cursorPosition.x());
+    //    _list.y(cursorPosition.y() + 1);
+    //    _list.current(0);
 
     _autoComplete.populate(env);
     updateCompletion(_currentText);
@@ -29,6 +37,14 @@ void CompleteView::updateCompletion(std::string str) {
     _list.current(selected);
 }
 
+bool CompleteView::keyPress(IEnvironment &env) {
+    if (env.key().key == Key::Text || env.key().key == Key::Backspace ||
+        env.key().key == Key::Delete) {
+        setCursor(env.editor().cursor(), env.editor().bufferView());
+    }
+    return _list.keyPress(env);
+}
+
 void CompleteView::callback(
     std::function<void(CompleteView::CompletionResult)> f) {
     _list.callback([f, this](auto &&, auto &&index, auto &&value) {
@@ -42,4 +58,31 @@ void CompleteView::callback(
         visible(false);
         _list.visible(false);
     });
+}
+
+void CompleteView::setCursor(const Cursor cursor,
+                             const BufferView &bufferView) {
+    auto currentChar = content(left(cursor)).at(0);
+    Cursor begin = cursor;
+    if (isalnum(currentChar)) {
+        // If on for example a newline
+        begin = wordBegin(cursor);
+    }
+    else {
+        begin = cursor; // I.e. Empty string
+    }
+    auto range = CursorRange{begin, cursor};
+    currentText(content(range).front());
+
+    auto screenPosition = bufferView.cursorPosition(begin);
+
+    _list.x(screenPosition.x());
+    _list.y(screenPosition.y() + 1);
+}
+
+void CompleteView::currentText(std::string str) {
+    _currentText = std::move(str);
+    if (visible()) {
+        updateCompletion(_currentText);
+    }
 }

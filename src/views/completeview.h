@@ -16,7 +16,7 @@ public:
     CompleteView();
 
     //! @param cursorPosition is the cursors position _on the screen_
-    void triggerShow(Position cursorPosition, IEnvironment &env);
+    void triggerShow(IEnvironment &env);
 
     void updateCompletion(std::string str);
 
@@ -26,9 +26,7 @@ public:
     }
 
     //! @see IKeySink
-    bool keyPress(IEnvironment &env) override {
-        return _list.keyPress(env);
-    }
+    bool keyPress(IEnvironment &env) override;
 
     //! @see IKeySink
     void updateCursor(IScreen &screen) const override {
@@ -37,16 +35,13 @@ public:
 
     void callback(std::function<void(CompletionResult)> f);
 
-    void currentText(std::string str) {
-        _currentText = std::move(str);
-        if (visible()) {
-            updateCompletion(_currentText);
-        }
-    }
+    void setCursor(Cursor cursor, const BufferView &bufferView);
 
 private:
+    void currentText(std::string str);
+
     ListView _list;
     AutoComplete _autoComplete;
-    //    Position _cursorPosition;
+    Position _cursorPosition;
     std::string _currentText;
 };
