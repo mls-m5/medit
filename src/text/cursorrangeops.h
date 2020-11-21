@@ -7,6 +7,8 @@
 //! Get the text content in a range
 std::vector<FString> content(CursorRange range);
 
+std::string toString(CursorRange range);
+
 Cursor erase(CursorRange range);
 
 void format(CursorRange, FormatType);

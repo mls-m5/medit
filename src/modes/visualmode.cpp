@@ -20,6 +20,7 @@ std::unique_ptr<IMode> createVisualMode() {
             {{"X"}, {"editor.erase"}},
             {{Key::Delete}, {"neditor.erase\neditor.normalmode"}},
             {{"x"}, {"editor.erase\neditor.normalmode"}},
+            {{"d"}, {"editor.erase\neditor.normalmode"}},
             {{Key::Escape}, {"editor.normalmode"}},
             {{Key::Return}, {"editor.down"}},
             {{"\n"}, {"editor.down"}},
@@ -30,6 +31,7 @@ std::unique_ptr<IMode> createVisualMode() {
             {{"w"},
              {"editor.word_end\neditor.right\neditor.word_end\neditor.word_"
               "begin"}},
+            {{"y"}, {"editor.yank\neditor.normalmode"}},
 
         },
     };

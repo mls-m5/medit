@@ -16,6 +16,8 @@ std::unique_ptr<IMode> createNormalMode() {
             {{"j"}, {"editor.down"}},
             {{"k"}, {"editor.up"}},
             {{"J"}, {"editor.join"}},
+            {{"p"}, {"editor.paste"}},
+            {{"P"}, {"editor.paste_before"}},
             {{"o"},
              {"editor.end\neditor.split\neditor.copyindentation\neditor."
               "insertmode"}},
@@ -50,6 +52,10 @@ std::unique_ptr<IMode> createNormalMode() {
         {{"dd"}, {"editor.delete_line"}},
         {{"dw"}, {"editor.delete_word"}},
         {{"diw"}, {"editor.delete_iw"}},
+
+        {{"yy"}, {"editor.yank_line\neditor.normalmode"}},
+        {{"yw"}, {"editor.yank_word\neditor.normalmode"}},
+        {{"yiw"}, {"editor.yank_iw\neditor.normalmode"}},
 
         {{"cc"},
          {"editor.delete_line\neditor.split\neditor.left\neditor.insertmode"}},

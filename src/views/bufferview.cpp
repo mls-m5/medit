@@ -54,17 +54,27 @@ void BufferView::drawSpecial(IScreen &screen,
         auto l = ty + yScroll();
         if (l < buffer().lines().size()) {
             auto line = _buffer->lines().at(l);
-            if (l > range.begin().y() && l < range.end().y()) {
-                line.format(f);
-            }
-            else if (l == range.begin().y()) {
+            if (range.begin().y() == range.end().y() &&
+                l == range.begin().y()) {
+                // Selection on a single line
                 for (auto i = range.begin().x();
-                     i < line.size() && i < line.size();
+                     i < line.size() && i < range.endPosition().x();
                      ++i) {
                     line.at(i).f = f;
                 }
             }
+            else if (l > range.begin().y() && l < range.end().y()) {
+                // Selection on a full line
+                line.format(f);
+            }
+            else if (l == range.begin().y()) {
+                // Selection on first line in multi line selection
+                for (auto i = range.begin().x(); i < line.size(); ++i) {
+                    line.at(i).f = f;
+                }
+            }
             else if (l == range.end().y()) {
+                // Selection on last line in multi line selection
                 for (size_t i = 0; i < range.end().x() && i < line.size();
                      ++i) {
                     line.at(i).f = f;

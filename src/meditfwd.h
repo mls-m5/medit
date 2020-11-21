@@ -25,6 +25,7 @@ class Project;
 class Color;
 class IPalette;
 class IAnnotation;
+class Registers;
 
 class Timer;
 class JobQueue;

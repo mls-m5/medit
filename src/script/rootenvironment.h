@@ -1,8 +1,8 @@
 #pragma once
 
+#include "core/registers.h"
 #include "environment.h"
 #include "meditfwd.h"
-//#include "syntax/palette.h"
 
 class RootEnvironment : public Environment {
     KeyEvent _lastKeyEvent;
@@ -10,7 +10,7 @@ class RootEnvironment : public Environment {
     Project *_project;
     bool _showConsole = false;
     Context &_context;
-    //    Palette _palette;
+    Registers _registers;
 
 public:
     RootEnvironment(Context &context)
@@ -63,20 +63,14 @@ public:
         return _context;
     }
 
-    //! @see IEnvironment
-    //    Palette &palette() override {
-    //        return _palette;
-    //    }
+    Registers &registers() override {
+        return _registers;
+    }
 
     Project &project() override {
         if (!_project) {
             throw std::runtime_error("no project defined");
         }
         return *_project;
-    }
-
-    void call(std::string value) {
-        if (value == "showlocator") {
-        }
     }
 };

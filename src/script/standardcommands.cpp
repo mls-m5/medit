@@ -1,5 +1,6 @@
 
 #include "standardcommands.h"
+#include "core/registers.h"
 #include "files/project.h"
 #include "main.h"
 #include "modes/insertmode.h"
@@ -69,10 +70,33 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
         },
     },
     {
+        "editor.yank_line",
+        [](IEnvironment &env) {
+            auto &e = env.editor();
+            auto cursor = e.cursor();
+            auto line = e.buffer().lineAt(cursor.y());
+            env.registers().save(standardRegister, std::string{line}, true);
+            env.editor().clearSelection();
+        },
+    },
+    {
         "editor.delete_line",
         [](IEnvironment &env) {
             auto &e = env.editor();
+            auto cursor = e.cursor();
+            auto line = e.buffer().lineAt(cursor.y());
+            env.registers().save(standardRegister, std::string{line}, true);
             e.cursor(deleteLine(e.cursor()));
+        },
+    },
+    {
+        "editor.yank_word",
+        [](IEnvironment &env) {
+            auto &e = env.editor();
+            auto cursor = e.cursor();
+            auto range = CursorRange{cursor, right(wordEnd(cursor))};
+            env.registers().save(standardRegister, toString(range));
+            e.clearSelection();
         },
     },
     {
@@ -80,7 +104,19 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
         [](IEnvironment &env) {
             auto &e = env.editor();
             auto cursor = e.cursor();
-            e.cursor(erase({cursor, right(wordEnd(cursor))}));
+            auto range = CursorRange{cursor, right(wordEnd(cursor))};
+            env.registers().save(standardRegister, toString(range));
+            e.cursor(erase(range));
+        },
+    },
+    {
+        "editor.yank_iw",
+        [](IEnvironment &env) {
+            auto &e = env.editor();
+            auto cursor = e.cursor();
+            auto range = CursorRange{wordBegin(cursor), right(wordEnd(cursor))};
+            env.registers().save(standardRegister, toString(range));
+            e.clearSelection();
         },
     },
     {
@@ -88,7 +124,9 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
         [](IEnvironment &env) {
             auto &e = env.editor();
             auto cursor = e.cursor();
-            e.cursor(erase({wordBegin(cursor), right(wordEnd(cursor))}));
+            auto range = CursorRange{wordBegin(cursor), right(wordEnd(cursor))};
+            env.registers().save(standardRegister, toString(range));
+            e.cursor(erase(range));
         },
     },
     {
@@ -121,15 +159,69 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
         },
     },
     {
+        "editor.yank", // copy on vim-language
+        [](IEnvironment &env) {
+            auto &e = env.editor();
+            auto selection = e.selection();
+            if (selection.empty()) {
+                env.registers().save(standardRegister,
+                                     std::string{content(e.cursor())});
+            }
+            else {
+                env.registers().save(standardRegister, toString(selection));
+            }
+        },
+    },
+    {
         "editor.erase",
         [](IEnvironment &env) {
             auto &e = env.editor();
             auto selection = e.selection();
             if (selection.empty()) {
+                env.registers().save(standardRegister,
+                                     std::string{content(e.cursor())});
                 e.cursor(erase(e.cursor()));
             }
             else {
+                env.registers().save(standardRegister, toString(selection));
                 e.cursor(erase(selection), true);
+            }
+        },
+    },
+    {
+        "editor.paste_before",
+        [](IEnvironment &env) {
+            auto str = env.registers().load(standardRegister);
+            auto cursor = env.editor().cursor();
+            if (str.isLine) {
+                env.editor().buffer().insert(cursor.y(), str.value);
+            }
+            else {
+                for (auto c : str.value) {
+                    //! Todo: Make efficient if this slows down
+                    cursor = insert(c, cursor);
+                }
+                env.editor().cursor(left(cursor));
+            }
+        },
+    },
+    {
+        "editor.paste",
+        [](IEnvironment &env) {
+            auto str = env.registers().load(standardRegister);
+            auto cursor = env.editor().cursor();
+            if (str.isLine) {
+                env.editor().buffer().insert(cursor.y() + 1, str.value);
+                cursor.y(cursor.y() + 1);
+                env.editor().cursor(cursor);
+            }
+            else {
+                cursor = right(cursor);
+                for (auto c : str.value) {
+                    //! Todo: Make efficient if this slows down
+                    cursor = insert(c, cursor);
+                }
+                env.editor().cursor(cursor);
             }
         },
     },

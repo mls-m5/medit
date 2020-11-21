@@ -102,10 +102,9 @@ public:
         }
     }
 
-    //! @see IEnvironment
-    //    IPalette &palette() override {
-    //        return root().palette();
-    //    }
+    Registers &registers() override {
+        return root().registers();
+    }
 
     //! @see IEnvironment
     void set(std::string name, Variable variable) override {

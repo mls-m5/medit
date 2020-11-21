@@ -27,6 +27,8 @@ public:
 
     [[nodiscard]] virtual Context &context() = 0;
 
+    [[nodiscard]] virtual Registers &registers() = 0;
+
     virtual void addCommand(std::string,
                             std::function<void(IEnvironment &)>) = 0;
 

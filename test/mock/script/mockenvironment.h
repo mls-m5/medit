@@ -12,7 +12,7 @@ public:
     MOCK_METHOD0(IEnvironment &, root, (), override);
     MOCK_METHOD0(Project &, project, (), override);
     MOCK_METHOD0(Context &, context, (), override);
-    //    MOCK_METHOD0(IPalette &, palette, (), override);
+    MOCK_METHOD0(Registers &, registers, (), override);
     MOCK_CONST_METHOD0(IEnvironment &, root, (), override);
     MOCK_METHOD2(void,
                  addCommand,

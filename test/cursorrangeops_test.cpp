@@ -123,4 +123,11 @@ TEST_CASE("operator ==") {
     ASSERT_EQ(res4, false);
 }
 
+TEST_CASE("toString()") {
+    auto testString = "hello\there"sv;
+    auto buffer = Buffer{testString};
+    auto range = CursorRange{buffer};
+    ASSERT_EQ(testString, toString(range));
+}
+
 TEST_SUIT_END

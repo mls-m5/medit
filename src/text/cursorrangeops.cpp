@@ -4,6 +4,7 @@
 #include "text/buffer.h"
 #include "text/cursorops.h"
 #include <iostream>
+#include <sstream>
 
 //! Returns a list with at least one element
 std::vector<FString> content(CursorRange range) {
@@ -114,4 +115,19 @@ std::ostream &operator<<(std::ostream &stream, CursorRange range) {
         }
     }
     return stream;
+}
+
+std::string toString(CursorRange range) {
+    auto content = ::content(range);
+
+    std::ostringstream ss;
+
+    for (auto line : content) {
+        ss << std::string{line} << "\n";
+    }
+
+    auto str = ss.str();
+    str.pop_back(); // Remove extra newline
+
+    return str;
 }
