@@ -3,6 +3,7 @@
 #include "syntax/ipalette.h"
 #include "text/buffer.h"
 #include "text/cursor.h"
+#include "text/cursorrange.h"
 
 BufferView::~BufferView() = default;
 
@@ -38,6 +39,38 @@ void BufferView::draw(IScreen &screen) {
         }
         else {
             screen.draw(0, y() + ty, fillStr);
+        }
+    }
+}
+
+void BufferView::drawSpecial(IScreen &screen,
+                             CursorRange &range,
+                             FormatType f) {
+    if (!visible()) {
+        return;
+    }
+
+    for (size_t ty = 0; ty < height(); ++ty) {
+        auto l = ty + yScroll();
+        if (l < buffer().lines().size()) {
+            auto line = _buffer->lines().at(l);
+            if (l > range.begin().y() && l < range.end().y()) {
+                line.format(f);
+            }
+            else if (l == range.begin().y()) {
+                for (auto i = range.begin().x();
+                     i < line.size() && i < line.size();
+                     ++i) {
+                    line.at(i).f = f;
+                }
+            }
+            else if (l == range.end().y()) {
+                for (size_t i = 0; i < range.end().x() && i < line.size();
+                     ++i) {
+                    line.at(i).f = f;
+                }
+            }
+            screen.draw(x() + _numberWidth, y() + ty, line);
         }
     }
 }

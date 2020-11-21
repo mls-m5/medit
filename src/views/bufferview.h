@@ -1,6 +1,7 @@
 #pragma once
 
 #include "meditfwd.h"
+#include "text/formattype.h"
 #include "views/scrollview.h"
 #include <memory>
 
@@ -10,6 +11,8 @@ public:
     ~BufferView() override;
 
     void draw(IScreen &) override;
+
+    void drawSpecial(IScreen &, CursorRange &range, FormatType f);
 
     Buffer &buffer() {
         return *_buffer;

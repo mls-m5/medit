@@ -129,7 +129,7 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
                 e.cursor(erase(e.cursor()));
             }
             else {
-                e.cursor(erase(selection));
+                e.cursor(erase(selection), true);
             }
         },
     },

@@ -31,9 +31,14 @@ bool ClangAnnotation::annotate(IEnvironment &env) {
 
     bool shouldShow = false;
 
+    auto pathStr = tmpFile.path.string();
+
     for (std::string line; getline(pstream, line);) {
         if (!shouldShow) {
             env.console().buffer().clear();
+        }
+        if (line.starts_with(pathStr)) {
+            line.replace(0, pathStr.size(), env.editor().path());
         }
         env.console().buffer().push_back(line);
         shouldShow = true;

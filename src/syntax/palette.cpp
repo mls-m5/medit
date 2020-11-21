@@ -140,6 +140,7 @@ bool Palette::update(IScreen &screen) {
         fixFormat("text", BasicPalette::standard);
         fixFormat("current-line", BasicPalette::currentLine);
         fixFormat("line-numbers", BasicPalette::lineNumbers);
+        fixFormat("selection", BasicPalette::selection);
         fixFormat("def:identifier", BasicPalette::identifier);
         fixFormat("def:statement", BasicPalette::statement);
         fixFormat("def:comment", BasicPalette::comment);

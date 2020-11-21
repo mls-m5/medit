@@ -40,6 +40,7 @@ const auto keytranslations = std::map<int, KeyTranslation>{
 
 void reducedPalette() {
     ::init_pair(IPalette::standard, COLOR_WHITE, COLOR_BLACK);
+    ::init_pair(IPalette::selection, COLOR_BLUE, COLOR_WHITE);
     ::init_pair(IPalette::statement, COLOR_RED, COLOR_BLACK);
     ::init_pair(IPalette::identifier, COLOR_RED, COLOR_BLACK);
     ::init_pair(IPalette::comment, COLOR_BLUE, COLOR_BLACK);

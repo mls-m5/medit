@@ -18,7 +18,9 @@ public:
         lineNumbers,
 
         currentLine,
-        string
+        string,
+
+        selection,
     };
 
     virtual ~IPalette() = default;

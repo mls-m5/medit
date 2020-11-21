@@ -55,7 +55,8 @@ public:
         return _cursor;
     }
 
-    Cursor cursor(Cursor c);
+    //! @param deselect = true if you want to disable the selectionAnchor
+    Cursor cursor(Cursor c, bool deselect = false);
 
     void anchor(Cursor cursor) {
         _selectionAnchor = {cursor};

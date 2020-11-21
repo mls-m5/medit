@@ -42,13 +42,17 @@ void Editor::load() {
     }
 }
 
-Cursor Editor::cursor(Cursor c) {
+Cursor Editor::cursor(Cursor c, bool deselect) {
     _cursor = c;
     const auto &lines = _bufferView.buffer().lines();
     if (_cursor.y() > lines.size()) {
         _cursor.y(lines.size());
     }
     fitCursor();
+    if (deselect) {
+        _selectionAnchor.reset();
+    }
+
     return _cursor;
 }
 
@@ -96,6 +100,10 @@ void Editor::draw(IScreen &screen) {
     fillRect(screen, {' ', _background}, x(), y(), width(), height());
 
     _bufferView.draw(screen);
+
+    if (auto sel = selection(); !sel.empty()) {
+        _bufferView.drawSpecial(screen, sel, IPalette::selection);
+    }
 }
 
 void Editor::fitCursor() {

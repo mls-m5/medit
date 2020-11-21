@@ -115,5 +115,11 @@ public:
         _content.clear();
     }
 
+    void format(FormatType f) {
+        for (auto &c : _content) {
+            c.f = f;
+        }
+    }
+
     FString operator+(const FString &other);
 };
