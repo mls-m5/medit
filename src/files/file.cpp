@@ -8,12 +8,14 @@ void File::load(Buffer &buffer) {
     std::ifstream file(_path);
     if (file.is_open()) {
         buffer.text(file);
+        buffer.changed(false);
     }
 }
 
 void File::save(const Buffer &buffer) {
     auto file = std::ofstream{_path};
     buffer.text(file);
+    file << "\n";
 }
 
 std::string File::representation() const {

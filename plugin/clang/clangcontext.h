@@ -29,22 +29,22 @@ struct ClangContext {
         tmpPath = locationString;
 
         if (buffer.changed()) {
-            tmpFile.reset();
+            tmpFile.emplace(".cpp");
+            tmpPath = tmpFile->path.string();
             std::ofstream file(tmpPath);
             buffer.text(file);
-
-            locationString = tmpPath;
         }
 
         auto &project = env.project();
 
         auto clangFlags = ClangFlags{project};
-        return ClangUnsavedFile{buffer.text(), tmpPath};
+        return ClangUnsavedFile{buffer.text(), locationString, tmpPath};
     }
 
     ClangTranslationUnit init(IEnvironment &env, ClangModel &model) {
         auto &project = env.project();
-        return ClangTranslationUnit{model.index, project, unsavedFile, tmpPath};
+        return ClangTranslationUnit{
+            model.index, project, unsavedFile, locationString};
     }
 
     ClangContext(IEnvironment &env, ClangModel &model)

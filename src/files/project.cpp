@@ -9,7 +9,15 @@ namespace {
 
 const std::string_view projectFileName = ".medit.json";
 
+std::string translateInclude(std::string flag, const filesystem::path &root) {
+    if (flag.starts_with("-I")) {
+        flag = "-I" + (root / flag.substr(2)).string();
+    }
+
+    return flag;
 }
+
+} // namespace
 
 filesystem::path Project::root(filesystem::path path) const {
     path = filesystem::absolute(path);
@@ -142,7 +150,8 @@ void Project::loadProjectFile() {
             _settings.flags.clear();
             for (auto &value : *it) {
                 if (value.type == Json::String) {
-                    _settings.flags.push_back(value.value);
+                    _settings.flags.push_back(
+                        translateInclude(value.value, _settings.root));
                 }
             }
         }
