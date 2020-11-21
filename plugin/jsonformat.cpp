@@ -19,6 +19,11 @@ bool JsonFormat::format(Editor &editor) {
                 editor.buffer().text(formatted);
             }
         }
+        catch (Json::ParsingError &e) {
+            auto cursor = editor.buffer().cursor(
+                {e.position.col - 1, e.position.line - 1});
+            editor.cursor(cursor);
+        }
         catch (std::exception &e) {
         }
         return true;
