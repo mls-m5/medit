@@ -139,6 +139,10 @@ KeyEvent NCursesScreen::getInput() {
                         c == 0 ? ' ' : static_cast<char>(c + 'A' - 1),
                         Modifiers::Ctrl};
     }
+    else if (c >= 28 && c <= 31) {
+        // For some reason ctrl+shift+7 is 31
+        return KeyEvent{Key::KeyCombination, '4' + c - 28, Modifiers::Ctrl};
+    }
     else if ((c & 0b11111111) == c) {
         Utf8Char uc{static_cast<char>(c)};
         auto size = utf8size(static_cast<char>(c));
