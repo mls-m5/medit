@@ -178,7 +178,7 @@ void NCursesScreen::cursorStyle(CursorStyle style) {
         using namespace std::literals;
         auto command =
             "echo \"\\e["s + std::to_string(static_cast<int>(style)) + " q\""s;
-        system(command.c_str());
+        //        system(command.c_str());
         _currentCursor = style;
     }
 }
