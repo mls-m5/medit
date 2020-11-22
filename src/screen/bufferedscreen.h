@@ -38,6 +38,8 @@ public:
     size_t addStyle(const Color &foreground,
                     const Color &background,
                     size_t index) override;
+    // @see IScreen
+    void cursorStyle(CursorStyle) override;
 
     //! @see IInput
     KeyEvent getInput() override;

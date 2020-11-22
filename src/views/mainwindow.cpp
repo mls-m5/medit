@@ -158,6 +158,7 @@ void MainWindow::resize(size_t w, size_t h) {
 
 void MainWindow::draw(IScreen &screen) {
     updatePalette(screen);
+    screen.cursorStyle(_editor.mode().cursorStyle());
 
     _editor.draw(screen);
     if (_env.showConsole()) {

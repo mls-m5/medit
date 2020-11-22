@@ -63,6 +63,9 @@ std::unique_ptr<IMode> createNormalMode() {
         {{"ciw"}, {"editor.delete_iw\neditor.insertmode"}},
     }};
 
-    return std::make_unique<Mode>(
-        "normal", std::move(map), createParentMode(), std::move(bufferMap));
+    return std::make_unique<Mode>("normal",
+                                  std::move(map),
+                                  CursorStyle::Block,
+                                  createParentMode(),
+                                  std::move(bufferMap));
 }

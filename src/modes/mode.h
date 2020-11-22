@@ -18,10 +18,12 @@ class Mode : public IMode {
     std::unique_ptr<IMode> _parent;
     std::function<void(Editor &)> _start;
     std::function<void(Editor &)> _exit;
+    CursorStyle _cursorStyle = CursorStyle::Block;
 
 public:
     Mode(std::string name,
          KeyMap map,
+         CursorStyle cursorStyle = CursorStyle::Block,
          std::unique_ptr<IMode> parent = {},
          BufferKeyMap bufferMap = {});
 
@@ -45,7 +47,11 @@ public:
         }
     }
 
-    std::string_view name() override {
+    std::string_view name() const override {
         return _name;
+    }
+
+    CursorStyle cursorStyle() const override {
+        return _cursorStyle;
     }
 };

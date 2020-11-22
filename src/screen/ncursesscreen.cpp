@@ -173,6 +173,16 @@ size_t NCursesScreen::height() const {
     return static_cast<size_t>(::LINES);
 }
 
+void NCursesScreen::cursorStyle(CursorStyle style) {
+    if (_currentCursor != style) {
+        using namespace std::literals;
+        auto command =
+            "echo \"\\e["s + std::to_string(static_cast<int>(style)) + " q\""s;
+        system(command.c_str());
+        _currentCursor = style;
+    }
+}
+
 size_t NCursesScreen::addStyle(const Color &fg, const Color &bg, size_t index) {
     if (!_hasColors) {
         return 1;

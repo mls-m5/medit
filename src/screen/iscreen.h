@@ -1,6 +1,7 @@
 #pragma once
 
 #include "meditfwd.h"
+#include "screen/cursorstyle.h"
 #include "text/fstring.h"
 
 class IScreen {
@@ -23,6 +24,8 @@ public:
         const Color &foreground,
         const Color &background,
         size_t index = std::numeric_limits<size_t>::max()) = 0;
+
+    virtual void cursorStyle(CursorStyle) = 0;
 
     virtual ~IScreen() = default;
 };

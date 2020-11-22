@@ -17,5 +17,6 @@ std::unique_ptr<IMode> createInsertMode() {
     }};
     map.defaultAction({"editor.insert"});
 
-    return std::make_unique<Mode>("insert", std::move(map), createParentMode());
+    return std::make_unique<Mode>(
+        "insert", std::move(map), CursorStyle::Beam, createParentMode());
 }

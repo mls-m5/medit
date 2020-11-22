@@ -4,10 +4,12 @@
 
 Mode::Mode(std::string name,
            KeyMap map,
+           CursorStyle cursorStyle,
            std::unique_ptr<IMode> parent,
            BufferKeyMap bufferMap)
     : _name(std::move(name)), _keyMap(std::move(map)),
-      _bufferMap(std::move(bufferMap)), _parent(std::move(parent)) {}
+      _bufferMap(std::move(bufferMap)), _parent(std::move(parent)),
+      _cursorStyle(cursorStyle) {}
 
 bool Mode::keyPress(IEnvironment &env) {
     const auto key = env.key();

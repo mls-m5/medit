@@ -18,8 +18,11 @@ std::unique_ptr<IMode> createTestMode(bool enableDefaultAction = false) {
         {{"dw"}, {"delete_word"}},
     }};
 
-    return std::make_unique<Mode>(
-        "testmode", std::move(map), nullptr, std::move(bufferMap));
+    return std::make_unique<Mode>("testmode",
+                                  std::move(map),
+                                  CursorStyle::Block,
+                                  nullptr,
+                                  std::move(bufferMap));
 }
 
 TEST_SUIT_BEGIN

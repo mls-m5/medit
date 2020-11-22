@@ -77,6 +77,10 @@ public:
 
     void mode(std::unique_ptr<IMode> mode);
 
+    IMode &mode() {
+        return *_mode;
+    }
+
     void showLines(bool value) {
         _bufferView.showLines(value);
     }

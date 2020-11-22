@@ -1,7 +1,7 @@
 {
     "build": "matmake",
     "flags": [
-        "-std=c++17",
+        "-std=c++2a",
         "-Isrc",
         "-Iinclude",
         "-Iplugin/include",

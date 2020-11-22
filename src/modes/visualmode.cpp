@@ -48,8 +48,11 @@ std::unique_ptr<IMode> createVisualMode() {
         //        {{"ciw"}, {"editor.delete_iw\neditor.insertmode"}},
     }};
 
-    auto mode = std::make_unique<Mode>(
-        "visual", std::move(map), createParentMode(), std::move(bufferMap));
+    auto mode = std::make_unique<Mode>("visual",
+                                       std::move(map),
+                                       CursorStyle::Block,
+                                       createParentMode(),
+                                       std::move(bufferMap));
 
     mode->startCallback([](Editor &e) { e.anchor(e.cursor()); });
     mode->exitCallback([](Editor &e) { e.clearSelection(); });

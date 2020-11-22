@@ -110,6 +110,10 @@ size_t BufferedScreen::addStyle(const Color &foreground,
     return _backend->addStyle(foreground, background, index);
 }
 
+void BufferedScreen::cursorStyle(CursorStyle style) {
+    _backend->cursorStyle(style);
+}
+
 KeyEvent BufferedScreen::getInput() {
     auto key = _input->getInput();
     if (key == Key::Resize) {

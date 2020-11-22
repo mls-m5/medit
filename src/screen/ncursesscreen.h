@@ -30,6 +30,8 @@ public:
         return _palette;
     }
 
+    void cursorStyle(CursorStyle) override;
+
 private:
     void init();
 
@@ -41,6 +43,8 @@ private:
 
     size_t _lastStyle = 16;
     size_t _lastColor = 16;
+
+    CursorStyle _currentCursor = CursorStyle::Block;
 
     //! @see IScreen interface
     size_t addStyle(const Color &fg, const Color &bg, size_t index) override;

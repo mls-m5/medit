@@ -27,5 +27,5 @@ std::unique_ptr<IMode> createParentMode() {
 
     map.defaultAction({});
 
-    return std::make_unique<Mode>("parent", std::move(map));
+    return std::make_unique<Mode>("parent", std::move(map), CursorStyle::Block);
 }
