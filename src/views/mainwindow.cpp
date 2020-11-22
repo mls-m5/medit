@@ -72,16 +72,6 @@ void MainWindow::addCommands() {
         _editor.cursor(fix(_editor.cursor()));
 
         Cursor cursor = _editor.cursor();
-        //        auto currentChar = content(left(cursor)).at(0);
-        //        if (isalnum(currentChar)) {
-        //            // If on for example a newline
-        //            cursor = wordBegin(_editor.cursor());
-        //        }
-        //        else {
-        //            cursor = _editor.cursor(); // I.e. Empty string
-        //        }
-        //        auto range = CursorRange(cursor, _editor.cursor());
-        //        _completeView.currentText(content(range).front());
         _completeView.setCursor(cursor, _editor.bufferView());
         _completeView.triggerShow(_env);
     });
