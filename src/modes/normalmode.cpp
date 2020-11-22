@@ -4,7 +4,7 @@
 #include "modes/mode.h"
 #include "modes/parentmode.h"
 
-std::unique_ptr<IMode> createNormalMode() {
+std::shared_ptr<IMode> createNormalMode() {
     auto map = KeyMap{
         {
             {{Key::Left}, {"editor.left"}},
@@ -34,6 +34,7 @@ std::unique_ptr<IMode> createNormalMode() {
             {{Key::Space}, {"editor.right"}},
             {{"i"}, {"editor.insertmode"}},
             {{"v"}, {"editor.visualmode"}},
+            {{"u"}, {"editor.undo"}},
             {{"I"}, {"editor.home\neditor.insertmode"}},
             {{"a"}, {"editor.right\neditor.insertmode"}},
             {{"A"}, {"editor.end\neditor.insertmode"}},
@@ -63,7 +64,7 @@ std::unique_ptr<IMode> createNormalMode() {
         {{"ciw"}, {"editor.delete_iw\neditor.insertmode"}},
     }};
 
-    return std::make_unique<Mode>("normal",
+    return std::make_shared<Mode>("normal",
                                   std::move(map),
                                   CursorStyle::Block,
                                   createParentMode(),

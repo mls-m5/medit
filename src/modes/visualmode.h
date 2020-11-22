@@ -4,4 +4,4 @@
 #include "modes/imode.h"
 #include <memory>
 
-std::unique_ptr<IMode> createVisualMode();
+std::shared_ptr<IMode> createVisualMode();

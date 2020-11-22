@@ -1,4 +1,3 @@
-
 #include "mls-unit-test/unittest.h"
 #include "text/buffer.h"
 #include <string_view>

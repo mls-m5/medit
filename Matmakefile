@@ -116,4 +116,6 @@ clanghighlighting_test.copy = test/res/annotation_test1.cpp
 
 basichighlighting_test.src += #
 
+history_test.src += #
+
 

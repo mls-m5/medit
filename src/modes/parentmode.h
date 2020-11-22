@@ -4,4 +4,4 @@
 #include <memory>
 
 //! A mode that is shared between other modes
-std::unique_ptr<IMode> createParentMode();
+std::shared_ptr<IMode> createParentMode();

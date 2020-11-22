@@ -6,6 +6,7 @@
 #include "text/cursor.h"
 #include "text/cursorrange.h"
 #include "text/formattype.h"
+#include "text/history.h"
 #include "views/bufferview.h"
 #include <memory>
 #include <optional>
@@ -13,9 +14,10 @@
 class Editor : public View, public IKeySink {
 private:
     BufferView _bufferView;
+    History _history;
     Cursor _cursor;
     std::optional<Cursor> _selectionAnchor;
-    std::unique_ptr<IMode> _mode;
+    std::shared_ptr<IMode> _mode;
     std::unique_ptr<IFile> _file;
     FormatType _background = 1;
 
@@ -38,6 +40,8 @@ public:
     void save();
 
     void load();
+
+    void undo();
 
     Buffer &buffer() {
         return _bufferView.buffer();
@@ -75,7 +79,7 @@ public:
         }
     }
 
-    void mode(std::unique_ptr<IMode> mode);
+    void mode(std::shared_ptr<IMode> mode);
 
     IMode &mode() {
         return *_mode;

@@ -5,7 +5,7 @@
 #include "text/buffer.h"
 #include "views/editor.h"
 
-std::unique_ptr<IMode> createTestMode(bool enableDefaultAction = false) {
+std::shared_ptr<IMode> createTestMode(bool enableDefaultAction = false) {
     auto map = KeyMap{{
         {{Key::Left}, {"test"}},
     }};
@@ -18,7 +18,7 @@ std::unique_ptr<IMode> createTestMode(bool enableDefaultAction = false) {
         {{"dw"}, {"delete_word"}},
     }};
 
-    return std::make_unique<Mode>("testmode",
+    return std::make_shared<Mode>("testmode",
                                   std::move(map),
                                   CursorStyle::Block,
                                   nullptr,

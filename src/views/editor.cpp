@@ -42,6 +42,10 @@ void Editor::load() {
     }
 }
 
+void Editor::undo() {
+    _history.undo(buffer());
+}
+
 Cursor Editor::cursor(Cursor c, bool deselect) {
     _cursor = c;
     const auto &lines = _bufferView.buffer().lines();
@@ -56,11 +60,12 @@ Cursor Editor::cursor(Cursor c, bool deselect) {
     return _cursor;
 }
 
-void Editor::mode(std::unique_ptr<IMode> mode) {
+void Editor::mode(std::shared_ptr<IMode> mode) {
     if (_mode) {
         _mode->exit(*this);
     }
     _mode = move(mode);
+    _history.commit(buffer());
     _mode->start(*this);
 }
 

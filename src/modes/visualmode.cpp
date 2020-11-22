@@ -5,7 +5,7 @@
 #include "modes/parentmode.h"
 #include "views/editor.h"
 
-std::unique_ptr<IMode> createVisualMode() {
+std::shared_ptr<IMode> createVisualMode() {
     auto map = KeyMap{
         {
             {{Key::Left}, {"editor.left"}},
@@ -48,7 +48,7 @@ std::unique_ptr<IMode> createVisualMode() {
         //        {{"ciw"}, {"editor.delete_iw\neditor.insertmode"}},
     }};
 
-    auto mode = std::make_unique<Mode>("visual",
+    auto mode = std::make_shared<Mode>("visual",
                                        std::move(map),
                                        CursorStyle::Block,
                                        createParentMode(),

@@ -3,7 +3,7 @@
 #include "parentmode.h"
 #include "mode.h"
 
-std::unique_ptr<IMode> createParentMode() {
+std::shared_ptr<IMode> createParentMode() {
     auto map = KeyMap{{
         //        {{Key::Escape}, {"escape"}},
         {KeyEvent{Key::F2}, {"editor.goto_definition"}},
@@ -13,6 +13,8 @@ std::unique_ptr<IMode> createParentMode() {
          {"editor.format\neditor.show_open"}},
         {KeyEvent{Key::KeyCombination, 'S', Modifiers::Ctrl},
          {"editor.format\neditor.save"}},
+        {KeyEvent{Key::KeyCombination, 'Z', Modifiers::Ctrl},
+         {"editor.format\neditor.undo"}},
         {KeyEvent{Key::KeyCombination, 'B', Modifiers::Ctrl},
          {"editor.format\neditor.save\neditor.build"}},
         {KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}, {"quit"}},
@@ -27,5 +29,5 @@ std::unique_ptr<IMode> createParentMode() {
 
     map.defaultAction({});
 
-    return std::make_unique<Mode>("parent", std::move(map), CursorStyle::Block);
+    return std::make_shared<Mode>("parent", std::move(map), CursorStyle::Block);
 }

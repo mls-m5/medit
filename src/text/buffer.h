@@ -26,7 +26,16 @@ public:
     Buffer(std::string_view text) : Buffer(std::string(text)) {}
     Buffer(const char *text) : Buffer(std::string{text}) {}
 
-    [[nodiscard]] const auto &lines() const {
+    void copyFrom(const Buffer &buffer) {
+        forceThread();
+
+        _lines = buffer.lines();
+        _singleLine = buffer._singleLine;
+
+        isChanged(true);
+    }
+
+    [[nodiscard]] const std::vector<FString> &lines() const {
         forceThread();
         return _lines;
     }
@@ -37,14 +46,14 @@ public:
     }
 
     //! Get a line and trigger changed
-    auto &lineAt(size_t index) {
+    FString &lineAt(size_t index) {
         forceThread();
         isChanged(true);
         return _lines.at(index);
     }
 
     //! Get a line without trigger changed
-    const auto &lineAtConst(size_t index) const {
+    const FString &lineAtConst(size_t index) const {
         forceThread();
         return _lines.at(index);
     }
@@ -82,7 +91,7 @@ public:
         isChanged(true);
     }
 
-    auto isChanged() const {
+    bool isChanged() const {
         return _changedTime > _savedTime;
     }
 
@@ -163,8 +172,6 @@ public:
 
 private:
     std::vector<FString> _lines = {""};
-    //    bool _changed = false;
-    //    bool _oldColors = false;
     bool _singleLine = false;
     std::thread::id _threadId = std::this_thread::get_id();
 

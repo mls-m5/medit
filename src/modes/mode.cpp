@@ -5,13 +5,14 @@
 Mode::Mode(std::string name,
            KeyMap map,
            CursorStyle cursorStyle,
-           std::unique_ptr<IMode> parent,
+           std::shared_ptr<IMode> parent,
            BufferKeyMap bufferMap)
     : _name(std::move(name)), _keyMap(std::move(map)),
       _bufferMap(std::move(bufferMap)), _parent(std::move(parent)),
       _cursorStyle(cursorStyle) {}
 
 bool Mode::keyPress(IEnvironment &env) {
+    auto lock = shared_from_this();
     const auto key = env.key();
     const auto &action = _keyMap.find(key);
     if (_parent && _parent->keyPress(env)) {
@@ -40,9 +41,5 @@ bool Mode::keyPress(IEnvironment &env) {
         env.run(action);
         return true;
     }
-    //    else if (useDefault) {
-    //        env.run(_keyMap.defaultAction());
-    //        return true;
-    //    }
     return false;
 }

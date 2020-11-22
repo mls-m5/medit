@@ -5,4 +5,4 @@
 
 #include <memory>
 
-std::unique_ptr<IMode> createInsertMode();
+std::shared_ptr<IMode> createInsertMode();

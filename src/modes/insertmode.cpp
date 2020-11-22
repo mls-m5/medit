@@ -3,7 +3,7 @@
 #include "modes/mode.h"
 #include "modes/parentmode.h"
 
-std::unique_ptr<IMode> createInsertMode() {
+std::shared_ptr<IMode> createInsertMode() {
     auto map = KeyMap{{
         {{Key::Left}, {"editor.left"}},
         {{Key::Right}, {"editor.right"}},
@@ -17,6 +17,6 @@ std::unique_ptr<IMode> createInsertMode() {
     }};
     map.defaultAction({"editor.insert"});
 
-    return std::make_unique<Mode>(
+    return std::make_shared<Mode>(
         "insert", std::move(map), CursorStyle::Beam, createParentMode());
 }
