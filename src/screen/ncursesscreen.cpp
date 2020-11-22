@@ -48,6 +48,7 @@ void reducedPalette() {
     ::init_pair(IPalette::currentLine, COLOR_WHITE, COLOR_BLACK);
     ::init_pair(IPalette::string, COLOR_YELLOW, COLOR_BLACK);
     ::init_pair(IPalette::type, COLOR_RED, COLOR_BLACK);
+    ::init_pair(IPalette::error, COLOR_BLACK, COLOR_RED);
 }
 
 } // namespace
@@ -62,8 +63,6 @@ void NCursesScreen::init() {
     if (auto s = getenv("GJS_PATH");
         s && std::string{s}.find("drop-down") != std::string::npos) {
         // Special case for gnome drop down terminal
-        // Todo: use reduced palette
-
         _hasColors = false;
     }
 
@@ -71,7 +70,6 @@ void NCursesScreen::init() {
     if (_hasColors) {
     }
     else {
-        //        ::init_pair(1, COLOR_WHITE, COLOR_BLACK);
         reducedPalette();
     }
     ::raw();
@@ -84,9 +82,7 @@ void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
     for (size_t tx = 0, i = 0; i < str.size() && tx < width() - this->x();
          ++tx, ++i) {
         auto c = str.at(i);
-        //        if (_hasColors) {
         attron(COLOR_PAIR(c.f));
-        //        }
         if (c.c == '\t') {
             ::printw("%s", std::string{std::string(_tabWidth, ' ')}.c_str());
             tx += _tabWidth - 1;
@@ -94,9 +90,7 @@ void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
         else {
             ::printw("%s", std::string{std::string_view{c}}.c_str());
         }
-        //        if (_hasColors) {
         attroff(COLOR_PAIR(c.f));
-        //        }
     }
 }
 
@@ -175,11 +169,12 @@ size_t NCursesScreen::height() const {
 
 void NCursesScreen::cursorStyle(CursorStyle style) {
     if (_currentCursor != style) {
-        using namespace std::literals;
-        auto command =
-            "echo \"\\e["s + std::to_string(static_cast<int>(style)) + " q\""s;
-        //        system(command.c_str());
-        _currentCursor = style;
+        //        using namespace std::literals;
+        //        auto command =
+        //            "echo \"\\e["s + std::to_string(static_cast<int>(style)) +
+        //            " q\""s;
+        //        //        system(command.c_str());
+        //        _currentCursor = style;
     }
 }
 

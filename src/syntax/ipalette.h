@@ -21,6 +21,8 @@ public:
         string,
 
         selection,
+
+        error,
     };
 
     virtual ~IPalette() = default;

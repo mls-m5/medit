@@ -38,14 +38,8 @@ std::shared_ptr<IMode> createVisualMode() {
     map.defaultAction({});
 
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
-        //        {{"dd"}, {"editor.delete_line"}},
-        //        {{"dw"}, {"editor.delete_word"}},
-        //        {{"diw"}, {"editor.delete_iw"}},
-
-        //        {{"cc"},
-        //         {"editor.delete_line\neditor.split\neditor.left\neditor.insertmode"}},
-        //        {{"cw"}, {"editor.delete_word\neditor.insertmode"}},
-        //        {{"ciw"}, {"editor.delete_iw\neditor.insertmode"}},
+        {{"iw"}, {"editor.select_inner_word"}},
+        {{"cw"}, {"editor.word"}},
     }};
 
     auto mode = std::make_shared<Mode>("visual",

@@ -11,12 +11,16 @@ Todo:
   - [x] Visual mode
   - [x] Registers
   - [ ] Full row visual mode
+  - [ ] Implement all navigation shortcuts for all modes (iw aw 'i{' etc)
 - [x] Undo/Redo
   - [ ] Improve memory usage for undo/redo
 - [ ] Multiple open editors
+- [ ] Keep buffers open in background
 - [x] Buffered screen output
 - [x] Delayed syntax highlighting
 - [x] Save files
+- [ ] Find text in file
+- [ ] Find text in project
 - [ ] Ide-tools
   - [x] Switch headers/source
   - [ ] Find usages

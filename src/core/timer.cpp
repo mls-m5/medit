@@ -62,6 +62,6 @@ void Timer::loop() {
 
         using namespace std::literals;
 
-        std::this_thread::sleep_for(.1s);
+        std::this_thread::sleep_for(10ms);
     }
 }

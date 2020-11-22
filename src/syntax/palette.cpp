@@ -146,6 +146,7 @@ bool Palette::update(IScreen &screen) {
         fixFormat("def:comment", BasicPalette::comment);
         fixFormat("def:string", BasicPalette::string);
         fixFormat("def:type", BasicPalette::type);
+        fixFormat("def:error", BasicPalette::error);
 
         auto standardStyle = _styles[standardFormatName];
         screen.addStyle(standardStyle.color, standardStyle.background, 0);
