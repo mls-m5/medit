@@ -42,6 +42,7 @@ public:
     void load();
 
     void undo();
+    void redo();
 
     Buffer &buffer() {
         return _bufferView.buffer();

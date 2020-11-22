@@ -15,6 +15,8 @@ std::shared_ptr<IMode> createParentMode() {
          {"editor.format\neditor.save"}},
         {KeyEvent{Key::KeyCombination, 'Z', Modifiers::Ctrl},
          {"editor.format\neditor.undo"}},
+        {KeyEvent{Key::KeyCombination, 'Y', Modifiers::Ctrl},
+         {"editor.format\neditor.redo"}},
         {KeyEvent{Key::KeyCombination, 'B', Modifiers::Ctrl},
          {"editor.format\neditor.save\neditor.build"}},
         {KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}, {"quit"}},

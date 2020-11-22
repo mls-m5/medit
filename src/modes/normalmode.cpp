@@ -35,6 +35,7 @@ std::shared_ptr<IMode> createNormalMode() {
             {{"i"}, {"editor.insertmode"}},
             {{"v"}, {"editor.visualmode"}},
             {{"u"}, {"editor.undo"}},
+            {{"U"}, {"editor.redo"}},
             {{"I"}, {"editor.home\neditor.insertmode"}},
             {{"a"}, {"editor.right\neditor.insertmode"}},
             {{"A"}, {"editor.end\neditor.insertmode"}},

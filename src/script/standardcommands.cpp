@@ -251,6 +251,10 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
         [](IEnvironment &env) { env.editor().undo(); },
     },
     {
+        "editor.redo",
+        [](IEnvironment &env) { env.editor().redo(); },
+    },
+    {
         "editor.build",
         [](IEnvironment &env) { build(env); },
     },

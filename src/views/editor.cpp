@@ -46,6 +46,10 @@ void Editor::undo() {
     _history.undo(buffer());
 }
 
+void Editor::redo() {
+    _history.redo(buffer());
+}
+
 Cursor Editor::cursor(Cursor c, bool deselect) {
     _cursor = c;
     const auto &lines = _bufferView.buffer().lines();
@@ -71,7 +75,13 @@ void Editor::mode(std::shared_ptr<IMode> mode) {
 
 bool Editor::keyPress(IEnvironment &env) {
     if (_mode) {
-        return _mode->keyPress(env);
+        if (_mode->keyPress(env)) {
+            _history.commit(buffer());
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     return false;

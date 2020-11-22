@@ -13,18 +13,23 @@ TEST_CASE("simple undo") {
     auto history = History{};
 
     auto testString1 = "hello there";
+    auto testString2 = "wazzup?";
 
     auto buffer = Buffer{testString1};
 
     history.commit(buffer);
 
-    buffer = "wazzup?";
+    buffer = testString2;
 
     history.commit(buffer);
 
     history.undo(buffer);
 
     ASSERT_EQ(buffer.text(), testString1);
+
+    history.redo(buffer);
+
+    ASSERT_EQ(buffer.text(), testString2);
 }
 
 TEST_CASE("multi line undo") {
