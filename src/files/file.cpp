@@ -7,15 +7,13 @@ File::File(filesystem::path path) : _path(path) {}
 void File::load(Buffer &buffer) {
     std::ifstream file(_path);
     if (file.is_open()) {
-        buffer.text(file);
+        file >> buffer;
         buffer.isChanged(false);
     }
 }
 
 void File::save(const Buffer &buffer) {
-    auto file = std::ofstream{_path};
-    buffer.text(file);
-    file << "\n";
+    std::ofstream{_path} << buffer << "\n";
 }
 
 std::string File::representation() const {

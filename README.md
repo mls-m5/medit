@@ -9,7 +9,7 @@ Todo:
   - [x] Multi-letter vim combinations
   - [ ] Implement a lot of them
   - [ ] Visual mode
-  - [ ] Registers
+  - [x] Registers
 - [ ] Undo/Redo
 - [ ] Multiple open editors
 - [x] Buffered screen output

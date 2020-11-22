@@ -12,7 +12,7 @@ bool ClangAnnotation::annotate(IEnvironment &env) {
     auto project = env.project();
     std::ostringstream ss;
     TmpFile tmpFile{".cpp"};
-    ss << "clang++ -fsyntax-only ";
+    ss << "clang++ -fsyntax-only -Wno-pragma-once-outside-header ";
     ss << tmpFile.path;
     for (auto &flag : project.settings().flags) {
         ss << " " << flag;
