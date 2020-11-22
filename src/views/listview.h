@@ -39,7 +39,11 @@ public:
 
     void current(size_t value);
 
-    auto current() const {
+    bool isEmpty() {
+        return _lines.empty();
+    }
+
+    size_t current() const {
         return _current;
     }
 };

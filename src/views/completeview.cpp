@@ -20,6 +20,8 @@ void CompleteView::triggerShow(IEnvironment &env) {
 }
 
 void CompleteView::updateCompletion(std::string str) {
+    constexpr bool debug = true;
+
     auto values = _autoComplete.getMatching(str);
     auto selected = _list.current();
     _list.clear();
@@ -27,6 +29,13 @@ void CompleteView::updateCompletion(std::string str) {
         _list.addLine(FString{item.name + "     ", 0} + item.description,
                       item.name);
     }
+
+    if (debug) {
+        if (_list.isEmpty()) {
+            _list.addLine(str + " not found", "");
+        }
+    }
+
     _list.current(selected);
 }
 
@@ -55,15 +64,16 @@ void CompleteView::callback(
 
 void CompleteView::setCursor(const Cursor cursor,
                              const BufferView &bufferView) {
-    auto currentChar = content(left(cursor)).at(0);
-    Cursor begin = cursor;
-    if (isalnum(currentChar)) {
-        // If on for example a newline
-        begin = wordBegin(cursor);
-    }
-    else {
-        begin = cursor; // I.e. Empty string
-    }
+    //    auto currentChar = content(left(cursor)).at(0);
+    //    Cursor begin = cursor;
+    //    if (isalnum(currentChar)) {
+    //        // If on for example a newline
+    //        begin = wordBegin(cursor);
+    //    }
+    //    else {
+    //        begin = cursor; // I.e. Empty string
+    //    }
+    auto begin = autocompleteWordBegin(cursor);
     auto range = CursorRange{begin, cursor};
     currentText(content(range).front());
 

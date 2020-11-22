@@ -20,8 +20,10 @@ struct ClangTranslationUnit {
                                                      locationString.c_str(),
                                                      clangFlags.args.data(),
                                                      clangFlags.args.size(),
-                                                     &unsavedFile.clangFile,
-                                                     1,
+                                                     //&unsavedFile.clangFile,
+                                                     // 1,
+                                                     nullptr, // unsaved
+                                                     0,
                                                      0);
     }
 

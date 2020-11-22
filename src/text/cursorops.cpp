@@ -307,3 +307,17 @@ FChar *contentPtr(Cursor cursor) {
 
     return &line.at(cursor.x());
 }
+
+Cursor autocompleteWordBegin(const Cursor cursor) {
+    auto currentChar = content(left(cursor)).at(0);
+    Cursor begin = cursor;
+    if (isalnum(currentChar)) {
+        // If on for example a newline
+        begin = wordBegin(cursor);
+    }
+    else {
+        begin = cursor; // I.e. Empty string
+    }
+
+    return begin;
+}

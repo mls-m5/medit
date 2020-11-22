@@ -59,14 +59,12 @@ int main(int argc, char **argv) {
         });
     });
 
-    guiQueue.addTask([argc, argv, &mainWindow] {
-        if (argc > 1) {
-            mainWindow.open(argv[1]);
-        }
-        else {
-            mainWindow.updateLocatorBuffer();
-        }
-    });
+    if (argc > 1) {
+        mainWindow.open(argv[1]);
+    }
+    else {
+        mainWindow.updateLocatorBuffer();
+    }
 
     mainWindow.resize();
     mainWindow.draw(*screen);

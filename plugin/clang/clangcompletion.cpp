@@ -1,6 +1,7 @@
 #include "clang/clangcompletion.h"
 #include "clangcontext.h"
 #include "script/ienvironment.h"
+#include "text/cursorops.h"
 #include "clang/clangmodel.h"
 #include <clang-c/Index.h>
 
@@ -9,7 +10,7 @@ std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
 
     auto context = ClangContext{env, *_model};
 
-    auto cursor = env.editor().cursor();
+    auto cursor = autocompleteWordBegin(env.editor().cursor());
 
     auto result = clang_codeCompleteAt(context.translationUnit,
                                        context.locationString.c_str(),
