@@ -9,10 +9,11 @@ struct ClangTranslationUnit {
     CXTranslationUnit translationUnit = 0;
     ClangFlags clangFlags;
 
-    ClangTranslationUnit(CXIndex index,
-                         Project &project,
-                         ClangUnsavedFile &unsavedFile,
-                         filesystem::path path)
+    ClangTranslationUnit(
+        CXIndex index,
+        Project &project,
+        //                         ClangUnsavedFile &unsavedFile,
+        filesystem::path path)
         : clangFlags(project) {
         auto locationString = path.string();
 

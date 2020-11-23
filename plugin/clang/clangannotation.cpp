@@ -3,6 +3,7 @@
 #include "files/popenstream.h"
 #include "files/project.h"
 #include "script/ienvironment.h"
+#include "text/startswith.h"
 #include "tmpfile.h"
 #include "views/editor.h"
 #include <fstream>
@@ -19,9 +20,6 @@ bool ClangAnnotation::annotate(IEnvironment &env) {
     }
 
     std::ofstream{tmpFile.path} << env.editor().buffer();
-    //    auto file = std::ofstream{tmpFile.path};
-    //    file << env.editor().buffer().text();
-    //    env.editor().buffer().text(file);
 
     auto command = ss.str();
 
@@ -37,7 +35,7 @@ bool ClangAnnotation::annotate(IEnvironment &env) {
         if (!shouldShow) {
             env.console().buffer().clear();
         }
-        if (line.starts_with(pathStr)) {
+        if (starts_with(line, pathStr)) {
             line.replace(0, pathStr.size(), env.editor().path());
         }
         env.console().buffer().push_back(line);

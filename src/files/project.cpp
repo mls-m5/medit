@@ -1,6 +1,7 @@
 
 #include "project.h"
 #include "files/extensions.h"
+#include "text/startswith.h"
 #include "json/json.h"
 #include <fstream>
 #include <string_view>
@@ -10,7 +11,7 @@ namespace {
 const std::string_view projectFileName = ".medit.json";
 
 std::string translateInclude(std::string flag, const filesystem::path &root) {
-    if (flag.starts_with("-I")) {
+    if (starts_with(flag, "-I")) {
         flag = "-I" + (root / flag.substr(2)).string();
     }
 

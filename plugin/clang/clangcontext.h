@@ -14,41 +14,60 @@
 #include <string>
 
 struct ClangContext {
-    std::string locationString;
+    //    std::string locationString;
     std::optional<TmpFile> tmpFile;
     std::string tmpPath;
-    ClangUnsavedFile unsavedFile;
+    //    ClangUnsavedFile unsavedFile;
     ClangTranslationUnit translationUnit;
 
-    ClangUnsavedFile getUnsaved(IEnvironment &env) {
+    //    ClangUnsavedFile getUnsaved(IEnvironment &env) {
+    //        auto path = filesystem::absolute(env.editor().file()->path());
+    //        auto &buffer = env.editor().buffer();
+
+    //        locationString = path.string();
+    //        tmpPath = locationString;
+
+    //        if (buffer.isChanged()) {
+    //            tmpFile.emplace(".cpp");
+    //            tmpPath = tmpFile->path.string();
+    //            //            std::ofstream file(tmpPath);
+    //            //            buffer.text(file);
+    //            std::ofstream(tmpPath) << buffer;
+    //        }
+
+    //        auto &project = env.project();
+
+    //        auto clangFlags = ClangFlags{project};
+    //        return ClangUnsavedFile{buffer.text(), locationString, tmpPath};
+    //    }
+
+    ClangTranslationUnit init(IEnvironment &env, ClangModel &model) {
+        auto &project = env.project();
 
         auto path = filesystem::absolute(env.editor().file()->path());
         auto &buffer = env.editor().buffer();
 
-        locationString = path.string();
-        tmpPath = locationString;
+        //        locationString = path.string();
+        //        tmpPath = locationString;
+        tmpPath = path.string();
 
-        if (buffer.isChanged()) {
-            tmpFile.emplace(".cpp");
-            tmpPath = tmpFile->path.string();
-            std::ofstream file(tmpPath);
-            buffer.text(file);
-        }
-
-        auto &project = env.project();
+        //        if (buffer.isChanged()) {
+        tmpFile.emplace(".cpp");
+        tmpPath = tmpFile->path.string();
+        //            std::ofstream file(tmpPath);
+        //            buffer.text(file);
+        std::ofstream(tmpPath) << buffer;
+        //        }
 
         auto clangFlags = ClangFlags{project};
-        return ClangUnsavedFile{buffer.text(), locationString, tmpPath};
-    }
 
-    ClangTranslationUnit init(IEnvironment &env, ClangModel &model) {
-        auto &project = env.project();
         return ClangTranslationUnit{
-            model.index, project, unsavedFile, locationString};
+            model.index, project /*, unsavedFile*/, tmpPath};
     }
 
     ClangContext(IEnvironment &env, ClangModel &model)
-        : unsavedFile(getUnsaved(env)), translationUnit(init(env, model)) {}
+        //        : unsavedFile(getUnsaved(env)),
+        : translationUnit(init(env, model)) {}
 
     struct Range {
         Position begin, end;
@@ -90,7 +109,7 @@ struct ClangContext {
     }
 
     CXCursor getClangCursor(Cursor cursor) {
-        auto file = clang_getFile(translationUnit, locationString.c_str());
+        auto file = clang_getFile(translationUnit, tmpPath.c_str());
 
         auto location = clang_getLocation(
             translationUnit, file, cursor.y() + 1, cursor.x() + 1);
