@@ -265,4 +265,12 @@ TEST_CASE("goto end of word") {
     }
 }
 
+TEST_CASE("for each") {
+    auto buffer = Buffer{"int main() {\n\n}"};
+
+    for (auto c : buffer) {
+        (void)c;
+    }
+}
+
 TEST_SUIT_END

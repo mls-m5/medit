@@ -30,6 +30,9 @@ public:
     constexpr CursorRange(Cursor begin, Cursor end)
         : CursorRange(begin.buffer(), begin, end) {}
 
+    constexpr CursorRange(Cursor begin, Position end)
+        : CursorRange(begin.buffer(), begin, end) {}
+
     constexpr CursorRange(const CursorRange &) = default;
     constexpr CursorRange(CursorRange &&) = default;
     constexpr CursorRange &operator=(const CursorRange &) = default;

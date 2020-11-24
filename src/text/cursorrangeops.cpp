@@ -131,3 +131,7 @@ std::string toString(CursorRange range) {
 
     return str;
 }
+
+CursorRange fix(CursorRange range) {
+    return {fix(range.begin()), fix(range.end())};
+}

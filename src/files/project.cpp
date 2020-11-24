@@ -1,6 +1,7 @@
 
 #include "project.h"
 #include "files/extensions.h"
+#include "text/startswith.h"
 #include "json/json.h"
 #include <fstream>
 #include <string_view>

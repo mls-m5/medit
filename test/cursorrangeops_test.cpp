@@ -130,4 +130,39 @@ TEST_CASE("toString()") {
     ASSERT_EQ(testString, toString(range));
 }
 
+TEST_CASE("for each") {
+    auto testString = "int main() {\n\n}"sv;
+    auto buffer = Buffer{testString};
+
+    auto range = CursorRange(buffer);
+
+    size_t count = 0;
+
+    for (auto c : range) {
+        (void)c;
+        ++count;
+    }
+
+    ASSERT_EQ(count, testString.size());
+}
+
+TEST_CASE("for each - fixed range") {
+    auto testString = "int main() {\n\n}"sv;
+    auto buffer = Buffer{testString};
+
+    auto range = CursorRange(buffer);
+    auto newEnd = range.end().y(100);
+    range = CursorRange{range.begin(), newEnd};
+    size_t count = 0;
+
+    range = fix(range);
+
+    for (auto c : range) {
+        (void)c;
+        ++count;
+    }
+
+    ASSERT_EQ(count, testString.size());
+}
+
 TEST_SUIT_END

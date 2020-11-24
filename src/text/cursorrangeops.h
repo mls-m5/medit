@@ -16,3 +16,5 @@ void format(CursorRange, FormatType);
 bool operator==(CursorRange, std::string_view);
 
 std::ostream &operator<<(std::ostream &, CursorRange);
+
+CursorRange fix(CursorRange);

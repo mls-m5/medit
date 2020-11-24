@@ -13,11 +13,13 @@ std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
     auto cursor = autocompleteWordBegin(env.editor().cursor());
 
     auto result = clang_codeCompleteAt(context.translationUnit,
-                                       context.locationString.c_str(),
+                                       context.tmpPath.c_str(),
                                        cursor.y() + 1,
                                        cursor.x() + 1,
-                                       &context.unsavedFile.clangFile,
-                                       1,
+                                       nullptr,
+                                       0,
+                                       // &context.unsavedFile.clangFile,
+                                       // 1,
                                        clang_defaultCodeCompleteOptions());
 
     if (!result) {
