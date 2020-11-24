@@ -13,6 +13,7 @@
 #include "script/parser.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
+#include "togglecomments.h"
 #include "views/editor.h"
 #include "clang/clangnavigation.h" // extract to plugin later
 #include <functional>
@@ -251,6 +252,10 @@ CommandList editorCommands = {
     {
         "editor.visualmode",
         [](IEnvironment &env) { env.editor().mode(createVisualMode()); },
+    },
+    {
+        "editor.toggle_comment",
+        [](IEnvironment &env) { toggleComments(env); },
     },
     {"quit", [](auto &) { quitMedit(); }},
 };
