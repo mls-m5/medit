@@ -46,6 +46,9 @@ bool ClangAnnotation::annotate(IEnvironment &env) {
 
     if (shouldShow) {
         env.showConsole(true);
+
+        env.console().buffer().push_back(" when compiling with");
+        env.console().buffer().push_back(command);
     }
 
     //    // Test

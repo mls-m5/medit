@@ -10,8 +10,10 @@ namespace {
 const std::string_view projectFileName = ".medit.json";
 
 std::string translateInclude(std::string flag, const filesystem::path &root) {
-    if (flag.starts_with("-I")) {
-        flag = "-I" + (root / flag.substr(2)).string();
+    if (flag.starts_with("-I") && flag.size() > 2) {
+        if (flag.at(2) != '/') {
+            flag = "-I" + (root / flag.substr(2)).string();
+        }
     }
 
     return flag;
