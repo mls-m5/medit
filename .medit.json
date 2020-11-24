@@ -6,6 +6,7 @@
         "-Iinclude",
         "-Iplugin/include",
         "-Iplugin/clang/include",
-        "-Ilib/json.h/include"
+        "-Ilib/json.h/include",
+        "-Itest"
     ]
 }

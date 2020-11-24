@@ -1,17 +1,17 @@
 #pragma once
 
 #include "files/project.h"
-#include "locator.h"
 #include "meditfwd.h"
 #include "script/rootenvironment.h"
 #include "syntax/iformat.h"
 #include "views/completeview.h"
 #include "views/editor.h"
 #include "views/listview.h"
+#include "views/locator.h"
 #include "views/window.h"
 
 struct MainWindow : public Window {
-    Editor _editor;
+    std::vector<Editor> _editors;
     RootEnvironment _env;
     Editor _console;
     Locator _locator;
@@ -19,9 +19,10 @@ struct MainWindow : public Window {
     Project _project;
     size_t _split = 10;
     FString _splitString;
-    IKeySink *_inputFocus = &_editor;
+    IKeySink *_inputFocus = &_editors.front();
     std::unique_ptr<IWindow> _activePopup;
     size_t _updateTimeHandle = 0;
+    size_t _currentEditor = 0;
 
     //! Move these
     std::vector<std::unique_ptr<IHighlight>> _highlighting;
@@ -51,12 +52,16 @@ struct MainWindow : public Window {
     //! Initialize palette colors
     void updatePalette(IScreen &screen);
 
-    //! Update all editors with new highlighting
-    void updateHighlighting();
+    //! Update editor with new highlighting
+    void updateHighlighting(Editor &editor);
 
     void showPopup(std::unique_ptr<IWindow> popup);
 
+    Editor &currentEditor();
+
     void resetFocus();
+
+    void switchEditor();
 
 private:
     void addCommands();

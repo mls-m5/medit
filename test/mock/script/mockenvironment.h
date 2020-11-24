@@ -20,6 +20,7 @@ public:
                  override);
     MOCK_METHOD1(void, showConsole, (bool shown), override);
     MOCK_METHOD1(bool, run, (const Command &command), override);
+    MOCK_METHOD1(Action *, findAction, (const std::string &name), override);
 
     MOCK_METHOD2(void, set, (std::string name, Variable variable), override);
     MOCK_CONST_METHOD1(std::optional<Variable>,

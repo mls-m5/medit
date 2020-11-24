@@ -20,11 +20,12 @@
 #include "clang/clanghighlight.h"
 
 MainWindow::MainWindow(IScreen &screen, Context &context)
-    : View(screen.width(), screen.height()), _env(context),
-      _locator(_env, _project) {
-    _env.editor(&_editor);
-    _editor.mode(createNormalMode());
-    _editor.showLines(true);
+    : View(screen.width(), screen.height()), _editors(2), _env(context),
+      _locator(_env, _project), _currentEditor(0) {
+    _env.editor(&_editors.front());
+    for (auto &editor : _editors) {
+        editor.showLines(true);
+    }
     _console.showLines(false);
     _env.console(&_console);
     _env.project(&_project);
@@ -35,17 +36,18 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
 
     _locator.callback([this](auto &&path) {
         open(path);
-        _inputFocus = &_editor;
+        _inputFocus = &currentEditor();
         _locator.visible(false);
     });
 
     _completeView.callback([this](auto &&result) {
-        auto cursor = _editor.cursor();
+        auto &editor = currentEditor();
+        auto cursor = editor.cursor();
         for (auto c : result.value) {
             cursor = insert(c, cursor);
         }
-        _editor.cursor(cursor);
-        _inputFocus = &_editor;
+        editor.cursor(cursor);
+        _inputFocus = &editor;
     });
 
     addCommands();
@@ -68,22 +70,24 @@ void MainWindow::addCommands() {
         _inputFocus = &_locator;
     });
 
-    _env.addCommand("editor.auto_complete", [this](auto &&) {
-        _editor.cursor(fix(_editor.cursor()));
+    _env.addCommand("editor.auto_complete", [this](IEnvironment &env) {
+        auto &editor = env.editor();
+        editor.cursor(fix(editor.cursor()));
 
-        Cursor cursor = _editor.cursor();
-        _completeView.setCursor(cursor, _editor.bufferView());
+        Cursor cursor = editor.cursor();
+        _completeView.setCursor(cursor, editor.bufferView());
         _completeView.triggerShow(_env);
     });
 
-    _env.addCommand("editor.format", [this](auto &&) {
+    _env.addCommand("editor.format", [this](IEnvironment &env) {
+        auto &editor = env.editor();
         for (auto &format : _formatting) {
-            format->format(_editor);
+            format->format(editor);
         }
     });
 
-    _env.addCommand("editor.open", [this](auto &&) {
-        auto path = _env.get("path");
+    _env.addCommand("editor.open", [this](IEnvironment &env) {
+        auto path = env.get("path");
         if (path) {
             open(path->value());
         }
@@ -93,8 +97,9 @@ void MainWindow::addCommands() {
         showPopup(std::make_unique<MessageBox>());
     });
 
-    _env.addCommand("editor.show_open", [this](auto &&) {
-        auto path = _editor.path();
+    _env.addCommand("editor.show_open", [this](IEnvironment &env) {
+        auto &editor = env.editor();
+        auto path = editor.path();
         if (path.empty()) {
             path = filesystem::current_path();
         }
@@ -111,8 +116,10 @@ void MainWindow::addCommands() {
 
     _env.addCommand("escape", [this](IEnvironment &env) {
         env.showConsole(false);
-        _inputFocus = &_editor;
+        _inputFocus = &currentEditor();
     });
+
+    _env.addCommand("switch_editor", [this](auto &&) { switchEditor(); });
 }
 
 void MainWindow::resize(size_t w, size_t h) {
@@ -123,15 +130,23 @@ void MainWindow::resize(size_t w, size_t h) {
     if (h) {
         height(h);
     }
-    _editor.width(width());
-    if (_env.showConsole()) {
-        _editor.height(height() - _split);
+
+    {
+        size_t index = 0;
+        for (auto &editor : _editors) {
+            editor.x(index * width() / 2);
+            editor.y(0);
+            editor.width(width() / 2);
+            if (_env.showConsole()) {
+                editor.height(height() - _split);
+            }
+            else {
+                editor.height(height() - 1);
+            }
+
+            ++index;
+        }
     }
-    else {
-        _editor.height(height() - 1);
-    }
-    _editor.x(0);
-    _editor.y(0);
 
     _console.width(width());
     _console.height(_split - 1); // 1 character for toolbar
@@ -148,9 +163,11 @@ void MainWindow::resize(size_t w, size_t h) {
 
 void MainWindow::draw(IScreen &screen) {
     updatePalette(screen);
-    screen.cursorStyle(_editor.mode().cursorStyle());
+    screen.cursorStyle(currentEditor().mode().cursorStyle());
 
-    _editor.draw(screen);
+    for (auto &editor : _editors) {
+        editor.draw(screen);
+    }
     if (_env.showConsole()) {
         _console.draw(screen);
         screen.draw(0, height() - _split, _splitString);
@@ -179,22 +196,28 @@ void MainWindow::updateCursor(IScreen &screen) const {
 }
 
 bool MainWindow::keyPress(IEnvironment &env) {
-    if (_inputFocus == &_editor && _completeView.visible()) {
+    if (_inputFocus == &currentEditor() && _completeView.visible()) {
         if (_completeView.keyPress(env)) {
-            updateHighlighting();
+            updateHighlighting(currentEditor());
             return true; // Otherwise give key events to editor
         }
     }
 
-    if (_inputFocus->keyPress(env)) {
+    auto &editor = currentEditor();
+    _env.editor(&editor);
+    Environment scopeEnvironment(&env);
+    scopeEnvironment.editor(&editor);
+    if (_inputFocus->keyPress(scopeEnvironment)) {
+
         // Todo: Handle this for reallz in the future
-        if (_inputFocus == &_editor) {
-            _env.editor(&_editor);
+        if (_inputFocus == &editor) {
+            _env.editor(&editor);
         }
         if (_inputFocus == &_console) {
-            _env.editor(&_console);
+            _env.editor(&editor);
         }
-        updateHighlighting();
+
+        updateHighlighting(currentEditor());
         if (_activePopup && _activePopup->isClosed()) {
             _activePopup = nullptr;
             resetFocus();
@@ -207,8 +230,9 @@ bool MainWindow::keyPress(IEnvironment &env) {
 }
 
 void MainWindow::updateLocatorBuffer() {
-    if (_editor.file()) {
-        _project.updateCache(_editor.file()->path());
+    auto &editor = currentEditor();
+    if (editor.file()) {
+        _project.updateCache(editor.path());
     }
     else {
         _project.updateCache(filesystem::current_path());
@@ -219,21 +243,23 @@ void MainWindow::open(filesystem::path path) {
     if (path.empty()) {
         return;
     }
+    auto &editor = currentEditor();
     path = filesystem::absolute(path);
     auto file = std::make_unique<File>(path);
-    _editor.buffer(std::make_unique<Buffer>());
-    _editor.cursor(Cursor{_editor.buffer()});
+
+    editor.buffer(std::make_unique<Buffer>());
+    editor.cursor(Cursor{editor.buffer()});
     if (filesystem::exists(path)) {
-        file->load(_editor.buffer());
+        file->load(editor.buffer());
     }
     else {
-        _editor.buffer().clear();
+        editor.buffer().clear();
     }
-    _editor.file(std::move(file));
-    _editor.bufferView().yScroll(0);
+    editor.file(std::move(file));
+    editor.bufferView().yScroll(0);
     updateLocatorBuffer();
 
-    updateHighlighting();
+    updateHighlighting(editor);
 }
 
 void MainWindow::updatePalette(IScreen &screen) {
@@ -245,7 +271,7 @@ void MainWindow::updatePalette(IScreen &screen) {
     }
 }
 
-void MainWindow::updateHighlighting() {
+void MainWindow::updateHighlighting(Editor &editor) {
     auto &timer = _env.context().timer();
     auto &queue = _env.context().guiQueue();
     if (_updateTimeHandle) {
@@ -253,22 +279,22 @@ void MainWindow::updateHighlighting() {
         _updateTimeHandle = 0;
     }
 
-    if (_editor.buffer().isColorsOld()) {
+    if (editor.buffer().isColorsOld()) {
         _updateTimeHandle = timer.setTimeout(1s, [&] {
-            if (_editor.buffer().isColorsOld()) {
+            if (editor.buffer().isColorsOld()) {
 
                 queue.addTask([&] {
                     for (auto &highlight : _highlighting) {
-                        if (highlight->shouldEnable(_editor.path())) {
+                        if (highlight->shouldEnable(editor.path())) {
                             highlight->highlight(_env);
 
-                            _editor.buffer().isColorsOld(false);
+                            editor.buffer().isColorsOld(false);
                             break;
                         }
                     }
 
                     for (auto &annotation : _annotation) {
-                        if (annotation->shouldEnable(_editor.path())) {
+                        if (annotation->shouldEnable(editor.path())) {
                             annotation->annotate(_env);
                             break;
                         }
@@ -285,6 +311,25 @@ void MainWindow::showPopup(std::unique_ptr<IWindow> popup) {
     _inputFocus = _activePopup.get();
 }
 
+Editor &MainWindow::currentEditor() {
+    if (_currentEditor >= _editors.size()) {
+        _currentEditor = _editors.size() - 1;
+    }
+    return _editors.at(_currentEditor);
+    //    for (auto &editor : _editors) {
+    //        if (&editor == _inputFocus) {
+    //            return editor;
+    //        }
+    //    }
+
+    throw std::runtime_error("could not get the right editor");
+}
+
 void MainWindow::resetFocus() {
-    _inputFocus = &_editor;
+    _inputFocus = &_editors.at(_currentEditor);
+}
+
+void MainWindow::switchEditor() {
+    _currentEditor = (_currentEditor + 1) % _editors.size();
+    _inputFocus = &currentEditor();
 }

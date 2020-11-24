@@ -58,8 +58,6 @@ BufferedScreen::BufferedScreen(IScreen *screen, IInput *input)
 BufferedScreen::~BufferedScreen() = default;
 
 void BufferedScreen::draw(size_t x, size_t y, const FString &str) {
-    //    _backend->draw(x, y, str);
-
     _canvas->draw(x, y, str);
 }
 
@@ -71,11 +69,9 @@ void BufferedScreen::refresh() {
 
 void BufferedScreen::clear() {
     _canvas->fill(' ');
-    //    _backend->clear();
 }
 
 void BufferedScreen::cursor(size_t x, size_t y) {
-    //    _backend->cursor(x, y);
     _canvas->_cursorX = x;
     _canvas->_cursorY = y;
 }

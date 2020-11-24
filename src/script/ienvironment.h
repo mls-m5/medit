@@ -9,6 +9,8 @@
 
 class IEnvironment {
 public:
+    using Action = std::function<void(IEnvironment &)>;
+
     //! Return the editor active in the current context
     [[nodiscard]] virtual Editor &editor() = 0;
     [[nodiscard]] virtual Editor &console() = 0;
@@ -49,6 +51,8 @@ public:
         }
         return true;
     }
+
+    virtual Action *findAction(const std::string &name) = 0;
 
     virtual void set(std::string name, Variable variable) = 0;
     virtual std::optional<Variable> get(std::string name) const = 0;

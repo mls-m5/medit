@@ -52,7 +52,7 @@ void BufferView::draw(IScreen &screen) {
             }
         }
         else {
-            screen.draw(0, y() + ty, fillStr);
+            //            screen.draw(x(), y() + ty, fillStr);
         }
     }
 }

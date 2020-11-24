@@ -7,8 +7,8 @@
 #include <map>
 
 class Environment : public IEnvironment {
-    using Functions =
-        std::map<std::string, std::function<void(IEnvironment &)>>;
+    using Action = std::function<void(IEnvironment &)>;
+    using Functions = std::map<std::string, Action>;
 
     IEnvironment *_parent = nullptr;
     Editor *_editor = nullptr;
@@ -89,17 +89,25 @@ public:
 
     // @see IEnvironment
     bool run(const Command &command) override {
-        auto action = _context.find(command.text);
-        if (action != _context.end()) {
-            action->second(*this);
+        auto action = findAction(command.text);
+        if (action) {
+            (*action)(*this);
             return true;
-        }
-        if (_parent) {
-            return parent().run(command);
         }
         else {
             return false;
         }
+    }
+
+    Action *findAction(const std::string &name) override {
+        auto action = _context.find(name);
+        if (action != _context.end()) {
+            return &action->second;
+        }
+        if (_parent) {
+            return parent().findAction(name);
+        }
+        return nullptr;
     }
 
     Registers &registers() override {
@@ -108,7 +116,7 @@ public:
 
     //! @see IEnvironment
     void set(std::string name, Variable variable) override {
-        _variables[name] = variable;
+        _variables[name] = std::move(variable);
     }
 
     //! @see IEnvironment
