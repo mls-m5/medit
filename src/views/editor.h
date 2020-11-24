@@ -25,6 +25,11 @@ public:
     Editor(std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>());
     ~Editor() override;
 
+    Editor(const Editor &) = delete;
+    Editor(Editor &&) = delete;
+    Editor &operator=(const Editor &) = delete;
+    Editor &operator=(Editor &&) = delete;
+
     void file(std::unique_ptr<IFile> file);
 
     IFile *file() {
@@ -102,7 +107,7 @@ public:
 
     void updateCursor(IScreen &) const override;
 
-    void updatePalette(const IPalette &palette);
+    //    void updatePalette(const IPalette &palette);
 
     void draw(IScreen &) override;
 

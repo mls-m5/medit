@@ -107,12 +107,12 @@ void Editor::updateCursor(IScreen &screen) const {
                   _bufferView.y() + tmpCursor.y() - _bufferView.yScroll());
 }
 
-void Editor::updatePalette(const IPalette &palette) {
-    _background = palette.getFormat(standardFormatName);
-}
+// void Editor::updatePalette(const IPalette &palette) {
+//    _background = palette.getFormat(standardFormatName);
+//}
 
 void Editor::draw(IScreen &screen) {
-    fillRect(screen, {' ', _background}, x(), y(), width(), height());
+    fillRect(screen, {' ', IPalette::standard}, x(), y(), width(), height());
 
     _bufferView.draw(screen);
 

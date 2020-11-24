@@ -241,7 +241,7 @@ void MainWindow::updatePalette(IScreen &screen) {
         for (auto &highligting : _highlighting) {
             highligting->update(screen.palette());
         }
-        _editor.updatePalette(screen.palette());
+        //        editor.updatePalette(screen.palette());
     }
 }
 
