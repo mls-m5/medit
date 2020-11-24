@@ -21,7 +21,8 @@
 namespace {
 using CommandList = std::map<std::string, std::function<void(IEnvironment &)>>;
 
-CommandList editorCommands = {
+CommandList navigationCommands = {
+
     {
         "editor.left",
         [](IEnvironment &env) {
@@ -72,6 +73,37 @@ CommandList editorCommands = {
         },
     },
     {
+        "editor.goto_definition",
+        [](IEnvironment &env) { ClangNavigation::gotoSymbol(env); },
+    },
+    {
+        "editor.switch_header",
+        [](IEnvironment &env) {
+            auto path = env.project().findSwitchHeader(env.editor().path());
+            if (!path.empty()) {
+                env.set("path", path.string());
+                env.run(parse("editor.open"));
+            }
+        },
+    },
+    {
+        "editor.home",
+        [](IEnvironment &env) {
+            auto &e = env.editor();
+            e.cursor(home(e.cursor()));
+        },
+    },
+    {
+        "editor.end",
+        [](IEnvironment &env) {
+            auto &e = env.editor();
+            e.cursor(end(e.cursor()));
+        },
+    },
+};
+
+CommandList editorCommands = {
+    {
         "editor.yank_line",
         [](IEnvironment &env) {
             auto &e = env.editor();
@@ -104,20 +136,6 @@ CommandList editorCommands = {
         [](IEnvironment &env) {
             auto &e = env.editor();
             e.cursor(split(e.cursor()));
-        },
-    },
-    {
-        "editor.home",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
-            e.cursor(home(e.cursor()));
-        },
-    },
-    {
-        "editor.end",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
-            e.cursor(end(e.cursor()));
         },
     },
     {
@@ -234,25 +252,10 @@ CommandList editorCommands = {
         "editor.visualmode",
         [](IEnvironment &env) { env.editor().mode(createVisualMode()); },
     },
-    {
-        "editor.goto_definition",
-        [](IEnvironment &env) { ClangNavigation::gotoSymbol(env); },
-    },
-    {
-        "editor.switch_header",
-        [](IEnvironment &env) {
-            auto path = env.project().findSwitchHeader(env.editor().path());
-            if (!path.empty()) {
-                env.set("path", path.string());
-                env.run(parse("editor.open"));
-            }
-        },
-    },
     {"quit", [](auto &) { quitMedit(); }},
 };
 
 CommandList selectionCommands = {
-
     {
         "editor.select_word",
         [](IEnvironment &env) {
@@ -275,10 +278,13 @@ CommandList selectionCommands = {
 } // namespace
 
 void addStandardCommands(IEnvironment &env) {
-    for (auto &pair : editorCommands) {
-        env.addCommand(pair.first, pair.second);
-    }
-    for (auto &pair : selectionCommands) {
-        env.addCommand(pair.first, pair.second);
-    }
+    auto addCommands = [&](auto &list) {
+        for (auto &pair : list) {
+            env.addCommand(pair.first, pair.second);
+        }
+    };
+
+    addCommands(navigationCommands);
+    addCommands(editorCommands);
+    addCommands(selectionCommands);
 }
