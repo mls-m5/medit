@@ -5,6 +5,18 @@
 #include "text/cursor.h"
 #include "text/cursorrange.h"
 
+namespace {
+
+size_t getLineNumWidth(size_t numLines) {
+    size_t width = 0;
+    while (numLines /= 10) {
+        ++width;
+    }
+    return width + 1;
+}
+
+} // namespace
+
 BufferView::~BufferView() = default;
 
 BufferView::BufferView(std::unique_ptr<Buffer> buffer)
@@ -14,6 +26,8 @@ void BufferView::draw(IScreen &screen) {
     if (!visible()) {
         return;
     }
+
+    _numberWidth = getLineNumWidth(_buffer->lines().size()) + 1;
     auto fillStr = FString{std::string(width(), ' '), 5};
     for (size_t ty = 0; ty < height(); ++ty) {
         auto l = ty + yScroll();

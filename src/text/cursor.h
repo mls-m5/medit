@@ -1,7 +1,7 @@
 #pragma once
 
 #include "meditfwd.h"
-#include "position.h"
+#include "text/position.h"
 
 class Cursor : public Position {
 private:
