@@ -52,17 +52,18 @@ std::shared_ptr<IMode> createNormalMode() {
 
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
         {{"dd"}, {"editor.delete_line"}},
-        {{"dw"}, {"editor.delete_word"}},
-        {{"diw"}, {"editor.delete_iw"}},
+        {{"dw"}, {"editor.select_word\neditor.erase"}},
+        {{"diw"}, {"editor.select_inner_word\neditor.erase"}},
 
         {{"yy"}, {"editor.yank_line\neditor.normalmode"}},
-        {{"yw"}, {"editor.yank_word\neditor.normalmode"}},
-        {{"yiw"}, {"editor.yank_iw\neditor.normalmode"}},
+        {{"yw"}, {"editor.select_word\neditor.yank\neditor.normalmode"}},
+        {{"yiw"}, {"editor.select_inner_word\neditor.yank\neditor.normalmode"}},
 
         {{"cc"},
          {"editor.delete_line\neditor.split\neditor.left\neditor.insertmode"}},
-        {{"cw"}, {"editor.delete_word\neditor.insertmode"}},
-        {{"ciw"}, {"editor.delete_iw\neditor.insertmode"}},
+        {{"cw"}, {"editor.select_word\neditor.erase\neditor.insertmode"}},
+        {{"ciw"},
+         {"editor.select_inner_word\neditor.erase\neditor.insertmode"}},
     }};
 
     return std::make_shared<Mode>("normal",

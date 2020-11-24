@@ -20,6 +20,8 @@ const auto keytranslations = std::map<int, KeyTranslation>{
     {KEY_UP, {Key::Up}},
     {KEY_LEFT, {Key::Left}},
     {KEY_RIGHT, {Key::Right}},
+    {KEY_HOME, {Key::Home}},
+    {KEY_END, {Key::End}},
     {27, {Key::Escape}},
     {KEY_CANCEL, {Key::Cancel}},
     {KEY_DC, {Key::Delete}},

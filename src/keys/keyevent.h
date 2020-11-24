@@ -11,6 +11,8 @@ enum class Key {
     Down,
     Left,
     Right,
+    Home,
+    End,
     Backspace,
     Delete,
     Return,

@@ -39,7 +39,7 @@ std::shared_ptr<IMode> createVisualMode() {
 
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
         {{"iw"}, {"editor.select_inner_word"}},
-        {{"cw"}, {"editor.word"}},
+        //        {{"w"}, {"editor.select_word"}}, // Done automaticaly
     }};
 
     auto mode = std::make_shared<Mode>("visual",

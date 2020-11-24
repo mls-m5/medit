@@ -19,7 +19,9 @@
 #include <map>
 
 namespace {
-std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
+using CommandList = std::map<std::string, std::function<void(IEnvironment &)>>;
+
+CommandList editorCommands = {
     {
         "editor.left",
         [](IEnvironment &env) {
@@ -90,46 +92,6 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
         },
     },
     {
-        "editor.yank_word",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
-            auto cursor = e.cursor();
-            auto range = CursorRange{cursor, right(wordEnd(cursor))};
-            env.registers().save(standardRegister, toString(range));
-            e.clearSelection();
-        },
-    },
-    {
-        "editor.delete_word",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
-            auto cursor = e.cursor();
-            auto range = CursorRange{cursor, right(wordEnd(cursor))};
-            env.registers().save(standardRegister, toString(range));
-            e.cursor(erase(range));
-        },
-    },
-    {
-        "editor.yank_iw",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
-            auto cursor = e.cursor();
-            auto range = CursorRange{wordBegin(cursor), right(wordEnd(cursor))};
-            env.registers().save(standardRegister, toString(range));
-            e.clearSelection();
-        },
-    },
-    {
-        "editor.delete_iw",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
-            auto cursor = e.cursor();
-            auto range = CursorRange{wordBegin(cursor), right(wordEnd(cursor))};
-            env.registers().save(standardRegister, toString(range));
-            e.cursor(erase(range));
-        },
-    },
-    {
         "editor.insert",
         [](IEnvironment &env) {
             auto &e = env.editor();
@@ -170,6 +132,8 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
             else {
                 env.registers().save(standardRegister, toString(selection));
             }
+
+            e.cursor(selection.begin(), true);
         },
     },
     {
@@ -286,10 +250,35 @@ std::map<std::string, std::function<void(IEnvironment &)>> editorCommands = {
     },
     {"quit", [](auto &) { quitMedit(); }},
 };
+
+CommandList selectionCommands = {
+
+    {
+        "editor.select_word",
+        [](IEnvironment &env) {
+            auto &e = env.editor();
+            auto cursor = e.cursor();
+            auto range = CursorRange{cursor, right(wordEnd(cursor))};
+            e.selection(range);
+        },
+    },
+    {
+        "editor.select_inner_word",
+        [](IEnvironment &env) {
+            auto &e = env.editor();
+            auto cursor = e.cursor();
+            auto range = CursorRange{wordBegin(cursor), right(wordEnd(cursor))};
+            e.selection(range);
+        },
+    },
+};
 } // namespace
 
 void addStandardCommands(IEnvironment &env) {
     for (auto &pair : editorCommands) {
+        env.addCommand(pair.first, pair.second);
+    }
+    for (auto &pair : selectionCommands) {
         env.addCommand(pair.first, pair.second);
     }
 }

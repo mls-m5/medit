@@ -7,6 +7,6 @@ inline bool shouldQuit = false;
 } // namespace main
 } // namespace medit
 
-void quitMedit() {
+inline void quitMedit() {
     medit::main::shouldQuit = true;
 }

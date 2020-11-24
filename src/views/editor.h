@@ -83,6 +83,11 @@ public:
         }
     }
 
+    void selection(CursorRange range) {
+        anchor(range.begin());
+        cursor(range.end());
+    }
+
     void mode(std::shared_ptr<IMode> mode);
 
     IMode &mode() {
