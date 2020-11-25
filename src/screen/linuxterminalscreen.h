@@ -30,6 +30,15 @@ public:
     //! IInput
     KeyEvent getInput() override;
 
+    size_t addStyle(const Color &foreground,
+                    const Color &background,
+                    size_t index = std::numeric_limits<size_t>::max()) override;
+
+    void cursorStyle(CursorStyle) override;
+
 private:
+    struct Style;
+    std::vector<Style> _styles;
+    size_t _lastStyle = 16;
     Palette _palette;
 };

@@ -1,69 +1,79 @@
 
 #include "linuxterminalscreen.h"
 #include "files/popenstream.h"
+#include "syntax/color.h"
 #include "text/fstring.h"
+#include <termios.h>
+#include <unistd.h>
 
 namespace {
 
-struct Canvas {
-    std::vector<FChar> data;
-    size_t width = 0;
-
-    FChar &at(size_t x, size_t y) {
-        return data.at(y * width + x);
-    }
-
-    void draw(size_t x, size_t y, const FString &str) {
-        for (size_t tx = x; (tx + x) < width && tx < str.size(); ++tx) {
-            at(tx + x, y) = str.at(tx - x);
-        }
-    }
-
-    void resize(size_t w, size_t h) {
-        width = w;
-        data.resize(w * h);
-    }
-
-    void clear() {
-        for (auto &c : data) {
-            c = {" "};
-        }
-    }
-
-    void refresh() {
-        system("tput cup 0 0");
-        for (auto &c : data) {
-            std::cout << std::string{c};
-        }
-        std::cout.flush();
-    }
+struct KeyTranslation {
+    Key key;
+    Utf8Char text{};
 };
 
-std::string ttyString() {
-    std::ios::sync_with_stdio(false);
-    std::string ttyString;
-    POpenStream{"tty"} >> ttyString;
-    return ttyString;
-}
+//! Keys that starts with ^
+const auto keytranslations = std::map<int, KeyTranslation>{
+    {27, {Key::Escape}},
+    {127, {Key::Backspace}},
+    {13, {Key::Text, "\n"}},
+};
 
-//! Check man stty for settings
-void setTtySetting(std::string setting) {
-    system(("stty -F " + ttyString() + " " + setting).c_str());
-}
+const auto escapeKeytranslations = std::map<int, KeyTranslation>{};
 
-Canvas canvas;
+// std::string ttyString() {
+//    std::ios::sync_with_stdio(false);
+//    std::string ttyString;
+//    POpenStream{"tty"} >> ttyString;
+//    return ttyString;
+//}
+
+////! Check man stty for settings
+// void setTtySetting(std::string setting) {
+//    system(("stty -F " + ttyString() + " " + setting).c_str());
+//}
+
+termios originalTermiosSettings;
 
 } // namespace
 
+struct LinuxTerminalScreen::Style {
+    Color foreground;
+    Color background;
+};
+
 LinuxTerminalScreen::LinuxTerminalScreen() {
-    //    system(("stty -F " + ttyString() + " raw").c_str());
-    setTtySetting("raw");
-    setTtySetting("-echo");
-    canvas.resize(width(), height());
+    _styles.resize(100);
+
+    // For more info check, stty --help
+    //    setTtySetting("icanon"); // Enable special characters
+    //    setTtySetting("raw");
+    //    setTtySetting("-echo");
+    //    canvas.resize(width(), height());
+
+    tcgetattr(STDIN_FILENO, &originalTermiosSettings);
+    termios settings = originalTermiosSettings;
+
+    //    settings.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+    //    settings.c_oflag &= ~(OPOST);
+    //    settings.c_cflag |= (CS8);
+    //    settings.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+
+    settings.c_iflag &= ~(ICRNL | IXON);
+    // IXION is for ctrl+z and ctrl+q
+    // ICRNL is for disabling ctrl+m -> \n and ctrl+j -> 13
+    settings.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+    // Isig prevents ctrl+c or ctrl+z from generating signals
+    // IExten is for ctrl+v
+    //    settings.c_cc[VMIN] = 0;  // Minimum characters needed to read (could
+    //    be 0) settings.c_cc[VTIME] = 1; // Minimal time in tenths of seconds
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &settings);
 }
 
 LinuxTerminalScreen::~LinuxTerminalScreen() {
-    system(("stty -F " + ttyString() + " sane").c_str());
+    //    system(("stty -F " + ttyString() + " sane").c_str());
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &originalTermiosSettings);
 }
 
 void LinuxTerminalScreen::draw(size_t x, size_t y, const FString &str) {
@@ -71,18 +81,52 @@ void LinuxTerminalScreen::draw(size_t x, size_t y, const FString &str) {
     //    system(("tput cup " + std::to_string(y) + " " +
     //    std::to_string(x)).c_str()); std::cout << std::string{str};
     //    std::cout.flush();
-    canvas.draw(x, y, str);
+
+    //    canvas.draw(x, y, str);
+    //    printf("\033[%d;%dH", static_cast<int>(y + 1), static_cast<int>(x +
+    //    1));
+    //    std::printf("%s", std::string{str}.c_str());
+
+    std::ostringstream ss;
+
+    auto setFgColor = [&ss](Color c) {
+        ss << "\033[38;2;" << static_cast<int>(c.r()) << ";"
+           << static_cast<int>(c.g()) << ";" << static_cast<int>(c.b()) << "m";
+    };
+
+    auto setBgColor = [&ss](Color c) {
+        ss << "\033[48;2;" << static_cast<int>(c.r()) << ";"
+           << static_cast<int>(c.g()) << ";" << static_cast<int>(c.b()) << "m";
+    };
+
+    auto prevF = FormatType{1};
+
+    std::cout << "\033[" << (y + 1) << ";" << (x + 1) << "H";
+
+    for (auto &c : str) {
+        if (c.f != prevF) {
+            prevF = c.f;
+            auto &style = _styles.at(c.f);
+            setFgColor(style.foreground);
+            setBgColor(style.background);
+        }
+        ss << &c.c.front();
+    }
+
+    std::cout << ss.str();
 }
 
 void LinuxTerminalScreen::refresh() {
-    canvas.refresh();
+    std::cout.flush();
 }
 
-void LinuxTerminalScreen::clear() {
-    canvas.clear();
-}
+void LinuxTerminalScreen::clear() {}
 
-void LinuxTerminalScreen::cursor(size_t x, size_t y) {}
+void LinuxTerminalScreen::cursor(size_t x, size_t y) {
+    std::printf(
+        "\033[%d;%dH", static_cast<int>(y + 1), static_cast<int>(x + 1));
+    std::fflush(stdout);
+}
 
 size_t LinuxTerminalScreen::x() const {
     return 0;
@@ -108,8 +152,55 @@ size_t LinuxTerminalScreen::height() const {
 KeyEvent LinuxTerminalScreen::getInput() {
     KeyEvent event;
 
-    event.symbol = std::cin.get();
-    event.key = Key::Text;
+    auto c = std::cin.get();
 
+    event.symbol = c;
+
+    if (c == 27) {
+        auto c2 = std::cin.peek();
+        if (c2 == '[') {
+            std::cin.get();
+            auto c3 = std::cin.get();
+            if (auto f = escapeKeytranslations.find(c3);
+                f != escapeKeytranslations.end()) {
+                return KeyEvent{f->second.key, f->second.text};
+            }
+        }
+    }
+    if (auto f = keytranslations.find(c); f != keytranslations.end()) {
+        return KeyEvent{f->second.key, f->second.text};
+    }
+    else if (c < 27) { // ctrl-characters
+        // Note that ctrl+space -> 0
+        return KeyEvent{Key::KeyCombination,
+                        c == 0 ? ' ' : static_cast<char>(c + 'A' - 1),
+                        Modifiers::Ctrl};
+    }
+    else if (c >= 28 && c <= 31) {
+        // For some reason ctrl+shift+7 is 31
+        return KeyEvent{Key::KeyCombination, '4' + c - 28, Modifiers::Ctrl};
+    }
+    else {
+        event.key = Key::Text;
+    }
     return event;
 }
+
+size_t LinuxTerminalScreen::addStyle(const Color &foreground,
+                                     const Color &background,
+                                     size_t index) {
+    if (index == std::numeric_limits<size_t>::max()) {
+        ++_lastStyle;
+        index = _lastStyle;
+    }
+
+    if (index + 1 > _styles.size()) {
+        _styles.resize(index);
+    }
+
+    _styles.at(index) = {foreground, background};
+
+    return index;
+}
+
+void LinuxTerminalScreen::cursorStyle(CursorStyle) {}
