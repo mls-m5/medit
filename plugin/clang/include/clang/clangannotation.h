@@ -6,7 +6,7 @@
 class ClangAnnotation : public IAnnotation {
 public:
     //! @see IAnnotation interface
-    bool annotate(IEnvironment &env) override;
+    bool annotate(std::shared_ptr<IEnvironment> env) override;
 
     //! @see IAnnotation interface
     bool shouldEnable(filesystem::path) override;

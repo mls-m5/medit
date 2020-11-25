@@ -11,7 +11,7 @@ CompleteView::CompleteView() {
     _list.height(20);
 }
 
-void CompleteView::triggerShow(IEnvironment &env) {
+void CompleteView::triggerShow(std::shared_ptr<IEnvironment> env) {
     _list.visible(true);
     visible(true);
 

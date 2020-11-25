@@ -20,9 +20,9 @@ struct ClangContext {
     //    ClangUnsavedFile unsavedFile;
     ClangTranslationUnit translationUnit;
 
-    //    ClangUnsavedFile getUnsaved(IEnvironment &env) {
-    //        auto path = filesystem::absolute(env.editor().file()->path());
-    //        auto &buffer = env.editor().buffer();
+    //    ClangUnsavedFile getUnsaved(std::shared_ptr<IEnvironment> env) {
+    //        auto path = filesystem::absolute(env->editor().file()->path());
+    //        auto &buffer = env->editor().buffer();
 
     //        locationString = path.string();
     //        tmpPath = locationString;
@@ -35,17 +35,18 @@ struct ClangContext {
     //            std::ofstream(tmpPath) << buffer;
     //        }
 
-    //        auto &project = env.project();
+    //        auto &project = env->project();
 
     //        auto clangFlags = ClangFlags{project};
     //        return ClangUnsavedFile{buffer.text(), locationString, tmpPath};
     //    }
 
-    ClangTranslationUnit init(IEnvironment &env, ClangModel &model) {
-        auto &project = env.project();
+    ClangTranslationUnit init(std::shared_ptr<IEnvironment> env,
+                              ClangModel &model) {
+        auto &project = env->project();
 
-        auto path = filesystem::absolute(env.editor().file()->path());
-        auto &buffer = env.editor().buffer();
+        auto path = filesystem::absolute(env->editor().file()->path());
+        auto &buffer = env->editor().buffer();
 
         //        locationString = path.string();
         //        tmpPath = locationString;
@@ -65,7 +66,7 @@ struct ClangContext {
             model.index, project /*, unsavedFile*/, tmpPath};
     }
 
-    ClangContext(IEnvironment &env, ClangModel &model)
+    ClangContext(std::shared_ptr<IEnvironment> env, ClangModel &model)
         //        : unsavedFile(getUnsaved(env)),
         : translationUnit(init(env, model)) {}
 

@@ -18,7 +18,7 @@ void MessageBox::draw(IScreen &screen) {
     screen.draw(x() + 2, y() + 2, {"hello"});
 }
 
-bool MessageBox::keyPress(IEnvironment &) {
+bool MessageBox::keyPress(std::shared_ptr<IEnvironment> ) {
     close();
     return true;
 }

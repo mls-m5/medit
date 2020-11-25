@@ -37,8 +37,8 @@ bool BasicHighlighting::shouldEnable(filesystem::path) {
     return true;
 }
 
-void BasicHighlighting::highlight(IEnvironment &env) {
-    auto &editor = env.editor();
+void BasicHighlighting::highlight(std::shared_ptr<IEnvironment> env) {
+    auto &editor = env->editor();
     auto &buffer = editor.buffer();
 
     if (buffer.empty()) {

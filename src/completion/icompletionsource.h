@@ -2,6 +2,7 @@
 
 #include "meditfwd.h"
 #include "text/fstring.h"
+#include <memory>
 #include <string>
 
 class ICompletionSource {
@@ -15,7 +16,7 @@ public:
 
     virtual ~ICompletionSource() = default;
 
-    virtual CompletionList list(IEnvironment &env) = 0;
+    virtual CompletionList list(std::shared_ptr<IEnvironment>) = 0;
 
-    virtual bool shouldComplete(IEnvironment &env) = 0;
+    virtual bool shouldComplete(std::shared_ptr<IEnvironment>) = 0;
 };

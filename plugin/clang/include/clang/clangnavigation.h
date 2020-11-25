@@ -1,8 +1,9 @@
 #pragma once
 
 #include "meditfwd.h"
+#include <memory>
 
 class ClangNavigation {
 public:
-    static void gotoSymbol(IEnvironment &env);
+    static void gotoSymbol(std::shared_ptr<IEnvironment> env);
 };

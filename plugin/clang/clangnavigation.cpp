@@ -9,23 +9,23 @@
 
 using namespace std::literals;
 
-void ClangNavigation::gotoSymbol(IEnvironment &env) {
+void ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     auto context = ClangContext{env, *getClangModel()};
 
     constexpr bool debug = true;
 
     if (debug) {
-        env.console().buffer().clear();
-        env.showConsole(true);
+        env->console().buffer().clear();
+        env->showConsole(true);
     }
 
     if (!context.translationUnit) {
-        env.console().buffer().push_back(
+        env->console().buffer().push_back(
             "goto definiton: failed to parse translation unit");
         return;
     }
 
-    auto cursor = env.editor().cursor();
+    auto cursor = env->editor().cursor();
 
     auto cxCursor = context.getClangCursor(cursor);
 
@@ -33,7 +33,7 @@ void ClangNavigation::gotoSymbol(IEnvironment &env) {
         auto usr = clang_getCursorUSR(cxCursor);
         auto str = clang_getCString(usr);
         if (str) {
-            env.console().buffer().push_back("usr: "s + str);
+            env->console().buffer().push_back("usr: "s + str);
         }
         clang_disposeString(usr);
     }
@@ -41,7 +41,7 @@ void ClangNavigation::gotoSymbol(IEnvironment &env) {
         auto spelling = clang_getCursorSpelling(cxCursor);
         auto str = clang_getCString(spelling);
         if (str) {
-            env.console().buffer().push_back("spelling: "s + str);
+            env->console().buffer().push_back("spelling: "s + str);
         }
         clang_disposeString(spelling);
     }
@@ -49,7 +49,7 @@ void ClangNavigation::gotoSymbol(IEnvironment &env) {
         auto displayName = clang_getCursorDisplayName(cxCursor);
         auto str = clang_getCString(displayName);
         if (str) {
-            env.console().buffer().push_back("displayName: "s + str);
+            env->console().buffer().push_back("displayName: "s + str);
         }
         clang_disposeString(displayName);
     }
@@ -57,8 +57,8 @@ void ClangNavigation::gotoSymbol(IEnvironment &env) {
     auto cxDefinition = clang_getCursorDefinition(cxCursor);
 
     if (clang_isInvalid(clang_getCursorKind(cxDefinition))) {
-        env.showConsole(true);
-        env.console().buffer().push_back(
+        env->showConsole(true);
+        env->console().buffer().push_back(
             "goto definiton: failed to find declaration");
         return;
     }
@@ -66,7 +66,7 @@ void ClangNavigation::gotoSymbol(IEnvironment &env) {
     auto range = context.getRange(cxDefinition);
 
     auto location = context.getLocation(cxDefinition);
-    auto defCursor = Cursor{env.editor().buffer(), location.position};
+    auto defCursor = Cursor{env->editor().buffer(), location.position};
 
     //    auto cxFileNameString = clang_getFileName(range.file);
     auto cxFileNameString = clang_getFileName(location.file);
@@ -78,26 +78,26 @@ void ClangNavigation::gotoSymbol(IEnvironment &env) {
 
     if (debug) {
 
-        env.console().buffer().push_back("definition:");
-        auto tmp =
-            content(CursorRange{env.editor().buffer(), range.begin, range.end});
-        env.console().buffer().push_back(tmp.front());
+        env->console().buffer().push_back("definition:");
+        auto tmp = content(
+            CursorRange{env->editor().buffer(), range.begin, range.end});
+        env->console().buffer().push_back(tmp.front());
 
-        env.console().buffer().push_back(
+        env->console().buffer().push_back(
             "line: "s + std::to_string(defCursor.y() + 1) + " " +
             std::to_string(defCursor.x() + 1));
 
-        env.console().buffer().push_back(filenameStr);
+        env->console().buffer().push_back(filenameStr);
     }
 
-    auto path = env.editor().path();
+    auto path = env->editor().path();
 
     if (!filenameStr.empty() && path != filenameStr) {
-        env.editor().file(std::make_unique<File>(filenameStr));
-        env.editor().load();
+        env->editor().file(std::make_unique<File>(filenameStr));
+        env->editor().load();
     }
 
-    env.editor().cursor({env.editor().buffer(), defCursor});
+    env->editor().cursor({env->editor().buffer(), defCursor});
 
-    env.showConsole(true);
+    env->showConsole(true);
 }

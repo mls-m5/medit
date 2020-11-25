@@ -1,5 +1,6 @@
 #pragma once
 
 #include "meditfwd.h"
+#include <memory>
 
-void toggleComments(IEnvironment &env);
+void toggleComments(std::shared_ptr<IEnvironment> env);

@@ -25,8 +25,8 @@ TEST_CASE("create") {
 TEST_CASE("format all to default") {
     BasicHighlighting hl;
     Editor editor;
-    MockEnvironment env;
-    env.mock_editor_0.returnValueRef(editor);
+    auto env = std::make_shared<MockEnvironment>();
+    env->mock_editor_0.returnValueRef(editor);
 
     editor.buffer().text("hello"s);
 
@@ -44,8 +44,8 @@ TEST_CASE("format all to default") {
 TEST_CASE("format keyword") {
     BasicHighlighting hl;
     Editor editor;
-    MockEnvironment env;
-    env.mock_editor_0.returnValueRef(editor);
+    auto env = std::make_shared<MockEnvironment>();
+    env->mock_editor_0.returnValueRef(editor);
 
     editor.buffer().text("int hello"s);
 
@@ -63,8 +63,8 @@ TEST_CASE("partial match") {
 
     BasicHighlighting hl;
     Editor editor;
-    MockEnvironment env;
-    env.mock_editor_0.returnValueRef(editor);
+    auto env = std::make_shared<MockEnvironment>();
+    env->mock_editor_0.returnValueRef(editor);
 
     editor.buffer().text("inte automatic"s);
 

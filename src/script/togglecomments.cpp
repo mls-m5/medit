@@ -3,8 +3,8 @@
 #include "text/buffer.h"
 #include "views/editor.h"
 
-void toggleComments(IEnvironment &env) {
-    auto &e = env.editor();
+void toggleComments(std::shared_ptr<IEnvironment> env) {
+    auto &e = env->editor();
     auto &buffer = e.buffer();
 
     auto selection = e.selection();

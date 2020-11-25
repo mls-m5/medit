@@ -11,10 +11,10 @@
 class WordCompletions : public ICompletionSource {
 public:
     // @see ICompletions
-    CompletionList list(IEnvironment &env) override {
+    CompletionList list(std::shared_ptr<IEnvironment> env) override {
         std::set<std::string> words;
 
-        auto &buffer = env.editor().buffer();
+        auto &buffer = env->editor().buffer();
         const auto end = buffer.end();
 
         for (auto cursor = buffer.begin(); cursor != end;
@@ -43,7 +43,7 @@ public:
     }
 
     //! @see ICompletionSource
-    bool shouldComplete(IEnvironment &) override {
+    bool shouldComplete(std::shared_ptr<IEnvironment>) override {
         return true;
     }
 };

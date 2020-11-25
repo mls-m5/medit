@@ -2,4 +2,4 @@
 
 #include "script/ienvironment.h"
 
-void build(IEnvironment &env);
+void build(std::shared_ptr<IEnvironment> env);

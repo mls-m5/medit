@@ -71,24 +71,26 @@ void MainWindow::addCommands() {
         _inputFocus = &_locator;
     });
 
-    _env->addCommand("editor.auto_complete", [this](IEnvironment &env) {
-        auto &editor = env.editor();
-        editor.cursor(fix(editor.cursor()));
+    _env->addCommand("editor.auto_complete",
+                     [this](std::shared_ptr<IEnvironment> env) {
+                         auto &editor = env->editor();
+                         editor.cursor(fix(editor.cursor()));
 
-        Cursor cursor = editor.cursor();
-        _completeView.setCursor(cursor, editor.bufferView());
-        _completeView.triggerShow(_env);
-    });
+                         Cursor cursor = editor.cursor();
+                         _completeView.setCursor(cursor, editor.bufferView());
+                         _completeView.triggerShow(_env);
+                     });
 
-    _env->addCommand("editor.format", [this](IEnvironment &env) {
-        auto &editor = env.editor();
-        for (auto &format : _formatting) {
-            format->format(editor);
-        }
-    });
+    _env->addCommand("editor.format",
+                     [this](std::shared_ptr<IEnvironment> env) {
+                         auto &editor = env->editor();
+                         for (auto &format : _formatting) {
+                             format->format(editor);
+                         }
+                     });
 
-    _env->addCommand("editor.open", [this](IEnvironment &env) {
-        auto path = env.get("path");
+    _env->addCommand("editor.open", [this](std::shared_ptr<IEnvironment> env) {
+        auto path = env->get("path");
         if (path) {
             open(path->value());
         }
@@ -98,25 +100,26 @@ void MainWindow::addCommands() {
         showPopup(std::make_unique<MessageBox>());
     });
 
-    _env->addCommand("editor.show_open", [this](IEnvironment &env) {
-        auto &editor = env.editor();
-        auto path = editor.path();
-        if (path.empty()) {
-            path = filesystem::current_path();
-        }
-        auto input =
-            std::make_unique<InputBox>("Path to open: ", path.string());
-        input->callback([this](std::string value) { open(value); });
-        showPopup(std::move(input));
-    });
+    _env->addCommand(
+        "editor.show_open", [this](std::shared_ptr<IEnvironment> env) {
+            auto &editor = env->editor();
+            auto path = editor.path();
+            if (path.empty()) {
+                path = filesystem::current_path();
+            }
+            auto input =
+                std::make_unique<InputBox>("Path to open: ", path.string());
+            input->callback([this](std::string value) { open(value); });
+            showPopup(std::move(input));
+        });
 
-    _env->addCommand("show_console", [this](auto &env) {
-        env.showConsole(true);
+    _env->addCommand("show_console", [this](auto env) {
+        env->showConsole(true);
         _inputFocus = &_console;
     });
 
-    _env->addCommand("escape", [this](IEnvironment &env) {
-        env.showConsole(false);
+    _env->addCommand("escape", [this](std::shared_ptr<IEnvironment> env) {
+        env->showConsole(false);
         _inputFocus = &currentEditor();
     });
 
@@ -280,35 +283,30 @@ void MainWindow::updateHighlighting(Editor &editor) {
     }
 
     if (editor.buffer().isColorsOld()) {
-        _updateTimeHandle = timer.setTimeout(1s, [env = _env] {
+        _updateTimeHandle = timer.setTimeout(1s, [this, env = _env] {
             auto &queue = env->context().guiQueue();
             auto &editor = env->editor();
 
             if (editor.buffer().isColorsOld()) {
 
-                queue.addTask([env] {
+                queue.addTask([this, env] {
                     auto &editor = env->editor();
-                    //                    for (auto &highlight : _highlighting)
-                    //                    {
-                    //                        if
-                    //                        (highlight->shouldEnable(editor.path()))
-                    //                        {
-                    //                            highlight->highlight(_env);
+                    for (auto &highlight : _highlighting) {
+                        if (highlight->shouldEnable(editor.path())) {
+                            highlight->highlight(env);
 
-                    //                            editor.buffer().isColorsOld(false);
-                    //                            break;
-                    //                        }
-                    //                    }
+                            editor.buffer().isColorsOld(false);
+                            break;
+                        }
+                    }
 
-                    //                    for (auto &annotation : _annotation) {
-                    //                        if
-                    //                        (annotation->shouldEnable(editor.path()))
-                    //                        {
-                    //                            annotation->annotate(_env);
-                    //                            break;
-                    //                        }
-                    //                    }
-                    _env->context().redrawScreen();
+                    for (auto &annotation : _annotation) {
+                        if (annotation->shouldEnable(editor.path())) {
+                            annotation->annotate(env);
+                            break;
+                        }
+                    }
+                    env->context().redrawScreen();
                 });
             }
         });

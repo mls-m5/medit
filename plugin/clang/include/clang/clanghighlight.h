@@ -8,7 +8,7 @@ class ClangHighlight : public IHighlight {
 public:
     //! @see IHighlight interface
     bool shouldEnable(filesystem::path path);
-    void highlight(IEnvironment &env);
+    void highlight(std::shared_ptr<IEnvironment> env);
 
     //! @see IHighlight
     void update(const IPalette &palette);

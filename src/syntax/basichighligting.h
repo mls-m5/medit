@@ -14,7 +14,7 @@ public:
 
     // @see IHighlight
     bool shouldEnable(filesystem::path) override;
-    void highlight(IEnvironment &) override;
+    void highlight(std::shared_ptr<IEnvironment> ) override;
     void update(const IPalette &palette) override;
 
 private:

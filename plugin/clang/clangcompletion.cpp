@@ -6,11 +6,11 @@
 #include <clang-c/Index.h>
 
 std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
-    IEnvironment &env) {
+    std::shared_ptr<IEnvironment> env) {
 
     auto context = ClangContext{env, *_model};
 
-    auto cursor = autocompleteWordBegin(env.editor().cursor());
+    auto cursor = autocompleteWordBegin(env->editor().cursor());
 
     auto result = clang_codeCompleteAt(context.translationUnit,
                                        context.tmpPath.c_str(),
@@ -66,15 +66,16 @@ ClangCompletion::ClangCompletion() : _model(getClangModel()) {}
 
 ClangCompletion::~ClangCompletion() = default;
 
-bool ClangCompletion::shouldComplete(IEnvironment &env) {
-    if (!env.editor().file()) {
+bool ClangCompletion::shouldComplete(std::shared_ptr<IEnvironment> env) {
+    if (!env->editor().file()) {
         return false;
     }
-    auto extension = env.editor().file()->path().extension();
+    auto extension = env->editor().file()->path().extension();
     return extension == ".h" || extension == ".cpp";
 }
 
-ICompletionSource::CompletionList ClangCompletion::list(IEnvironment &env) {
+ICompletionSource::CompletionList ClangCompletion::list(
+    std::shared_ptr<IEnvironment> env) {
     auto list = complete(env);
 
     ICompletionSource::CompletionList ret;

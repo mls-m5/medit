@@ -15,9 +15,9 @@ TEST_SUIT_BEGIN
 TEST_CASE("basic coloring unsaved file") {
     Editor editor;
     Project project;
-    MockEnvironment env;
-    env.mock_editor_0.returnValueRef(editor);
-    env.mock_project_0.returnValueRef(project);
+    auto env = std::make_shared<MockEnvironment>();
+    env->mock_editor_0.returnValueRef(editor);
+    env->mock_project_0.returnValueRef(project);
     ClangHighlight highligt;
 
     editor.file(std::make_unique<File>(testPath1));
@@ -29,9 +29,9 @@ TEST_CASE("basic coloring unsaved file") {
 TEST_CASE("basic coloring") {
     Editor editor;
     Project project;
-    MockEnvironment env;
-    env.mock_editor_0.returnValueRef(editor);
-    env.mock_project_0.returnValueRef(project);
+    auto env = std::make_shared<MockEnvironment>();
+    env->mock_editor_0.returnValueRef(editor);
+    env->mock_project_0.returnValueRef(project);
     ClangHighlight highligt;
 
     editor.file(std::make_unique<File>(testPath1));

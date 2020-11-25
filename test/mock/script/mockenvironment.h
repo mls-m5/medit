@@ -16,7 +16,8 @@ public:
     MOCK_CONST_METHOD0(IEnvironment &, root, (), override);
     MOCK_METHOD2(void,
                  addCommand,
-                 (std::string, std::function<void(IEnvironment &)>),
+                 (std::string,
+                  std::function<void(std::shared_ptr<IEnvironment>)>),
                  override);
     MOCK_METHOD1(void, showConsole, (bool shown), override);
     MOCK_METHOD1(bool, run, (const Command &command), override);

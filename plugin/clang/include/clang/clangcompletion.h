@@ -17,12 +17,12 @@ public:
     ~ClangCompletion();
 
     //! @see ICompletionSource
-    bool shouldComplete(IEnvironment &) override;
+    bool shouldComplete(std::shared_ptr<IEnvironment> ) override;
 
     //! @ ICompletionSource
-    CompletionList list(IEnvironment &env) override;
+    CompletionList list(std::shared_ptr<IEnvironment> env) override;
 
 private:
     ClangModel *_model;
-    std::vector<CompleteResult> complete(IEnvironment &env);
+    std::vector<CompleteResult> complete(std::shared_ptr<IEnvironment> env);
 };

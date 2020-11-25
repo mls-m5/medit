@@ -9,8 +9,8 @@
 #include <fstream>
 #include <sstream>
 
-bool ClangAnnotation::annotate(IEnvironment &env) {
-    auto project = env.project();
+bool ClangAnnotation::annotate(std::shared_ptr<IEnvironment> env) {
+    auto project = env->project();
     std::ostringstream ss;
     TmpFile tmpFile{".cpp"};
     ss << "clang++ -fsyntax-only -Wno-pragma-once-outside-header ";
@@ -19,7 +19,7 @@ bool ClangAnnotation::annotate(IEnvironment &env) {
         ss << " " << flag;
     }
 
-    std::ofstream{tmpFile.path} << env.editor().buffer();
+    std::ofstream{tmpFile.path} << env->editor().buffer();
 
     auto command = ss.str();
 
@@ -33,25 +33,25 @@ bool ClangAnnotation::annotate(IEnvironment &env) {
 
     for (std::string line; getline(pstream, line);) {
         if (!shouldShow) {
-            env.console().buffer().clear();
+            env->console().buffer().clear();
         }
         if (starts_with(line, pathStr)) {
-            line.replace(0, pathStr.size(), env.editor().path());
+            line.replace(0, pathStr.size(), env->editor().path());
         }
-        env.console().buffer().push_back(line);
+        env->console().buffer().push_back(line);
         shouldShow = true;
     }
 
     if (shouldShow) {
-        env.showConsole(true);
+        env->showConsole(true);
 
-        env.console().buffer().push_back(" when compiling with");
-        env.console().buffer().push_back(command);
+        env->console().buffer().push_back(" when compiling with");
+        env->console().buffer().push_back(command);
     }
 
     //    // Test
-    //    env.showConsole(true);
-    //    env.console().buffer().push_back(command);
+    //    env->showConsole(true);
+    //    env->console().buffer().push_back(command);
 
     return true;
 }

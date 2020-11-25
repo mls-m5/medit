@@ -20,28 +20,29 @@
 #include <map>
 
 namespace {
-using CommandList = std::map<std::string, std::function<void(IEnvironment &)>>;
+using CommandList =
+    std::map<std::string, std::function<void(std::shared_ptr<IEnvironment>)>>;
 
 CommandList navigationCommands = {
 
     {
         "editor.left",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             e.cursor(left(e.cursor()));
         },
     },
     {
         "editor.right",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             e.cursor(right(e.cursor()));
         },
     },
     {
         "editor.up",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             if (e.cursor().y() == 0) {
                 return;
             }
@@ -52,8 +53,8 @@ CommandList navigationCommands = {
     },
     {
         "editor.down",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             auto cursor = e.cursor();
             cursor.y(e.cursor().y() + 1);
             e.cursor(cursor);
@@ -61,43 +62,45 @@ CommandList navigationCommands = {
     },
     {
         "editor.word_begin",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             e.cursor(wordBegin(e.cursor()));
         },
     },
     {
         "editor.word_end",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             e.cursor(wordEnd(e.cursor()));
         },
     },
     {
         "editor.goto_definition",
-        [](IEnvironment &env) { ClangNavigation::gotoSymbol(env); },
+        [](std::shared_ptr<IEnvironment> env) {
+            ClangNavigation::gotoSymbol(env);
+        },
     },
     {
         "editor.switch_header",
-        [](IEnvironment &env) {
-            auto path = env.project().findSwitchHeader(env.editor().path());
+        [](std::shared_ptr<IEnvironment> env) {
+            auto path = env->project().findSwitchHeader(env->editor().path());
             if (!path.empty()) {
-                env.set("path", path.string());
-                env.run(parse("editor.open"));
+                env->set("path", path.string());
+                env->run(parse("editor.open"));
             }
         },
     },
     {
         "editor.home",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             e.cursor(home(e.cursor()));
         },
     },
     {
         "editor.end",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             e.cursor(end(e.cursor()));
         },
     },
@@ -106,50 +109,50 @@ CommandList navigationCommands = {
 CommandList editorCommands = {
     {
         "editor.yank_line",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             auto cursor = e.cursor();
             auto line = e.buffer().lineAt(cursor.y());
-            env.registers().save(standardRegister, std::string{line}, true);
-            env.editor().clearSelection();
+            env->registers().save(standardRegister, std::string{line}, true);
+            env->editor().clearSelection();
         },
     },
     {
         "editor.delete_line",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             auto cursor = e.cursor();
             auto line = e.buffer().lineAt(cursor.y());
-            env.registers().save(standardRegister, std::string{line}, true);
+            env->registers().save(standardRegister, std::string{line}, true);
             e.cursor(deleteLine(e.cursor()));
         },
     },
     {
         "editor.insert",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
-            auto event = env.key();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
+            auto event = env->key();
             e.cursor(insert(event.symbol, e.cursor()));
         },
     },
     {
         "editor.split",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             e.cursor(split(e.cursor()));
         },
     },
     {
         "editor.yank", // copy on vim-language
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             auto selection = e.selection();
             if (selection.empty()) {
-                env.registers().save(standardRegister,
-                                     std::string{content(e.cursor())});
+                env->registers().save(standardRegister,
+                                      std::string{content(e.cursor())});
             }
             else {
-                env.registers().save(standardRegister, toString(selection));
+                env->registers().save(standardRegister, toString(selection));
             }
 
             e.cursor(selection.begin(), true);
@@ -157,46 +160,46 @@ CommandList editorCommands = {
     },
     {
         "editor.erase",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             auto selection = e.selection();
             if (selection.empty()) {
-                env.registers().save(standardRegister,
-                                     std::string{content(e.cursor())});
+                env->registers().save(standardRegister,
+                                      std::string{content(e.cursor())});
                 e.cursor(erase(e.cursor()));
             }
             else {
-                env.registers().save(standardRegister, toString(selection));
+                env->registers().save(standardRegister, toString(selection));
                 e.cursor(erase(selection), true);
             }
         },
     },
     {
         "editor.paste_before",
-        [](IEnvironment &env) {
-            auto str = env.registers().load(standardRegister);
-            auto cursor = env.editor().cursor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto str = env->registers().load(standardRegister);
+            auto cursor = env->editor().cursor();
             if (str.isLine) {
-                env.editor().buffer().insert(cursor.y(), str.value);
+                env->editor().buffer().insert(cursor.y(), str.value);
             }
             else {
                 for (auto c : str.value) {
                     //! Todo: Make efficient if this slows down
                     cursor = insert(c, cursor);
                 }
-                env.editor().cursor(left(cursor));
+                env->editor().cursor(left(cursor));
             }
         },
     },
     {
         "editor.paste",
-        [](IEnvironment &env) {
-            auto str = env.registers().load(standardRegister);
-            auto cursor = env.editor().cursor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto str = env->registers().load(standardRegister);
+            auto cursor = env->editor().cursor();
             if (str.isLine) {
-                env.editor().buffer().insert(cursor.y() + 1, str.value);
+                env->editor().buffer().insert(cursor.y() + 1, str.value);
                 cursor.y(cursor.y() + 1);
-                env.editor().cursor(cursor);
+                env->editor().cursor(cursor);
             }
             else {
                 cursor = right(cursor);
@@ -204,67 +207,73 @@ CommandList editorCommands = {
                     //! Todo: Make efficient if this slows down
                     cursor = insert(c, cursor);
                 }
-                env.editor().cursor(cursor);
+                env->editor().cursor(cursor);
             }
         },
     },
     {
         "editor.join",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             e.cursor(join(e.cursor()));
         },
     },
     {
         "editor.save",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             e.save();
         },
     },
     {
         "editor.copyindentation",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             e.cursor(copyIndentation(e.cursor()));
         },
     },
     {
         "editor.undo",
-        [](IEnvironment &env) { env.editor().undo(); },
+        [](std::shared_ptr<IEnvironment> env) { env->editor().undo(); },
     },
     {
         "editor.redo",
-        [](IEnvironment &env) { env.editor().redo(); },
+        [](std::shared_ptr<IEnvironment> env) { env->editor().redo(); },
     },
     {
         "editor.build",
-        [](IEnvironment &env) { build(env); },
+        [](std::shared_ptr<IEnvironment> env) { build(env); },
     },
     {
         "editor.insertmode",
-        [](IEnvironment &env) { env.editor().mode(createInsertMode()); },
+        [](std::shared_ptr<IEnvironment> env) {
+            env->editor().mode(createInsertMode());
+        },
     },
     {
         "editor.normalmode",
-        [](IEnvironment &env) { env.editor().mode(createNormalMode()); },
+        [](std::shared_ptr<IEnvironment> env) {
+            env->editor().mode(createNormalMode());
+        },
     },
     {
         "editor.visualmode",
-        [](IEnvironment &env) { env.editor().mode(createVisualMode()); },
+        [](std::shared_ptr<IEnvironment> env) {
+            env->editor().mode(createVisualMode());
+        },
     },
     {
         "editor.toggle_comment",
-        [](IEnvironment &env) { toggleComments(env); },
+        [](std::shared_ptr<IEnvironment> env) { toggleComments(env); },
     },
-    {"quit", [](auto &) { quitMedit(); }},
+    {"quit", [](auto &&) { quitMedit(); }},
 };
 
 CommandList selectionCommands = {
     {
         "editor.select_word",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             auto cursor = e.cursor();
             auto range = CursorRange{cursor, right(wordEnd(cursor))};
             e.selection(range);
@@ -272,8 +281,8 @@ CommandList selectionCommands = {
     },
     {
         "editor.select_inner_word",
-        [](IEnvironment &env) {
-            auto &e = env.editor();
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
             auto cursor = e.cursor();
             auto range = CursorRange{wordBegin(cursor), right(wordEnd(cursor))};
             e.selection(range);

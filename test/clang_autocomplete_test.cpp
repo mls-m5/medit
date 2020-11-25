@@ -25,10 +25,10 @@ TEST_CASE("create") {
 TEST_CASE("simple complete") {
     auto completion = std::make_unique<ClangCompletion>();
     auto editor = Editor();
-    auto env = MockEnvironment();
+    auto env = std::make_shared<MockEnvironment>();
     auto project = Project{};
-    env.mock_editor_0.returnValueRef(editor);
-    env.mock_project_0.returnValueRef(project);
+    env->mock_editor_0.returnValueRef(editor);
+    env->mock_project_0.returnValueRef(project);
 
     editor.file(std::make_unique<File>(testPath1));
     editor.load();
@@ -48,10 +48,10 @@ TEST_CASE("simple complete") {
 TEST_CASE("simple complete on unsaved file") {
     auto completion = std::make_unique<ClangCompletion>();
     auto editor = Editor();
-    auto env = MockEnvironment();
+    auto env = std::make_shared<MockEnvironment>();
     Project project;
-    env.mock_editor_0.returnValueRef(editor);
-    env.mock_project_0.returnValueRef(project);
+    env->mock_editor_0.returnValueRef(editor);
+    env->mock_project_0.returnValueRef(project);
 
     editor.file(std::make_unique<File>(testPath1));
     editor.load();
@@ -72,10 +72,10 @@ TEST_CASE("simple complete on unsaved file") {
 TEST_CASE("simple complete on unsaved file crossing dot") {
     auto completion = std::make_unique<ClangCompletion>();
     auto editor = Editor();
-    auto env = MockEnvironment();
+    auto env = std::make_shared<MockEnvironment>();
     Project project;
-    env.mock_editor_0.returnValueRef(editor);
-    env.mock_project_0.returnValueRef(project);
+    env->mock_editor_0.returnValueRef(editor);
+    env->mock_project_0.returnValueRef(project);
 
     editor.file(std::make_unique<File>(testPath2));
     editor.load();

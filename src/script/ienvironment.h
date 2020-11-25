@@ -5,11 +5,12 @@
 #include "script/command.h"
 #include "script/variable.h"
 #include <functional>
+#include <memory>
 #include <string>
 
-class IEnvironment {
+class IEnvironment : public std::enable_shared_from_this<IEnvironment> {
 public:
-    using Action = std::function<void(IEnvironment &)>;
+    using Action = std::function<void(std::shared_ptr<IEnvironment>)>;
 
     //! Return the editor active in the current context
     [[nodiscard]] virtual Editor &editor() = 0;
@@ -31,8 +32,8 @@ public:
 
     [[nodiscard]] virtual Registers &registers() = 0;
 
-    virtual void addCommand(std::string,
-                            std::function<void(IEnvironment &)>) = 0;
+    virtual void addCommand(
+        std::string, std::function<void(std::shared_ptr<IEnvironment>)>) = 0;
 
     //! In the future this can be multiple values depending on which console
     virtual void showConsole(bool shown) = 0;

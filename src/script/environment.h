@@ -8,7 +8,7 @@
 #include <memory>
 
 class Environment : public IEnvironment {
-    using Action = std::function<void(IEnvironment &)>;
+    using Action = std::function<void(std::shared_ptr<IEnvironment>)>;
     using Functions = std::map<std::string, Action>;
 
     std::shared_ptr<IEnvironment> _parent = {};
@@ -83,8 +83,9 @@ public:
         root().showConsole(shown);
     }
 
-    void addCommand(std::string name,
-                    std::function<void(IEnvironment &)> f) override {
+    void addCommand(
+        std::string name,
+        std::function<void(std::shared_ptr<IEnvironment>)> f) override {
         _context[name] = f;
     }
 
@@ -92,7 +93,7 @@ public:
     bool run(const Command &command) override {
         auto action = findAction(command.text);
         if (action) {
-            (*action)(*this);
+            (*action)(shared_from_this());
             return true;
         }
         else {
