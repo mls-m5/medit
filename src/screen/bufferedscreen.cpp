@@ -50,28 +50,40 @@ struct BufferedScreen::Canvas {
     }
 };
 
+void BufferedScreen::forceThread() {
+    if (_threadId != std::this_thread::get_id()) {
+        throw std::runtime_error{
+            "trying to run from wrong thread in bufferedscreen"};
+    }
+}
+
 BufferedScreen::BufferedScreen(IScreen *screen, IInput *input)
-    : _backend(screen), _input(input), _canvas(std::make_unique<Canvas>()) {
+    : _backend(screen), _input(input), _canvas(std::make_unique<Canvas>()),
+      _threadId(std::this_thread::get_id()) {
     _canvas->resize(_backend->width(), _backend->height());
 }
 
 BufferedScreen::~BufferedScreen() = default;
 
 void BufferedScreen::draw(size_t x, size_t y, const FString &str) {
+    forceThread();
     _canvas->draw(x, y, str);
 }
 
 void BufferedScreen::refresh() {
+    forceThread();
     _canvas->resize(_backend->width(), _backend->height());
     _canvas->refresh(*_backend);
     _backend->refresh();
 }
 
 void BufferedScreen::clear() {
+    forceThread();
     _canvas->fill(' ');
 }
 
 void BufferedScreen::cursor(size_t x, size_t y) {
+    forceThread();
     _canvas->_cursorX = x;
     _canvas->_cursorY = y;
 }
@@ -107,6 +119,7 @@ size_t BufferedScreen::addStyle(const Color &foreground,
 }
 
 void BufferedScreen::cursorStyle(CursorStyle style) {
+    forceThread();
     _backend->cursorStyle(style);
 }
 

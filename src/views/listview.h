@@ -30,7 +30,7 @@ public:
     void draw(IScreen &) override;
 
     //! @see IKeySink
-    bool keyPress(IEnvironment &env) override;
+    bool keyPress(std::shared_ptr<IEnvironment>) override;
 
     //! @see IKeySink
     void updateCursor(IScreen &screen) const override;

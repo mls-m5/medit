@@ -3,9 +3,7 @@
 #include "modes/parentmode.h"
 #include "text/buffer.h"
 
-Locator::Locator(IEnvironment &env, Project &projectFiles)
-    : _env(&env), _projectFiles(projectFiles) {
-    _env.editor(this);
+Locator::Locator(Project &projectFiles) : _projectFiles(projectFiles) {
     buffer().singleLine(true);
     _list.x(0);
     _list.y(1);
@@ -13,12 +11,15 @@ Locator::Locator(IEnvironment &env, Project &projectFiles)
     _list.height(20);
 }
 
-bool Locator::keyPress(IEnvironment &) {
-    if (_list.keyPress(_env)) {
+bool Locator::keyPress(std::shared_ptr<IEnvironment> env) {
+    auto localEnvironment = std::make_shared<Environment>(env);
+    localEnvironment->editor(this);
+    ;
+    if (_list.keyPress(localEnvironment)) {
         return true;
     }
     else {
-        auto ret = Editor::keyPress(_env);
+        auto ret = Editor::keyPress(localEnvironment);
 
         updateList();
         return ret;

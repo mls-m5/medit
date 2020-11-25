@@ -11,7 +11,7 @@ public:
     ~InputBox();
 
     //! @see IKeySink interface
-    bool keyPress(IEnvironment &env);
+    bool keyPress(std::shared_ptr<IEnvironment>);
     void updateCursor(IScreen &screen) const;
 
     //! @see IView

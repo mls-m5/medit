@@ -27,7 +27,7 @@ void handleKey(KeyEvent c, MainWindow &mainWindow, IScreen &screen) {
         mainWindow.resize(screen.width(), screen.height());
     }
     else {
-        mainWindow._env.key(c);
+        mainWindow._env->key(c);
         mainWindow.keyPress(mainWindow._env);
         mainWindow.resize();
     }
@@ -94,12 +94,10 @@ int main(int argc, char **argv) {
         guiQueue.stop();
     });
 
-    //    std::thread guiThread([&] { guiQueue.loop(); });
     guiQueue.loop(); // Make sure that the guiThread is the same thread that
                      // created everything
 
     inputThread.join();
-    //    guiThread.join();
     jobThread.join();
     timerThread.join();
 

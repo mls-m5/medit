@@ -87,4 +87,4 @@ void ClangHighlight::highlight(IEnvironment &env) {
     }
 }
 
-void ClangHighlight::update(const IPalette &palette) {}
+void ClangHighlight::update(const IPalette &) {}

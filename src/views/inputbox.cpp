@@ -25,23 +25,23 @@ InputBox::InputBox(FString title, std::string defaultValue) : _title(title) {
 
 InputBox::~InputBox() = default;
 
-bool InputBox::keyPress(IEnvironment &env) {
-    auto key = env.key();
+bool InputBox::keyPress(std::shared_ptr<IEnvironment> env) {
+    auto key = env->key();
 
-    Environment context(&env);
+    auto context = std::make_shared<Environment>(env);
 
-    context.editor(&_entry);
+    context->editor(&_entry);
 
     switch (key.key) {
     case Key::Escape:
-        env.set("return", {});
+        env->set("return", {});
         close();
     case Key::Text:
         if (key.symbol == '\n') {
             close();
             //! To make sure that the editor points right again
             //            auto callbackContext = Environment{&env};
-            //            auto callbackVariable = env.get("callback");
+            //            auto callbackVariable = env->get("callback");
             //            callbackContext.set("value",
             //            {_entry.buffer().text()}); if (callbackVariable) {
             //                callbackContext.run(CommandBlock{callbackVariable->value()});

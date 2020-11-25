@@ -103,7 +103,7 @@ public:
         _bufferView.showLines(value);
     }
 
-    bool keyPress(IEnvironment &) override;
+    bool keyPress(std::shared_ptr<IEnvironment>) override;
 
     void updateCursor(IScreen &) const override;
 

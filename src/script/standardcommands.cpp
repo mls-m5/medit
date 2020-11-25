@@ -283,7 +283,7 @@ CommandList selectionCommands = {
 } // namespace
 
 void addStandardCommands(IEnvironment &env) {
-    auto addCommands = [&](auto &list) {
+    auto addCommands = [&env](auto &list) {
         for (auto &pair : list) {
             env.addCommand(pair.first, pair.second);
         }

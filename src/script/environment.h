@@ -5,12 +5,13 @@
 #include "script/standardcommands.h"
 #include <functional>
 #include <map>
+#include <memory>
 
 class Environment : public IEnvironment {
     using Action = std::function<void(IEnvironment &)>;
     using Functions = std::map<std::string, Action>;
 
-    IEnvironment *_parent = nullptr;
+    std::shared_ptr<IEnvironment> _parent = {};
     Editor *_editor = nullptr;
 
     Functions _context;
@@ -18,7 +19,7 @@ class Environment : public IEnvironment {
     std::map<std::string, Variable> _variables;
 
 public:
-    Environment(IEnvironment *parent) : _parent(parent) {
+    Environment(std::shared_ptr<IEnvironment> parent) : _parent(parent) {
         addStandardCommands(*this);
     }
 

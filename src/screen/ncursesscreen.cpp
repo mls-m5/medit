@@ -79,7 +79,15 @@ void NCursesScreen::init() {
     ::noecho();
 }
 
+void NCursesScreen::forceThread() {
+    if (_threadId != std::this_thread::get_id()) {
+        throw std::runtime_error{
+            "trying to call ncurses screen from non gui thread"};
+    }
+}
+
 void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
+    forceThread();
     ::move(y, x);
     for (size_t tx = 0, i = 0; i < str.size() && tx < width() - this->x();
          ++tx, ++i) {
@@ -97,19 +105,23 @@ void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
 }
 
 void NCursesScreen::refresh() {
+    forceThread();
     ::refresh();
 }
 
 void NCursesScreen::clear() {
+    forceThread();
     ::clear();
 }
 
 void NCursesScreen::cursor(size_t x, size_t y) {
+    forceThread();
     ::move(y, x);
 }
 
 NCursesScreen::NCursesScreen() {
     init();
+    _threadId = std::this_thread::get_id();
 }
 
 NCursesScreen::~NCursesScreen() {
@@ -170,6 +182,7 @@ size_t NCursesScreen::height() const {
 }
 
 void NCursesScreen::cursorStyle(CursorStyle style) {
+    forceThread();
     if (_currentCursor != style) {
         //        using namespace std::literals;
         //        auto command =
@@ -181,6 +194,7 @@ void NCursesScreen::cursorStyle(CursorStyle style) {
 }
 
 size_t NCursesScreen::addStyle(const Color &fg, const Color &bg, size_t index) {
+    forceThread();
     if (!_hasColors) {
         return 1;
     }

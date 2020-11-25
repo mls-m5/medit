@@ -3,12 +3,16 @@
 #include "screen/iinput.h"
 #include "screen/iscreen.h"
 #include <memory>
+#include <thread>
 
 class BufferedScreen : public IScreen, public IInput {
     IScreen *_backend;
     IInput *_input;
     struct Canvas;
     std::unique_ptr<Canvas> _canvas;
+    std::thread::id _threadId;
+
+    void forceThread();
 
 public:
     BufferedScreen(IScreen *backend, IInput *keysink);

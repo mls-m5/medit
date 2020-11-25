@@ -12,7 +12,7 @@
 
 struct MainWindow : public Window {
     std::vector<Editor> _editors;
-    RootEnvironment _env;
+    std::shared_ptr<RootEnvironment> _env;
     Editor _console;
     Locator _locator;
     CompleteView _completeView;
@@ -43,7 +43,7 @@ struct MainWindow : public Window {
     void updateCursor(IScreen &screen) const override;
 
     //! @see IKeySink
-    bool keyPress(IEnvironment &env) override;
+    bool keyPress(std::shared_ptr<IEnvironment>) override;
 
     void updateLocatorBuffer();
 

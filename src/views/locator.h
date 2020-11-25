@@ -8,15 +8,15 @@
 
 class Locator : public Editor {
 public:
-    Environment _env;
+    //    Environment _env;
     ListView _list;
     Project &_projectFiles;
 
-    Locator(IEnvironment &env, Project &projectFiles);
+    Locator(Project &projectFiles);
     ~Locator() override;
 
     // @see IKeySink
-    bool keyPress(IEnvironment &) override;
+    bool keyPress(std::shared_ptr<IEnvironment>) override;
 
     // @see IView
     void draw(IScreen &) override;

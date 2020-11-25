@@ -20,15 +20,16 @@
 #include "clang/clanghighlight.h"
 
 MainWindow::MainWindow(IScreen &screen, Context &context)
-    : View(screen.width(), screen.height()), _editors(2), _env(context),
-      _locator(_env, _project), _currentEditor(0) {
-    _env.editor(&_editors.front());
+    : View(screen.width(), screen.height()), _editors(2),
+      _env(std::make_shared<RootEnvironment>(context)), _locator(_project),
+      _currentEditor(0) {
+    _env->editor(&_editors.front());
     for (auto &editor : _editors) {
         editor.showLines(true);
     }
     _console.showLines(false);
-    _env.console(&_console);
-    _env.project(&_project);
+    _env->console(&_console);
+    _env->project(&_project);
     screen.palette().load(findConfig("data/oblivion.json"));
 
     _locator.mode(createInsertMode());
@@ -65,12 +66,12 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
 MainWindow::~MainWindow() = default;
 
 void MainWindow::addCommands() {
-    _env.addCommand("window.show_locator", [this](auto &&) {
+    _env->addCommand("window.show_locator", [this](auto &&) {
         _locator.visible(true);
         _inputFocus = &_locator;
     });
 
-    _env.addCommand("editor.auto_complete", [this](IEnvironment &env) {
+    _env->addCommand("editor.auto_complete", [this](IEnvironment &env) {
         auto &editor = env.editor();
         editor.cursor(fix(editor.cursor()));
 
@@ -79,25 +80,25 @@ void MainWindow::addCommands() {
         _completeView.triggerShow(_env);
     });
 
-    _env.addCommand("editor.format", [this](IEnvironment &env) {
+    _env->addCommand("editor.format", [this](IEnvironment &env) {
         auto &editor = env.editor();
         for (auto &format : _formatting) {
             format->format(editor);
         }
     });
 
-    _env.addCommand("editor.open", [this](IEnvironment &env) {
+    _env->addCommand("editor.open", [this](IEnvironment &env) {
         auto path = env.get("path");
         if (path) {
             open(path->value());
         }
     });
 
-    _env.addCommand("messagebox", [this](auto &&) {
+    _env->addCommand("messagebox", [this](auto &&) {
         showPopup(std::make_unique<MessageBox>());
     });
 
-    _env.addCommand("editor.show_open", [this](IEnvironment &env) {
+    _env->addCommand("editor.show_open", [this](IEnvironment &env) {
         auto &editor = env.editor();
         auto path = editor.path();
         if (path.empty()) {
@@ -109,17 +110,17 @@ void MainWindow::addCommands() {
         showPopup(std::move(input));
     });
 
-    _env.addCommand("show_console", [this](auto &env) {
+    _env->addCommand("show_console", [this](auto &env) {
         env.showConsole(true);
         _inputFocus = &_console;
     });
 
-    _env.addCommand("escape", [this](IEnvironment &env) {
+    _env->addCommand("escape", [this](IEnvironment &env) {
         env.showConsole(false);
         _inputFocus = &currentEditor();
     });
 
-    _env.addCommand("switch_editor", [this](auto &&) { switchEditor(); });
+    _env->addCommand("switch_editor", [this](auto &&) { switchEditor(); });
 }
 
 void MainWindow::resize(size_t w, size_t h) {
@@ -137,7 +138,7 @@ void MainWindow::resize(size_t w, size_t h) {
             editor.x(index * width() / 2);
             editor.y(0);
             editor.width(width() / 2);
-            if (_env.showConsole()) {
+            if (_env->showConsole()) {
                 editor.height(height() - _split);
             }
             else {
@@ -168,7 +169,7 @@ void MainWindow::draw(IScreen &screen) {
     for (auto &editor : _editors) {
         editor.draw(screen);
     }
-    if (_env.showConsole()) {
+    if (_env->showConsole()) {
         _console.draw(screen);
         screen.draw(0, height() - _split, _splitString);
     }
@@ -187,7 +188,7 @@ void MainWindow::draw(IScreen &screen) {
 void MainWindow::updateCursor(IScreen &screen) const {
     _inputFocus->updateCursor(screen);
 
-    auto c = _env.key();
+    auto c = _env->key();
     screen.draw(40,
                 screen.height() - 1,
                 ((c.modifiers == Modifiers::Ctrl) ? "ctrl+'" : "'") +
@@ -195,7 +196,7 @@ void MainWindow::updateCursor(IScreen &screen) const {
                     c.symbol.byteRepresentation());
 }
 
-bool MainWindow::keyPress(IEnvironment &env) {
+bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
     if (_inputFocus == &currentEditor() && _completeView.visible()) {
         if (_completeView.keyPress(env)) {
             updateHighlighting(currentEditor());
@@ -204,17 +205,16 @@ bool MainWindow::keyPress(IEnvironment &env) {
     }
 
     auto &editor = currentEditor();
-    _env.editor(&editor);
-    Environment scopeEnvironment(&env);
-    scopeEnvironment.editor(&editor);
+    _env->editor(&editor);
+    auto scopeEnvironment = std::make_shared<Environment>(env);
+    scopeEnvironment->editor(&editor);
     if (_inputFocus->keyPress(scopeEnvironment)) {
-
         // Todo: Handle this for reallz in the future
         if (_inputFocus == &editor) {
-            _env.editor(&editor);
+            _env->editor(&editor);
         }
         if (_inputFocus == &_console) {
-            _env.editor(&editor);
+            _env->editor(&editor);
         }
 
         updateHighlighting(currentEditor());
@@ -272,34 +272,43 @@ void MainWindow::updatePalette(IScreen &screen) {
 }
 
 void MainWindow::updateHighlighting(Editor &editor) {
-    auto &timer = _env.context().timer();
-    auto &queue = _env.context().guiQueue();
+
+    auto &timer = _env->context().timer();
     if (_updateTimeHandle) {
         timer.cancel(_updateTimeHandle);
         _updateTimeHandle = 0;
     }
 
     if (editor.buffer().isColorsOld()) {
-        _updateTimeHandle = timer.setTimeout(1s, [&] {
+        _updateTimeHandle = timer.setTimeout(1s, [env = _env] {
+            auto &queue = env->context().guiQueue();
+            auto &editor = env->editor();
+
             if (editor.buffer().isColorsOld()) {
 
-                queue.addTask([&] {
-                    for (auto &highlight : _highlighting) {
-                        if (highlight->shouldEnable(editor.path())) {
-                            highlight->highlight(_env);
+                queue.addTask([env] {
+                    auto &editor = env->editor();
+                    //                    for (auto &highlight : _highlighting)
+                    //                    {
+                    //                        if
+                    //                        (highlight->shouldEnable(editor.path()))
+                    //                        {
+                    //                            highlight->highlight(_env);
 
-                            editor.buffer().isColorsOld(false);
-                            break;
-                        }
-                    }
+                    //                            editor.buffer().isColorsOld(false);
+                    //                            break;
+                    //                        }
+                    //                    }
 
-                    for (auto &annotation : _annotation) {
-                        if (annotation->shouldEnable(editor.path())) {
-                            annotation->annotate(_env);
-                            break;
-                        }
-                    }
-                    _env.context().redrawScreen();
+                    //                    for (auto &annotation : _annotation) {
+                    //                        if
+                    //                        (annotation->shouldEnable(editor.path()))
+                    //                        {
+                    //                            annotation->annotate(_env);
+                    //                            break;
+                    //                        }
+                    //                    }
+                    _env->context().redrawScreen();
                 });
             }
         });

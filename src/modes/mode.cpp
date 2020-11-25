@@ -11,9 +11,9 @@ Mode::Mode(std::string name,
       _bufferMap(std::move(bufferMap)), _parent(std::move(parent)),
       _cursorStyle(cursorStyle) {}
 
-bool Mode::keyPress(IEnvironment &env) {
+bool Mode::keyPress(std::shared_ptr<IEnvironment> env) {
     auto lock = shared_from_this();
-    const auto key = env.key();
+    const auto key = env->key();
     const auto &action = _keyMap.find(key);
     if (_parent && _parent->keyPress(env)) {
         return true;
@@ -30,7 +30,7 @@ bool Mode::keyPress(IEnvironment &env) {
         }
         else if (m.first == BufferKeyMap::Match) {
             const auto &block = *m.second;
-            env.run(block);
+            env->run(block);
             _buffer.clear();
             return true;
         }
@@ -38,7 +38,7 @@ bool Mode::keyPress(IEnvironment &env) {
     _buffer.clear();
 
     if (action) {
-        env.run(action);
+        env->run(action);
         return true;
     }
     return false;

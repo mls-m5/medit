@@ -73,7 +73,7 @@ void Editor::mode(std::shared_ptr<IMode> mode) {
     _mode->start(*this);
 }
 
-bool Editor::keyPress(IEnvironment &env) {
+bool Editor::keyPress(std::shared_ptr<IEnvironment> env) {
     if (_mode) {
         if (_mode->keyPress(env)) {
             _history.commit(buffer());

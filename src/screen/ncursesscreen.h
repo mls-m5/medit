@@ -3,6 +3,7 @@
 #include "screen/iinput.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
+#include <thread>
 
 class NCursesScreen : public IScreen, public IInput {
 public:
@@ -35,6 +36,8 @@ public:
 private:
     void init();
 
+    void forceThread();
+
     bool _hasColors = true;
 
     Palette _palette;
@@ -45,6 +48,8 @@ private:
     size_t _lastColor = 16;
 
     CursorStyle _currentCursor = CursorStyle::Block;
+
+    std::thread::id _threadId;
 
     //! @see IScreen interface
     size_t addStyle(const Color &fg, const Color &bg, size_t index) override;

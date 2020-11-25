@@ -39,10 +39,10 @@ void CompleteView::updateCompletion(std::string str) {
     _list.current(selected);
 }
 
-bool CompleteView::keyPress(IEnvironment &env) {
-    if (env.key().key == Key::Text || env.key().key == Key::Backspace ||
-        env.key().key == Key::Delete) {
-        setCursor(env.editor().cursor(), env.editor().bufferView());
+bool CompleteView::keyPress(std::shared_ptr<IEnvironment> env) {
+    if (env->key().key == Key::Text || env->key().key == Key::Backspace ||
+        env->key().key == Key::Delete) {
+        setCursor(env->editor().cursor(), env->editor().bufferView());
     }
     return _list.keyPress(env);
 }

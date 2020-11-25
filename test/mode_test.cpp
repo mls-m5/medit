@@ -33,67 +33,67 @@ TEST_CASE("create mode") {
 
 TEST_CASE("match keypress") {
     auto mode = createTestMode();
-    auto env = MockEnvironment();
+    auto env = std::make_shared<MockEnvironment>();
     auto editor = Editor{};
 
-    env.mock_editor_0.returnValueRef(editor);
-    //    env.mock_run_1.onCall([](auto &&) { return true; });
-    env.mock_run_1.returnValue(true);
+    env->mock_editor_0.returnValueRef(editor);
+    //    env->mock_run_1.onCall([](auto &&) { return true; });
+    env->mock_run_1.returnValue(true);
 
-    env.mock_run_1.expectNum(0);
+    env->mock_run_1.expectNum(0);
 
     // Missmatch
-    env.mock_key_0.returnValue({Key::F1});
+    env->mock_key_0.returnValue({Key::F1});
     ASSERT_EQ(false, mode->keyPress(env));
 
-    env.mock_run_1.expectNum(1);
+    env->mock_run_1.expectNum(1);
 
     // Match
-    env.mock_key_0.returnValue({Key::Left});
+    env->mock_key_0.returnValue({Key::Left});
     ASSERT_EQ(true, mode->keyPress(env));
 }
 
 TEST_CASE("default action") {
     auto mode = createTestMode(true);
-    auto env = MockEnvironment();
+    auto env = std::make_shared<MockEnvironment>();
     auto editor = Editor{};
 
-    env.mock_run_1.returnValue(true);
-    env.mock_run_1.expectNum(1);
+    env->mock_run_1.returnValue(true);
+    env->mock_run_1.expectNum(1);
 
     // Default actions
-    env.mock_key_0.returnValue({Key::F1});
+    env->mock_key_0.returnValue({Key::F1});
     ASSERT_EQ(true, mode->keyPress(env));
 }
 
 TEST_CASE("buffered keypress") {
     auto mode = createTestMode();
-    auto env = MockEnvironment{};
+    auto env = std::make_shared<MockEnvironment>();
     auto editor = Editor{};
 
-    env.mock_editor_0.returnValueRef(editor);
-    //    env.mock_run_1.onCall([](auto &&) { return true; });
-    env.mock_run_1.returnValue(true);
+    env->mock_editor_0.returnValueRef(editor);
+    //    env->mock_run_1.onCall([](auto &&) { return true; });
+    env->mock_run_1.returnValue(true);
 
-    env.mock_run_1.expectNum(0);
+    env->mock_run_1.expectNum(0);
 
-    env.mock_key_0.returnValue(KeyEvent{Key::Text, 'w'});
+    env->mock_key_0.returnValue(KeyEvent{Key::Text, 'w'});
     ASSERT_EQ(false, mode->keyPress(env));
 
-    env.mock_run_1.expectNum(0);
+    env->mock_run_1.expectNum(0);
 
-    env.mock_key_0.returnValue(KeyEvent{Key::Text, 'd'});
+    env->mock_key_0.returnValue(KeyEvent{Key::Text, 'd'});
     ASSERT_EQ(true, mode->keyPress(env));
 
-    env.mock_run_1.expectNum(1);
+    env->mock_run_1.expectNum(1);
 
     // Second keypress
-    env.mock_key_0.returnValue(KeyEvent{Key::Text, 'w'});
+    env->mock_key_0.returnValue(KeyEvent{Key::Text, 'w'});
     ASSERT_EQ(true, mode->keyPress(env));
 
     // Expect buffer to be cleared
-    env.mock_run_1.expectNum(0);
-    env.mock_key_0.returnValue(KeyEvent{Key::Text, 'w'});
+    env->mock_run_1.expectNum(0);
+    env->mock_key_0.returnValue(KeyEvent{Key::Text, 'w'});
     ASSERT_EQ(false, mode->keyPress(env));
 }
 

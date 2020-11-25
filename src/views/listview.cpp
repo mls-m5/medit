@@ -49,8 +49,8 @@ void ListView::draw(IScreen &screen) {
     }
 }
 
-bool ListView::keyPress(IEnvironment &env) {
-    switch (env.key().key) {
+bool ListView::keyPress(std::shared_ptr<IEnvironment> env) {
+    switch (env->key().key) {
     case Key::Up:
         if (_current > 0) {
             current(_current - 1);
@@ -70,7 +70,7 @@ bool ListView::keyPress(IEnvironment &env) {
         }
         return false;
     case Key::Text:
-        if (env.key().symbol == '\n') {
+        if (env->key().symbol == '\n') {
             if (!_lines.empty()) {
                 auto &line = _lines.at(_current);
                 if (_callback) {
