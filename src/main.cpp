@@ -74,30 +74,36 @@ int main(int argc, char **argv) {
     std::thread timerThread([&] { timer.loop(); });
     std::thread jobThread([&] { queue.loop(); });
 
-    std::thread inputThread([&] {
-        while (!medit::main::shouldQuit) {
-            auto c = input->getInput();
+    //    std::thread inputThread([&] {
+    while (!medit::main::shouldQuit) {
+        auto c = input->getInput();
 
-            // Todo: in the future check main window for unsaved changes here
-            // too
+        // Todo: in the future check main window for unsaved changes here
+        // too
+        while (c != Key::None) {
             if (c == KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}) {
                 break;
             }
 
-            guiQueue.addTask([&, c] {
-                handleKey(c, mainWindow, *screen); //
-            });
+            //        guiQueue.addTask([&, c] {
+            handleKey(c, mainWindow, *screen); //
+                                               //        });
+            c = input->getInput();
         }
 
-        queue.stop();
-        timer.stop();
-        guiQueue.stop();
-    });
+        guiQueue.work(false);
+    }
 
-    guiQueue.loop(); // Make sure that the guiThread is the same thread that
-                     // created everything
+    queue.stop();
+    timer.stop();
+    guiQueue.stop();
+    //    });
 
-    inputThread.join();
+    //    guiQueue.loop(); // Make sure that the guiThread is the same thread
+    //    that
+    //                     // created everything
+
+    //    inputThread.join();
     jobThread.join();
     timerThread.join();
 

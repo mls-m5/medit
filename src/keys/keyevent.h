@@ -4,6 +4,7 @@
 
 enum class Key {
     Unknown,
+    None,
     Any,
     Text,
     KeyCombination,

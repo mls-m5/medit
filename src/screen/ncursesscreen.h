@@ -3,6 +3,7 @@
 #include "screen/iinput.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
+#include <mutex>
 #include <thread>
 
 class NCursesScreen : public IScreen, public IInput {
@@ -50,6 +51,10 @@ private:
     CursorStyle _currentCursor = CursorStyle::Block;
 
     std::thread::id _threadId;
+
+    // Without a mutex ncurses will segfault at some random times
+    // when writing to the screen and getting input simultaneously
+    //    std::mutex _accessMutex;
 
     //! @see IScreen interface
     size_t addStyle(const Color &fg, const Color &bg, size_t index) override;

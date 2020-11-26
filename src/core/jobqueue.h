@@ -29,15 +29,19 @@ public:
         }
     }
 
-    void work() {
-        _waitMutex.lock();
+    void work(bool shouldWait = true) {
+        if (shouldWait) {
+            _waitMutex.lock();
+        }
         while (!_queue.empty() && _running) {
             auto task = std::move(_queue.front());
             _queue.pop();
             task();
         }
 
-        wait();
+        if (shouldWait) {
+            wait();
+        }
     }
 
     void stop() {

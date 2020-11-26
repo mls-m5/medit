@@ -77,6 +77,7 @@ void NCursesScreen::init() {
     ::raw();
     ::keypad(stdscr, true);
     ::noecho();
+    ::timeout(10);
 }
 
 void NCursesScreen::forceThread() {
@@ -131,14 +132,17 @@ NCursesScreen::~NCursesScreen() {
 
 KeyEvent NCursesScreen::getInput() {
     const auto c = getch();
-    if (c == KEY_RESIZE) {
+    if (c == ERR) {
+        return KeyEvent{Key::None};
+    }
+    else if (c == KEY_RESIZE) {
         ::endwin();
         ::refresh();
         ::clear();
         init();
         return KeyEvent{Key::Resize};
     }
-    if (auto f = keytranslations.find(c); f != keytranslations.end()) {
+    else if (auto f = keytranslations.find(c); f != keytranslations.end()) {
         return KeyEvent{f->second.key, f->second.text};
     }
     else if (c < 27) { // ctrl-characters
