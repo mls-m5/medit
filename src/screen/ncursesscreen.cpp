@@ -88,6 +88,7 @@ void NCursesScreen::forceThread() {
 }
 
 void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
+    //    auto lock = std::scoped_lock{_accessMutex};
     forceThread();
     ::move(y, x);
     for (size_t tx = 0, i = 0; i < str.size() && tx < width() - this->x();
@@ -131,6 +132,8 @@ NCursesScreen::~NCursesScreen() {
 }
 
 KeyEvent NCursesScreen::getInput() {
+    //    _accessMutex.lock();
+    //    _accessMutex.unlock();
     const auto c = getch();
     if (c == ERR) {
         return KeyEvent{Key::None};

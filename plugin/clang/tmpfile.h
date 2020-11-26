@@ -1,6 +1,7 @@
 // Copyright Mattias Larsson Sköld 2020
 #pragma once
 
+#include "files/filesystem.h"
 #include <random>
 
 //! Creates a path to a temporary file in /tmp folder on creation and removes
