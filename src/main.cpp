@@ -82,6 +82,7 @@ int main(int argc, char **argv) {
         // too
         while (c != Key::None) {
             if (c == KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}) {
+                medit::main::shouldQuit = true;
                 break;
             }
 

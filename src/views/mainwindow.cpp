@@ -41,6 +41,7 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
         _locator.visible(false);
     });
 
+    _completeView.visible(false);
     _completeView.callback([this](auto &&result) {
         auto &editor = currentEditor();
         auto cursor = editor.cursor();
@@ -288,7 +289,6 @@ void MainWindow::updateHighlighting(Editor &editor) {
             auto &editor = env->editor();
 
             if (editor.buffer().isColorsOld()) {
-
                 queue.addTask([this, env] {
                     auto &editor = env->editor();
                     for (auto &highlight : _highlighting) {
@@ -323,11 +323,6 @@ Editor &MainWindow::currentEditor() {
         _currentEditor = _editors.size() - 1;
     }
     return _editors.at(_currentEditor);
-    //    for (auto &editor : _editors) {
-    //        if (&editor == _inputFocus) {
-    //            return editor;
-    //        }
-    //    }
 
     throw std::runtime_error("could not get the right editor");
 }

@@ -12,7 +12,7 @@ size_t getLineNumWidth(size_t numLines) {
     while (numLines /= 10) {
         ++width;
     }
-    return width + 1;
+    return std::min(width + 1, 2ul);
 }
 
 } // namespace
@@ -40,9 +40,9 @@ void BufferView::draw(IScreen &screen) {
                 const auto lineNum = l + 1;
                 auto lineFormat = IPalette::lineNumbers;
                 size_t fill = 0;
-                if (lineNum < 10) {
-                    fill += 1;
-                }
+                //                if (lineNum < 10) {
+                //                    fill += 1;
+                //                }
                 screen.draw(
                     x(),
                     y() + ty,
