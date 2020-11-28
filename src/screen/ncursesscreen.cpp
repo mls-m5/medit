@@ -1,3 +1,4 @@
+#ifndef __EMSCRIPTEN__
 #include "screen/ncursesscreen.h"
 #include "syntax/color.h"
 #include <map>
@@ -230,3 +231,5 @@ size_t NCursesScreen::addStyle(const Color &fg, const Color &bg, size_t index) {
         return index;
     }
 }
+
+#endif

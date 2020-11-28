@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef __EMSCRIPTEN__
+
 #include "screen/iinput.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
@@ -59,3 +61,5 @@ private:
     //! @see IScreen interface
     size_t addStyle(const Color &fg, const Color &bg, size_t index) override;
 };
+
+#endif

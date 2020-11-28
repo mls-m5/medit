@@ -38,9 +38,7 @@ POpenStream::POpenStreamBuf::~POpenStreamBuf() {
 POpenStream::POpenStream(std::string command,
                          bool captureStdErr,
                          size_t bufferSize)
-    : buffer(command, captureStdErr, bufferSize) {
-    rdbuf(&buffer);
-}
+    : std::istream(&buffer), buffer(command, captureStdErr, bufferSize) {}
 
 int POpenStream::returnCode() {
     return buffer.returnCode;

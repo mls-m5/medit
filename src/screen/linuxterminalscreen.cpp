@@ -3,6 +3,7 @@
 #include "files/popenstream.h"
 #include "syntax/color.h"
 #include "text/fstring.h"
+#include <sstream>
 #include <termios.h>
 #include <unistd.h>
 

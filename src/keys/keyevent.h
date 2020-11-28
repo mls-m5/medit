@@ -65,4 +65,8 @@ public:
         return a.key == b.key && a.modifiers == b.modifiers &&
                a.state == b.state && a.symbol == b.symbol;
     }
+
+    constexpr friend bool operator!=(const KeyEvent &a, const KeyEvent &b) {
+        return !(a == b);
+    }
 };

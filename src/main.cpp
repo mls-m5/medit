@@ -5,6 +5,7 @@
 #include "files/file.h"
 #include "screen/bufferedscreen.h"
 #include "screen/ncursesscreen.h"
+#include "screen/htmlscreen.h"
 #include "script/rootenvironment.h"
 #include "views/mainwindow.h"
 #include <string>
@@ -40,7 +41,11 @@ void handleKey(KeyEvent c, MainWindow &mainWindow, IScreen &screen) {
 int main(int argc, char **argv) {
     std::unique_ptr<IScreen> screen;
     IInput *input;
+#ifdef __EMSCRIPTEN__
+    auto ns = std::make_unique<HtmlScreen>();
+#else
     auto ns = std::make_unique<NCursesScreen>();
+#endif
     auto bs = std::make_unique<BufferedScreen>(ns.get(), ns.get());
 
     input = ns.get();

@@ -6,6 +6,7 @@
 #include "script/variable.h"
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 
 class IEnvironment : public std::enable_shared_from_this<IEnvironment> {

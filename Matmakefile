@@ -4,9 +4,12 @@
 
 cpp = clang++-10
 
+em: cpp = em++
+em: ar = emar
+
 config +=
-   c++2a
-#   c++17
+   c++17
+#   c++2a
 #   modules #treat includes as separate
 
 flags +=
@@ -17,6 +20,8 @@ flags +=
    -Wnon-virtual-dtor
    -g
 
+em: flags += -s USE_PTHREADS -s LLD_REPORT_UNDEFINED
+
 includes +=
    include
    src
@@ -25,10 +30,13 @@ includes +=
    lib/json.h/include
 
 dir = bin
+em: dir = bin/em
+debug: dir = bin/debug
 
 # ==== Plugins ======================================
 
 standardplugins.out = shared %
+em: standardplugins.out = static %
 
 standardplugins.src =
    plugin/*.cpp
@@ -42,6 +50,7 @@ clangplugin.sysincludes=
 #   /usr/lib/llvm-10/include/
 
 clangplugin.out = shared %
+em: clangplugin.out = static %
 clangplugin.src = plugin/clang/**.cpp
 clangplugin.libs += -lclang-9
 
@@ -61,6 +70,7 @@ core.src +=
    src/core/**.cpp
 
 core.out = shared core
+em: core.out = static core
 core.libs += `pkg-config --libs ncurses` -lstdc++fs
 core.link +=  standardplugins clangplugin
 
@@ -76,7 +86,6 @@ main.out = medit
 src = test/%.cpp
 out = test %
 link = core
-dir = bin
 
 includes +=
    src

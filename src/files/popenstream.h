@@ -7,7 +7,7 @@
 #include <iostream>
 #include <vector>
 
-class POpenStream : public std::iostream {
+class POpenStream : public std::istream {
 private:
     struct POpenStreamBuf : public std::streambuf {
         POpenStreamBuf(std::string command,
