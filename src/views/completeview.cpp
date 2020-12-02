@@ -51,8 +51,13 @@ void CompleteView::callback(
     std::function<void(CompleteView::CompletionResult)> f) {
     _list.callback([f, this](auto &&, auto &&index, auto &&value) {
         if (index != static_cast<size_t>(-1)) {
-            auto str = std::any_cast<std::string>(value);
-            f({str.substr(_currentText.size()), ""});
+            try {
+                auto str = std::any_cast<std::string>(value);
+                f({str.substr(_currentText.size()), ""});
+            }
+            catch (std::bad_any_cast &e) {
+                f({"", ""});
+            }
         }
         else {
             f({"", ""});
