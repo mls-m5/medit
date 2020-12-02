@@ -94,10 +94,6 @@ struct Register {
     // This will be modified if the plugin is to be loaded dynamaically
     Register() {
         registerCompletion<ClangCompletion>();
-        //        pluginRegisterFunctions().registerCompletion(
-        //            []() -> std::unique_ptr<ICompletionSource> {
-        //                return std::make_unique<ClangCompletion>();
-        //            });
     }
 };
 

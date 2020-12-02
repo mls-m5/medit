@@ -1,5 +1,6 @@
 #include "core/plugins.h"
 #include "completion/icompletionsource.h"
+#include "syntax/iannotation.h"
 #include "syntax/ihighlight.h"
 #include <algorithm>
 #include <vector>
@@ -7,14 +8,17 @@
 namespace {
 
 struct PluginData {
-    std::vector<PluginRegisterFunctions::HighlightFactoryF>
-        highligtFactoryFunctions;
-    std::vector<PluginRegisterFunctions::CompletionFactoryF>
-        completionFactoryFunctions;
+    std::vector<PluginRegisterFunctions::Func<IHighlight>::createT>
+        highligtCreateFunctions;
+    std::vector<PluginRegisterFunctions::Func<ICompletionSource>::createT>
+        completionCreateFunctions;
+    std::vector<PluginRegisterFunctions::Func<IAnnotation>::createT>
+        annotationCreateFunctions;
 
     PluginData() {
-        highligtFactoryFunctions.reserve(20);
-        completionFactoryFunctions.reserve(20);
+        highligtCreateFunctions.reserve(20);
+        completionCreateFunctions.reserve(20);
+        annotationCreateFunctions.reserve(20);
     }
 };
 
@@ -24,29 +28,46 @@ PluginData &pluginData() {
     return data;
 }
 
+// Generic create function
+template <typename Type, typename FactoryFunctions>
+std::vector<std::unique_ptr<Type>> createPlugins(FactoryFunctions &functions) {
+    std::vector<std::unique_ptr<Type>> ret;
+    ret.reserve(functions.size());
+
+    for (auto &f : functions) {
+        ret.push_back(f());
+    }
+
+    return ret;
+}
+
 } // namespace
 
 PluginRegisterFunctions pluginRegisterFunctions() {
     return PluginRegisterFunctions{
         .registerHighlighting =
-            [](PluginRegisterFunctions::HighlightFactoryF f) {
-                pluginData().highligtFactoryFunctions.push_back(std::move(f));
+            [](PluginRegisterFunctions::Func<IHighlight>::createT f) {
+                pluginData().highligtCreateFunctions.push_back(std::move(f));
             },
         .registerCompletion =
-            [](PluginRegisterFunctions::CompletionFactoryF f) {
-                pluginData().completionFactoryFunctions.push_back(std::move(f));
+            [](PluginRegisterFunctions::Func<ICompletionSource>::createT f) {
+                pluginData().completionCreateFunctions.push_back(std::move(f));
             },
-    };
+        .registerAnnotation =
+            [](PluginRegisterFunctions::Func<IAnnotation>::createT f) {
+                pluginData().annotationCreateFunctions.push_back(std::move(f));
+            }};
 }
 
 std::vector<std::unique_ptr<IHighlight>> createHighlightings() {
-    std::vector<std::unique_ptr<IHighlight>> ret;
-    auto &pluginData = ::pluginData();
-    ret.reserve(pluginData.highligtFactoryFunctions.size());
+    return createPlugins<IHighlight>(pluginData().highligtCreateFunctions);
+}
 
-    for (auto &f : pluginData.highligtFactoryFunctions) {
-        ret.push_back(f());
-    }
+std::vector<std::unique_ptr<ICompletionSource>> createCompletionSources() {
+    return createPlugins<ICompletionSource>(
+        pluginData().completionCreateFunctions);
+}
 
-    return ret;
+std::vector<std::unique_ptr<IAnnotation>> createAnnotations() {
+    return createPlugins<IAnnotation>(pluginData().annotationCreateFunctions);
 }

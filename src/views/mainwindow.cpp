@@ -11,13 +11,14 @@
 #include "plugin/clangformat.h"
 #include "plugin/jsonformat.h"
 #include "screen/iscreen.h"
+#include "syntax/iannotation.h"
 #include "syntax/ihighlight.h"
 #include "syntax/ipalette.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "views/inputbox.h"
 #include "views/messagebox.h"
-#include "clang/clangannotation.h"
+//#include "clang/clangannotation.h"
 
 MainWindow::MainWindow(IScreen &screen, Context &context)
     : View(screen.width(), screen.height()), _editors(2),
@@ -54,8 +55,6 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
 
     addCommands();
 
-    //    _highlighting.push_back(std::make_unique<ClangHighlight>());
-    //    _highlighting.push_back(std::make_unique<BasicHighlighting>());
     _highlighting = createHighlightings();
 
     updatePalette(screen);
@@ -63,7 +62,8 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
     _formatting.push_back(std::make_unique<ClangFormat>());
     _formatting.push_back(std::make_unique<JsonFormat>());
 
-    _annotation.push_back(std::make_unique<ClangAnnotation>());
+    //    _annotation.push_back(std::make_unique<ClangAnnotation>());
+    _annotation = createAnnotations();
 }
 
 MainWindow::~MainWindow() = default;

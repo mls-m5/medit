@@ -1,12 +1,14 @@
 
 
 #include "completion/autocomplete.h"
-#include "completion/wordcompletions.h"
-#include "clang/clangcompletion.h"
+#include "core/plugins.h"
+//#include "completion/wordcompletions.h"
+//#include "clang/clangcompletion.h"
 
 AutoComplete::AutoComplete() {
-    _sources.emplace_back(std::make_unique<ClangCompletion>());
-    _sources.emplace_back(std::make_unique<WordCompletions>());
+    //    _sources.emplace_back(std::make_unique<ClangCompletion>());
+    //    _sources.emplace_back(std::make_unique<WordCompletions>());
+    _sources = createCompletionSources();
 }
 
 AutoComplete::~AutoComplete() {}
