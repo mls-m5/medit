@@ -1,10 +1,11 @@
 #pragma once
 
-#include "screen/iscreen.h"
-#include "screen/iinput.h"
+#ifdef __EMSCRIPTEN__
 
-class HtmlScreen: public IScreen, public IInput
-{
+#include "screen/iinput.h"
+#include "screen/iscreen.h"
+
+class HtmlScreen : public IScreen, public IInput {
 public:
     // @see IScreen
     void draw(size_t x, size_t y, const FString &str);
@@ -27,10 +28,14 @@ public:
     // @see IScreen
     IPalette &palette();
     // @see IScreen
-    size_t addStyle(const Color &foreground, const Color &background, size_t index);
+    size_t addStyle(const Color &foreground,
+                    const Color &background,
+                    size_t index);
     // @see IScreen
     void cursorStyle(CursorStyle);
 
     // @see IInput
     KeyEvent getInput();
 };
+
+#endif

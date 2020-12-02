@@ -1,6 +1,7 @@
 #pragma once
 
 #include "completion/icompletionsource.h"
+#include "core/plugins.h"
 #include "script/ienvironment.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
@@ -47,3 +48,13 @@ public:
         return true;
     }
 };
+
+namespace {
+
+struct Register {
+    Register() {
+        registerCompletion<WordCompletions>();
+    }
+} r;
+
+} // namespace
