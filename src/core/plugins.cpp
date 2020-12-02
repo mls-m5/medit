@@ -1,6 +1,7 @@
 #include "core/plugins.h"
 #include "completion/icompletionsource.h"
 #include "syntax/iannotation.h"
+#include "syntax/iformat.h"
 #include "syntax/ihighlight.h"
 #include <algorithm>
 #include <vector>
@@ -14,6 +15,8 @@ struct PluginData {
         completionCreateFunctions;
     std::vector<PluginRegisterFunctions::Func<IAnnotation>::createT>
         annotationCreateFunctions;
+    std::vector<PluginRegisterFunctions::Func<IFormat>::createT>
+        formatCreateFunctions;
 
     PluginData() {
         highligtCreateFunctions.reserve(20);
@@ -56,7 +59,12 @@ PluginRegisterFunctions pluginRegisterFunctions() {
         .registerAnnotation =
             [](PluginRegisterFunctions::Func<IAnnotation>::createT f) {
                 pluginData().annotationCreateFunctions.push_back(std::move(f));
-            }};
+            },
+        .registerFormat =
+            [](PluginRegisterFunctions::Func<IFormat>::createT f) {
+                pluginData().formatCreateFunctions.push_back(std::move(f));
+            },
+    };
 }
 
 std::vector<std::unique_ptr<IHighlight>> createHighlightings() {
@@ -70,4 +78,8 @@ std::vector<std::unique_ptr<ICompletionSource>> createCompletionSources() {
 
 std::vector<std::unique_ptr<IAnnotation>> createAnnotations() {
     return createPlugins<IAnnotation>(pluginData().annotationCreateFunctions);
+}
+
+std::vector<std::unique_ptr<IFormat>> createFormat() {
+    return createPlugins<IFormat>(pluginData().formatCreateFunctions);
 }

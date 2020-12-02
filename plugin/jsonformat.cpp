@@ -1,5 +1,6 @@
 
 #include "plugin/jsonformat.h"
+#include "core/plugins.h"
 #include "files/extensions.h"
 #include "text/buffer.h"
 #include "views/editor.h"
@@ -32,3 +33,13 @@ bool JsonFormat::format(Editor &editor) {
         return false;
     }
 }
+
+namespace {
+
+struct Register {
+    Register() {
+        registerFormat<JsonFormat>();
+    }
+} r;
+
+} // namespace

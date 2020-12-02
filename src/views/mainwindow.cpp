@@ -8,8 +8,6 @@
 #include "files/file.h"
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
-#include "plugin/clangformat.h"
-#include "plugin/jsonformat.h"
 #include "screen/iscreen.h"
 #include "syntax/iannotation.h"
 #include "syntax/ihighlight.h"
@@ -18,7 +16,6 @@
 #include "text/cursorrangeops.h"
 #include "views/inputbox.h"
 #include "views/messagebox.h"
-//#include "clang/clangannotation.h"
 
 MainWindow::MainWindow(IScreen &screen, Context &context)
     : View(screen.width(), screen.height()), _editors(2),
@@ -59,10 +56,8 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
 
     updatePalette(screen);
 
-    _formatting.push_back(std::make_unique<ClangFormat>());
-    _formatting.push_back(std::make_unique<JsonFormat>());
+    _formatting = createFormat();
 
-    //    _annotation.push_back(std::make_unique<ClangAnnotation>());
     _annotation = createAnnotations();
 }
 
