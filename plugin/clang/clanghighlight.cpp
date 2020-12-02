@@ -1,6 +1,7 @@
 
 #include "clang/clanghighlight.h"
 #include "clangcontext.h"
+#include "core/plugins.h"
 #include "files/extensions.h"
 #include "files/ifile.h"
 #include "getformat.h"
@@ -88,3 +89,13 @@ void ClangHighlight::highlight(std::shared_ptr<IEnvironment> env) {
 }
 
 void ClangHighlight::update(const IPalette &) {}
+
+namespace {
+
+struct Register {
+    Register() {
+        registerHighlighting<ClangHighlight>();
+    }
+};
+
+} // namespace

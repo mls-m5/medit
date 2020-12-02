@@ -4,8 +4,8 @@
 #include "core/timer.h"
 #include "files/file.h"
 #include "screen/bufferedscreen.h"
-#include "screen/ncursesscreen.h"
 #include "screen/htmlscreen.h"
+#include "screen/ncursesscreen.h"
 #include "script/rootenvironment.h"
 #include "views/mainwindow.h"
 #include <string>
@@ -79,7 +79,6 @@ int main(int argc, char **argv) {
     std::thread timerThread([&] { timer.loop(); });
     std::thread jobThread([&] { queue.loop(); });
 
-    //    std::thread inputThread([&] {
     while (!medit::main::shouldQuit) {
         auto c = input->getInput();
 
@@ -91,9 +90,7 @@ int main(int argc, char **argv) {
                 break;
             }
 
-            //        guiQueue.addTask([&, c] {
-            handleKey(c, mainWindow, *screen); //
-                                               //        });
+            handleKey(c, mainWindow, *screen);
             c = input->getInput();
         }
 
@@ -103,13 +100,6 @@ int main(int argc, char **argv) {
     queue.stop();
     timer.stop();
     guiQueue.stop();
-    //    });
-
-    //    guiQueue.loop(); // Make sure that the guiThread is the same thread
-    //    that
-    //                     // created everything
-
-    //    inputThread.join();
     jobThread.join();
     timerThread.join();
 

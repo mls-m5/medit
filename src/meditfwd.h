@@ -20,7 +20,6 @@ class BufferView;
 class Command;
 class CommandBlock;
 class ClangModel;
-class IHighlight;
 class Project;
 class Color;
 class IPalette;
@@ -30,3 +29,7 @@ class Registers;
 class Timer;
 class JobQueue;
 class Context;
+
+class IHighlight;
+class ICompletionSource;
+class IAnnotation;

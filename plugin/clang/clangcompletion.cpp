@@ -1,5 +1,6 @@
 #include "clang/clangcompletion.h"
 #include "clangcontext.h"
+#include "core/plugins.h"
 #include "script/ienvironment.h"
 #include "text/cursorops.h"
 #include "clang/clangmodel.h"
@@ -86,3 +87,18 @@ ICompletionSource::CompletionList ClangCompletion::list(
 
     return ret;
 }
+
+namespace {
+
+struct Register {
+    // This will be modified if the plugin is to be loaded dynamaically
+    Register() {
+        registerCompletion<ClangCompletion>();
+        //        pluginRegisterFunctions().registerCompletion(
+        //            []() -> std::unique_ptr<ICompletionSource> {
+        //                return std::make_unique<ClangCompletion>();
+        //            });
+    }
+};
+
+} // namespace

@@ -2,6 +2,7 @@
 #include "views/mainwindow.h"
 #include "core/context.h"
 #include "core/jobqueue.h"
+#include "core/plugins.h"
 #include "core/timer.h"
 #include "files/config.h"
 #include "files/file.h"
@@ -10,14 +11,13 @@
 #include "plugin/clangformat.h"
 #include "plugin/jsonformat.h"
 #include "screen/iscreen.h"
-#include "syntax/basichighligting.h"
+#include "syntax/ihighlight.h"
 #include "syntax/ipalette.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "views/inputbox.h"
 #include "views/messagebox.h"
 #include "clang/clangannotation.h"
-#include "clang/clanghighlight.h"
 
 MainWindow::MainWindow(IScreen &screen, Context &context)
     : View(screen.width(), screen.height()), _editors(2),
@@ -54,8 +54,10 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
 
     addCommands();
 
-    _highlighting.push_back(std::make_unique<ClangHighlight>());
-    _highlighting.push_back(std::make_unique<BasicHighlighting>());
+    //    _highlighting.push_back(std::make_unique<ClangHighlight>());
+    //    _highlighting.push_back(std::make_unique<BasicHighlighting>());
+    _highlighting = createHighlightings();
+
     updatePalette(screen);
 
     _formatting.push_back(std::make_unique<ClangFormat>());

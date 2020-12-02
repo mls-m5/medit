@@ -72,13 +72,15 @@ core.src +=
 core.out = shared core
 em: core.out = static core
 core.libs += `pkg-config --libs ncurses` -lstdc++fs
-core.link +=  standardplugins clangplugin
 
 main.src = src/main.cpp
 main.copy += README.md data/oblivion.json
 main.link += core
 main.libs +=  -pthread
 main.out = medit
+em: main.out = medit.html
+main.link +=  standardplugins
+!em: main.link += clangplugin
 
 
 # ======== Tests =====================================
@@ -114,13 +116,13 @@ palette_test.src += #
 project_test.src += #
 project_test.copy = test/res/.medit.json
 
-clang_autocomplete_test.link += clangplugin
-clang_autocomplete_test.copy =
+!em: clang_autocomplete_test.link += clangplugin
+!em: clang_autocomplete_test.copy =
     test/res/complete_test1.cpp
     test/res/complete_test2.cpp
 
-clanghighlighting_test.link += clangplugin
-clanghighlighting_test.copy = test/res/annotation_test1.cpp
+!em clanghighlighting_test.link += clangplugin
+!em clanghighlighting_test.copy = test/res/annotation_test1.cpp
 
 basichighlighting_test.src += #
 

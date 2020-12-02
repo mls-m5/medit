@@ -69,15 +69,6 @@ void CompleteView::callback(
 
 void CompleteView::setCursor(const Cursor cursor,
                              const BufferView &bufferView) {
-    //    auto currentChar = content(left(cursor)).at(0);
-    //    Cursor begin = cursor;
-    //    if (isalnum(currentChar)) {
-    //        // If on for example a newline
-    //        begin = wordBegin(cursor);
-    //    }
-    //    else {
-    //        begin = cursor; // I.e. Empty string
-    //    }
     auto begin = autocompleteWordBegin(cursor);
     auto range = CursorRange{begin, cursor};
     currentText(content(range).front());
