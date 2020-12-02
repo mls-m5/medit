@@ -24,7 +24,7 @@ struct MainWindow : public Window {
     size_t _updateTimeHandle = 0;
     size_t _currentEditor = 0;
 
-    //! Move these
+    //! Move these somewhere else
     std::vector<std::unique_ptr<IHighlight>> _highlighting;
     std::vector<std::unique_ptr<IFormat>> _formatting;
     std::vector<std::unique_ptr<IAnnotation>> _annotation;

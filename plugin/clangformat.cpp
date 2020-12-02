@@ -1,5 +1,6 @@
 
 #include "plugin/clangformat.h"
+#include "core/plugins.h"
 #include "files/extensions.h"
 #include "files/ifile.h"
 #include "views/editor.h"
@@ -22,3 +23,13 @@ bool ClangFormat::format(Editor &editor) {
 
     return true;
 }
+
+namespace {
+
+struct Register {
+    Register() {
+        registerFormat<ClangFormat>();
+    }
+} r;
+
+} // namespace

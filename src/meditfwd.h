@@ -33,3 +33,4 @@ class Context;
 class IHighlight;
 class ICompletionSource;
 class IAnnotation;
+class IFormat;
