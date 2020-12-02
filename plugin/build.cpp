@@ -11,10 +11,10 @@
 namespace {
 
 bool isBuilding = false;
-
 }
 
 void build(std::shared_ptr<IEnvironment> env) {
+#ifndef __EMSCRIPTEN__
     if (isBuilding) {
         return;
     }
@@ -51,4 +51,5 @@ void build(std::shared_ptr<IEnvironment> env) {
 
         isBuilding = false;
     });
+#endif
 }
