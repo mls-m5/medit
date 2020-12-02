@@ -1,6 +1,7 @@
 #include "clang/clangannotation.h"
 #include "core/context.h"
 #include "core/jobqueue.h"
+#include "core/plugins.h"
 #include "files/extensions.h"
 #include "files/popenstream.h"
 #include "files/project.h"
@@ -72,3 +73,13 @@ bool ClangAnnotation::annotate(std::shared_ptr<IEnvironment> env) {
 bool ClangAnnotation::shouldEnable(filesystem::path path) {
     return isCpp(path);
 }
+
+namespace {
+
+struct Register {
+    Register() {
+        registerAnnotation<ClangAnnotation>();
+    }
+} r;
+
+} // namespace

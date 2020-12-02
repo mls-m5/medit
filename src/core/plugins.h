@@ -15,15 +15,15 @@
 //! the main application
 class PluginRegisterFunctions {
 public:
-    using HighlightFactoryF = std::unique_ptr<IHighlight> (*)();
-    using HighlightRegisterF = void (*)(HighlightFactoryF);
+    template <typename T>
+    struct Func {
+        using createT = std::unique_ptr<T> (*)();
+        using registerT = void (*)(createT);
+    };
 
-    HighlightRegisterF registerHighlighting;
-
-    using CompletionFactoryF = std::unique_ptr<ICompletionSource> (*)();
-    using CompletionRegisterF = void (*)(CompletionFactoryF);
-
-    CompletionRegisterF registerCompletion;
+    Func<IHighlight>::registerT registerHighlighting;
+    Func<ICompletionSource>::registerT registerCompletion;
+    Func<IAnnotation>::registerT registerAnnotation;
 };
 
 // Get a handles to the register functions
@@ -32,6 +32,7 @@ PluginRegisterFunctions pluginRegisterFunctions();
 // Functions used by the application to create the plugins
 std::vector<std::unique_ptr<IHighlight>> createHighlightings();
 std::vector<std::unique_ptr<ICompletionSource>> createCompletionSources();
+std::vector<std::unique_ptr<IAnnotation>> createAnnotations();
 
 template <typename T>
 void registerHighlighting() {
@@ -45,4 +46,10 @@ void registerCompletion() {
         []() -> std::unique_ptr<ICompletionSource> {
             return std::make_unique<T>();
         });
+}
+
+template <typename T>
+void registerAnnotation() {
+    pluginRegisterFunctions().registerAnnotation(
+        []() -> std::unique_ptr<IAnnotation> { return std::make_unique<T>(); });
 }
