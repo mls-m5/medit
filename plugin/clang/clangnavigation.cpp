@@ -6,6 +6,7 @@
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
 #include "clang/clangmodel.h"
+#include <core/plugins.h>
 
 using namespace std::literals;
 
@@ -101,3 +102,12 @@ void ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
 
     env->showConsole(true);
 }
+
+namespace {
+
+struct Register {
+    Register() {
+        registerNavigation<ClangNavigation>();
+    }
+};
+} // namespace

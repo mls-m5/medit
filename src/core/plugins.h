@@ -25,6 +25,7 @@ public:
     Func<ICompletionSource>::registerT registerCompletion;
     Func<IAnnotation>::registerT registerAnnotation;
     Func<IFormat>::registerT registerFormat;
+    Func<INavigation>::registerT registerNavigation;
 };
 
 // Get a handles to the register functions
@@ -35,6 +36,7 @@ std::vector<std::unique_ptr<IHighlight>> createHighlightings();
 std::vector<std::unique_ptr<ICompletionSource>> createCompletionSources();
 std::vector<std::unique_ptr<IAnnotation>> createAnnotations();
 std::vector<std::unique_ptr<IFormat>> createFormat();
+std::vector<std::unique_ptr<INavigation>> createNavigation();
 
 template <typename T>
 void registerHighlighting() {
@@ -60,4 +62,10 @@ template <typename T>
 void registerFormat() {
     pluginRegisterFunctions().registerFormat(
         []() -> std::unique_ptr<IFormat> { return std::make_unique<T>(); });
+}
+
+template <typename T>
+void registerNavigation() {
+    pluginRegisterFunctions().registerNavigation(
+        []() -> std::unique_ptr<INavigation> { return std::make_unique<T>(); });
 }

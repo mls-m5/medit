@@ -34,3 +34,4 @@ class IHighlight;
 class ICompletionSource;
 class IAnnotation;
 class IFormat;
+class INavigation;
