@@ -8,6 +8,7 @@
 #include "files/file.h"
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
+#include "navigation/inavigation.h"
 #include "screen/iscreen.h"
 #include "syntax/iannotation.h"
 #include "syntax/ihighlight.h"
@@ -59,6 +60,8 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
     _formatting = createFormat();
 
     _annotation = createAnnotations();
+
+    _navigation = createNavigation();
 }
 
 MainWindow::~MainWindow() = default;
@@ -83,7 +86,16 @@ void MainWindow::addCommands() {
                      [this](std::shared_ptr<IEnvironment> env) {
                          auto &editor = env->editor();
                          for (auto &format : _formatting) {
-                             format->format(editor);
+                             if (format->format(editor)) {
+                                 break;
+                             }
+                         }
+                     });
+
+    _env->addCommand("editor.goto_definition",
+                     [this](std::shared_ptr<IEnvironment> env) {
+                         for (auto &navigation : _navigation) {
+                             navigation->gotoSymbol(env);
                          }
                      });
 

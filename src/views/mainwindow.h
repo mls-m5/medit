@@ -28,6 +28,7 @@ struct MainWindow : public Window {
     std::vector<std::unique_ptr<IHighlight>> _highlighting;
     std::vector<std::unique_ptr<IFormat>> _formatting;
     std::vector<std::unique_ptr<IAnnotation>> _annotation;
+    std::vector<std::unique_ptr<INavigation>> _navigation;
 
     MainWindow(IScreen &screen, Context &context);
 

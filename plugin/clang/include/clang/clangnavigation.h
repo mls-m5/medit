@@ -1,9 +1,10 @@
 #pragma once
 
 #include "meditfwd.h"
+#include "navigation/inavigation.h"
 #include <memory>
 
-class ClangNavigation {
+class ClangNavigation : public INavigation {
 public:
-    static void gotoSymbol(std::shared_ptr<IEnvironment> env);
+    void gotoSymbol(std::shared_ptr<IEnvironment> env) override;
 };

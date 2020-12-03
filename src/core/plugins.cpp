@@ -1,5 +1,6 @@
 #include "core/plugins.h"
 #include "completion/icompletionsource.h"
+#include "navigation/inavigation.h"
 #include "syntax/iannotation.h"
 #include "syntax/iformat.h"
 #include "syntax/ihighlight.h"
@@ -17,12 +18,8 @@ struct PluginData {
         annotationCreateFunctions;
     std::vector<PluginRegisterFunctions::Func<IFormat>::createT>
         formatCreateFunctions;
-
-    PluginData() {
-        highligtCreateFunctions.reserve(20);
-        completionCreateFunctions.reserve(20);
-        annotationCreateFunctions.reserve(20);
-    }
+    std::vector<PluginRegisterFunctions::Func<INavigation>::createT>
+        navigationCreateFunctions;
 };
 
 // Something like a singleton
@@ -64,6 +61,10 @@ PluginRegisterFunctions pluginRegisterFunctions() {
             [](PluginRegisterFunctions::Func<IFormat>::createT f) {
                 pluginData().formatCreateFunctions.push_back(std::move(f));
             },
+        .registerNavigation =
+            [](PluginRegisterFunctions::Func<INavigation>::createT f) {
+                pluginData().navigationCreateFunctions.push_back(std::move(f));
+            },
     };
 }
 
@@ -82,4 +83,8 @@ std::vector<std::unique_ptr<IAnnotation>> createAnnotations() {
 
 std::vector<std::unique_ptr<IFormat>> createFormat() {
     return createPlugins<IFormat>(pluginData().formatCreateFunctions);
+}
+
+std::vector<std::unique_ptr<INavigation>> createNavigation() {
+    return createPlugins<INavigation>(pluginData().navigationCreateFunctions);
 }
