@@ -2,13 +2,14 @@
 
 #include "completion/autocomplete.h"
 #include "core/plugins.h"
-//#include "completion/wordcompletions.h"
-//#include "clang/clangcompletion.h"
+#include <algorithm>
 
 AutoComplete::AutoComplete() {
-    //    _sources.emplace_back(std::make_unique<ClangCompletion>());
-    //    _sources.emplace_back(std::make_unique<WordCompletions>());
     _sources = createCompletionSources();
+
+    std::sort(_sources.begin(), _sources.end(), [](auto &&a, auto &&b) {
+        return a->priority() > b->priority();
+    });
 }
 
 AutoComplete::~AutoComplete() {}

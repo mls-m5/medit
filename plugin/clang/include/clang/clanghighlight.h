@@ -6,12 +6,15 @@
 
 class ClangHighlight : public IHighlight {
 public:
-    //! @see IHighlight interface
-    bool shouldEnable(filesystem::path path);
-    void highlight(std::shared_ptr<IEnvironment> env);
+    //! @see IHighlight
+    bool shouldEnable(filesystem::path path) override;
+    void highlight(std::shared_ptr<IEnvironment> env) override;
 
     //! @see IHighlight
-    void update(const IPalette &palette);
+    void update(const IPalette &palette) override;
 
-private:
+    //! @see IHighlight
+    int priority() override {
+        return 100;
+    }
 };

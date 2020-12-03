@@ -95,6 +95,6 @@ struct Register {
     Register() {
         registerCompletion<ClangCompletion>();
     }
-};
+} r;
 
 } // namespace

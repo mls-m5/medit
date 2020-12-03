@@ -17,10 +17,15 @@ public:
     ~ClangCompletion();
 
     //! @see ICompletionSource
-    bool shouldComplete(std::shared_ptr<IEnvironment> ) override;
+    bool shouldComplete(std::shared_ptr<IEnvironment>) override;
 
     //! @ ICompletionSource
     CompletionList list(std::shared_ptr<IEnvironment> env) override;
+
+    //! @see ICompletionSource
+    int priority() override {
+        return 10;
+    }
 
 private:
     ClangModel *_model;

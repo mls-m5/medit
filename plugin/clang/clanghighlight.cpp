@@ -96,6 +96,6 @@ struct Register {
     Register() {
         registerHighlighting<ClangHighlight>();
     }
-};
+} r;
 
 } // namespace

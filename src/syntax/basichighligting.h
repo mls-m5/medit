@@ -12,10 +12,15 @@ public:
     BasicHighlighting();
     ~BasicHighlighting();
 
-    // @see IHighlight
+    //! @see IHighlight
     bool shouldEnable(filesystem::path) override;
-    void highlight(std::shared_ptr<IEnvironment> ) override;
+    void highlight(std::shared_ptr<IEnvironment>) override;
     void update(const IPalette &palette) override;
+
+    //! @see IHighlight
+    int priority() override {
+        return -1;
+    }
 
 private:
 };
