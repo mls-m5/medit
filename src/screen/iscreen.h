@@ -3,6 +3,7 @@
 #include "meditfwd.h"
 #include "screen/cursorstyle.h"
 #include "text/fstring.h"
+#include <limits>
 
 class IScreen {
 public:
