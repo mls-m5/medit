@@ -54,6 +54,9 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
     addCommands();
 
     _highlighting = createHighlightings();
+    std::sort(_highlighting.begin(),
+              _highlighting.end(),
+              [](auto &&a, auto &&b) { return a->priority() > b->priority(); });
 
     updatePalette(screen);
 
@@ -280,7 +283,6 @@ void MainWindow::updatePalette(IScreen &screen) {
         for (auto &highligting : _highlighting) {
             highligting->update(screen.palette());
         }
-        //        editor.updatePalette(screen.palette());
     }
 }
 

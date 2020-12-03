@@ -74,14 +74,6 @@ CommandList navigationCommands = {
             e.cursor(wordEnd(e.cursor()));
         },
     },
-    //#ifndef __EMSCRIPTEN__
-    //    {
-    //        "editor.goto_definition",
-    //        [](std::shared_ptr<IEnvironment> env) {
-    //            ClangNavigation::gotoSymbol(env);
-    //        },
-    //    },
-    //#endif
     {
         "editor.switch_header",
         [](std::shared_ptr<IEnvironment> env) {

@@ -47,6 +47,11 @@ public:
     bool shouldComplete(std::shared_ptr<IEnvironment>) override {
         return true;
     }
+
+    //! @see ICompletionSource
+    int priority() override {
+        return -1;
+    }
 };
 
 namespace {

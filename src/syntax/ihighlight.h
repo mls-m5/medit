@@ -11,4 +11,7 @@ public:
     virtual bool shouldEnable(filesystem::path) = 0;
     virtual void highlight(std::shared_ptr<IEnvironment> env) = 0;
     virtual void update(const IPalette &palette) = 0;
+
+    //! High priority means that it should be selected first
+    virtual int priority() = 0;
 };
