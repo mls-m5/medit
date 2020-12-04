@@ -31,6 +31,16 @@ jobs:
           sudo apt-get install -y clang-10 libclang-9-dev
       - name: Build and test
         run: matmake/matmake -v -c debug test
+      - name: Install emscripten
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+          emsdk/emsdk install latest
+          emsdk/emsdk activate latest
+          
+      - name: Build emscripten
+        run: | 
+          source emsdk/emsdk_env.sh
+          matmake/matmake -v -c em
         
         
 
