@@ -1,5 +1,6 @@
 
 #include "views/listview.h"
+#include "screen/draw.h"
 #include "screen/iscreen.h"
 #include "script/ienvironment.h"
 #include "syntax/ipalette.h"
@@ -28,8 +29,19 @@ void ListView::draw(IScreen &screen) {
         return;
     }
 
-    FString fillStr{std::string(width(), ' '), IPalette::standard};
-    FString selFillStr{std::string(width(), ' '), IPalette::currentLine};
+    size_t width = 0;
+
+    for (size_t ty = 0, i = yScroll(); ty < height() && i < _lines.size();
+         ++i, ++ty) {
+        auto &l = _lines.at(i);
+        width = std::max(width, l.text.size());
+    }
+    this->width(width);
+
+    //    fillRect(screen, ' ', *this);
+
+    FString fillStr{std::string(this->width(), ' '), IPalette::standard};
+    FString selFillStr{std::string(this->width(), ' '), IPalette::currentLine};
 
     for (size_t ty = 0, i = yScroll(); ty < height() && i < _lines.size();
          ++i, ++ty) {
@@ -38,13 +50,15 @@ void ListView::draw(IScreen &screen) {
             break;
         }
         if (i == _current) {
-            screen.draw(x(), y() + ty, selFillStr);
-            screen.draw(
-                x(), y() + ty, {std::string{l.text}, IPalette::currentLine});
+            ::draw(screen, x(), y() + ty, selFillStr);
+            ::draw(screen,
+                   x(),
+                   y() + ty,
+                   {std::string{l.text}, IPalette::currentLine});
         }
         else {
-            screen.draw(x(), y() + ty, fillStr);
-            screen.draw(x(), y() + ty, l.text);
+            ::draw(screen, x(), y() + ty, fillStr);
+            ::draw(screen, x(), y() + ty, l.text);
         }
     }
 }
@@ -54,13 +68,11 @@ bool ListView::keyPress(std::shared_ptr<IEnvironment> env) {
     case Key::Up:
         if (_current > 0) {
             current(_current - 1);
-            //            --_current;
         }
         return true;
     case Key::Down:
         if (_current < _lines.size() - 1) {
             current(_current + 1);
-            //            ++_current;
         }
         return true;
     case Key::Escape:

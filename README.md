@@ -1,6 +1,10 @@
 The best text editor in the world
 ======================================
 
+![Alt text](docs/window.png?raw=true "Typical window with code")
+
+![Alt text](docs/complete.png?raw=true "Example of autocomplete using clang")
+
 Todo:
 - [x] Show/hide console
 - [x] Resize window
@@ -14,7 +18,7 @@ Todo:
   - [ ] Implement all navigation shortcuts for all modes (iw aw 'i{' etc)
 - [x] Undo/Redo
   - [ ] Improve memory usage for undo/redo
-- [ ] Multiple open editors
+- [x] Multiple open editors
 - [ ] Keep buffers open in background
 - [x] Buffered screen output
 - [x] Delayed syntax highlighting
