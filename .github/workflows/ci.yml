@@ -40,7 +40,7 @@ jobs:
       - name: Build emscripten
         run: | 
           source emsdk/emsdk_env.sh
-          matmake/matmake -v -c em test
+          matmake/matmake -v -c em
         
         
 
