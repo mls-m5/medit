@@ -21,7 +21,7 @@ public:
     }
 
     //! The whole buffer
-    constexpr CursorRange(Buffer &buffer)
+    CursorRange(Buffer &buffer)
         : _buffer(&buffer), _begin(buffer.begin()), _end(buffer.end()) {}
 
     //! Convert a cursor to a empty range
