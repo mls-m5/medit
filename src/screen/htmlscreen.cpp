@@ -1,6 +1,13 @@
 #ifdef __EMSCRIPTEN__
 
 #include "screen/htmlscreen.h"
+#include "emscripten.h"
+
+struct HtmlScreen::Grid {};
+
+HtmlScreen::HtmlScreen() = default;
+
+HtmlScreen::~HtmlScreen() = default;
 
 void HtmlScreen::draw(size_t x, size_t y, const FString &str) {}
 

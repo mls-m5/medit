@@ -8,8 +8,8 @@ all: ${matmake}
 	@echo for more options use 'matmake -h'
 	@${matmake}
 
-${matmake}:
-	make -C &{matmake}
+${matmake}: matmake/src/matmake.cpp
+	make -C matmake
 
 clean:
 	${matmake} clean

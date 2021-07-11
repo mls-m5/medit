@@ -87,6 +87,7 @@ main.link +=  standardplugins
 
 src = test/%.cpp
 out = test %
+em: out = test %.html
 link = core standardplugins
 
 includes +=

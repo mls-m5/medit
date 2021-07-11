@@ -4,9 +4,13 @@
 
 #include "screen/iinput.h"
 #include "screen/iscreen.h"
+#include <memory>
 
 class HtmlScreen : public IScreen, public IInput {
 public:
+    HtmlScreen();
+    ~HtmlScreen();
+
     // @see IScreen
     void draw(size_t x, size_t y, const FString &str);
     // @see IScreen
@@ -36,6 +40,11 @@ public:
 
     // @see IInput
     KeyEvent getInput();
+
+private:
+    struct Grid;
+
+    std::unique_ptr<Grid> _grid;
 };
 
 #endif
