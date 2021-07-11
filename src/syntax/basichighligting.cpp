@@ -8,12 +8,12 @@
 #include "text/cursorrangeops.h"
 #include "text/words.h"
 #include "views/editor.h"
+#include <array>
 #include <string>
-#include <vector>
 
 namespace {
 //! Todo: Extract this so it can be customized
-const auto wordList = std::vector<std::string>{
+const auto wordList = std::array<std::string, 20>{
     "int",   "double", "char", "signed",  "long",    "unsigned",  "void",
     "short", "bool",   "auto", "include", "struct",  "class",     "if",
     "else",  "switch", "case", "public",  "private", "namespace",

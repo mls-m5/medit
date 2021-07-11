@@ -1,132 +1,199 @@
 
 # Matmake file
-# https://github.com/mls-m5/matmake
-
-cpp = clang++-10
-
-em: cpp = em++
-em: ar = emar
-
-config +=
-   c++17
-#   c++2a
-#   modules #treat includes as separate
-
-flags +=
-   -W
-   -Wall
-   -Wno-unused-parameter
-   -Wno-sign-compare
-   -Wnon-virtual-dtor
-   -g
-
-em: flags += -s USE_PTHREADS -s LLD_REPORT_UNDEFINED
-
-includes +=
-   include
-   src
-   plugin/include
-   plugin/clang/include
-   lib/json.h/include
-
-dir = bin
-em: dir = bin/em
-debug: dir = bin/debug
-
-# ==== Plugins ======================================
-
-standardplugins.out = shared %
-em: standardplugins.out = static %
-
-standardplugins.src =
-   plugin/*.cpp
-
+# https://github.com/mls-m5/matmake2
 
 ## -- clangplugin -----------------------------------
 
-clangplugin.sysincludes=
-   /usr/lib/llvm-9/include/
+# convert to shared library
+clangplugin
+   includes =
+      /usr/lib/llvm-9/include/
+   out = clangplugin
+   src = plugin/clang/*.cpp
+   ldflags = -lclang-9
+   command = [static]
 #   /usr/lib/llvm-11/include
 #   /usr/lib/llvm-10/include/
 
-clangplugin.out = shared %
-em: clangplugin.out = static %
-clangplugin.src = plugin/clang/**.cpp
-clangplugin.libs += -lclang-9
+core
+   src =
+      src/completion/*.cpp
+      src/files/*.cpp
+      src/keys/*.cpp
+      src/modes/*.cpp
+      src/screen/*.cpp
+      src/text/*.cpp
+      src/script/*.cpp
+      src/views/*.cpp
+      src/syntax/*.cpp
+      src/core/*.cpp
+   out = core
+   command = [static]
 
+main
+   in =
+      @core
+      @clangplugin
+   src =
+      src/main.cpp
 
-# ==== Main target ==================================
-
-core.src +=
-   src/completion/**.cpp
-   src/files/**.cpp
-   src/keys/**.cpp
-   src/modes/**.cpp
-   src/screen/**.cpp
-   src/text/**.cpp
-   src/script/**.cpp
-   src/views/**.cpp
-   src/syntax/**.cpp
-   src/core/**.cpp
-
-core.out = shared core
-em: core.out = static core
-core.libs += `pkg-config --libs ncurses` -lstdc++fs
-
-main.src = src/main.cpp
-main.copy += README.md data/oblivion.json
-main.link += core
-main.libs +=  -pthread
-main.out = medit
-em: main.out = medit.html
-main.link +=  standardplugins
-!em: main.link += clangplugin
+      plugin/*.cpp
+   copy =
+      README.md
+      data/oblivion.json
+   libs =  -pthread
+   out = medit
+   command = [exe]
+   ldflags = `pkg-config --libs ncurses` -lstdc++fs -pthread
 
 
 # ======== Tests =====================================
 
-src = test/%.cpp
-out = test %
-em: out = test %.html
-link = core standardplugins
+#src = test/%.cpp
+#out = test %
+#link = core standardplugins
 
-includes +=
-   src
-   test
+#includes +=
+#   src
+#   test
 
-buffer_test.src += #
+#buffer_test.src += #
 
-cursorops_test.src += #
+buffer_test
+   in = @core
+   src = test/buffer_test.cpp
+   command = [test]
+   out = buffer_test
 
-cursorrangeops_test.src += #
+cursorops_test
+   in = @core
+   src = test/cursorops_test.cpp
+   command = [test]
+   out = cursorops_test
 
-wordsiterator_test.src += #
+wordsiterator_test
+   in = @core
+   src = test/wordsiterator_test.cpp
+   command = [test]
+   out = wordsiterator_test
 
-keysettings_test.src += #
+keysettings_test
+   in = @core
+   src = test/keysettings_test.cpp
+   command = [test]
+   out = keysettings_test
 
-fstring_test.src += #
+fstring_test
+   in = @core
+   src = test/fstring_test.cpp
+   command = [test]
+   out = fstring_test
 
-utf8char_test.src += #
+utf8char_test
+   in = @core
+   src = test/utf8char_test.cpp
+   command = [test]
+   out = utf8char_test
 
-bufferkeymap_test.src += #
+bufferkeymap_test
+   in = @core
+   src = test/bufferkeymap_test.cpp
+   command = [test]
+   out = bufferkeymap_test
 
-mode_test.src += #
+mode_test
+   in = @core
+   src = test/mode_test.cpp
+   command = [test]
+   out = mode_test
 
-palette_test.src += #
+palette_test
+   in = @core
+   src = test/palette_test.cpp
+   command = [test]
+   out = palette_test
 
-project_test.src += #
-project_test.copy = test/res/.medit.json
+project_test
+   in = @core
+   src = test/project_test.cpp
+   copy = test/res/.medit.json
+   command = [test]
+   out = project_test
 
-!em: clang_autocomplete_test.link += clangplugin
-!em: clang_autocomplete_test.copy =
-    test/res/complete_test1.cpp
-    test/res/complete_test2.cpp
+clang_autocomplete_test
+   in =
+      @core
+      @clangplugin
+   src = test/clang_autocomplete_test.cpp
+   command = [test]
+   out = clang_autocomplete_test
+   copy =
+      test/res/complete_test1.cpp
+      test/res/complete_test2.cpp
+   ldflags = -lclang-9
 
-!em clanghighlighting_test.link += clangplugin
-!em clanghighlighting_test.copy = test/res/annotation_test1.cpp
+clanghighlighting_test
+   in =
+      @clangplugin
+      @core
+   src = test/clanghighlighting_test.cpp
+   command = [test]
+   out = clanghighlighting_test
+   copy = test/res/annotation_test1.cpp
+   ldflags = -lclang-9
 
-basichighlighting_test.src += #
+basichighlighting_test
+   in = @core
+   src = test/basichighlighting_test.cpp
+   command = [test]
+   out = basichighlighting_test
 
-history_test.src += #
+history_test
+   in = @core
+   src = test/history_test.cpp
+   command = [test]
+   out = history_test
 
+
+
+# ============ Generic rules =========================================
+
+tests
+   in =
+      @buffer_test
+      @cursorops_test
+      @wordsiterator_test
+      @keysettings_test
+      @fstring_test
+      @utf8char_test
+      @bufferkeymap_test
+      @mode_test
+      @palette_test
+      @project_test
+      #@clang_autocomplete_test
+      #@clanghighlighting_test
+      @basichighlighting_test
+      @history_test
+   includes =
+      test/
+
+all
+   in =
+      @main
+      @tests
+
+   config =
+      c++17
+   flags =
+      -W
+      -Wall
+      -Wno-unused-parameter
+      -Wno-sign-compare
+      -Wnon-virtual-dtor
+   includes =
+      include
+      src
+      plugin/include
+      plugin/clang/include
+      lib/json.h/include
 
