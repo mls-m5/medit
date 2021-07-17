@@ -21,7 +21,7 @@ jobs:
       - name: Update recursive
         run: git submodule update --recursive --init
       - name: Build build-system
-        run: make -C matmake -j8
+        run: make -C matmake2 -j8
       - name: Install tools
         run: |
           pip install cmake==3.18.2.post1 ninja==1.10.0.post1 --upgrade
@@ -30,7 +30,7 @@ jobs:
           sudo apt update
           sudo apt-get install -y clang-10 libclang-9-dev
       - name: Build and test
-        run: matmake/matmake -v -c debug test
+        run: matmake2/build/matmake2 -t gcc
       - name: Install emscripten
         run: |
           git clone https://github.com/emscripten-core/emsdk.git
@@ -40,7 +40,7 @@ jobs:
       - name: Build emscripten
         run: | 
           source emsdk/emsdk_env.sh
-          matmake/matmake -v -c em
+          matmake2/build/matmake2 -t em test
         
         
 
