@@ -6,9 +6,9 @@
 
 # convert to shared library
 clangplugin
+   out = clangplugin
    includes =
       /usr/lib/llvm-9/include/
-   out = clangplugin
    src = plugin/clang/*.cpp
    ldflags = -lclang-9
    command = [static]
@@ -16,6 +16,7 @@ clangplugin
 #   /usr/lib/llvm-10/include/
 
 core
+   out = core
    src =
       src/completion/*.cpp
       src/files/*.cpp
@@ -27,37 +28,35 @@ core
       src/views/*.cpp
       src/syntax/*.cpp
       src/core/*.cpp
-   out = core
+
+      plugin/*.cpp
+   config = thread
    command = [static]
+
+matgui
+   out = matgui
+   command = [static]
+   src = lib/matgui/src/*.cpp
 
 main
    in =
       @core
       @clangplugin
+      @matgui
    src =
       src/main.cpp
-
-      plugin/*.cpp
    copy =
       README.md
       data/oblivion.json
    libs =  -pthread
    out = medit
    command = [exe]
-   ldflags = `pkg-config --libs ncurses` -lstdc++fs -pthread
+   config =
+      thread
+   ldflags = `pkg-config --libs ncurses` -lstdc++fs -lGL -lSDL2
 
 
 # ======== Tests =====================================
-
-#src = test/%.cpp
-#out = test %
-#link = core standardplugins
-
-#includes +=
-#   src
-#   test
-
-#buffer_test.src += #
 
 buffer_test
    in = @core
@@ -124,7 +123,9 @@ clang_autocomplete_test
    in =
       @core
       @clangplugin
-   src = test/clang_autocomplete_test.cpp
+   src =
+      test/clang_autocomplete_test.cpp
+      src/core/plugins.cpp # tmp fix registerPlugins
    command = [test]
    out = clang_autocomplete_test
    copy =
@@ -136,7 +137,9 @@ clanghighlighting_test
    in =
       @clangplugin
       @core
-   src = test/clanghighlighting_test.cpp
+   src =
+      test/clanghighlighting_test.cpp
+      src/core/plugins.cpp # tmp fix registerPlugins
    command = [test]
    out = clanghighlighting_test
    copy = test/res/annotation_test1.cpp
@@ -170,8 +173,8 @@ tests
       @mode_test
       @palette_test
       @project_test
-      #@clang_autocomplete_test
-      #@clanghighlighting_test
+      @clang_autocomplete_test
+      @clanghighlighting_test
       @basichighlighting_test
       @history_test
    includes =
@@ -196,4 +199,4 @@ all
       plugin/include
       plugin/clang/include
       lib/json.h/include
-
+      lib/matgui/include
