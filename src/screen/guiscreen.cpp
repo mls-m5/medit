@@ -1,14 +1,14 @@
 #include "guiscreen.h"
+#include "files/fontlocator.h"
+#include "matgui/fontview.h"
 #include "matgui/keys.h"
 #include "matgui/keyutils.h"
 #include "matgui/paint.h"
 #include "syntax/color.h"
+#include "text/position.h"
 #include <array>
 
 namespace {
-
-auto testPaint =
-    matgui::Paint{matgui::ColorStyle{1, 1, 1}, matgui::LineStyle{1, 1, 1}};
 
 size_t testX = 0;
 
@@ -41,10 +41,20 @@ Key matguiToMeditKey(int scanCode, int symbol) {
 struct GuiScreen::Buffer {
     std::vector<FString> lines;
     std::vector<matgui::Paint> styles;
+    std::map<Utf8Char, matgui::FontView> characters;
     size_t width = 0;
     size_t height = 0;
-    double cellWith = 10;
-    double cellHeight = 20;
+    double cellWidth = 8;
+    double cellHeight = 16;
+    matgui::Font font = {findFont("UbuntuMono-R").string(), 10};
+
+    Position cursorPos;
+
+    matgui::Paint cursorPaint = {
+        {1, 1, 1},
+        {1, 1, 1},
+        {},
+    };
 
     // Save data to be drawn
     void draw(size_t x, size_t y, const FString &str) {
@@ -80,11 +90,25 @@ struct GuiScreen::Buffer {
         }
     }
 
+    matgui::FontView &getFontView(Utf8Char c) {
+        if (auto f = characters.find(c); f != characters.end()) {
+            return f->second;
+        }
+
+        auto &f = characters[c];
+        f.font(font);
+        f.text(c);
+        return f;
+    }
+
     void renderLine(size_t y, const FString &str) {
         for (size_t x = 0; x < str.size(); ++x) {
             auto c = str.at(x);
-            auto &paint = styles.at(c.f);
-            paint.drawRect(x * cellWith, y * cellHeight, cellWith, cellHeight);
+            auto &f = getFontView(c.c);
+            auto &bg = styles.at(c.f);
+            bg.drawRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+            f.draw(x * cellWidth + cellWidth / 2 * 0,
+                   y * cellHeight + cellHeight * .6);
         }
     }
 
@@ -94,8 +118,10 @@ struct GuiScreen::Buffer {
             renderLine(y, lines.at(y));
         }
 
-        testPaint.drawRect(
-            (cellWith) * (3 + testX), cellHeight * 3, cellWith, cellHeight);
+        cursorPaint.drawRect((cellWidth)*cursorPos.x(),
+                             cellHeight * cursorPos.y(),
+                             cellWidth,
+                             cellHeight);
     }
 
     size_t addStyle(const Color &fg, const Color &bg, size_t index) {
@@ -110,7 +136,7 @@ struct GuiScreen::Buffer {
         auto &style = styles.at(index);
 
         style.fill.color(bg.r() / 255., bg.g() / 255., bg.b() / 255.);
-        style.line.color(fg.r() / 255., fg.g() / 255., fg.b() / 255.);
+        style.line.color(0, 0, 0, 0);
 
         return index;
     }
@@ -128,12 +154,15 @@ void GuiScreen::clear() {
     _buffer->fill({});
 }
 
-void GuiScreen::cursor(size_t x, size_t y) {}
+void GuiScreen::cursor(size_t x, size_t y) {
+    _buffer->cursorPos.x(x);
+    _buffer->cursorPos.y(y);
+}
 
 GuiScreen::GuiScreen()
     : _buffer(std::make_unique<Buffer>()), _application(0, nullptr),
       _window("matedit",
-              constWidth * _buffer->cellWith,
+              constWidth * _buffer->cellWidth,
               constHeight * _buffer->cellHeight) {
     _buffer->resize(constWidth, constHeight);
 
@@ -146,7 +175,7 @@ GuiScreen::~GuiScreen() noexcept {
 };
 
 KeyEvent GuiScreen::getInput() {
-    _inputMutex.lock();
+    _inputAvailableMutex.lock();
     if (!_isRunning) {
         _isRunning = true;
         _guiThread = std::thread{[this] { _application.mainLoop(); }};
@@ -158,12 +187,12 @@ KeyEvent GuiScreen::getInput() {
                 Modifiers::None,
                 true,
             });
-            _inputMutex.try_lock();
-            _inputMutex.unlock();
+            _inputAvailableMutex.try_lock();
+            _inputAvailableMutex.unlock();
         });
     }
 
-    _inputMutex.lock();
+    _inputAvailableMutex.lock();
     auto event = _inputQueue.front();
 
     ++testX;

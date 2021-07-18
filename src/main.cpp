@@ -59,7 +59,7 @@ struct Settings {
                 style = UiStyle::Matgui;
             }
             else {
-                if (i == 0 && arg.rfind("--") == std::string::npos) {
+                if (arg.rfind("-") != 0) {
                     file = args.at(i);
                 }
             }

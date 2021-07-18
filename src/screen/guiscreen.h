@@ -64,5 +64,6 @@ private:
     bool _isRunning = false;
 
     std::vector<KeyEvent> _inputQueue;
-    std::mutex _inputMutex;
+    std::mutex _inputAvailableMutex;
+    std::mutex _queueLock;
 };
