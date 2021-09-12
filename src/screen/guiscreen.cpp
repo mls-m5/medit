@@ -14,17 +14,22 @@ size_t testX = 0;
 
 using namespace matgui::Keys;
 
-auto keyMap = std::array<std::pair<int, Key>, 7>{{
-    {Unknown, Key::Unknown},
-    {Escape, Key::Escape},
-    {Left, Key::Left},
-    {Right, Key::Right},
-    {Backspace, Key::Backspace},
-    {Delete, Key::Delete},
+auto keyMap = std::array<std::pair<int, Key>, 22>{{
+    {Unknown, Key::Unknown}, {Escape, Key::Escape}, {Up, Key::Up},
+    {Down, Key::Down},       {Left, Key::Left},     {Right, Key::Right},
+    {Home, Key::Home},       {End, Key::End},       {Backspace, Key::Backspace},
+    {Delete, Key::Delete},   {F1, Key::F1},         {F2, Key::F2},
+    {F3, Key::F3},           {F4, Key::F4},         {F5, Key::F5},
+    {F6, Key::F6},           {F7, Key::F7},         {F8, Key::F8},
+    {F9, Key::F9},           {F10, Key::F10},       {F11, Key::F11},
+    {F12, Key::F12},
 }};
 
-auto specialCharactersMap = std::array<std::pair<int, KeyEvent>, 1>{{
+// Characters that does also insert text
+auto specialCharactersMap = std::array<std::pair<int, KeyEvent>, 3>{{
     {Return, KeyEvent{Key::Return, '\n'}},
+    {Tab, KeyEvent{Key::Return, '\t'}},
+    {Space, KeyEvent{Key::Return, ' '}},
 }};
 
 KeyEvent matguiToMeditKey(int scanCode) {
@@ -192,6 +197,12 @@ KeyEvent GuiScreen::getInput() {
 
         _window.textInput.connect([this](std::string text) {
             auto l = std::scoped_lock{_queueLock};
+
+            if (text == " " || text == "\t") {
+                // Avoid double handling
+                return;
+            }
+
             _inputQueue.emplace_back(
                 Key::Text, text.c_str(), Modifiers::None, true);
             _inputAvailableMutex.try_lock();
