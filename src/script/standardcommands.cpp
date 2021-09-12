@@ -143,7 +143,7 @@ CommandList editorCommands = {
             auto selection = e.selection();
             if (selection.empty()) {
                 env->registers().save(standardRegister,
-                                      std::string{content(e.cursor())});
+                                      content(e.cursor()).toString());
             }
             else {
                 env->registers().save(standardRegister, toString(selection));
@@ -159,7 +159,7 @@ CommandList editorCommands = {
             auto selection = e.selection();
             if (selection.empty()) {
                 env->registers().save(standardRegister,
-                                      std::string{content(e.cursor())});
+                                      content(e.cursor()).toString());
                 e.cursor(erase(e.cursor()));
             }
             else {

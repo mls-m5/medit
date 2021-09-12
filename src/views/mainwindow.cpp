@@ -208,8 +208,7 @@ void MainWindow::updateCursor(IScreen &screen) const {
     screen.draw(40,
                 screen.height() - 1,
                 ((c.modifiers == Modifiers::Ctrl) ? "ctrl+'" : "'") +
-                    std::string{c.symbol} + "'" +
-                    c.symbol.byteRepresentation());
+                    c.symbol.toString() + "'" + c.symbol.byteRepresentation());
 }
 
 bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {

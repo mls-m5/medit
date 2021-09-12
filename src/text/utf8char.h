@@ -155,6 +155,10 @@ public:
         return std::string{_data.begin(), size()};
     }
 
+    std::string toString() const {
+        return std::string{_data.begin(), size()};
+    }
+
     std::string byteRepresentation() const {
         std::string ret;
         for (auto c : _data) {

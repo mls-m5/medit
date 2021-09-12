@@ -11,7 +11,7 @@ clangplugin
       /usr/lib/llvm-9/include/
    src = plugin/clang/*.cpp
    ldflags = -lclang-9
-   command = [static]
+   !em:command = [static]
 #   /usr/lib/llvm-11/include
 #   /usr/lib/llvm-10/include/
 
@@ -43,12 +43,19 @@ matgui
 #      `pkg-config --cflags sdl2 SDL2_ttf`
 #      -DUSE_TTF_FONT
    src = lib/matgui/src/*.cpp
+   includes =
+      /usr/include/SDL2
+   em:eflags =
+      -s USE_SDL=2 -DDISABLE_TEXTURES
+   em:flags =
+      -s USE_SDL=2
 
 main
    in =
       @core
-      @clangplugin
+   !em:in =
       @matgui
+      @clangplugin
    src =
       src/main.cpp
    copy =
@@ -59,7 +66,7 @@ main
    command = [exe]
    config =
       thread
-   ldflags = `pkg-config --libs ncurses` -lstdc++fs -lGL -lSDL2
+   !em:ldflags = `pkg-config --libs ncurses` -lstdc++fs -lGL -lSDL2
 
 
 # ======== Tests =====================================
@@ -179,10 +186,11 @@ tests
       @mode_test
       @palette_test
       @project_test
-      @clang_autocomplete_test
-      @clanghighlighting_test
       @basichighlighting_test
       @history_test
+   !em:in =
+      @clang_autocomplete_test
+      @clanghighlighting_test
    includes =
       test/
 
@@ -206,3 +214,6 @@ all
       plugin/clang/include
       lib/json.h/include
       lib/matgui/include
+   em:flags =
+      -s USE_PTHREADS
+
