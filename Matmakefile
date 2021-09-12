@@ -39,7 +39,8 @@ matgui
 #   eflags =
 #      -DUSE_TTF_FONT
    flags =
-      `pkg-config --cflags sdl2 SDL2_ttf`
+      `pkg-config --cflags sdl2`
+#      `pkg-config --cflags sdl2 SDL2_ttf`
 #      -DUSE_TTF_FONT
    src = lib/matgui/src/*.cpp
 
@@ -58,7 +59,7 @@ main
    command = [exe]
    config =
       thread
-   ldflags = `pkg-config --libs ncurses` -lstdc++fs -lGL -lSDL2 -lSDL2_ttf
+   ldflags = `pkg-config --libs ncurses` -lstdc++fs -lGL -lSDL2
 
 
 # ======== Tests =====================================
