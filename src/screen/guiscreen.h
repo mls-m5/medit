@@ -64,4 +64,7 @@ private:
     std::vector<KeyEvent> _inputQueue;
     std::mutex _inputAvailableMutex;
     std::mutex _queueLock;
+
+    bool _ctrlState = false;
+    bool _altState = false;
 };

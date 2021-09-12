@@ -50,6 +50,12 @@ KeyEvent matguiToMeditKey(int scanCode) {
     return Key::Unknown;
 }
 
+Modifiers modifiers(bool ctrl, bool alt) {
+    return static_cast<Modifiers>(
+        static_cast<int>(ctrl ? Modifiers::Ctrl : Modifiers{}) |
+        static_cast<int>(alt ? Modifiers::Alt : Modifiers{}));
+}
+
 } // namespace
 
 struct GuiScreen::Buffer {
@@ -219,8 +225,10 @@ KeyEvent GuiScreen::getInput() {
                 return;
             }
 
-            _inputQueue.emplace_back(
-                Key::Text, text.c_str(), Modifiers::None, true);
+            _inputQueue.emplace_back(Key::Text,
+                                     text.c_str(),
+                                     modifiers(_ctrlState, _altState),
+                                     true);
             _inputAvailableMutex.try_lock();
             _inputAvailableMutex.unlock();
         });
@@ -230,9 +238,42 @@ KeyEvent GuiScreen::getInput() {
             // Handle special keys (not text)
             if (auto key = matguiToMeditKey(arg.scanCode);
                 key != Key::Unknown) {
+                key.modifiers = modifiers(_ctrlState, _altState);
                 _inputQueue.emplace_back(key);
                 _inputAvailableMutex.try_lock();
                 _inputAvailableMutex.unlock();
+            }
+            else {
+                if (arg.scanCode == matgui::Keys::CtrlLeft) {
+                    _ctrlState = true;
+                }
+                else if (arg.scanCode == matgui::Keys::AltLeft) {
+                    _altState = true;
+                }
+                else if (_ctrlState) {
+                    // For some reason when holding ctrl. Text input does not
+                    // work
+
+                    if (arg.symbol >= 'A' || arg.symbol <= 'Z') {
+                        arg.symbol -= ('a' - 'A');
+
+                        auto event = KeyEvent{Key::KeyCombination,
+                                              arg.symbol,
+                                              modifiers(_ctrlState, _altState)};
+                        _inputQueue.emplace_back(event);
+                        _inputAvailableMutex.try_lock();
+                        _inputAvailableMutex.unlock();
+                    }
+                }
+            }
+        });
+
+        _window.keyUp.connect([this](matgui::View::KeyArgument arg) {
+            if (arg.scanCode == matgui::Keys::CtrlLeft) {
+                _ctrlState = false;
+            }
+            else if (arg.scanCode == matgui::Keys::AltLeft) {
+                _altState = false;
             }
         });
     }
