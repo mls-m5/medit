@@ -19,7 +19,7 @@
 #include "views/messagebox.h"
 
 MainWindow::MainWindow(IScreen &screen, Context &context)
-    : View(screen.width(), screen.height()), _editors(2),
+    : View(screen.width(), screen.height()), _editors(1),
       _env(std::make_shared<RootEnvironment>(context)), _locator(_project),
       _currentEditor(0) {
     _env->editor(&_editors.front());
@@ -208,8 +208,7 @@ void MainWindow::updateCursor(IScreen &screen) const {
     screen.draw(40,
                 screen.height() - 1,
                 ((c.modifiers == Modifiers::Ctrl) ? "ctrl+'" : "'") +
-                    std::string{c.symbol} + "'" +
-                    c.symbol.byteRepresentation());
+                    c.symbol.toString() + "'" + c.symbol.byteRepresentation());
 }
 
 bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {

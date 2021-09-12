@@ -7,3 +7,6 @@
 [submodule "matmake2"]
 	path = matmake2
 	url = https://github.com/Laserskold/matmake2
+[submodule "lib/matgui"]
+	path = lib/matgui
+	url = https://github.com/mls-m5/matgui

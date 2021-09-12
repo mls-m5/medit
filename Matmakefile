@@ -6,16 +6,17 @@
 
 # convert to shared library
 clangplugin
+   out = clangplugin
    includes =
       /usr/lib/llvm-9/include/
-   out = clangplugin
    src = plugin/clang/*.cpp
    ldflags = -lclang-9
-   command = [static]
+   !em:command = [static]
 #   /usr/lib/llvm-11/include
 #   /usr/lib/llvm-10/include/
 
 core
+   out = core
    src =
       src/completion/*.cpp
       src/files/*.cpp
@@ -27,37 +28,48 @@ core
       src/views/*.cpp
       src/syntax/*.cpp
       src/core/*.cpp
-   out = core
+
+      plugin/*.cpp
+   config = thread
    command = [static]
+
+matgui
+   out = matgui
+   command = [static]
+#   eflags =
+#      -DUSE_TTF_FONT
+   flags =
+      `pkg-config --cflags sdl2`
+#      `pkg-config --cflags sdl2 SDL2_ttf`
+#      -DUSE_TTF_FONT
+   src = lib/matgui/src/*.cpp
+   includes =
+      /usr/include/SDL2
+   em:eflags =
+      -s USE_SDL=2 -DDISABLE_TEXTURES
+   em:flags =
+      -s USE_SDL=2
 
 main
    in =
       @core
+   !em:in =
+      @matgui
       @clangplugin
    src =
       src/main.cpp
-
-      plugin/*.cpp
    copy =
       README.md
       data/oblivion.json
    libs =  -pthread
    out = medit
    command = [exe]
-   ldflags = `pkg-config --libs ncurses` -lstdc++fs -pthread
+   config =
+      thread
+   !em:ldflags = `pkg-config --libs ncurses` -lstdc++fs -lGL -lSDL2
 
 
 # ======== Tests =====================================
-
-#src = test/%.cpp
-#out = test %
-#link = core standardplugins
-
-#includes +=
-#   src
-#   test
-
-#buffer_test.src += #
 
 buffer_test
    in = @core
@@ -124,7 +136,9 @@ clang_autocomplete_test
    in =
       @core
       @clangplugin
-   src = test/clang_autocomplete_test.cpp
+   src =
+      test/clang_autocomplete_test.cpp
+      src/core/plugins.cpp # tmp fix registerPlugins
    command = [test]
    out = clang_autocomplete_test
    copy =
@@ -136,7 +150,9 @@ clanghighlighting_test
    in =
       @clangplugin
       @core
-   src = test/clanghighlighting_test.cpp
+   src =
+      test/clanghighlighting_test.cpp
+      src/core/plugins.cpp # tmp fix registerPlugins
    command = [test]
    out = clanghighlighting_test
    copy = test/res/annotation_test1.cpp
@@ -170,10 +186,11 @@ tests
       @mode_test
       @palette_test
       @project_test
-      #@clang_autocomplete_test
-      #@clanghighlighting_test
       @basichighlighting_test
       @history_test
+   !em:in =
+      @clang_autocomplete_test
+      @clanghighlighting_test
    includes =
       test/
 
@@ -196,4 +213,7 @@ all
       plugin/include
       plugin/clang/include
       lib/json.h/include
+      lib/matgui/include
+   em:flags =
+      -s USE_PTHREADS
 

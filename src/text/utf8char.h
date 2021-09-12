@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstring> // for memcpy
 #include <ostream>
 
 constexpr uint8_t utf8size(char first) {
@@ -121,6 +122,16 @@ public:
         return size() == 1 && _data.front() == c;
     }
 
+    operator uint32_t() const {
+        auto value = uint32_t{};
+        std::memcpy(&value, _data.data(), 4);
+        return value;
+    }
+
+    friend bool operator<(const Utf8Char &self, const Utf8Char &other) {
+        return static_cast<uint32_t>(self) < static_cast<uint32_t>(other);
+    }
+
     friend constexpr bool operator==(const Utf8Char &self,
                                      const Utf8Char &other) {
         for (size_t i = 0; i < self._data.size(); ++i) {
@@ -138,6 +149,14 @@ public:
 
     operator std::string_view() const {
         return std::string_view{_data.begin(), size()};
+    }
+
+    operator std::string() const {
+        return std::string{_data.begin(), size()};
+    }
+
+    std::string toString() const {
+        return std::string{_data.begin(), size()};
     }
 
     std::string byteRepresentation() const {
