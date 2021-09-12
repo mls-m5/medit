@@ -41,7 +41,7 @@ public:
 
 private:
     static constexpr size_t constWidth = 80;
-    static constexpr size_t constHeight = 40;
+    static constexpr size_t constHeight = 24;
 
     bool _hasColors = true;
 

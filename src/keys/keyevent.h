@@ -44,22 +44,17 @@ enum class Modifiers {
 
 class KeyEvent {
 public:
-    KeyEvent() = default;
-    KeyEvent(const KeyEvent &) = default;
-    KeyEvent(KeyEvent &&) = default;
-    KeyEvent &operator=(const KeyEvent &) = default;
-    KeyEvent &operator=(KeyEvent &&) = default;
+    constexpr KeyEvent() = default;
+    constexpr KeyEvent(const KeyEvent &) = default;
+    constexpr KeyEvent(KeyEvent &&) = default;
+    constexpr KeyEvent &operator=(const KeyEvent &) = default;
+    constexpr KeyEvent &operator=(KeyEvent &&) = default;
 
-    KeyEvent(Key key,
-             Utf8Char symbol = {},
-             Modifiers modifiers = Modifiers::None,
-             bool state = true)
+    constexpr KeyEvent(Key key,
+                       Utf8Char symbol = {},
+                       Modifiers modifiers = Modifiers::None,
+                       bool state = true)
         : key(key), symbol(symbol), modifiers(modifiers), state(state) {}
-
-    Key key = Key::Unknown;
-    Utf8Char symbol = {};
-    Modifiers modifiers = Modifiers::None;
-    bool state = true;
 
     constexpr friend bool operator==(const KeyEvent &a, const KeyEvent &b) {
         return a.key == b.key && a.modifiers == b.modifiers &&
@@ -69,4 +64,9 @@ public:
     constexpr friend bool operator!=(const KeyEvent &a, const KeyEvent &b) {
         return !(a == b);
     }
+
+    Key key = Key::Unknown;
+    Utf8Char symbol = {};
+    Modifiers modifiers = Modifiers::None;
+    bool state = true;
 };

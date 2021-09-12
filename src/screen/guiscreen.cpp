@@ -14,20 +14,29 @@ size_t testX = 0;
 
 using namespace matgui::Keys;
 
-auto keyMap = std::array<std::pair<int, Key>, 3>{{
+auto keyMap = std::array<std::pair<int, Key>, 7>{{
     {Unknown, Key::Unknown},
     {Escape, Key::Escape},
     {Left, Key::Left},
+    {Right, Key::Right},
+    {Backspace, Key::Backspace},
+    {Delete, Key::Delete},
 }};
 
-Key matguiToMeditKey(int scanCode, int symbol) {
-    // This probably does not work as expected
-    if (scanCode >= A && scanCode <= Z) {
-        auto s = std::string{};
-        return Key::Text;
-    }
+auto specialCharactersMap = std::array<std::pair<int, KeyEvent>, 1>{{
+    {Return, KeyEvent{Key::Return, '\n'}},
+}};
+
+KeyEvent matguiToMeditKey(int scanCode) {
+    // Text input is handled separately by matgui
 
     for (auto pair : keyMap) {
+        if (pair.first == scanCode) {
+            return KeyEvent{pair.second};
+        }
+    }
+
+    for (auto pair : specialCharactersMap) {
         if (pair.first == scanCode) {
             return pair.second;
         }
@@ -165,6 +174,7 @@ GuiScreen::GuiScreen()
               constWidth * _buffer->cellWidth,
               constHeight * _buffer->cellHeight) {
     _buffer->resize(constWidth, constHeight);
+    matgui::beginTextEntry();
 
     _window.frameUpdate.connect([this](double f) { _buffer->refresh(); });
 }
@@ -175,25 +185,42 @@ GuiScreen::~GuiScreen() noexcept {
 };
 
 KeyEvent GuiScreen::getInput() {
-    _inputAvailableMutex.lock();
     if (!_isRunning) {
+        _inputAvailableMutex.lock();
         _isRunning = true;
         _guiThread = std::thread{[this] { _application.mainLoop(); }};
 
-        _window.keyDown.connect([this](matgui::View::KeyArgument arg) {
-            _inputQueue.push_back({
-                {},
-                {},
-                Modifiers::None,
-                true,
-            });
+        _window.textInput.connect([this](std::string text) {
+            auto l = std::scoped_lock{_queueLock};
+            _inputQueue.emplace_back(
+                Key::Text, text.c_str(), Modifiers::None, true);
             _inputAvailableMutex.try_lock();
             _inputAvailableMutex.unlock();
         });
+
+        _window.keyDown.connect([this](matgui::View::KeyArgument arg) {
+            auto l = std::scoped_lock{_queueLock};
+            // Handle special keys (not text)
+            if (auto key = matguiToMeditKey(arg.scanCode);
+                key != Key::Unknown) {
+                _inputQueue.emplace_back(key);
+                _inputAvailableMutex.try_lock();
+                _inputAvailableMutex.unlock();
+            }
+        });
     }
 
-    _inputAvailableMutex.lock();
+    _inputAvailableMutex.try_lock();
+    {
+        auto l = std::unique_lock{_queueLock};
+        if (_inputQueue.empty()) {
+            l.unlock();
+            _inputAvailableMutex.lock(); // Lock untill there is some key
+            l.lock();
+        }
+    }
     auto event = _inputQueue.front();
+    _inputQueue.erase(_inputQueue.begin());
 
     ++testX;
 
