@@ -56,6 +56,7 @@ struct GuiScreen::Buffer {
     std::vector<FString> lines;
     std::vector<matgui::Paint> styles;
     std::map<Utf8Char, matgui::FontView> characters;
+    CursorStyle cursorStyle = CursorStyle::Block;
     size_t width = 0;
     size_t height = 0;
     double cellWidth = 8;
@@ -119,7 +120,12 @@ struct GuiScreen::Buffer {
         for (size_t x = 0; x < str.size(); ++x) {
             auto c = str.at(x);
             auto &f = getFontView(c.c);
-            auto &bg = styles.at(c.f);
+            auto &bg = [&]() -> matgui::Paint & {
+                if (c.f < styles.size()) {
+                    return styles.at(c.f);
+                }
+                return styles.front();
+            }();
             bg.drawRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
             f.draw(x * cellWidth + cellWidth / 2 * 0,
                    y * cellHeight + cellHeight * .6);
@@ -132,10 +138,20 @@ struct GuiScreen::Buffer {
             renderLine(y, lines.at(y));
         }
 
-        cursorPaint.drawRect((cellWidth)*cursorPos.x(),
-                             cellHeight * cursorPos.y(),
-                             cellWidth,
-                             cellHeight);
+        switch (cursorStyle) {
+        case CursorStyle::Beam:
+            cursorPaint.drawRect(cellWidth * cursorPos.x(),
+                                 cellHeight * cursorPos.y(),
+                                 1,
+                                 cellHeight);
+            break;
+        default:
+            cursorPaint.drawRect(cellWidth * cursorPos.x(),
+                                 cellHeight * cursorPos.y(),
+                                 cellWidth,
+                                 cellHeight);
+            break;
+        }
     }
 
     size_t addStyle(const Color &fg, const Color &bg, size_t index) {
@@ -254,7 +270,8 @@ size_t GuiScreen::height() const {
     return constHeight;
 }
 
-void GuiScreen::cursorStyle(CursorStyle) {
+void GuiScreen::cursorStyle(CursorStyle style) {
+    _buffer->cursorStyle = style;
     return;
 }
 

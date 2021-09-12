@@ -52,8 +52,6 @@ private:
     size_t _lastStyle = 16;
     size_t _lastColor = 16;
 
-    CursorStyle _currentCursor = CursorStyle::Block;
-
     struct Buffer;
     std::unique_ptr<Buffer> _buffer;
 
