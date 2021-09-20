@@ -1,9 +1,11 @@
 #include "guiscreen.h"
+#include "SDL2/SDL_keyboard.h"
 #include "files/fontlocator.h"
-#include "matgui/fontview.h"
-#include "matgui/keys.h"
-#include "matgui/keyutils.h"
-#include "matgui/paint.h"
+#include "matrixscreen.h"
+#include "sdlpp/events.hpp"
+#include "sdlpp/keyboard.hpp"
+#include "sdlpp/render.hpp"
+#include "sdlpp/window.hpp"
 #include "syntax/color.h"
 #include "text/position.h"
 #include <array>
@@ -12,27 +14,39 @@ namespace {
 
 size_t testX = 0;
 
-using namespace matgui::Keys;
-
 auto keyMap = std::array<std::pair<int, Key>, 22>{{
-    {Unknown, Key::Unknown}, {Escape, Key::Escape}, {Up, Key::Up},
-    {Down, Key::Down},       {Left, Key::Left},     {Right, Key::Right},
-    {Home, Key::Home},       {End, Key::End},       {Backspace, Key::Backspace},
-    {Delete, Key::Delete},   {F1, Key::F1},         {F2, Key::F2},
-    {F3, Key::F3},           {F4, Key::F4},         {F5, Key::F5},
-    {F6, Key::F6},           {F7, Key::F7},         {F8, Key::F8},
-    {F9, Key::F9},           {F10, Key::F10},       {F11, Key::F11},
-    {F12, Key::F12},
+    {SDLK_UNKNOWN, Key::Unknown},
+    {SDLK_ESCAPE, Key::Escape},
+    {SDLK_UP, Key::Up},
+    {SDLK_DOWN, Key::Down},
+    {SDLK_LEFT, Key::Left},
+    {SDLK_RIGHT, Key::Right},
+    {SDLK_HOME, Key::Home},
+    {SDLK_END, Key::End},
+    {SDLK_BACKSPACE, Key::Backspace},
+    {SDLK_DELETE, Key::Delete},
+    {SDLK_F1, Key::F1},
+    {SDLK_F2, Key::F2},
+    {SDLK_F3, Key::F3},
+    {SDLK_F4, Key::F4},
+    {SDLK_F5, Key::F5},
+    {SDLK_F6, Key::F6},
+    {SDLK_F7, Key::F7},
+    {SDLK_F8, Key::F8},
+    {SDLK_F9, Key::F9},
+    {SDLK_F10, Key::F10},
+    {SDLK_F11, Key::F11},
+    {SDLK_F12, Key::F12},
 }};
 
 // Characters that does also insert text
 auto specialCharactersMap = std::array<std::pair<int, KeyEvent>, 3>{{
-    {Return, KeyEvent{Key::Return, '\n'}},
-    {Tab, KeyEvent{Key::Return, '\t'}},
-    {Space, KeyEvent{Key::Return, ' '}},
+    {SDLK_RETURN, KeyEvent{Key::Return, '\n'}},
+    {SDLK_TAB, KeyEvent{Key::Return, '\t'}},
+    {SDLK_SPACE, KeyEvent{Key::Return, ' '}},
 }};
 
-KeyEvent matguiToMeditKey(int scanCode) {
+KeyEvent scancodeToMeditKey(int scanCode) {
     // Text input is handled separately by matgui
 
     for (auto pair : keyMap) {
@@ -60,22 +74,28 @@ Modifiers modifiers(bool ctrl, bool alt) {
 
 struct GuiScreen::Buffer {
     std::vector<FString> lines;
-    std::vector<matgui::Paint> styles;
-    std::map<Utf8Char, matgui::FontView> characters;
     CursorStyle cursorStyle = CursorStyle::Block;
     size_t width = 0;
     size_t height = 0;
     double cellWidth = 8;
     double cellHeight = 16;
-    matgui::Font font = {findFont("UbuntuMono-R").string(), 10};
-
     Position cursorPos;
 
-    matgui::Paint cursorPaint = {
-        {1, 1, 1},
-        {1, 1, 1},
-        {},
-    };
+    sdl::Window window;
+    sdl::Renderer renderer;
+    matscreen::MatrixScreen screen;
+    std::vector<sdl::Color> styles;
+
+    Buffer()
+        : window{"medit",
+                 300,
+                 200,
+                 SDL_WINDOWPOS_CENTERED,
+                 SDL_WINDOWPOS_CENTERED,
+                 SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN},
+          renderer{
+              window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC},
+          screen{300, 200} {}
 
     // Save data to be drawn
     void draw(size_t x, size_t y, const FString &str) {
@@ -101,6 +121,9 @@ struct GuiScreen::Buffer {
 
         this->width = width;
         this->height = height;
+
+        window.size(width * screen.cache.charWidth,
+                    height * screen.cache.charHeight);
     }
 
     void fill(FChar color) {
@@ -111,30 +134,21 @@ struct GuiScreen::Buffer {
         }
     }
 
-    matgui::FontView &getFontView(Utf8Char c) {
-        if (auto f = characters.find(c); f != characters.end()) {
-            return f->second;
-        }
-
-        auto &f = characters[c];
-        f.font(font);
-        f.text(c);
-        return f;
-    }
-
     void renderLine(size_t y, const FString &str) {
         for (size_t x = 0; x < str.size(); ++x) {
             auto c = str.at(x);
-            auto &f = getFontView(c.c);
-            auto &bg = [&]() -> matgui::Paint & {
+            auto s = screen.canvas.at(x, y);
+
+            // Todo: Check what needs to be updated in some smart way
+            s.texture =
+                screen.cache.getCharacter(renderer, std::string_view{c.c});
+
+            s.bg = [&]() -> sdl::Color & {
                 if (c.f < styles.size()) {
                     return styles.at(c.f);
                 }
                 return styles.front();
             }();
-            bg.drawRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
-            f.draw(x * cellWidth + cellWidth / 2 * 0,
-                   y * cellHeight + cellHeight * .6);
         }
     }
 
@@ -144,18 +158,23 @@ struct GuiScreen::Buffer {
             renderLine(y, lines.at(y));
         }
 
+        screen.render(renderer);
+
+        renderer.drawColor(sdl::White);
         switch (cursorStyle) {
         case CursorStyle::Beam:
-            cursorPaint.drawRect(cellWidth * cursorPos.x(),
-                                 cellHeight * cursorPos.y(),
-                                 1,
-                                 cellHeight);
+            renderer.fillRect(
+                sdl::Rect{static_cast<int>(cellWidth * cursorPos.x()),
+                          static_cast<int>(cellHeight * cursorPos.y()),
+                          1,
+                          static_cast<int>(cellHeight)});
             break;
         default:
-            cursorPaint.drawRect(cellWidth * cursorPos.x(),
-                                 cellHeight * cursorPos.y(),
-                                 cellWidth,
-                                 cellHeight);
+            renderer.fillRect(
+                sdl::Rect{static_cast<int>(cellWidth * cursorPos.x()),
+                          static_cast<int>(cellHeight * cursorPos.y()),
+                          static_cast<int>(cellWidth),
+                          static_cast<int>(cellHeight)});
             break;
         }
     }
@@ -171,8 +190,7 @@ struct GuiScreen::Buffer {
 
         auto &style = styles.at(index);
 
-        style.fill.color(bg.r() / 255., bg.g() / 255., bg.b() / 255.);
-        style.line.color(0, 0, 0, 0);
+        style = {bg.r(), bg.g(), bg.b()};
 
         return index;
     }
@@ -183,7 +201,7 @@ void GuiScreen::draw(size_t x, size_t y, const FString &str) {
 }
 
 void GuiScreen::refresh() {
-    _window.invalidate();
+    _buffer->refresh();
 }
 
 void GuiScreen::clear() {
@@ -195,102 +213,105 @@ void GuiScreen::cursor(size_t x, size_t y) {
     _buffer->cursorPos.y(y);
 }
 
-GuiScreen::GuiScreen()
-    : _buffer(std::make_unique<Buffer>()), _application(0, nullptr),
-      _window("matedit",
-              constWidth * _buffer->cellWidth,
-              constHeight * _buffer->cellHeight) {
+GuiScreen::GuiScreen() : _buffer(std::make_unique<Buffer>()) {
     _buffer->resize(constWidth, constHeight);
-    matgui::beginTextEntry();
 
-    _window.frameUpdate.connect([this](double f) { _buffer->refresh(); });
+    sdl::startTextInput();
 }
 
 GuiScreen::~GuiScreen() noexcept {
-    matgui::Application::quit();
+    _buffer.reset();
     _guiThread.join();
 };
 
 KeyEvent GuiScreen::getInput() {
-    if (!_isRunning) {
-        _inputAvailableMutex.lock();
-        _isRunning = true;
-        _guiThread = std::thread{[this] { _application.mainLoop(); }};
+    //    if (!_isRunning) {
+    //        _inputAvailableMutex.lock();
+    //        _isRunning = true;
+    //        _guiThread = std::thread{[this] { _application.mainLoop(); }};
 
-        _window.textInput.connect([this](std::string text) {
-            auto l = std::scoped_lock{_queueLock};
+    //        _window.textInput.connect([this](std::string text) {
+    //            auto l = std::scoped_lock{_queueLock};
 
-            if (text == " " || text == "\t") {
-                // Avoid double handling
-                return;
-            }
+    //            if (text == " " || text == "\t") {
+    //                // Avoid double handling
+    //                return;
+    //            }
 
-            _inputQueue.emplace_back(Key::Text,
-                                     text.c_str(),
-                                     modifiers(_ctrlState, _altState),
-                                     true);
-            _inputAvailableMutex.try_lock();
-            _inputAvailableMutex.unlock();
-        });
+    //            _inputQueue.emplace_back(Key::Text,
+    //                                     text.c_str(),
+    //                                     modifiers(_ctrlState, _altState),
+    //                                     true);
+    //            _inputAvailableMutex.try_lock();
+    //            _inputAvailableMutex.unlock();
+    //        });
 
-        _window.keyDown.connect([this](matgui::View::KeyArgument arg) {
-            auto l = std::scoped_lock{_queueLock};
-            // Handle special keys (not text)
-            if (auto key = matguiToMeditKey(arg.scanCode);
-                key != Key::Unknown) {
-                key.modifiers = modifiers(_ctrlState, _altState);
-                _inputQueue.emplace_back(key);
-                _inputAvailableMutex.try_lock();
-                _inputAvailableMutex.unlock();
-            }
-            else {
-                if (arg.scanCode == matgui::Keys::CtrlLeft) {
-                    _ctrlState = true;
-                }
-                else if (arg.scanCode == matgui::Keys::AltLeft) {
-                    _altState = true;
-                }
-                else if (_ctrlState) {
-                    // For some reason when holding ctrl. Text input does not
-                    // work
+    //        _window.keyDown.connect([this](matgui::View::KeyArgument arg) {
+    //            auto l = std::scoped_lock{_queueLock};
+    //            // Handle special keys (not text)
+    //            if (auto key = scancodeToMeditKey(arg.scanCode);
+    //                key != Key::Unknown) {
+    //                key.modifiers = modifiers(_ctrlState, _altState);
+    //                _inputQueue.emplace_back(key);
+    //                _inputAvailableMutex.try_lock();
+    //                _inputAvailableMutex.unlock();
+    //            }
+    //            else {
+    //                if (arg.scanCode == matgui::Keys::CtrlLeft) {
+    //                    _ctrlState = true;
+    //                }
+    //                else if (arg.scanCode == matgui::Keys::AltLeft) {
+    //                    _altState = true;
+    //                }
+    //                else if (_ctrlState) {
+    //                    // For some reason when holding ctrl. Text input does
+    //                    not
+    //                    // work
 
-                    if (arg.symbol >= 'A' || arg.symbol <= 'Z') {
-                        arg.symbol -= ('a' - 'A');
+    //                    if (arg.symbol >= 'A' || arg.symbol <= 'Z') {
+    //                        arg.symbol -= ('a' - 'A');
 
-                        auto event = KeyEvent{Key::KeyCombination,
-                                              arg.symbol,
-                                              modifiers(_ctrlState, _altState)};
-                        _inputQueue.emplace_back(event);
-                        _inputAvailableMutex.try_lock();
-                        _inputAvailableMutex.unlock();
-                    }
-                }
-            }
-        });
+    //                        auto event = KeyEvent{Key::KeyCombination,
+    //                                              arg.symbol,
+    //                                              modifiers(_ctrlState,
+    //                                              _altState)};
+    //                        _inputQueue.emplace_back(event);
+    //                        _inputAvailableMutex.try_lock();
+    //                        _inputAvailableMutex.unlock();
+    //                    }
+    //                }
+    //            }
+    //        });
 
-        _window.keyUp.connect([this](matgui::View::KeyArgument arg) {
-            if (arg.scanCode == matgui::Keys::CtrlLeft) {
-                _ctrlState = false;
-            }
-            else if (arg.scanCode == matgui::Keys::AltLeft) {
-                _altState = false;
-            }
-        });
+    //        _window.keyUp.connect([this](matgui::View::KeyArgument arg) {
+    //            if (arg.scanCode == matgui::Keys::CtrlLeft) {
+    //                _ctrlState = false;
+    //            }
+    //            else if (arg.scanCode == matgui::Keys::AltLeft) {
+    //                _altState = false;
+    //            }
+    //        });
+    //    }
+
+    //    _inputAvailableMutex.try_lock();
+    //    {
+    //        auto l = std::unique_lock{_queueLock};
+    //        if (_inputQueue.empty()) {
+    //            l.unlock();
+    //            _inputAvailableMutex.lock(); // Lock untill there is some key
+    //            l.lock();
+    //        }
+    //    }
+    //    auto event = _inputQueue.front();
+    //    _inputQueue.erase(_inputQueue.begin());
+
+    //    ++testX;
+
+    auto sdlEvent = sdl::waitEvent();
+
+    switch (sdlEvent.type) {
+        // TODO: continue here
     }
-
-    _inputAvailableMutex.try_lock();
-    {
-        auto l = std::unique_lock{_queueLock};
-        if (_inputQueue.empty()) {
-            l.unlock();
-            _inputAvailableMutex.lock(); // Lock untill there is some key
-            l.lock();
-        }
-    }
-    auto event = _inputQueue.front();
-    _inputQueue.erase(_inputQueue.begin());
-
-    ++testX;
 
     return event;
 }

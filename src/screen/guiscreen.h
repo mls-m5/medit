@@ -1,7 +1,5 @@
 #pragma once
 
-#include "matgui/application.h"
-#include "matgui/window.h"
 #include "screen/iinput.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
@@ -54,9 +52,6 @@ private:
 
     struct Buffer;
     std::unique_ptr<Buffer> _buffer;
-
-    matgui::Application _application;
-    matgui::Window _window;
 
     std::thread _guiThread;
     bool _isRunning = false;
