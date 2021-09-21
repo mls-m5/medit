@@ -88,14 +88,13 @@ struct GuiScreen::Buffer {
 
     Buffer()
         : window{"medit",
-                 300,
-                 200,
                  SDL_WINDOWPOS_CENTERED,
                  SDL_WINDOWPOS_CENTERED,
+                 constWidth * 20,
+                 constHeight * 20,
                  SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN},
-          renderer{
-              window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC},
-          screen{300, 200} {}
+          renderer{window, SDL_RENDERER_ACCELERATED, SDL_RENDERER_PRESENTVSYNC},
+          screen{constWidth, constHeight, "data/UbuntuMono-Regular.ttf"} {}
 
     // Save data to be drawn
     void draw(size_t x, size_t y, const FString &str) {
@@ -177,6 +176,8 @@ struct GuiScreen::Buffer {
                           static_cast<int>(cellHeight)});
             break;
         }
+
+        renderer.present();
     }
 
     size_t addStyle(const Color &fg, const Color &bg, size_t index) {
@@ -310,10 +311,20 @@ KeyEvent GuiScreen::getInput() {
     auto sdlEvent = sdl::waitEvent();
 
     switch (sdlEvent.type) {
+    case SDL_KEYDOWN:
+        break;
+
+    case SDL_TEXTINPUT: {
+        auto text = sdlEvent.text;
+
+        auto ch = Utf8Char{text.text};
+
+        return KeyEvent{Key::Text, ch};
+    } break;
         // TODO: continue here
     }
 
-    return event;
+    return KeyEvent{Key::Unknown};
 }
 
 size_t GuiScreen::x() const {

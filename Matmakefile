@@ -54,13 +54,13 @@ main
    in =
       @core
    !em:in =
-      @matgui
       @clangplugin
    src =
       src/main.cpp
    copy =
       README.md
       data/oblivion.json
+      data/UbuntuMono-Regular.ttf
    libs =  -pthread
    out = medit
    command = [exe]
