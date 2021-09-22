@@ -15,35 +15,35 @@ namespace {
 size_t testX = 0;
 
 auto keyMap = std::array<std::pair<int, Key>, 22>{{
-    {SDLK_UNKNOWN, Key::Unknown},
-    {SDLK_ESCAPE, Key::Escape},
-    {SDLK_UP, Key::Up},
-    {SDLK_DOWN, Key::Down},
-    {SDLK_LEFT, Key::Left},
-    {SDLK_RIGHT, Key::Right},
-    {SDLK_HOME, Key::Home},
-    {SDLK_END, Key::End},
-    {SDLK_BACKSPACE, Key::Backspace},
-    {SDLK_DELETE, Key::Delete},
-    {SDLK_F1, Key::F1},
-    {SDLK_F2, Key::F2},
-    {SDLK_F3, Key::F3},
-    {SDLK_F4, Key::F4},
-    {SDLK_F5, Key::F5},
-    {SDLK_F6, Key::F6},
-    {SDLK_F7, Key::F7},
-    {SDLK_F8, Key::F8},
-    {SDLK_F9, Key::F9},
-    {SDLK_F10, Key::F10},
-    {SDLK_F11, Key::F11},
-    {SDLK_F12, Key::F12},
+    {SDL_SCANCODE_UNKNOWN, Key::Unknown},
+    {SDL_SCANCODE_ESCAPE, Key::Escape},
+    {SDL_SCANCODE_UP, Key::Up},
+    {SDL_SCANCODE_DOWN, Key::Down},
+    {SDL_SCANCODE_LEFT, Key::Left},
+    {SDL_SCANCODE_RIGHT, Key::Right},
+    {SDL_SCANCODE_HOME, Key::Home},
+    {SDL_SCANCODE_END, Key::End},
+    {SDL_SCANCODE_BACKSPACE, Key::Backspace},
+    {SDL_SCANCODE_DELETE, Key::Delete},
+    {SDL_SCANCODE_F1, Key::F1},
+    {SDL_SCANCODE_F2, Key::F2},
+    {SDL_SCANCODE_F3, Key::F3},
+    {SDL_SCANCODE_F4, Key::F4},
+    {SDL_SCANCODE_F5, Key::F5},
+    {SDL_SCANCODE_F6, Key::F6},
+    {SDL_SCANCODE_F7, Key::F7},
+    {SDL_SCANCODE_F8, Key::F8},
+    {SDL_SCANCODE_F9, Key::F9},
+    {SDL_SCANCODE_F10, Key::F10},
+    {SDL_SCANCODE_F11, Key::F11},
+    {SDL_SCANCODE_F12, Key::F12},
 }};
 
 // Characters that does also insert text
 auto specialCharactersMap = std::array<std::pair<int, KeyEvent>, 3>{{
-    {SDLK_RETURN, KeyEvent{Key::Return, '\n'}},
-    {SDLK_TAB, KeyEvent{Key::Return, '\t'}},
-    {SDLK_SPACE, KeyEvent{Key::Return, ' '}},
+    {SDL_SCANCODE_RETURN, KeyEvent{Key::Return, '\n'}},
+    {SDL_SCANCODE_TAB, KeyEvent{Key::Return, '\t'}},
+    {SDL_SCANCODE_SPACE, KeyEvent{Key::Return, ' '}},
 }};
 
 KeyEvent scancodeToMeditKey(int scanCode) {
@@ -77,8 +77,6 @@ struct GuiScreen::Buffer {
     CursorStyle cursorStyle = CursorStyle::Block;
     size_t width = 0;
     size_t height = 0;
-    double cellWidth = 8;
-    double cellHeight = 16;
     Position cursorPos;
 
     sdl::Window window;
@@ -136,7 +134,7 @@ struct GuiScreen::Buffer {
     void renderLine(size_t y, const FString &str) {
         for (size_t x = 0; x < str.size(); ++x) {
             auto c = str.at(x);
-            auto s = screen.canvas.at(x, y);
+            auto &s = screen.canvas.at(x, y);
 
             // Todo: Check what needs to be updated in some smart way
             s.texture =
@@ -148,6 +146,8 @@ struct GuiScreen::Buffer {
                 }
                 return styles.front();
             }();
+
+            s.fg = sdl::White; // Todo: Fix real formatting
         }
     }
 
@@ -160,6 +160,10 @@ struct GuiScreen::Buffer {
         screen.render(renderer);
 
         renderer.drawColor(sdl::White);
+
+        auto cellWidth = screen.cache.charWidth;
+        auto cellHeight = screen.cache.charHeight;
+
         switch (cursorStyle) {
         case CursorStyle::Beam:
             renderer.fillRect(
@@ -312,6 +316,7 @@ KeyEvent GuiScreen::getInput() {
 
     switch (sdlEvent.type) {
     case SDL_KEYDOWN:
+        return scancodeToMeditKey(sdlEvent.key.keysym.scancode);
         break;
 
     case SDL_TEXTINPUT: {

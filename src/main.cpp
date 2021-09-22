@@ -134,7 +134,9 @@ int main(int argc, char **argv) {
                 break;
             }
 
-            handleKey(c, mainWindow, *screen);
+            if (c != Key::Unknown) {
+                handleKey(c, mainWindow, *screen);
+            }
             c = input->getInput();
         }
 
