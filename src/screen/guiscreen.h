@@ -38,8 +38,8 @@ public:
     size_t addStyle(const Color &fg, const Color &bg, size_t index) override;
 
 private:
-    static constexpr size_t constWidth = 80;
-    static constexpr size_t constHeight = 24;
+    size_t _width = 80;
+    size_t _height = 24;
 
     bool _hasColors = true;
 

@@ -74,7 +74,6 @@ KeyEvent scancodeToMeditKey(SDL_KeyboardEvent event) {
 
 bool shouldIgnoreTextInput(char c) {
     switch (c) {
-    case '\r':
     case '\n':
     case ' ':
         return true;
@@ -109,15 +108,15 @@ struct GuiScreen::Buffer {
 
     std::vector<Style> styles;
 
-    Buffer()
+    Buffer(int width, int height)
         : window{"medit",
                  SDL_WINDOWPOS_CENTERED,
                  SDL_WINDOWPOS_CENTERED,
-                 constWidth * 20,
-                 constHeight * 20,
+                 width * 20,
+                 height * 20,
                  SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN},
           renderer{window, SDL_RENDERER_ACCELERATED, SDL_RENDERER_PRESENTVSYNC},
-          screen{constWidth, constHeight, "data/UbuntuMono-Regular.ttf"} {}
+          screen{width, height, "data/UbuntuMono-Regular.ttf"} {}
 
     // Save data to be drawn
     void draw(size_t x, size_t y, const FString &str) {
@@ -131,7 +130,18 @@ struct GuiScreen::Buffer {
         }
     }
 
-    void resize(size_t width, size_t height) {
+    sdl::Dims resizePixels(int width,
+                           int height,
+                           bool shouldUpdateWindow = true) {
+        auto dims = sdl::Dims{width / screen.cache.charWidth,
+                              height / screen.cache.charHeight};
+
+        resize(dims.w, dims.h, shouldUpdateWindow);
+
+        return dims;
+    }
+
+    void resize(int width, int height, bool shouldUpdateWindow = true) {
         if (width == this->width && height == this->height) {
             return;
         }
@@ -144,8 +154,12 @@ struct GuiScreen::Buffer {
         this->width = width;
         this->height = height;
 
-        window.size(width * screen.cache.charWidth,
-                    height * screen.cache.charHeight);
+        if (shouldUpdateWindow) {
+            window.size(width * screen.cache.charWidth,
+                        height * screen.cache.charHeight);
+        }
+
+        screen.resize(width, height);
     }
 
     void fill(FChar color) {
@@ -247,15 +261,14 @@ void GuiScreen::cursor(size_t x, size_t y) {
     _buffer->cursorPos.y(y);
 }
 
-GuiScreen::GuiScreen() : _buffer(std::make_unique<Buffer>()) {
-    _buffer->resize(constWidth, constHeight);
+GuiScreen::GuiScreen() : _buffer(std::make_unique<Buffer>(_width, _height)) {
+    _buffer->resize(_width, _height);
 
     sdl::startTextInput();
 }
 
 GuiScreen::~GuiScreen() noexcept {
     _buffer.reset();
-    //    _guiThread.join();
 };
 
 Modifiers getModState() {
@@ -308,7 +321,22 @@ KeyEvent GuiScreen::getInput() {
 
         return KeyEvent{Key::Text, ch};
     } break;
-        // TODO: continue here
+
+    case SDL_WINDOWEVENT:
+        switch (sdlEvent.window.event) {
+        case SDL_WINDOWEVENT_RESIZED: {
+            auto dims = _buffer->resizePixels(
+                sdlEvent.window.data1, sdlEvent.window.data2, false);
+            _width = dims.w;
+            _height = dims.h;
+            return KeyEvent{Key::Resize};
+            break;
+        }
+        default:
+            return Key::Unknown;
+            break;
+        }
+        break;
     }
 
     return KeyEvent{Key::Unknown};
@@ -323,11 +351,11 @@ size_t GuiScreen::y() const {
 }
 
 size_t GuiScreen::width() const {
-    return constWidth;
+    return _width;
 }
 
 size_t GuiScreen::height() const {
-    return constHeight;
+    return _height;
 }
 
 void GuiScreen::cursorStyle(CursorStyle style) {
