@@ -53,13 +53,6 @@ private:
     struct Buffer;
     std::unique_ptr<Buffer> _buffer;
 
-    std::thread _guiThread;
-    bool _isRunning = false;
-
-    std::vector<KeyEvent> _inputQueue;
-    std::mutex _inputAvailableMutex;
-    std::mutex _queueLock;
-
     bool _ctrlState = false;
     bool _altState = false;
 };

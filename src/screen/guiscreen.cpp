@@ -41,27 +41,46 @@ auto keyMap = std::array<std::pair<int, Key>, 22>{{
 
 // Characters that does also insert text
 auto specialCharactersMap = std::array<std::pair<int, KeyEvent>, 3>{{
-    {SDL_SCANCODE_RETURN, KeyEvent{Key::Return, '\n'}},
-    {SDL_SCANCODE_TAB, KeyEvent{Key::Return, '\t'}},
-    {SDL_SCANCODE_SPACE, KeyEvent{Key::Return, ' '}},
+    {SDL_SCANCODE_RETURN, KeyEvent{Key::Return, "\n"}},
+    {SDL_SCANCODE_TAB, KeyEvent{Key::Return, "\t"}},
+    {SDL_SCANCODE_SPACE, KeyEvent{Key::Return, " "}},
 }};
 
-KeyEvent scancodeToMeditKey(int scanCode) {
+KeyEvent scancodeToMeditKey(SDL_KeyboardEvent event) {
     // Text input is handled separately by matgui
 
+    auto scancode = event.keysym.scancode;
+
     for (auto pair : keyMap) {
-        if (pair.first == scanCode) {
+        if (pair.first == scancode) {
             return KeyEvent{pair.second};
         }
     }
 
     for (auto pair : specialCharactersMap) {
-        if (pair.first == scanCode) {
+        if (pair.first == scancode) {
             return pair.second;
         }
     }
 
+    auto sym = event.keysym.sym;
+
+    if (sym < 255 && std::isalpha(sym)) {
+        return KeyEvent{Key::KeyCombination, std::toupper(sym)};
+    }
+
     return Key::Unknown;
+}
+
+bool shouldIgnoreTextInput(char c) {
+    switch (c) {
+    case '\r':
+    case '\n':
+    case ' ':
+        return true;
+    default:
+        return false;
+    }
 }
 
 Modifiers modifiers(bool ctrl, bool alt) {
@@ -82,7 +101,13 @@ struct GuiScreen::Buffer {
     sdl::Window window;
     sdl::Renderer renderer;
     matscreen::MatrixScreen screen;
-    std::vector<sdl::Color> styles;
+
+    struct Style {
+        sdl::Color fg;
+        sdl::Color bg;
+    };
+
+    std::vector<Style> styles;
 
     Buffer()
         : window{"medit",
@@ -140,14 +165,15 @@ struct GuiScreen::Buffer {
             s.texture =
                 screen.cache.getCharacter(renderer, std::string_view{c.c});
 
-            s.bg = [&]() -> sdl::Color & {
+            auto style = [&]() -> Style & {
                 if (c.f < styles.size()) {
                     return styles.at(c.f);
                 }
                 return styles.front();
             }();
 
-            s.fg = sdl::White; // Todo: Fix real formatting
+            s.bg = style.bg;
+            s.fg = style.fg;
         }
     }
 
@@ -195,7 +221,10 @@ struct GuiScreen::Buffer {
 
         auto &style = styles.at(index);
 
-        style = {bg.r(), bg.g(), bg.b()};
+        style = {
+            {fg.r(), fg.g(), fg.b(), 255},
+            {bg.r(), bg.g(), bg.b(), 255},
+        };
 
         return index;
     }
@@ -226,103 +255,56 @@ GuiScreen::GuiScreen() : _buffer(std::make_unique<Buffer>()) {
 
 GuiScreen::~GuiScreen() noexcept {
     _buffer.reset();
-    _guiThread.join();
+    //    _guiThread.join();
 };
 
+Modifiers getModState() {
+    auto modState = sdl::modState();
+
+    bool ctrl = modState & (KMOD_LCTRL | KMOD_RCTRL);
+    bool alt = modState & (KMOD_LALT | KMOD_RALT);
+
+    return static_cast<Modifiers>(
+        static_cast<int>(ctrl ? Modifiers::Ctrl : Modifiers::None) |
+        static_cast<int>(alt ? Modifiers::Alt : Modifiers::None));
+}
+
 KeyEvent GuiScreen::getInput() {
-    //    if (!_isRunning) {
-    //        _inputAvailableMutex.lock();
-    //        _isRunning = true;
-    //        _guiThread = std::thread{[this] { _application.mainLoop(); }};
-
-    //        _window.textInput.connect([this](std::string text) {
-    //            auto l = std::scoped_lock{_queueLock};
-
-    //            if (text == " " || text == "\t") {
-    //                // Avoid double handling
-    //                return;
-    //            }
-
-    //            _inputQueue.emplace_back(Key::Text,
-    //                                     text.c_str(),
-    //                                     modifiers(_ctrlState, _altState),
-    //                                     true);
-    //            _inputAvailableMutex.try_lock();
-    //            _inputAvailableMutex.unlock();
-    //        });
-
-    //        _window.keyDown.connect([this](matgui::View::KeyArgument arg) {
-    //            auto l = std::scoped_lock{_queueLock};
-    //            // Handle special keys (not text)
-    //            if (auto key = scancodeToMeditKey(arg.scanCode);
-    //                key != Key::Unknown) {
-    //                key.modifiers = modifiers(_ctrlState, _altState);
-    //                _inputQueue.emplace_back(key);
-    //                _inputAvailableMutex.try_lock();
-    //                _inputAvailableMutex.unlock();
-    //            }
-    //            else {
-    //                if (arg.scanCode == matgui::Keys::CtrlLeft) {
-    //                    _ctrlState = true;
-    //                }
-    //                else if (arg.scanCode == matgui::Keys::AltLeft) {
-    //                    _altState = true;
-    //                }
-    //                else if (_ctrlState) {
-    //                    // For some reason when holding ctrl. Text input does
-    //                    not
-    //                    // work
-
-    //                    if (arg.symbol >= 'A' || arg.symbol <= 'Z') {
-    //                        arg.symbol -= ('a' - 'A');
-
-    //                        auto event = KeyEvent{Key::KeyCombination,
-    //                                              arg.symbol,
-    //                                              modifiers(_ctrlState,
-    //                                              _altState)};
-    //                        _inputQueue.emplace_back(event);
-    //                        _inputAvailableMutex.try_lock();
-    //                        _inputAvailableMutex.unlock();
-    //                    }
-    //                }
-    //            }
-    //        });
-
-    //        _window.keyUp.connect([this](matgui::View::KeyArgument arg) {
-    //            if (arg.scanCode == matgui::Keys::CtrlLeft) {
-    //                _ctrlState = false;
-    //            }
-    //            else if (arg.scanCode == matgui::Keys::AltLeft) {
-    //                _altState = false;
-    //            }
-    //        });
-    //    }
-
-    //    _inputAvailableMutex.try_lock();
-    //    {
-    //        auto l = std::unique_lock{_queueLock};
-    //        if (_inputQueue.empty()) {
-    //            l.unlock();
-    //            _inputAvailableMutex.lock(); // Lock untill there is some key
-    //            l.lock();
-    //        }
-    //    }
-    //    auto event = _inputQueue.front();
-    //    _inputQueue.erase(_inputQueue.begin());
-
-    //    ++testX;
-
     auto sdlEvent = sdl::waitEvent();
 
     switch (sdlEvent.type) {
-    case SDL_KEYDOWN:
-        return scancodeToMeditKey(sdlEvent.key.keysym.scancode);
+    case SDL_QUIT:
+        return {Key::Quit};
         break;
+    case SDL_KEYDOWN: {
+        auto keyEvent = scancodeToMeditKey(sdlEvent.key);
+
+        if (keyEvent.key == Key::Unknown) {
+            return keyEvent;
+        }
+
+        keyEvent.modifiers = getModState();
+
+        // This is to prevent text input to be registered twice (as text and as
+        // keydown)
+        if (keyEvent.key == Key::KeyCombination &&
+            keyEvent.modifiers == Modifiers::None) {
+            return {Key::Unknown};
+        }
+
+        return keyEvent;
+
+        break;
+    }
 
     case SDL_TEXTINPUT: {
         auto text = sdlEvent.text;
 
         auto ch = Utf8Char{text.text};
+
+        if (shouldIgnoreTextInput(ch[0])) {
+            return KeyEvent{Key::Unknown};
+        }
 
         return KeyEvent{Key::Text, ch};
     } break;
