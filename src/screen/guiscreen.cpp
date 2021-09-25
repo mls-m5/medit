@@ -116,7 +116,9 @@ struct GuiScreen::Buffer {
                  height * 20,
                  SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN},
           renderer{window, SDL_RENDERER_ACCELERATED, SDL_RENDERER_PRESENTVSYNC},
-          screen{width, height, "data/UbuntuMono-Regular.ttf"} {}
+          screen{width, height, "data/UbuntuMono-Regular.ttf", 18} {
+        styles.resize(16);
+    }
 
     // Save data to be drawn
     void draw(size_t x, size_t y, const FString &str) {
