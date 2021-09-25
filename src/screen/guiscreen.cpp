@@ -43,7 +43,7 @@ auto keyMap = std::array<std::pair<int, Key>, 22>{{
 auto specialCharactersMap = std::array<std::pair<int, KeyEvent>, 3>{{
     {SDL_SCANCODE_RETURN, KeyEvent{Key::Return, "\n"}},
     {SDL_SCANCODE_TAB, KeyEvent{Key::Return, "\t"}},
-    {SDL_SCANCODE_SPACE, KeyEvent{Key::Return, " "}},
+    {SDL_SCANCODE_SPACE, KeyEvent{Key::Space, " "}},
 }};
 
 KeyEvent scancodeToMeditKey(SDL_KeyboardEvent event) {
@@ -65,7 +65,7 @@ KeyEvent scancodeToMeditKey(SDL_KeyboardEvent event) {
 
     auto sym = event.keysym.sym;
 
-    if (sym < 255 && std::isalpha(sym)) {
+    if (sym < 255 && (std::isalnum(sym) || isspace(sym))) {
         return KeyEvent{Key::KeyCombination, std::toupper(sym)};
     }
 
@@ -326,6 +326,12 @@ KeyEvent GuiScreen::getInput() {
         }
 
         keyEvent.modifiers = getModState();
+
+        if (keyEvent.modifiers != Modifiers::None &&
+            (keyEvent.key == Key::Space || keyEvent.key == Key::Return ||
+             keyEvent.key == Key::Tab)) {
+            keyEvent.key = Key::KeyCombination;
+        }
 
         // This is to prevent text input to be registered twice (as text and as
         // keydown)
