@@ -32,23 +32,12 @@ core
       plugin/*.cpp
    config = thread
    command = [static]
-
-matgui
-   out = matgui
-   command = [static]
-   eflags =
-      -DUSE_TTF_FONT
-   flags =
-#      `pkg-config --cflags sdl2`
-      `pkg-config --cflags sdl2 SDL2_ttf`
-      -DUSE_TTF_FONT
-   src = lib/matgui/src/*.cpp
-   includes =
-      /usr/include/SDL2
    em:eflags =
-      -s USE_SDL=2 -DDISABLE_TEXTURES
+      -s USE_SDL=2
+      -s USE_SDL_TTF=2
    em:flags =
       -s USE_SDL=2
+      -s USE_SDL_TTF=2
 
 main
    in =
