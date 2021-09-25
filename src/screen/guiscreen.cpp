@@ -95,6 +95,8 @@ struct GuiScreen::Buffer {
     CursorStyle cursorStyle = CursorStyle::Block;
     size_t width = 0;
     size_t height = 0;
+    size_t pixelWidth = 0;
+    size_t pixelHeight = 0;
     Position cursorPos;
 
     sdl::Window window;
@@ -140,6 +142,9 @@ struct GuiScreen::Buffer {
 
         resize(dims.w, dims.h, shouldUpdateWindow);
 
+        pixelWidth = width;
+        pixelHeight = height;
+
         return dims;
     }
 
@@ -147,6 +152,11 @@ struct GuiScreen::Buffer {
         if (width == this->width && height == this->height) {
             return;
         }
+
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+
         lines.resize(height);
 
         for (auto &line : lines) {
@@ -159,6 +169,8 @@ struct GuiScreen::Buffer {
         if (shouldUpdateWindow) {
             window.size(width * screen.cache.charWidth,
                         height * screen.cache.charHeight);
+            pixelWidth = width * screen.cache.charWidth;
+            pixelHeight = height * screen.cache.charHeight;
         }
 
         screen.resize(width, height);
@@ -193,13 +205,28 @@ struct GuiScreen::Buffer {
         }
     }
 
+    // Make sure that the bottom line aligns with the window border
+    void drawBottomLine(sdl::RendererView renderer) {
+        screen.render(renderer,
+                      0,
+                      pixelHeight - screen.cache.charHeight,
+                      {0, screen.canvas.height - 1, screen.canvas.width, 1});
+    }
+
     // Update the screen
     void refresh() {
         for (size_t y = 0; y < lines.size(); ++y) {
             renderLine(y, lines.at(y));
         }
 
-        screen.render(renderer);
+        renderer.drawColor(styles.front().bg);
+        renderer.fillRect();
+
+        screen.render(renderer,
+                      0,
+                      0,
+                      {0, 0, screen.canvas.width, screen.canvas.height - 1});
+        drawBottomLine(renderer);
 
         renderer.drawColor(sdl::White);
 
