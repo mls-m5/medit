@@ -312,7 +312,13 @@ Modifiers getModState() {
 }
 
 KeyEvent GuiScreen::getInput() {
-    auto sdlEvent = sdl::waitEvent();
+    auto e = sdl::waitEventTimeout(100);
+    //    auto sdlEvent = sdl::waitEvent();
+    if (!e) {
+        return Key::None;
+    }
+
+    auto sdlEvent = *e;
 
     switch (sdlEvent.type) {
     case SDL_QUIT:

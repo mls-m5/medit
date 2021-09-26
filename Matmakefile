@@ -11,7 +11,7 @@ clangplugin
       /usr/lib/llvm-9/include/
    src = plugin/clang/*.cpp
    ldflags = -lclang-9
-   !em:command = [static]
+   command = [static]
 #   /usr/lib/llvm-11/include
 #   /usr/lib/llvm-10/include/
 
@@ -35,9 +35,11 @@ core
    em:eflags =
       -s USE_SDL=2
       -s USE_SDL_TTF=2
+      -pthread
    em:flags =
       -s USE_SDL=2
       -s USE_SDL_TTF=2
+      -pthread
 
 main
    in =
@@ -61,6 +63,11 @@ main
       -lGL
       -lSDL2
       -lSDL2_ttf
+
+   # clang workaround
+   includes =
+      /usr/lib/llvm-9/include/
+   ldflags = -lclang-9
 
 
 # ======== Tests =====================================

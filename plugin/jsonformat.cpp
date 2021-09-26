@@ -34,12 +34,6 @@ bool JsonFormat::format(Editor &editor) {
     }
 }
 
-namespace {
-
-struct Register {
-    Register() {
-        registerFormat<JsonFormat>();
-    }
-} r;
-
-} // namespace
+void JsonFormat::registerPlugin() {
+    registerFormat<JsonFormat>();
+}

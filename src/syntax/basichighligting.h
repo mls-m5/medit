@@ -22,5 +22,7 @@ public:
         return -1;
     }
 
+    static void registerPlugin();
+
 private:
 };

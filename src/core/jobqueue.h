@@ -12,21 +12,18 @@ class JobQueue {
     std::thread::id _threadId = {};
 
 public:
+    JobQueue() = default;
+    JobQueue(const JobQueue &) = delete;
+    JobQueue &operator=(const JobQueue &) = delete;
     //! Wait for another task to come in
     void wait() {
-        _waitMutex.lock();
-        _waitMutex.unlock();
+        auto l = std::scoped_lock(_waitMutex);
     }
 
     void addTask(std::function<void()> f) {
-        if (_queue.empty()) {
-            _queue.push(std::move(f));
-            _waitMutex.try_lock();
-            _waitMutex.unlock();
-        }
-        else {
-            _queue.push(std::move(f));
-        }
+        _queue.push(std::move(f));
+        _waitMutex.try_lock();
+        _waitMutex.unlock();
     }
 
     void work(bool shouldWait = true) {

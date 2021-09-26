@@ -83,11 +83,6 @@ void BasicHighlighting::highlight(std::shared_ptr<IEnvironment> env) {
 
 void BasicHighlighting::update(const IPalette &palette) {}
 
-namespace {
-struct Register {
-    Register() {
-        registerHighlighting<BasicHighlighting>();
-    }
-} r;
-
-} // namespace
+void BasicHighlighting::registerPlugin() {
+    registerHighlighting<BasicHighlighting>();
+}

@@ -10,4 +10,6 @@ public:
 
     //! @see IAnnotation interface
     bool shouldEnable(filesystem::path) override;
+
+    static void registerPlugin();
 };
