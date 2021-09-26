@@ -1,7 +1,5 @@
 #pragma once
 
-#include "matgui/application.h"
-#include "matgui/window.h"
 #include "screen/iinput.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
@@ -40,8 +38,8 @@ public:
     size_t addStyle(const Color &fg, const Color &bg, size_t index) override;
 
 private:
-    static constexpr size_t constWidth = 80;
-    static constexpr size_t constHeight = 24;
+    size_t _width = 80;
+    size_t _height = 24;
 
     bool _hasColors = true;
 
@@ -54,16 +52,6 @@ private:
 
     struct Buffer;
     std::unique_ptr<Buffer> _buffer;
-
-    matgui::Application _application;
-    matgui::Window _window;
-
-    std::thread _guiThread;
-    bool _isRunning = false;
-
-    std::vector<KeyEvent> _inputQueue;
-    std::mutex _inputAvailableMutex;
-    std::mutex _queueLock;
 
     bool _ctrlState = false;
     bool _altState = false;

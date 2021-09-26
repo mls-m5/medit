@@ -129,12 +129,15 @@ int main(int argc, char **argv) {
         // Todo: in the future check main window for unsaved changes here
         // too
         while (c != Key::None) {
-            if (c == KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}) {
+            if (c == KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl} ||
+                c == Key::Quit) {
                 medit::main::shouldQuit = true;
                 break;
             }
 
-            handleKey(c, mainWindow, *screen);
+            if (c != Key::Unknown) {
+                handleKey(c, mainWindow, *screen);
+            }
             c = input->getInput();
         }
 

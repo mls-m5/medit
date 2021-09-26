@@ -12,7 +12,7 @@ size_t getLineNumWidth(size_t numLines) {
     while (numLines /= 10) {
         ++width;
     }
-    return std::min(width + 1, 2ul);
+    return std::min<size_t>(width + 1, 2);
 }
 
 } // namespace
@@ -27,8 +27,9 @@ void BufferView::draw(IScreen &screen) {
         return;
     }
 
-    _numberWidth = getLineNumWidth(_buffer->lines().size()) + 1;
-    auto fillStr = FString{std::string(width(), ' '), 5};
+    _numberWidth = getLineNumWidth(_buffer->lines().size()) + 2;
+    auto fillStr =
+        FString{std::string(_numberWidth, ' '), IPalette::lineNumbers};
     for (size_t ty = 0; ty < height(); ++ty) {
         auto l = ty + yScroll();
         if (l < buffer().lines().size()) {
@@ -39,15 +40,14 @@ void BufferView::draw(IScreen &screen) {
             if (_showLines) {
                 const auto lineNum = l + 1;
                 auto lineFormat = IPalette::lineNumbers;
-                size_t fill = 0;
-                //                if (lineNum < 10) {
-                //                    fill += 1;
-                //                }
-                screen.draw(
-                    x(),
-                    y() + ty,
-                    {std::string(fill, ' ') + std::to_string(lineNum) + " ",
-                     lineFormat});
+
+                auto offset = 1;
+                screen.draw(x(), y() + ty, fillStr);
+                screen.draw(x() + offset,
+                            y() + ty,
+                            //                    {std::string(fill, ' ') +
+                            //                    std::to_string(lineNum) + " ",
+                            {std::to_string(lineNum), lineFormat});
                 ++l;
             }
         }

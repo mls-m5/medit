@@ -34,6 +34,7 @@ enum class Key {
     F11,
     F12,
     Resize, // Window resize event
+    Quit,
 };
 
 enum class Modifiers {

@@ -32,41 +32,35 @@ core
       plugin/*.cpp
    config = thread
    command = [static]
-
-matgui
-   out = matgui
-   command = [static]
-#   eflags =
-#      -DUSE_TTF_FONT
-   flags =
-      `pkg-config --cflags sdl2`
-#      `pkg-config --cflags sdl2 SDL2_ttf`
-#      -DUSE_TTF_FONT
-   src = lib/matgui/src/*.cpp
-   includes =
-      /usr/include/SDL2
    em:eflags =
-      -s USE_SDL=2 -DDISABLE_TEXTURES
+      -s USE_SDL=2
+      -s USE_SDL_TTF=2
    em:flags =
       -s USE_SDL=2
+      -s USE_SDL_TTF=2
 
 main
    in =
       @core
    !em:in =
-      @matgui
       @clangplugin
    src =
       src/main.cpp
    copy =
       README.md
       data/oblivion.json
+      data/UbuntuMono-Regular.ttf
    libs =  -pthread
    out = medit
    command = [exe]
    config =
       thread
-   !em:ldflags = `pkg-config --libs ncurses` -lstdc++fs -lGL -lSDL2
+   !em:ldflags =
+      `pkg-config --libs ncurses`
+      -lstdc++fs
+      -lGL
+      -lSDL2
+      -lSDL2_ttf
 
 
 # ======== Tests =====================================
@@ -213,7 +207,8 @@ all
       plugin/include
       plugin/clang/include
       lib/json.h/include
-      lib/matgui/include
+      lib/matrix-screen/include
+      lib/matrix-screen/lib/sdlpp/include
    em:flags =
       -s USE_PTHREADS
 
