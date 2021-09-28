@@ -36,6 +36,7 @@ bool InputBox::keyPress(std::shared_ptr<IEnvironment> env) {
     case Key::Escape:
         env->set("return", {});
         close();
+        break;
     case Key::Text:
         if (key.symbol == '\n') {
             close();

@@ -16,7 +16,7 @@ enum class Key {
     End,
     Backspace,
     Delete,
-    Return,
+    //    Return, never used
     Space,
     Escape,
     Cancel,
