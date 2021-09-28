@@ -5,6 +5,8 @@
 
 class ClangAnnotation : public IAnnotation {
 public:
+    ClangAnnotation();
+
     //! @see IAnnotation interface
     bool annotate(std::shared_ptr<IEnvironment> env) override;
 
@@ -12,4 +14,8 @@ public:
     bool shouldEnable(filesystem::path) override;
 
     static void registerPlugin();
+
+private:
+    struct Data;
+    std::unique_ptr<Data> _data;
 };

@@ -3,11 +3,13 @@
 #include "files/filesystem.h"
 
 inline bool isCppHeader(const filesystem::path &path) {
-    return path.extension() == ".h" || path.extension() == ".hpp";
+    auto ext = path.extension();
+    return ext == ".h" || ext == ".hpp" || ext == ".hxx";
 }
 
 inline bool isCppSource(const filesystem::path &path) {
-    return path.extension() == ".cpp";
+    auto ext = path.extension();
+    return ext == ".cpp" || ext == ".cc" || ext == ".cxx";
 }
 
 inline bool isCSource(const filesystem::path &path) {

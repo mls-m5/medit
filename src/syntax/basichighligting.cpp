@@ -13,10 +13,11 @@
 
 namespace {
 //! Todo: Extract this so it can be customized
-const auto wordList = std::array<std::string, 20>{
-    "int",   "double", "char", "signed",  "long",    "unsigned",  "void",
-    "short", "bool",   "auto", "include", "struct",  "class",     "if",
-    "else",  "switch", "case", "public",  "private", "namespace",
+const auto wordList = std::array<std::string, 22>{
+    "int",     "double",    "char",     "signed",   "long",    "unsigned",
+    "void",    "short",     "bool",     "auto",     "include", "struct",
+    "class",   "if",        "else",     "switch",   "case",    "public",
+    "private", "namespace", "typename", "template",
 };
 
 void highlightWord(CursorRange word) {
