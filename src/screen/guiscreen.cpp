@@ -41,8 +41,8 @@ auto keyMap = std::array<std::pair<int, Key>, 22>{{
 
 // Characters that does also insert text
 auto specialCharactersMap = std::array<std::pair<int, KeyEvent>, 3>{{
-    {SDL_SCANCODE_RETURN, KeyEvent{Key::Return, "\n"}},
-    {SDL_SCANCODE_TAB, KeyEvent{Key::Return, "\t"}},
+    {SDL_SCANCODE_RETURN, KeyEvent{Key::Text, "\n"}},
+    {SDL_SCANCODE_TAB, KeyEvent{Key::Tab, "\t"}},
     {SDL_SCANCODE_SPACE, KeyEvent{Key::Space, " "}},
 }};
 
@@ -66,7 +66,8 @@ KeyEvent scancodeToMeditKey(SDL_KeyboardEvent event) {
     auto sym = event.keysym.sym;
 
     if (sym < 255 && (std::isalnum(sym) || isspace(sym))) {
-        return KeyEvent{Key::KeyCombination, std::toupper(sym)};
+        return KeyEvent{Key::KeyCombination,
+                        static_cast<char>(std::toupper(sym))};
     }
 
     return Key::Unknown;
@@ -334,7 +335,7 @@ KeyEvent GuiScreen::getInput() {
         keyEvent.modifiers = getModState();
 
         if (keyEvent.modifiers != Modifiers::None &&
-            (keyEvent.key == Key::Space || keyEvent.key == Key::Return ||
+            (keyEvent.key == Key::Space || keyEvent.symbol == "\n" ||
              keyEvent.key == Key::Tab)) {
             keyEvent.key = Key::KeyCombination;
         }

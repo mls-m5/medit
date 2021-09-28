@@ -15,7 +15,8 @@ struct KeyTranslation {
 const auto keytranslations = std::map<int, KeyTranslation>{
     {KEY_BACKSPACE, {Key::Backspace}},
     {10, {Key::Text, "\n"}},
-    {KEY_ENTER, {Key::Return, "\n"}},
+    //    {KEY_ENTER, {Key::Return, "\n"}},
+    {KEY_ENTER, {Key::Text, "\n"}},
     {32, {Key::Space, " "}},
     {KEY_DOWN, {Key::Down}},
     {KEY_UP, {Key::Up}},
@@ -89,7 +90,6 @@ void NCursesScreen::forceThread() {
 }
 
 void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
-    //    auto lock = std::scoped_lock{_accessMutex};
     forceThread();
     ::move(y, x);
     for (size_t tx = 0, i = 0; i < str.size() && tx < width() - this->x();
@@ -133,8 +133,6 @@ NCursesScreen::~NCursesScreen() {
 }
 
 KeyEvent NCursesScreen::getInput() {
-    //    _accessMutex.lock();
-    //    _accessMutex.unlock();
     const auto c = getch();
     if (c == ERR) {
         return KeyEvent{Key::None};
@@ -192,12 +190,7 @@ size_t NCursesScreen::height() const {
 void NCursesScreen::cursorStyle(CursorStyle style) {
     forceThread();
     if (_currentCursor != style) {
-        //        using namespace std::literals;
-        //        auto command =
-        //            "echo \"\\e["s + std::to_string(static_cast<int>(style)) +
-        //            " q\""s;
-        //        //        system(command.c_str());
-        //        _currentCursor = style;
+        // Not implemented
     }
 }
 
