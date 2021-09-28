@@ -3,7 +3,6 @@
 #include "files/extensions.h"
 #include "text/startswith.h"
 #include "json/json.h"
-#include "text/startswith.h"
 #include <fstream>
 #include <string_view>
 
@@ -106,9 +105,9 @@ std::vector<filesystem::path> Project::findProjectFiles(
     std::vector<filesystem::path> paths;
 
     size_t i = 0;
-    for (auto path : filesystem::recursive_directory_iterator(root)) {
-        //        if (!isCpp(path) && !isJson(path) && !isMarkdown(path) &&
-        //            !isMatmake(path) && !isMake(path)) {
+    for (auto path : filesystem::recursive_directory_iterator{
+             root,
+             std::filesystem::directory_options::skip_permission_denied}) {
         if (!isKnownExtension(path)) {
             continue;
         }
