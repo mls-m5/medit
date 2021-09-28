@@ -63,11 +63,11 @@ main
       -lGL
       -lSDL2
       -lSDL2_ttf
+      -lclang-9
 
    # clang workaround
    includes =
       /usr/lib/llvm-9/include/
-   ldflags = -lclang-9
 
 
 # ======== Tests =====================================

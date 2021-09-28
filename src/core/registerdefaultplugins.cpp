@@ -9,6 +9,9 @@ void registerDefaultPlugins() {
     ClangFormat::registerPlugin();
     BasicHighlighting::registerPlugin();
     JsonFormat::registerPlugin();
+
+#ifndef __EMSCRIPTEN__
     ClangCompletion::registerPlugin();
     ClangAnnotation::registerPlugin();
+#endif
 }
