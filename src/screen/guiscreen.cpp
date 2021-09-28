@@ -119,7 +119,8 @@ struct GuiScreen::Buffer {
                  height * 20,
                  SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN},
           renderer{window, SDL_RENDERER_ACCELERATED, SDL_RENDERER_PRESENTVSYNC},
-          screen{width, height, "data/UbuntuMono-Regular.ttf", 18} {
+          //          screen{width, height, "data/UbuntuMono-Regular.ttf", 18} {
+          screen{width, height, fontPath(), 18} {
         styles.resize(16);
     }
 
@@ -133,6 +134,14 @@ struct GuiScreen::Buffer {
         for (size_t i = 0; i < str.size() && i + x < line.size(); ++i) {
             line.at(i + x) = str.at(i);
         }
+    }
+
+    std::string fontPath() {
+        auto path = findFont("UbuntuMono-Regular");
+        if (!path.empty()) {
+            return path.string();
+        }
+        return findFont("UbuntuMono-R"); // Try to find system font
     }
 
     sdl::Dims resizePixels(int width,

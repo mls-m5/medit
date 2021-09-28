@@ -1,35 +1,46 @@
 #include "fontlocator.h"
+#include "core/os.h"
 #include <iostream>
 
 namespace {
 
-filesystem::path find(filesystem::path name) {
-    for (auto &it :
-         filesystem::recursive_directory_iterator{"/usr/share/fonts"}) {
+filesystem::path searchPath(filesystem::path path, filesystem::path name) {
+    for (auto &it : filesystem::recursive_directory_iterator{path}) {
         if (it.path().filename().stem() == name) {
             std::cout << it.path() << std::endl;
             return it.path();
         }
     }
 
-    for (auto &it :
-         filesystem::recursive_directory_iterator{"/usr/local/share/fonts"}) {
-        if (it.path().filename().stem() == name) {
-            return it.path();
+    return {};
+}
+
+filesystem::path find(filesystem::path name) {
+    if (auto exePath = executablePath(); !exePath.empty()) {
+        if (auto path = searchPath(exePath.parent_path(), name);
+            !path.empty()) {
+            return path;
         }
+    }
+
+    if (auto path = searchPath("/usr/share/fonts", name); !path.empty()) {
+        return path;
+    }
+
+    if (auto path = searchPath("/usr/local/share/fonts", name); !path.empty()) {
+        return path;
     }
 
     if (auto env = getenv("HOME")) {
         auto fontPath = filesystem::path{env} / ".fonts/";
+
         if (filesystem::exists(fontPath)) {
-            for (auto &it :
-                 filesystem::recursive_directory_iterator{fontPath}) {
-                if (it.path().filename().stem() == name) {
-                    return it.path();
-                }
+            if (auto path = searchPath(fontPath, name); !path.empty()) {
+                return path;
             }
         }
     }
+
     return {};
 }
 

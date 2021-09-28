@@ -1,5 +1,6 @@
 #pragma once
 
+#include "files/filesystem.h"
 #include <stdexcept>
 #include <string>
 
@@ -12,7 +13,7 @@ enum Os {
 #define MATMAKE_USING_WINDOWS
 #endif
 constexpr Os getOs() {
-#ifdef MATMAKE_USING_WINDOWS
+#ifdef MEDIT_USING_WINDOWS
     return Os::Windows;
 #else
     return Os::Linux;
@@ -29,3 +30,5 @@ inline bool hasCommand(std::string command) {
                                  " is not implemented "};
     }
 }
+
+filesystem::path executablePath();

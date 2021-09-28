@@ -1,17 +1,25 @@
 #include "files/config.h"
+#include "core/os.h"
 #include <cstdlib>
 
 filesystem::path findConfig(filesystem::path file) {
-    auto abs = filesystem::absolute(file);
-    if (filesystem::exists(abs)) {
-        return abs;
-    }
-
     if (auto env = getenv("HOME")) {
         auto fullPath = filesystem::path{env} / ".config/medit" / file;
         if (filesystem::exists(fullPath)) {
             return fullPath;
         }
+    }
+
+    if (auto exePath = executablePath(); !exePath.empty()) {
+        auto fullPath = exePath.parent_path() / file;
+        if (filesystem::exists(fullPath)) {
+            return fullPath;
+        }
+    }
+
+    auto abs = filesystem::absolute(file);
+    if (filesystem::exists(abs)) {
+        return abs;
     }
 
     //! Handle if config is more difficult to locate
