@@ -1,6 +1,7 @@
 #include "main.h"
 #include "core/context.h"
 #include "core/jobqueue.h"
+#include "core/registerdefaultplugins.h"
 #include "core/timer.h"
 #include "files/file.h"
 #include "screen/bufferedscreen.h"
@@ -70,6 +71,7 @@ struct Settings {
 } // namespace
 
 int main(int argc, char **argv) {
+    registerDefaultPlugins();
     const auto settings = Settings{argc, argv};
 
     std::unique_ptr<IScreen> screen;

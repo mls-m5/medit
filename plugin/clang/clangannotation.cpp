@@ -74,12 +74,6 @@ bool ClangAnnotation::shouldEnable(filesystem::path path) {
     return isCpp(path);
 }
 
-namespace {
-
-struct Register {
-    Register() {
-        registerAnnotation<ClangAnnotation>();
-    }
-} r;
-
-} // namespace
+void ClangAnnotation::registerPlugin() {
+    registerAnnotation<ClangAnnotation>();
+}

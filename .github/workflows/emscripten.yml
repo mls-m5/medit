@@ -21,16 +21,17 @@ jobs:
       - name: Update recursive
         run: git submodule update --recursive --init
       - name: Build build-system
-        run: make -C matmake2 -j8
-      - name: Install tools
+        run: make -C matmake2
+      - name: Install emscripten
         run: |
-          pip install cmake==3.18.2.post1 ninja==1.10.0.post1 --upgrade
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo add-apt-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-10 main' -y
-          sudo apt update
-          sudo apt-get install -y clang-10 libclang-9-dev libsdl2-image-dev libsdl2-ttf-dev
-      - name: Build and test
-        run: matmake2/build/matmake2 -t gcc
-        
-        
+          git clone https://github.com/emscripten-core/emsdk.git
+          emsdk/emsdk install latest
+          emsdk/emsdk activate latest
+
+      - name: Build emscripten
+        run: |
+          source emsdk/emsdk_env.sh
+          matmake2/build/matmake2 -t em test
+
+
 

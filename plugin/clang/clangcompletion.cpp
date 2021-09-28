@@ -88,13 +88,7 @@ ICompletionSource::CompletionList ClangCompletion::list(
     return ret;
 }
 
-namespace {
+void ClangCompletion::registerPlugin() {
 
-struct Register {
-    // This will be modified if the plugin is to be loaded dynamaically
-    Register() {
-        registerCompletion<ClangCompletion>();
-    }
-} r;
-
-} // namespace
+    registerCompletion<ClangCompletion>();
+}

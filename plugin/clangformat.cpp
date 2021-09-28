@@ -24,12 +24,6 @@ bool ClangFormat::format(Editor &editor) {
     return true;
 }
 
-namespace {
-
-struct Register {
-    Register() {
-        registerFormat<ClangFormat>();
-    }
-} r;
-
-} // namespace
+void ClangFormat::registerPlugin() {
+    registerFormat<ClangFormat>();
+}

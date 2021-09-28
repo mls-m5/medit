@@ -27,6 +27,8 @@ public:
         return 10;
     }
 
+    static void registerPlugin();
+
 private:
     ClangModel *_model;
     std::vector<CompleteResult> complete(std::shared_ptr<IEnvironment> env);
