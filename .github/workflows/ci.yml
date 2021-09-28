@@ -1,4 +1,4 @@
-name: Test Linux
+name: Native Linux
 
 # Run this workflow every time a new commit pushed to your repository
 on: push
