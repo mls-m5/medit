@@ -98,7 +98,9 @@ void MainWindow::addCommands() {
     _env->addCommand("editor.goto_definition",
                      [this](std::shared_ptr<IEnvironment> env) {
                          for (auto &navigation : _navigation) {
-                             navigation->gotoSymbol(env);
+                             if (navigation->gotoSymbol(env)) {
+                                 break;
+                             }
                          }
                      });
 

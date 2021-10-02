@@ -5,7 +5,7 @@
 
 class INavigation {
 public:
-    virtual void gotoSymbol(std::shared_ptr<IEnvironment> env) = 0;
+    virtual bool gotoSymbol(std::shared_ptr<IEnvironment> env) = 0;
 
     virtual ~INavigation() = default;
 };

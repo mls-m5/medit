@@ -10,7 +10,7 @@
 
 using namespace std::literals;
 
-void ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
+bool ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     auto context = ClangContext{env, *getClangModel()};
 
     constexpr bool debug = true;
@@ -23,7 +23,7 @@ void ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     if (!context.translationUnit) {
         env->console().buffer().pushBack(
             "goto definiton: failed to parse translation unit");
-        return;
+        return false;
     }
 
     auto cursor = env->editor().cursor();
@@ -61,7 +61,7 @@ void ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
         env->showConsole(true);
         env->console().buffer().pushBack(
             "goto definiton: failed to find declaration");
-        return;
+        return false;
     }
 
     auto range = context.getRange(cxDefinition);
@@ -69,7 +69,6 @@ void ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     auto location = context.getLocation(cxDefinition);
     auto defCursor = Cursor{env->editor().buffer(), location.position};
 
-    //    auto cxFileNameString = clang_getFileName(range.file);
     auto cxFileNameString = clang_getFileName(location.file);
 
     auto cStringFilename = clang_getCString(cxFileNameString);
@@ -101,13 +100,9 @@ void ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     env->editor().cursor({env->editor().buffer(), defCursor});
 
     env->showConsole(true);
+    return true;
 }
 
-namespace {
-
-struct Register {
-    Register() {
-        registerNavigation<ClangNavigation>();
-    }
-};
-} // namespace
+void ClangNavigation::registerPlugin() {
+    registerNavigation<ClangNavigation>();
+}
