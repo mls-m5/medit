@@ -321,3 +321,26 @@ Cursor autocompleteWordBegin(const Cursor cursor) {
 
     return begin;
 }
+
+std::optional<Cursor> find(Cursor cursor, Utf8Char c) {
+    auto end = ::end(cursor);
+    for (auto cur = cursor; cur != end; cur = right(cur, false)) {
+        if (content(cur) == c) {
+            return cur;
+        }
+    }
+    return {};
+}
+
+std::optional<Cursor> rfind(Cursor cursor, Utf8Char c) {
+    for (auto cur = cursor;; cur = left(cur, false)) {
+        if (content(cur) == c) {
+            return cur;
+        }
+        if (cur.x() == 0) {
+            return {};
+        }
+    }
+
+    return {};
+}

@@ -135,3 +135,33 @@ std::string toString(CursorRange range) {
 CursorRange fix(CursorRange range) {
     return {fix(range.begin()), fix(range.end())};
 }
+
+CursorRange word(Cursor cursor) {
+    return {wordBegin(cursor), ++wordEnd(cursor)};
+}
+
+CursorRange line(Cursor cursor) {
+    return {home(cursor), end(cursor)};
+}
+
+CursorRange inner(const Cursor cursor,
+                  const Utf8Char start,
+                  const Utf8Char stop) {
+    auto begin = cursor;
+    for (; content(begin) != start; begin = left(begin, true)) {
+        if (begin.x() == 0 && begin.y() == 0) {
+            return {cursor};
+        }
+    }
+
+    const auto bufferEnd = cursor.buffer().end();
+    auto end = cursor;
+    for (; content(end) != stop; end = right(end, true)) {
+    }
+
+    if (end == bufferEnd) {
+        return {cursor};
+    }
+
+    return {++begin, end};
+}

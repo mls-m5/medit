@@ -5,7 +5,7 @@
 #include <iosfwd>
 
 //! Get the text content in a range
-std::vector<FString> content(CursorRange range);
+[[nodiscard]] std::vector<FString> content(CursorRange range);
 
 std::string toString(CursorRange range);
 
@@ -17,4 +17,8 @@ bool operator==(CursorRange, std::string_view);
 
 std::ostream &operator<<(std::ostream &, CursorRange);
 
-CursorRange fix(CursorRange);
+[[nodiscard]] CursorRange fix(CursorRange);
+
+[[nodiscard]] CursorRange word(Cursor);
+[[nodiscard]] CursorRange line(Cursor);
+[[nodiscard]] CursorRange inner(Cursor, Utf8Char start, Utf8Char stop);
