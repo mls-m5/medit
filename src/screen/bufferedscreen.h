@@ -35,6 +35,8 @@ public:
     //! @see IScreen
     size_t height() const override;
     //! @see IScreen
+    void title(std::string title) override;
+    //! @see IScreen
     const IPalette &palette() const override;
     //! @see IScreen
     IPalette &palette() override;
@@ -42,7 +44,7 @@ public:
     size_t addStyle(const Color &foreground,
                     const Color &background,
                     size_t index) override;
-    // @see IScreen
+    //! @see IScreen
     void cursorStyle(CursorStyle) override;
 
     //! @see IInput

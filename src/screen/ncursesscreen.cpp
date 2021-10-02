@@ -187,6 +187,10 @@ size_t NCursesScreen::height() const {
     return static_cast<size_t>(::LINES);
 }
 
+void NCursesScreen::title(std::string title) {
+    // Not implemented
+}
+
 void NCursesScreen::cursorStyle(CursorStyle style) {
     forceThread();
     if (_currentCursor != style) {

@@ -4,6 +4,7 @@
 #include "screen/cursorstyle.h"
 #include "text/fstring.h"
 #include <limits>
+#include <string>
 
 class IScreen {
 public:
@@ -16,6 +17,7 @@ public:
     virtual size_t y() const = 0;
     virtual size_t width() const = 0;
     virtual size_t height() const = 0;
+    virtual void title(std::string title) = 0;
     virtual const IPalette &palette() const = 0;
     virtual IPalette &palette() = 0;
 

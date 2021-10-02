@@ -119,7 +119,6 @@ struct GuiScreen::Buffer {
                  height * 20,
                  SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN},
           renderer{window, SDL_RENDERER_ACCELERATED, SDL_RENDERER_PRESENTVSYNC},
-          //          screen{width, height, "data/UbuntuMono-Regular.ttf", 18} {
           screen{width, height, fontPath(), 18} {
         styles.resize(16);
     }
@@ -134,6 +133,10 @@ struct GuiScreen::Buffer {
         for (size_t i = 0; i < str.size() && i + x < line.size(); ++i) {
             line.at(i + x) = str.at(i);
         }
+    }
+
+    void title(std::string title) {
+        window.title(title.c_str());
     }
 
     std::string fontPath() {
@@ -407,6 +410,10 @@ size_t GuiScreen::width() const {
 
 size_t GuiScreen::height() const {
     return _height;
+}
+
+void GuiScreen::title(std::string title) {
+    _buffer->title(title);
 }
 
 void GuiScreen::cursorStyle(CursorStyle style) {

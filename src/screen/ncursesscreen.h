@@ -25,6 +25,7 @@ public:
     size_t y() const override;
     size_t width() const override;
     size_t height() const override;
+    void title(std::string title) override;
 
     const IPalette &palette() const override {
         return _palette;

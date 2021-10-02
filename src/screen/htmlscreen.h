@@ -12,34 +12,36 @@ public:
     ~HtmlScreen();
 
     // @see IScreen
-    void draw(size_t x, size_t y, const FString &str);
+    void draw(size_t x, size_t y, const FString &str) override;
     // @see IScreen
-    void refresh();
+    void refresh() override;
     // @see IScreen
-    void clear();
+    void clear() override;
     // @see IScreen
-    void cursor(size_t x, size_t y);
+    void cursor(size_t x, size_t y) override;
     // @see IScreen
-    size_t x() const;
+    size_t x() const override;
     // @see IScreen
-    size_t y() const;
+    size_t y() const override;
     // @see IScreen
-    size_t width() const;
+    size_t width() const override;
     // @see IScreen
-    size_t height() const;
+    size_t height() const override;
     // @see IScreen
-    const IPalette &palette() const;
+    void title(std::string title) override;
     // @see IScreen
-    IPalette &palette();
+    const IPalette &palette() const override;
+    // @see IScreen
+    IPalette &palette() override;
     // @see IScreen
     size_t addStyle(const Color &foreground,
                     const Color &background,
-                    size_t index);
+                    size_t index) override;
     // @see IScreen
-    void cursorStyle(CursorStyle);
+    void cursorStyle(CursorStyle) override;
 
     // @see IInput
-    KeyEvent getInput();
+    KeyEvent getInput() override;
 
 private:
     struct Grid;

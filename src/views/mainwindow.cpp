@@ -51,7 +51,7 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
         _inputFocus = &editor;
     });
 
-    addCommands();
+    addCommands(screen);
 
     _highlighting = createHighlightings();
     std::sort(_highlighting.begin(),
@@ -69,7 +69,7 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
 
 MainWindow::~MainWindow() = default;
 
-void MainWindow::addCommands() {
+void MainWindow::addCommands(IScreen &screen) {
     _env->addCommand("window.show_locator", [this](auto &&) {
         _locator.visible(true);
         _inputFocus = &_locator;
@@ -127,6 +127,16 @@ void MainWindow::addCommands() {
             input->callback([this](std::string value) { open(value); });
             showPopup(std::move(input));
         });
+
+    _env->addCommand("window.title",
+                     [&screen, this](std::shared_ptr<IEnvironment> env) {
+                         if (auto title = env->get("title")) {
+                             screen.title(title->value());
+                         }
+                         if (auto file = currentEditor().file()) {
+                             screen.title(file->path().string() + " - medit");
+                         }
+                     });
 
     _env->addCommand("show_console", [this](auto env) {
         env->showConsole(true);
@@ -277,6 +287,8 @@ void MainWindow::open(filesystem::path path) {
     updateLocatorBuffer();
 
     updateHighlighting(editor);
+
+    _env->run({"window.title"});
 }
 
 void MainWindow::updatePalette(IScreen &screen) {
