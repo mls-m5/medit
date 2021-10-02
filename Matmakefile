@@ -84,6 +84,12 @@ cursorops_test
    command = [test]
    out = cursorops_test
 
+cursorrangeops_test
+   in = @core
+   src = test/cursorrangeops_test.cpp
+   command = [test]
+   out = cursorrangeops_test
+
 wordsiterator_test
    in = @core
    src = test/wordsiterator_test.cpp
@@ -179,6 +185,7 @@ tests
    in =
       @buffer_test
       @cursorops_test
+      @cursorrangeops_test
       @wordsiterator_test
       @keysettings_test
       @fstring_test

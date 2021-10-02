@@ -1,5 +1,5 @@
 {
-    "build": "matmake -v test",
+    "build": "matmake2 -t gcc-debug",
     "flags": [
         "-std=c++2a",
         "-Isrc",
