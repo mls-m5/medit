@@ -105,7 +105,7 @@ bool ClangAnnotation::annotate(std::shared_ptr<IEnvironment> env) {
                     if (starts_with(line, pathStr)) {
                         line.replace(0, pathStr.size(), env->editor().path());
                     }
-                    env->console().buffer().push_back(line);
+                    env->console().buffer().pushBack(line);
                     shouldShow = true;
                 }
 
@@ -113,8 +113,8 @@ bool ClangAnnotation::annotate(std::shared_ptr<IEnvironment> env) {
                     env->showConsole(true);
 
                     env->console().buffer().clear();
-                    env->console().buffer().push_back(" when compiling with");
-                    env->console().buffer().push_back(command);
+                    env->console().buffer().pushBack(" when compiling with");
+                    env->console().buffer().pushBack(command);
                 }
 
                 env->context().redrawScreen();

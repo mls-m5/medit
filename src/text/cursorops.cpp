@@ -91,7 +91,7 @@ Cursor end(Cursor cursor) {
 Cursor insert(Utf8Char c, Cursor cur) {
     auto &lines = cur.buffer().lines();
     if (lines.empty()) {
-        cur.buffer().push_back();
+        cur.buffer().pushBack();
     }
     cur = fix(cur);
     if (c == '\n') {
@@ -164,7 +164,7 @@ Cursor split(Cursor cursor) {
     auto &buffer = cursor.buffer();
     auto &lines = cursor.buffer().lines();
     if (lines.empty()) {
-        cursor.buffer().push_back();
+        cursor.buffer().pushBack();
     }
 
     if (cursor.y() >= lines.size()) {

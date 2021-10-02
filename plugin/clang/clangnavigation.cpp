@@ -1,12 +1,12 @@
 #include "clang/clangnavigation.h"
 #include "clangcontext.h"
+#include "core/plugins.h"
 #include "files/file.h"
 #include "script/ienvironment.h"
 #include "text/cursor.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
 #include "clang/clangmodel.h"
-#include <core/plugins.h>
 
 using namespace std::literals;
 
@@ -21,7 +21,7 @@ void ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     }
 
     if (!context.translationUnit) {
-        env->console().buffer().push_back(
+        env->console().buffer().pushBack(
             "goto definiton: failed to parse translation unit");
         return;
     }
@@ -34,7 +34,7 @@ void ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
         auto usr = clang_getCursorUSR(cxCursor);
         auto str = clang_getCString(usr);
         if (str) {
-            env->console().buffer().push_back("usr: "s + str);
+            env->console().buffer().pushBack("usr: "s + str);
         }
         clang_disposeString(usr);
     }
@@ -42,7 +42,7 @@ void ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
         auto spelling = clang_getCursorSpelling(cxCursor);
         auto str = clang_getCString(spelling);
         if (str) {
-            env->console().buffer().push_back("spelling: "s + str);
+            env->console().buffer().pushBack("spelling: "s + str);
         }
         clang_disposeString(spelling);
     }
@@ -50,7 +50,7 @@ void ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
         auto displayName = clang_getCursorDisplayName(cxCursor);
         auto str = clang_getCString(displayName);
         if (str) {
-            env->console().buffer().push_back("displayName: "s + str);
+            env->console().buffer().pushBack("displayName: "s + str);
         }
         clang_disposeString(displayName);
     }
@@ -59,7 +59,7 @@ void ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
 
     if (clang_isInvalid(clang_getCursorKind(cxDefinition))) {
         env->showConsole(true);
-        env->console().buffer().push_back(
+        env->console().buffer().pushBack(
             "goto definiton: failed to find declaration");
         return;
     }
@@ -79,16 +79,16 @@ void ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
 
     if (debug) {
 
-        env->console().buffer().push_back("definition:");
+        env->console().buffer().pushBack("definition:");
         auto tmp = content(
             CursorRange{env->editor().buffer(), range.begin, range.end});
-        env->console().buffer().push_back(tmp.front());
+        env->console().buffer().pushBack(tmp.front());
 
-        env->console().buffer().push_back(
+        env->console().buffer().pushBack(
             "line: "s + std::to_string(defCursor.y() + 1) + " " +
             std::to_string(defCursor.x() + 1));
 
-        env->console().buffer().push_back(filenameStr);
+        env->console().buffer().pushBack(filenameStr);
     }
 
     auto path = env->editor().path();
