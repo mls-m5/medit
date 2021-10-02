@@ -165,4 +165,92 @@ TEST_CASE("for each - fixed range") {
     ASSERT_EQ(count, testString.size());
 }
 
+TEST_CASE("word(...)") {
+    const auto testText = "hello there you"sv;
+    const auto resText1 = "hello"sv;
+    const auto resText2 = "there"sv;
+    const auto resText3 = "you"sv;
+
+    auto buffer = Buffer{testText};
+
+    {
+        auto cursor = Cursor{buffer, 1, 0};
+        auto result = word(cursor);
+        ASSERT_EQ(result, resText1);
+    }
+    {
+        auto cursor = Cursor{buffer, 8, 0};
+        auto result = word(cursor);
+        ASSERT_EQ(result, resText2);
+    }
+    {
+        auto cursor = Cursor{buffer, 14, 0};
+        auto result = word(cursor);
+        ASSERT_EQ(result, resText3);
+    }
+}
+
+TEST_CASE("line(...)") {
+    const auto testText = "so thats when i said\n"
+                          "hello there you\n"
+                          "wazzup\n"sv;
+
+    auto buffer = Buffer{testText};
+
+    {
+        const auto resText = "so thats when i said"sv;
+        auto cursor = Cursor{buffer, 3, 0};
+        auto result = line(cursor);
+        ASSERT_EQ(result, resText);
+    }
+    {
+        const auto resText = "hello there you"sv;
+        auto cursor = Cursor{buffer, 8, 1};
+        auto result = line(cursor);
+        ASSERT_EQ(result, resText);
+    }
+    {
+        const auto resText = "wazzup"sv;
+        auto cursor = Cursor{buffer, 0, 2};
+        auto result = line(cursor);
+        ASSERT_EQ(result, resText);
+    }
+}
+
+TEST_CASE("inner(..., '(', ')')") {
+    const auto testText = "int apa(float bepa);"sv;
+    const auto resText1 = "float bepa"sv;
+
+    auto buffer = Buffer{testText};
+
+    {
+        auto cursor = Cursor{buffer, 8, 0};
+        auto result = inner(cursor, '(', ')');
+        ASSERT_EQ(result, resText1);
+    }
+    {
+        auto cursor = Cursor{buffer, 1, 0};
+        auto result = inner(cursor, '(', ')');
+        EXPECT_TRUE(result.empty());
+    }
+}
+
+TEST_CASE("inner(..., '\"', '\"')") {
+    const auto testText = "auto c = \"hello there\";"sv;
+    const auto resText1 = "hello there"sv;
+
+    auto buffer = Buffer{testText};
+
+    {
+        auto cursor = Cursor{buffer, 12, 0};
+        auto result = inner(cursor, '"', '"');
+        ASSERT_EQ(result, resText1);
+    }
+    {
+        auto cursor = Cursor{buffer, 1, 0};
+        auto result = inner(cursor, '"', '"');
+        EXPECT_TRUE(result.empty());
+    }
+}
+
 TEST_SUIT_END

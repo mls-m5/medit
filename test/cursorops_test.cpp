@@ -273,4 +273,38 @@ TEST_CASE("for each") {
     }
 }
 
+TEST_CASE("find()") {
+    auto buffer = Buffer{"apa bepa cepa depa"};
+
+    {
+        auto f = find({buffer, 0, 0}, "d");
+        EXPECT_TRUE(f);
+        ASSERT_EQ(f->x(), 14);
+        ASSERT_EQ(f->y(), 0);
+    }
+
+    {
+        // If not found return same as before
+        auto f = find({buffer, 14, 0}, "b");
+        EXPECT_FALSE(f);
+    }
+}
+
+TEST_CASE("rfind()") {
+    auto buffer = Buffer{"apa bepa cepa depa"};
+
+    {
+        auto f = rfind({buffer, 14, 0}, "b");
+        EXPECT_TRUE(f);
+        ASSERT_EQ(f->x(), 4);
+        ASSERT_EQ(f->y(), 0);
+    }
+
+    {
+        // If not found return same as before
+        auto f = rfind({buffer, 5, 0}, "d");
+        EXPECT_FALSE(f);
+    }
+}
+
 TEST_SUIT_END

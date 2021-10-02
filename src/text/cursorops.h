@@ -3,6 +3,7 @@
 #include "meditfwd.h"
 #include "text/cursor.h"
 #include "text/utf8char.h"
+#include <optional>
 
 //! Check if cursor is inside buffer range for x and y
 [[nodiscard]] bool isValid(Cursor);
@@ -15,6 +16,10 @@
 //! Goto the beginning of the current word
 [[nodiscard]] Cursor wordBegin(Cursor);
 [[nodiscard]] Cursor wordEnd(Cursor);
+
+//! Find stuff
+[[nodiscard]] std::optional<Cursor> find(Cursor, Utf8Char);
+[[nodiscard]] std::optional<Cursor> rfind(Cursor, Utf8Char);
 
 Cursor insert(Utf8Char, Cursor);
 
