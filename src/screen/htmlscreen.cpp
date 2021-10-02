@@ -25,6 +25,8 @@ size_t HtmlScreen::width() const {}
 
 size_t HtmlScreen::height() const {}
 
+void HtmlScreen::title(std::string title) {}
+
 const IPalette &HtmlScreen::palette() const {}
 
 IPalette &HtmlScreen::palette() {}

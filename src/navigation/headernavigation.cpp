@@ -3,6 +3,7 @@
 #include "files/extensions.h"
 #include "files/file.h"
 #include "files/project.h"
+#include "script/environment.h"
 #include "script/ienvironment.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
@@ -42,13 +43,14 @@ std::optional<std::string> getIncludeName(IEnvironment &env) {
     return includeName.front();
 }
 
-bool openIncludeByName(IEnvironment &env, std::string name) {
-    auto files = env.project().files();
+bool openIncludeByName(std::shared_ptr<IEnvironment> env, std::string name) {
+    auto files = env->project().files();
 
     for (auto &path : files) {
         if (path.string().find(name) != std::string::npos) {
-            env.editor().file(std::make_unique<File>(path));
-            env.editor().load();
+            auto localEnvironment = std::make_shared<Environment>(env);
+            localEnvironment->set("path", path.string());
+            localEnvironment->run(Command{"editor.open"});
             return true;
         }
     }
@@ -71,14 +73,7 @@ bool HeaderNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     }
 
     if (auto includeName = getIncludeName(*env)) {
-
-        //        env->showConsole(true);
-        //        env->console().buffer().pushBack("trying to find:");
-        //        env->console().buffer().pushBack(*includeName);
-        //        env->console().buffer().pushBack("");
-        //        env->console().cursor(env->console().buffer().end());
-
-        return openIncludeByName(*env, *includeName);
+        return openIncludeByName(env, *includeName);
     }
 
     return false;

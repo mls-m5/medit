@@ -2,6 +2,7 @@
 #include "clangcontext.h"
 #include "core/plugins.h"
 #include "files/file.h"
+#include "script/environment.h"
 #include "script/ienvironment.h"
 #include "text/cursor.h"
 #include "text/cursorrangeops.h"
@@ -93,8 +94,10 @@ bool ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     auto path = env->editor().path();
 
     if (!filenameStr.empty() && path != filenameStr) {
-        env->editor().file(std::make_unique<File>(filenameStr));
-        env->editor().load();
+        auto localEnvironment = std::make_shared<Environment>(env);
+        localEnvironment->set("path", filenameStr);
+        localEnvironment->run(Command{"editor.open"});
+        return true;
     }
 
     env->editor().cursor({env->editor().buffer(), defCursor});

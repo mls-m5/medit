@@ -65,5 +65,5 @@ struct MainWindow : public Window {
     void switchEditor();
 
 private:
-    void addCommands();
+    void addCommands(IScreen &screen);
 };

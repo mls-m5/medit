@@ -8,7 +8,6 @@
 #include "screen/guiscreen.h"
 #include "screen/htmlscreen.h"
 #include "screen/ncursesscreen.h"
-#include "script/rootenvironment.h"
 #include "views/mainwindow.h"
 #include <string>
 #include <thread>
