@@ -1,13 +1,11 @@
 #include "fontlocator.h"
 #include "core/os.h"
-#include <iostream>
 
 namespace {
 
 filesystem::path searchPath(filesystem::path path, filesystem::path name) {
     for (auto &it : filesystem::recursive_directory_iterator{path}) {
         if (it.path().filename().stem() == name) {
-            std::cout << it.path() << std::endl;
             return it.path();
         }
     }

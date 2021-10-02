@@ -101,7 +101,6 @@ bool ClangAnnotation::annotate(std::shared_ptr<IEnvironment> env) {
             [env = std::move(env), lines = std::move(lines), pathStr, command] {
                 // Todo parse message in future
                 bool shouldShow = false;
-                env->console().buffer().clear();
                 for (auto line : lines) {
                     if (starts_with(line, pathStr)) {
                         line.replace(0, pathStr.size(), env->editor().path());
@@ -113,11 +112,9 @@ bool ClangAnnotation::annotate(std::shared_ptr<IEnvironment> env) {
                 if (shouldShow) {
                     env->showConsole(true);
 
+                    env->console().buffer().clear();
                     env->console().buffer().push_back(" when compiling with");
                     env->console().buffer().push_back(command);
-                }
-                else {
-                    env->console().buffer().push_back("no errors found");
                 }
 
                 env->context().redrawScreen();
