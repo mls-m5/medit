@@ -22,7 +22,7 @@ void build(std::shared_ptr<IEnvironment> env) {
     env->showConsole(true);
     auto &consoleBuffer = env->console().buffer();
     consoleBuffer.clear();
-    consoleBuffer.push_back(std::string{"trying to build..."});
+    consoleBuffer.pushBack(std::string{"trying to build..."});
 
     auto &project = env->project();
 
@@ -37,7 +37,7 @@ void build(std::shared_ptr<IEnvironment> env) {
 
         for (std::string line; getline(stream, line);) {
             env->context().guiQueue().addTask([line, env] {
-                env->console().buffer().push_back(line);
+                env->console().buffer().pushBack(line);
                 env->console().cursor({0, 100000000});
             });
         }
@@ -46,10 +46,10 @@ void build(std::shared_ptr<IEnvironment> env) {
                                            env] {
             auto &consoleBuffer = env->console().buffer();
             if (returnCode) {
-                consoleBuffer.push_back(FString("failed...", IPalette::error));
+                consoleBuffer.pushBack(FString("failed...", IPalette::error));
             }
             else {
-                consoleBuffer.push_back(std::string{"finished..."});
+                consoleBuffer.pushBack(std::string{"finished..."});
             }
         });
 

@@ -71,7 +71,7 @@ public:
         isChanged(true);
     }
 
-    void push_back(FString string = {}) {
+    void pushBack(FString string = {}) {
         forceThread();
         _lines.push_back(std::move(string));
         isChanged(true);
