@@ -28,6 +28,7 @@ core
       src/views/*.cpp
       src/syntax/*.cpp
       src/core/*.cpp
+      src/navigation/*.cpp
 
       plugin/*.cpp
    config = thread
