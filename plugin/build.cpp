@@ -26,20 +26,24 @@ void build(std::shared_ptr<IEnvironment> env) {
 
     auto &project = env->project();
 
-    filesystem::current_path(project.settings().root);
+    auto root = project.settings().root;
 
-    env->context().jobQueue().addTask([&project, &env] {
+    if (!root.empty()) {
+        filesystem::current_path(root);
+    }
+
+    env->context().jobQueue().addTask([&project, env] {
         POpenStream stream(project.settings().buildCommand, true, 100);
 
         for (std::string line; getline(stream, line);) {
-            env->context().guiQueue().addTask([line, &env] {
+            env->context().guiQueue().addTask([line, env] {
                 env->console().buffer().push_back(line);
                 env->console().cursor({0, 100000000});
             });
         }
 
         env->context().guiQueue().addTask([returnCode = stream.returnCode(),
-                                           &env] {
+                                           env] {
             auto &consoleBuffer = env->console().buffer();
             if (returnCode) {
                 consoleBuffer.push_back(FString("failed...", IPalette::error));
