@@ -300,6 +300,9 @@ void MainWindow::updatePalette(IScreen &screen) {
 }
 
 void MainWindow::updateHighlighting(Editor &editor) {
+#ifdef __EMSCRIPTEN__
+    return; // Todo: find reason for crash
+#endif      //__EMSCRIPTEN__
     auto &timer = _env->context().timer();
     if (_updateTimeHandle) {
         timer.cancel(_updateTimeHandle);

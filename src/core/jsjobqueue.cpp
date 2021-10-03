@@ -19,7 +19,7 @@ void JsJobQueue::addTask(std::function<void()> task) {
     if (!_isWaiting) {
         _isWaiting = true;
 
-        emscripten_set_timeout(::work, 1000, this);
+        emscripten_set_timeout(::work, 0, this);
         EM_ASM(console.log("add task timeout"));
     }
 }
