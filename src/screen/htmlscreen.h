@@ -4,6 +4,7 @@
 
 #include "screen/iinput.h"
 #include "screen/iscreen.h"
+#include "syntax/palette.h"
 #include <memory>
 
 class HtmlScreen : public IScreen, public IInput {
@@ -47,6 +48,8 @@ private:
     struct Grid;
 
     std::unique_ptr<Grid> _grid;
+
+    Palette _palette;
 };
 
 #endif

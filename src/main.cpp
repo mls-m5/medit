@@ -14,6 +14,40 @@
 #include <thread>
 #include <vector>
 
+#ifdef __EMSCRIPTEN__
+
+#include "core/jsjobqueue.h"
+#include "core/jstimer.h"
+#include <emscripten.h>
+
+//// Main loop but with cached arguments
+// std::function<void()> innerMainLoopCache;
+
+// EMSCRIPTEN_KEEPALIVE
+// void emCallMainLoop() {
+//     innerMainLoopCache();
+// }
+
+std::unique_ptr<IJobQueue> createJobQueue() {
+    return std::make_unique<JsJobQueue>();
+}
+
+std::unique_ptr<ITimer> createTimer() {
+    return std::make_unique<JsTimer>();
+}
+
+#else
+
+std::unique_ptr<IJobQueue> createJobQueue() {
+    return std::make_unique<JobQueue>();
+}
+
+std::unique_ptr<ITimer> createTimer() {
+    return std::make_unique<Timer>();
+}
+
+#endif // __EMSCRIPTEN__
+
 namespace {
 
 void refreshScreen(IWindow &window, IScreen &screen) {
@@ -68,14 +102,6 @@ struct Settings {
     }
 };
 
-std::unique_ptr<IJobQueue> createJobQueue() {
-    return std::make_unique<JobQueue>();
-}
-
-std::unique_ptr<ITimer> createTimer() {
-    return std::make_unique<Timer>();
-}
-
 void innerMainLoop(IInput &input,
                    IJobQueue &guiQueue,
                    std::function<void(KeyEvent)> callback) {
@@ -109,6 +135,7 @@ int main(int argc, char **argv) {
     auto input = (IInput *){};
 #ifdef __EMSCRIPTEN__
     auto ns = std::make_unique<HtmlScreen>();
+    //    auto ns = std::make_unique<GuiScreen>();
     input = ns.get();
 #else
     auto ns = [&input, style = settings.style]() -> std::unique_ptr<IScreen> {
@@ -158,14 +185,31 @@ int main(int argc, char **argv) {
 
     auto callback = [&](KeyEvent c) { handleKey(c, mainWindow, *screen); };
 
+#ifdef __EMSCRIPTEN__
+
+    using namespace std::chrono_literals;
+
+    auto guiLoopTimer = createTimer();
+
+    std::function<void()> emCallback = [&] {
+        innerMainLoop(*input, *guiQueue, callback);
+        guiLoopTimer->setTimeout(100s, emCallback);
+    };
+
+    guiLoopTimer->start();
+    guiLoopTimer->setTimeout(0s, emCallback);
+
+#else
     // If multithreaded lock gui thread with this
     while (!medit::main::shouldQuit) {
         innerMainLoop(*input, *guiQueue, callback);
     }
 
+#endif // __EMSCRIPTEN
+
     if (Os() == Os::Emscripten) {
-        // For emscripten we want the handling functions to live on after the
-        // main function has exited to avoid locking the gui
+        // For emscripten we want the handling functions to live on after
+        // the main function has exited to avoid locking the gui
         queue.release();
         timer.release();
         guiQueue.release();
