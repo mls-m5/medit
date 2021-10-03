@@ -5,25 +5,25 @@
 
 //! Keeps information of threads and timer
 class Context {
-    JobQueue &_jobQueue;
-    JobQueue &_guiQueue;
-    Timer &_timer;
+    IJobQueue &_jobQueue;
+    IJobQueue &_guiQueue;
+    ITimer &_timer;
     std::function<void()> _refreshScreenFunc;
 
 public:
-    Context(JobQueue &jobQueue, JobQueue &guiQueue, Timer &timer)
+    Context(IJobQueue &jobQueue, IJobQueue &guiQueue, ITimer &timer)
         : _jobQueue(jobQueue), _guiQueue(guiQueue), _timer(timer) {}
 
-    JobQueue &jobQueue() {
+    IJobQueue &jobQueue() {
         return _jobQueue;
     }
 
     //! Work tok do on gui thread
-    JobQueue &guiQueue() {
+    IJobQueue &guiQueue() {
         return _guiQueue;
     }
 
-    Timer &timer() {
+    ITimer &timer() {
         return _timer;
     }
 

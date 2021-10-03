@@ -7,6 +7,7 @@
 enum Os {
     Linux,
     Windows,
+    Emscripten,
 };
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
@@ -16,7 +17,11 @@ constexpr Os getOs() {
 #ifdef MEDIT_USING_WINDOWS
     return Os::Windows;
 #else
+#ifdef __EMSCRIPTEN__
+    return Os::Emscripten;
+#else
     return Os::Linux;
+#endif // __EMSCRIPTEN
 #endif
 }
 

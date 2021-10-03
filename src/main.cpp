@@ -1,6 +1,7 @@
 #include "main.h"
 #include "core/context.h"
 #include "core/jobqueue.h"
+#include "core/os.h"
 #include "core/registerdefaultplugins.h"
 #include "core/timer.h"
 #include "files/file.h"
@@ -67,6 +68,14 @@ struct Settings {
     }
 };
 
+std::unique_ptr<IJobQueue> createJobQueue() {
+    return std::make_unique<JobQueue>();
+}
+
+std::unique_ptr<ITimer> createTimer() {
+    return std::make_unique<Timer>();
+}
+
 } // namespace
 
 int main(int argc, char **argv) {
@@ -96,15 +105,15 @@ int main(int argc, char **argv) {
 
     screen = std::move(bs);
 
-    JobQueue queue;
-    JobQueue guiQueue;
-    Timer timer;
-    Context context(queue, guiQueue, timer);
+    auto queue = createJobQueue();
+    auto guiQueue = createJobQueue();
+    auto timer = createTimer();
+    Context context(*queue, *guiQueue, *timer);
 
     MainWindow mainWindow(*screen, context);
 
     context.refreshScreenFunc([&] {
-        guiQueue.addTask([&] {
+        guiQueue->addTask([&] {
             refreshScreen(mainWindow, *screen); //
         });
     });
@@ -121,8 +130,8 @@ int main(int argc, char **argv) {
     mainWindow.updateCursor(*screen);
     screen->refresh();
 
-    std::thread timerThread([&] { timer.loop(); });
-    std::thread jobThread([&] { queue.loop(); });
+    timer->start();
+    queue->start();
 
     while (!medit::main::shouldQuit) {
         auto c = input->getInput();
@@ -142,14 +151,15 @@ int main(int argc, char **argv) {
             c = input->getInput();
         }
 
-        guiQueue.work(false);
+        guiQueue->work(false);
     }
 
-    queue.stop();
-    timer.stop();
-    guiQueue.stop();
-    jobThread.join();
-    timerThread.join();
+    if (Os() != Os::Emscripten) {
+        // Emscripten will run on single thread but is event driven
+        queue->stop();
+        timer->stop();
+        guiQueue->stop();
+    }
 
     return 0;
 }

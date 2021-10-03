@@ -31,16 +31,15 @@ core
       src/navigation/*.cpp
 
       plugin/*.cpp
-   config = thread
+   !em:config =
+      thread
    command = [static]
    em:eflags =
       -s USE_SDL=2
       -s USE_SDL_TTF=2
-      -pthread
    em:flags =
       -s USE_SDL=2
       -s USE_SDL_TTF=2
-      -pthread
 
 main
    in =
@@ -53,10 +52,9 @@ main
       README.md
       data/oblivion.json
       data/UbuntuMono-Regular.ttf
-   libs =  -pthread
    out = medit
    command = [exe]
-   config =
+   !em:config =
       thread
    !em:ldflags =
       `pkg-config --libs ncurses`
@@ -224,6 +222,4 @@ all
       lib/json.h/include
       lib/matrix-screen/include
       lib/matrix-screen/lib/sdlpp/include
-   em:flags =
-      -s USE_PTHREADS
 

@@ -1,32 +1,31 @@
 #pragma once
 
+#include "ijobqueue.h"
 #include <functional>
 #include <mutex>
 #include <queue>
 #include <thread>
 
-class JobQueue {
-    std::queue<std::function<void()>> _queue;
-    std::mutex _waitMutex;
-    bool _running = true;
-    std::thread::id _threadId = {};
+class JobQueue : public IJobQueue {
 
 public:
     JobQueue() = default;
     JobQueue(const JobQueue &) = delete;
     JobQueue &operator=(const JobQueue &) = delete;
-    //! Wait for another task to come in
-    void wait() {
-        auto l = std::scoped_lock(_waitMutex);
+
+    ~JobQueue() {
+        if (_thread.joinable()) {
+            _thread.join();
+        }
     }
 
-    void addTask(std::function<void()> f) {
+    void addTask(std::function<void()> f) override {
         _queue.push(std::move(f));
         _waitMutex.try_lock();
         _waitMutex.unlock();
     }
 
-    void work(bool shouldWait = true) {
+    void work(bool shouldWait = true) override {
         if (shouldWait) {
             _waitMutex.lock();
         }
@@ -41,7 +40,10 @@ public:
         }
     }
 
-    void stop() {
+    void stop() override {
+        if (!_running) {
+            return;
+        }
         _running = false;
         _waitMutex.try_lock();
         decltype(_queue) empty{};
@@ -49,11 +51,22 @@ public:
         _waitMutex.unlock();
     }
 
+    void start() override {
+        _thread = std::thread{[this] { loop(); }};
+    }
+
+private:
+    //! Run and lock the current thread
     void loop() {
         _threadId = std::this_thread::get_id();
         while (_running) {
             work();
         }
+    }
+
+    //! Wait for another task to come in
+    void wait() {
+        auto l = std::scoped_lock(_waitMutex);
     }
 
     void forceThisThread() {
@@ -66,4 +79,10 @@ public:
     bool isThisThread() {
         return std::this_thread::get_id() == _threadId;
     }
+
+    std::queue<std::function<void()>> _queue;
+    std::mutex _waitMutex;
+    bool _running = true;
+    std::thread::id _threadId = {};
+    std::thread _thread;
 };

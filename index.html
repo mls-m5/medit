@@ -3,6 +3,10 @@
 <head>
     <title>medit</title>
     <style>
+        html {
+            background: black;
+        }
+
         .cell {
             font-family: 'Courier New', Courier, monospace;
             display: inline-block;
@@ -10,9 +14,10 @@
             margin: 0;
             position: absolute;
             width: 8;
-            height: 14;
-            background: red;
+            height: 17;
+            background: rgba(20, 20, 20, 255);
             font-size: 15;
+            color: rgba(255, 255, 255, 255);
         }
 
         .row {
@@ -23,12 +28,6 @@
 </head>
 
 <body>
-    <!-- <div class="row">
-        <div id="letter" class="cell">a</div>
-        <div id="letter" class="cell">a</div>
-        <div id="letter" class="cell">a</div>
-    </div> -->
-
     <div id="screen">
 
     </div>
@@ -44,7 +43,7 @@
             div.innerHTML = "";
             div.classList.add("cell");
             div.style.left = 8 * x;
-            div.style.top = 14 * y;
+            div.style.top = 17 * y;
             screen.appendChild(div);
             return div;
         }
@@ -67,6 +66,8 @@
         cell(10, 20).innerHTML = "a";
         cell(11, 20).innerHTML = "ö";
         cell(12, 20).innerHTML = "{";
+
+        
 
     </script>
 </body>
