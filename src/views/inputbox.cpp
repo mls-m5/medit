@@ -49,7 +49,10 @@ bool InputBox::keyPress(std::shared_ptr<IEnvironment> env) {
             //            }
             _callback(_entry.buffer().text());
         }
-        // Fallthrough
+        if (_entry.keyPress(context)) {
+            return true;
+        }
+        break;
     default:
         if (_entry.keyPress(context)) {
             return true;

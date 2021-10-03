@@ -13,7 +13,7 @@ filesystem::path searchPath(filesystem::path path, filesystem::path name) {
     return {};
 }
 
-filesystem::path find(filesystem::path name) {
+[[maybe_unused]] filesystem::path find(filesystem::path name) {
     if (auto exePath = executablePath(); !exePath.empty()) {
         if (auto path = searchPath(exePath.parent_path(), name);
             !path.empty()) {
@@ -45,23 +45,29 @@ filesystem::path find(filesystem::path name) {
 } // namespace
 
 filesystem::path findFont(filesystem::path path) {
-    auto replaced = [&] {
-        auto replaced = path.string();
-        for (auto &c : replaced) {
-            if (c == ' ') {
-                c = '-';
+    if constexpr (getOs() == Os::Emscripten) {
+        return "./data/UbuntuMono-Regular.ttf";
+    }
+    else {
+
+        auto replaced = [&] {
+            auto replaced = path.string();
+            for (auto &c : replaced) {
+                if (c == ' ') {
+                    c = '-';
+                }
             }
+            return filesystem::path{replaced};
+        }();
+
+        if (auto f = find(replaced); !f.empty()) {
+            return f;
         }
-        return filesystem::path{replaced};
-    }();
 
-    if (auto f = find(replaced); !f.empty()) {
-        return f;
+        if (auto f = find(path); !f.empty()) {
+            return f;
+        }
+
+        return {};
     }
-
-    if (auto f = find(path); !f.empty()) {
-        return f;
-    }
-
-    return {};
 }

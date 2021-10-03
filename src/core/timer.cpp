@@ -2,6 +2,12 @@
 #include <algorithm>
 #include <thread>
 
+Timer::~Timer() {
+    if (_thread.joinable()) {
+        _thread.join();
+    }
+}
+
 size_t Timer::setTimeout(Timer::DurationT duration, std::function<void()> f) {
     if (!_isRunning) {
         return 0;
@@ -64,4 +70,8 @@ void Timer::loop() {
 
         std::this_thread::sleep_for(10ms);
     }
+}
+
+void Timer::start() {
+    _thread = std::thread([this] { loop(); });
 }

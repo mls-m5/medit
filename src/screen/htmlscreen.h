@@ -4,7 +4,9 @@
 
 #include "screen/iinput.h"
 #include "screen/iscreen.h"
+#include "syntax/palette.h"
 #include <memory>
+#include <queue>
 
 class HtmlScreen : public IScreen, public IInput {
 public:
@@ -43,10 +45,16 @@ public:
     // @see IInput
     KeyEvent getInput() override;
 
+    void sendKeyEvent(KeyEvent event);
+
 private:
     struct Grid;
 
     std::unique_ptr<Grid> _grid;
+
+    Palette _palette;
+
+    std::queue<KeyEvent> _eventQueue;
 };
 
 #endif

@@ -26,8 +26,8 @@ class IPalette;
 class IAnnotation;
 class Registers;
 
-class Timer;
-class JobQueue;
+class ITimer;
+class IJobQueue;
 class Context;
 
 class IHighlight;

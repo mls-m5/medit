@@ -31,16 +31,9 @@ core
       src/navigation/*.cpp
 
       plugin/*.cpp
-   config = thread
+   !em:config =
+      thread
    command = [static]
-   em:eflags =
-      -s USE_SDL=2
-      -s USE_SDL_TTF=2
-      -pthread
-   em:flags =
-      -s USE_SDL=2
-      -s USE_SDL_TTF=2
-      -pthread
 
 main
    in =
@@ -53,22 +46,32 @@ main
       README.md
       data/oblivion.json
       data/UbuntuMono-Regular.ttf
-   libs =  -pthread
    out = medit
    command = [exe]
-   config =
+   !em:config =
       thread
    !em:ldflags =
       `pkg-config --libs ncurses`
       -lstdc++fs
-      -lGL
       -lSDL2
       -lSDL2_ttf
       -lclang-9
+   em:flags =
+#      -gsource-map -g2
+      --profiling
+#      --source-map-base
 
    # clang workaround
    includes =
       /usr/lib/llvm-9/include/
+   em:eflags =
+      -s USE_SDL=2
+      -s USE_SDL_TTF=2
+   em:ldflags =
+      -s USE_SDL=2
+      -s USE_SDL_TTF=2
+      --preload-file data/
+   em:copy = index.html
 
 
 # ======== Tests =====================================
@@ -224,6 +227,4 @@ all
       lib/json.h/include
       lib/matrix-screen/include
       lib/matrix-screen/lib/sdlpp/include
-   em:flags =
-      -s USE_PTHREADS
 

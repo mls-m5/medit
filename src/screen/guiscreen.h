@@ -39,21 +39,8 @@ public:
     size_t addStyle(const Color &fg, const Color &bg, size_t index) override;
 
 private:
-    size_t _width = 80;
-    size_t _height = 24;
-
-    bool _hasColors = true;
-
     Palette _palette;
-
-    size_t _tabWidth = 3;
-
-    size_t _lastStyle = 16;
-    size_t _lastColor = 16;
 
     struct Buffer;
     std::unique_ptr<Buffer> _buffer;
-
-    bool _ctrlState = false;
-    bool _altState = false;
 };
