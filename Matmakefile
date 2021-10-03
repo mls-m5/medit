@@ -64,6 +64,9 @@ main
    # clang workaround
    includes =
       /usr/lib/llvm-9/include/
+   em:eflags =
+      -s USE_SDL=2
+      -s USE_SDL_TTF=2
    em:ldflags =
       -s USE_SDL=2
       -s USE_SDL_TTF=2

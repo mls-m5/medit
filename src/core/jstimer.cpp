@@ -35,6 +35,8 @@ size_t JsTimer::setTimeout(DurationT duration, std::function<void()> f) {
 
     callbackMap[callback->i] = std::move(callback);
 
+    EM_ASM(console.log("add timer timeout"));
+
     return i;
 }
 

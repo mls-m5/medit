@@ -120,8 +120,8 @@ int mainFunc(int argc, char **argv) {
     const auto settings = Settings{0, nullptr};
     auto input = (IInput *){};
 
-    //    auto ns = std::make_unique<HtmlScreen>();
-    auto ns = std::make_unique<GuiScreen>();
+    auto ns = std::make_unique<HtmlScreen>();
+    //    auto ns = std::make_unique<GuiScreen>();
     input = ns.get();
 
     auto bs = std::make_unique<BufferedScreen>(ns.get(), input);
@@ -148,8 +148,6 @@ int mainFunc(int argc, char **argv) {
         mainWindow->open(settings.file);
     }
 
-    refreshScreen(*mainWindow, *screen);
-
     mainWindow->resize();
     mainWindow->draw(*screen);
     mainWindow->updateCursor(*screen);
@@ -172,7 +170,9 @@ int mainFunc(int argc, char **argv) {
     };
 
     guiLoopTimer->start();
-    guiLoopTimer->setTimeout(0s, emCallback);
+    guiLoopTimer->setTimeout(100ms, emCallback);
+
+    EM_ASM(console.log("hej"));
 
     emData.nativeScreen = std::move(ns);
     emData.screen = screen;
