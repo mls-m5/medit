@@ -6,6 +6,11 @@
 #include <emscripten/html5.h>
 #include <iostream>
 
+enum JsEventType {
+    Text = 1,
+    FKey = 2,
+};
+
 EM_JS(void,
       drawCell,
       (int x,
@@ -18,8 +23,6 @@ EM_JS(void,
        int bgg,
        int bgb),
       {
-          //    console.log("drawing ", x, y, " = ", c1);
-
           cell(x, y).innerText = String.fromCharCode([c1]);
           cell(x, y).style.background = rgb(bgr, bgb, bgb);
           cell(x, y).style.color = rgb(fgr, fgb, fgb);
@@ -29,18 +32,7 @@ EM_JS(void, moveCursor, (int x, int y), { moveCarret(x, y); });
 
 namespace {
 
-EM_BOOL callback(int eventType,
-                 const EmscriptenKeyboardEvent *keyEvent,
-                 void *data) {
-
-    auto screen = static_cast<HtmlScreen *>(data);
-
-    EM_ASM(console.log("keyboard event"));
-
-    screen->sendKeyEvent(KeyEvent{Key::Text, keyEvent->charCode});
-
-    return true;
-}
+auto staticPointer = (HtmlScreen *){nullptr};
 
 struct CellContent {
     Utf8Char c;
@@ -50,6 +42,20 @@ struct CellContent {
 };
 
 } // namespace
+
+EMSCRIPTEN_KEEPALIVE
+extern "C" void keyCallback(int type, char c1, char c2, char c3, char c4) {
+    auto str = std::string{c1, c2, c3, c4};
+    auto c = Utf8Char{str.data(), str.size()};
+    std::cout << c.toString() << std::endl;
+
+    if (staticPointer) {
+        if (type == 1) {
+            staticPointer->sendKeyEvent(
+                KeyEvent{Key::Text, {str.data(), str.size()}});
+        }
+    }
+}
 
 struct HtmlScreen::Grid {
     struct Style {
@@ -127,8 +133,7 @@ struct HtmlScreen::Grid {
 };
 
 HtmlScreen::HtmlScreen() : _grid(std::make_unique<Grid>()) {
-    emscripten_set_keydown_callback("#screen", this, true, callback);
-    emscripten_set_keydown_callback(".cell", this, true, callback);
+    staticPointer = this;
 }
 
 HtmlScreen::~HtmlScreen() = default;

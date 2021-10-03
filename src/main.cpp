@@ -165,8 +165,8 @@ int mainFunc(int argc, char **argv) {
     emCallback = [=] {
         innerMainLoop(*input, *guiQueue, callback);
         guiLoopTimer->setTimeout(
-            1000ms, emCallback); // Todo: Do this faster when it works
-        EM_ASM(console.log("inner loop"));
+            10ms, emCallback); // Todo: Do this faster when it works
+                               //        EM_ASM(console.log("inner loop"));
     };
 
     guiLoopTimer->start();

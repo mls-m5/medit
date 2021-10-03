@@ -1,28 +1,28 @@
 <!doctype html>
 <html lang="en-us">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Emscripten-Generated Code</title>
     <style>
+        #output {
+            width: 100%;
+            height: 200px;
+            margin: 0 auto;
+            margin-top: 10px;
+            border-left: 0px;
+            border-right: 0px;
+            padding-left: 0px;
+            padding-right: 0px;
+            display: block;
+            background-color: black;
+            color: white;
+            font-family: 'Lucida Console', Monaco, monospace;
+            outline: none;
+        }
 
-      #output {
-        width: 100%;
-        height: 200px;
-        margin: 0 auto;
-        margin-top: 10px;
-        border-left: 0px;
-        border-right: 0px;
-        padding-left: 0px;
-        padding-right: 0px;
-        display: block;
-        background-color: black;
-        color: white;
-        font-family: 'Lucida Console', Monaco, monospace;
-        outline: none;
-      }
-
-      /* Medit styling */
+        /* Medit styling */
         html {
             background: black;
         }
@@ -60,16 +60,15 @@
         }
 
         #screen:focus {
-            background:red;
+            background: red;
         }
-
-
     </style>
-  </head>
-  <body>
+</head>
+
+<body>
 
 
-<!-- <span id='controls'>
+    <!-- <span id='controls'>
   <span><input type="checkbox" id="resize">Resize canvas</span>
   <span><input type="checkbox" id="pointerLock" checked>Lock/hide mouse pointer &nbsp;&nbsp;&nbsp;</span>
   <span><input type="button" value="Fullscreen" onclick="Module.requestFullscreen(document.getElementById('pointerLock').checked, 
@@ -84,63 +83,63 @@
     <div id="screen" tabindex="0">
     </div>
     <div id="carret"></div>
-    
+
     <div class="emscripten_border">
-      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
+        <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
     </div>
     <!-- <textarea id="output" rows="8"></textarea> -->
 
     <script type='module'>
-      var progressElement = document.getElementById('progress');
-      var spinnerElement = document.getElementById('spinner');
+        var progressElement = document.getElementById('progress');
+        var spinnerElement = document.getElementById('spinner');
 
-      var Module = {
-        preRun: [],
-        postRun: [],
-        print: (function() {
-        //   var element = document.getElementById('output');
-        //   if (element) element.value = ''; // clear browser cache
-          return function(text) {
-            // if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-            // if (element) {
-            //   element.value += text + "\n";
-            //   element.scrollTop = element.scrollHeight; // focus on bottom
-            // }
-            console.log(text);
-          };
-        })(),
-        printErr: function(text) {
-          if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-          console.error(text);
-        },
-        canvas: (function() {
-          var canvas = document.getElementById('canvas');
+        var Module = {
+            preRun: [],
+            postRun: [],
+            print: (function () {
+                //   var element = document.getElementById('output');
+                //   if (element) element.value = ''; // clear browser cache
+                return function (text) {
+                    // if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                    // if (element) {
+                    //   element.value += text + "\n";
+                    //   element.scrollTop = element.scrollHeight; // focus on bottom
+                    // }
+                    console.log(text);
+                };
+            })(),
+            printErr: function (text) {
+                if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                console.error(text);
+            },
+            canvas: (function () {
+                var canvas = document.getElementById('canvas');
 
-          // As a default initial behavior, pop up an alert when webgl context is lost. To make your
-          // application robust, you may want to override this behavior before shipping!
-          // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
-          canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
+                // As a default initial behavior, pop up an alert when webgl context is lost. To make your
+                // application robust, you may want to override this behavior before shipping!
+                // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
+                canvas.addEventListener("webglcontextlost", function (e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
 
-          return canvas;
-        })(),
-        setStatus: function(text) {
-            console.log("status: " + text);
-        },
-        totalDependencies: 0,
-        monitorRunDependencies: function(left) {
-          this.totalDependencies = Math.max(this.totalDependencies, left);
-          Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
-        }
-      };
-      Module.setStatus('Downloading...');
-      window.onerror = function(event) {
-        // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
-        Module.setStatus('Exception thrown, see JavaScript console');
-        spinnerElement.style.display = 'none';
-        Module.setStatus = function(text) {
-          if (text) Module.printErr('[post-exception status] ' + text);
+                return canvas;
+            })(),
+            setStatus: function (text) {
+                console.log("status: " + text);
+            },
+            totalDependencies: 0,
+            monitorRunDependencies: function (left) {
+                this.totalDependencies = Math.max(this.totalDependencies, left);
+                Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+            }
         };
-      };
+        Module.setStatus('Downloading...');
+        window.onerror = function (event) {
+            // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
+            Module.setStatus('Exception thrown, see JavaScript console');
+            spinnerElement.style.display = 'none';
+            Module.setStatus = function (text) {
+                if (text) Module.printErr('[post-exception status] ' + text);
+            };
+        };
     </script>
     <script async type="text/javascript" src="medit.js"></script>
 
@@ -171,7 +170,7 @@
             }
         }
 
-        window.cell = function(x, y) {
+        window.cell = function (x, y) {
             return cells[y * screenWidth + x];
         }
 
@@ -179,7 +178,7 @@
         cell(11, 20).innerHTML = "ö";
         cell(12, 20).innerHTML = "{";
 
-        window.clearScreen = function() {
+        window.clearScreen = function () {
             for (let cell of cells) {
                 cell.innerHTML = "";
             }
@@ -187,25 +186,38 @@
             console.log("screen cleared");
         }
 
-        window.setCell = function(x, y, ) {
+        window.setCell = function (x, y,) {
 
         }
 
-        window.rgb = function(r, g, b) {
+        window.rgb = function (r, g, b) {
             return "rgb(" + r + "," + g + "," + b + ")";
         }
 
         let carret = document.getElementById("carret");
 
-        window.moveCarret = function(x, y) {
+        window.moveCarret = function (x, y) {
             carret.style.left = x * cellWidth + "px";
             carret.style.top = y * cellHeight + "px";
         }
-        
+
+        document.addEventListener("keydown", function (event) {
+            let data = [0, 0, 0, 0];
+            if (event.key.length == 1) {
+                let raw = new TextEncoder("utf8").encode(event.key);
+                for (let i in raw) {
+                    data[i] = raw[i];
+                }
+                window.Module._keyCallback(1, data[0], data[1], data[2], data[3]);
+            }
+
+            // console.log("hello" + event.keyCode)
+            // console.log(event);
+
+        });
 
     </script>
 
-  </body>
+</body>
+
 </html>
-
-

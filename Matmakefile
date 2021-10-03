@@ -71,6 +71,7 @@ main
       -s USE_SDL=2
       -s USE_SDL_TTF=2
       --preload-file data/
+      -sEXPORTED_FUNCTIONS=['_main','_keyCallback']
    em:copy = index.html
 
 
