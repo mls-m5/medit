@@ -1,5 +1,6 @@
 #include "guiscreen.h"
 #include "SDL2/SDL_keyboard.h"
+#include "core/os.h"
 #include "files/fontlocator.h"
 #include "matrixscreen.h"
 #include "sdlpp/events.hpp"
@@ -11,8 +12,6 @@
 #include <array>
 
 namespace {
-
-size_t testX = 0;
 
 auto keyMap = std::array<std::pair<int, Key>, 22>{{
     {SDL_SCANCODE_UNKNOWN, Key::Unknown},
@@ -83,12 +82,6 @@ bool shouldIgnoreTextInput(char c) {
     }
 }
 
-Modifiers modifiers(bool ctrl, bool alt) {
-    return static_cast<Modifiers>(
-        static_cast<int>(ctrl ? Modifiers::Ctrl : Modifiers{}) |
-        static_cast<int>(alt ? Modifiers::Alt : Modifiers{}));
-}
-
 } // namespace
 
 struct GuiScreen::Buffer {
@@ -121,6 +114,7 @@ struct GuiScreen::Buffer {
           renderer{window, SDL_RENDERER_ACCELERATED, SDL_RENDERER_PRESENTVSYNC},
           screen{width, height, fontPath(), 18} {
         styles.resize(16);
+        resize(width, height);
     }
 
     // Save data to be drawn
@@ -303,9 +297,7 @@ void GuiScreen::cursor(size_t x, size_t y) {
     _buffer->cursorPos.y(y);
 }
 
-GuiScreen::GuiScreen() : _buffer(std::make_unique<Buffer>(_width, _height)) {
-    _buffer->resize(_width, _height);
-
+GuiScreen::GuiScreen() : _buffer(std::make_unique<Buffer>(80, 40)) {
     sdl::startTextInput();
 }
 
@@ -325,8 +317,15 @@ Modifiers getModState() {
 }
 
 KeyEvent GuiScreen::getInput() {
-    auto e = sdl::waitEventTimeout(100);
-    //    auto sdlEvent = sdl::waitEvent();
+    auto e = [] {
+        if (getOs() == Os::Emscripten) {
+            return sdl::pollEvent();
+        }
+        else {
+            return sdl::waitEventTimeout(100);
+        }
+    }();
+
     if (!e) {
         return Key::None;
     }
@@ -379,10 +378,8 @@ KeyEvent GuiScreen::getInput() {
     case SDL_WINDOWEVENT:
         switch (sdlEvent.window.event) {
         case SDL_WINDOWEVENT_RESIZED: {
-            auto dims = _buffer->resizePixels(
+            /*auto dims =*/_buffer->resizePixels(
                 sdlEvent.window.data1, sdlEvent.window.data2, false);
-            _width = dims.w;
-            _height = dims.h;
             return KeyEvent{Key::Resize};
             break;
         }
@@ -405,11 +402,11 @@ size_t GuiScreen::y() const {
 }
 
 size_t GuiScreen::width() const {
-    return _width;
+    return static_cast<size_t>(_buffer->width);
 }
 
 size_t GuiScreen::height() const {
-    return _height;
+    return static_cast<size_t>(_buffer->height);
 }
 
 void GuiScreen::title(std::string title) {

@@ -1,6 +1,8 @@
 #include "main.h"
 #include "core/context.h"
 #include "core/jobqueue.h"
+#include "core/jsjobqueue.h"
+#include "core/jstimer.h"
 #include "core/os.h"
 #include "core/registerdefaultplugins.h"
 #include "core/timer.h"
@@ -16,37 +18,9 @@
 
 #ifdef __EMSCRIPTEN__
 
-#include "core/jsjobqueue.h"
-#include "core/jstimer.h"
-#include <emscripten.h>
+#include "emscripten.h"
 
-//// Main loop but with cached arguments
-// std::function<void()> innerMainLoopCache;
-
-// EMSCRIPTEN_KEEPALIVE
-// void emCallMainLoop() {
-//     innerMainLoopCache();
-// }
-
-std::unique_ptr<IJobQueue> createJobQueue() {
-    return std::make_unique<JsJobQueue>();
-}
-
-std::unique_ptr<ITimer> createTimer() {
-    return std::make_unique<JsTimer>();
-}
-
-#else
-
-std::unique_ptr<IJobQueue> createJobQueue() {
-    return std::make_unique<JobQueue>();
-}
-
-std::unique_ptr<ITimer> createTimer() {
-    return std::make_unique<Timer>();
-}
-
-#endif // __EMSCRIPTEN__
+#endif
 
 namespace {
 
@@ -105,6 +79,7 @@ struct Settings {
 void innerMainLoop(IInput &input,
                    IJobQueue &guiQueue,
                    std::function<void(KeyEvent)> callback) {
+
     auto c = input.getInput();
 
     // Todo: in the future check main window for unsaved changes
@@ -125,19 +100,96 @@ void innerMainLoop(IInput &input,
     guiQueue.work(false);
 };
 
-} // namespace
+#ifdef __EMSCRIPTEN__
 
-int main(int argc, char **argv) {
+struct EmscriptenData {
+    std::shared_ptr<IScreen> nativeScreen;
+    std::shared_ptr<IScreen> screen;
+    std::shared_ptr<IJobQueue> guiQueue;
+    std::shared_ptr<IJobQueue> queue;
+    std::shared_ptr<ITimer> timer;
+    std::shared_ptr<ITimer> guiLoopTimer;
+};
+
+std::function<void()> emCallback;
+
+EmscriptenData emData;
+
+int mainFunc(int argc, char **argv) {
+    registerDefaultPlugins();
+    const auto settings = Settings{0, nullptr};
+    auto input = (IInput *){};
+
+    //    auto ns = std::make_unique<HtmlScreen>();
+    auto ns = std::make_unique<GuiScreen>();
+    input = ns.get();
+
+    auto bs = std::make_unique<BufferedScreen>(ns.get(), input);
+
+    std::shared_ptr<IScreen> screen = std::move(bs);
+
+    auto queue = std::make_shared<JsJobQueue>();
+    auto guiQueue = std::make_shared<JsJobQueue>();
+    auto timer = std::make_shared<JsTimer>();
+    auto context = std::make_shared<Context>(*queue, *guiQueue, *timer);
+
+    auto mainWindow = std::make_shared<MainWindow>(*screen, *context);
+
+    context->refreshScreenFunc([=] {
+        guiQueue->addTask([=] {
+            refreshScreen(*mainWindow, *screen); //
+        });
+    });
+
+    if (settings.file.empty()) {
+        mainWindow->updateLocatorBuffer();
+    }
+    else {
+        mainWindow->open(settings.file);
+    }
+
+    refreshScreen(*mainWindow, *screen);
+
+    mainWindow->resize();
+    mainWindow->draw(*screen);
+    mainWindow->updateCursor(*screen);
+    screen->refresh();
+
+    timer->start();
+    queue->start();
+
+    auto callback = [=](KeyEvent c) { handleKey(c, *mainWindow, *screen); };
+
+    using namespace std::chrono_literals;
+
+    auto guiLoopTimer = std::make_shared<JsTimer>();
+
+    emCallback = [=] {
+        innerMainLoop(*input, *guiQueue, callback);
+        guiLoopTimer->setTimeout(
+            1000ms, emCallback); // Todo: Do this faster when it works
+        EM_ASM(console.log("inner loop"));
+    };
+
+    guiLoopTimer->start();
+    guiLoopTimer->setTimeout(0s, emCallback);
+
+    emData.nativeScreen = std::move(ns);
+    emData.screen = screen;
+    emData.guiQueue = guiQueue;
+    emData.queue = queue;
+    emData.timer = timer;
+    emData.guiLoopTimer = guiLoopTimer;
+    return 0;
+}
+
+#else  // __EMSCRIPTEN
+
+int mainFunc(int argc, char **argv) {
     registerDefaultPlugins();
     const auto settings = Settings{argc, argv};
 
-    std::unique_ptr<IScreen> screen;
     auto input = (IInput *){};
-#ifdef __EMSCRIPTEN__
-    auto ns = std::make_unique<HtmlScreen>();
-    //    auto ns = std::make_unique<GuiScreen>();
-    input = ns.get();
-#else
     auto ns = [&input, style = settings.style]() -> std::unique_ptr<IScreen> {
         if (style == UiStyle::Standard) {
             auto ns = std::make_unique<NCursesScreen>();
@@ -150,14 +202,14 @@ int main(int argc, char **argv) {
             return ns;
         }
     }();
-#endif
+
     auto bs = std::make_unique<BufferedScreen>(ns.get(), input);
 
-    screen = std::move(bs);
+    std::unique_ptr<IScreen> screen = std::move(bs);
 
-    auto queue = createJobQueue();
-    auto guiQueue = createJobQueue();
-    auto timer = createTimer();
+    auto queue = std::make_unique<JobQueue>();
+    auto guiQueue = std::make_unique<JobQueue>();
+    auto timer = std::make_unique<Timer>();
     Context context(*queue, *guiQueue, *timer);
 
     MainWindow mainWindow(*screen, context);
@@ -185,41 +237,23 @@ int main(int argc, char **argv) {
 
     auto callback = [&](KeyEvent c) { handleKey(c, mainWindow, *screen); };
 
-#ifdef __EMSCRIPTEN__
-
-    using namespace std::chrono_literals;
-
-    auto guiLoopTimer = createTimer();
-
-    std::function<void()> emCallback = [&] {
-        innerMainLoop(*input, *guiQueue, callback);
-        guiLoopTimer->setTimeout(100s, emCallback);
-    };
-
-    guiLoopTimer->start();
-    guiLoopTimer->setTimeout(0s, emCallback);
-
-#else
     // If multithreaded lock gui thread with this
     while (!medit::main::shouldQuit) {
         innerMainLoop(*input, *guiQueue, callback);
     }
 
-#endif // __EMSCRIPTEN
+    queue->stop();
+    timer->stop();
+    guiQueue->stop();
 
-    if (Os() == Os::Emscripten) {
-        // For emscripten we want the handling functions to live on after
-        // the main function has exited to avoid locking the gui
-        queue.release();
-        timer.release();
-        guiQueue.release();
-    }
-    else {
-        // Emscripten will run on single thread but is event driven
-        queue->stop();
-        timer->stop();
-        guiQueue->stop();
-    }
+    return 0;
+}
+#endif // __EMSCRIPTEN__
+
+} // namespace
+
+int main(int argc, char **argv) {
+    mainFunc(argc, argv);
 
     return 0;
 }

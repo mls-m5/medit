@@ -34,12 +34,6 @@ core
    !em:config =
       thread
    command = [static]
-   em:eflags =
-      -s USE_SDL=2
-      -s USE_SDL_TTF=2
-   em:flags =
-      -s USE_SDL=2
-      -s USE_SDL_TTF=2
 
 main
    in =
@@ -59,14 +53,22 @@ main
    !em:ldflags =
       `pkg-config --libs ncurses`
       -lstdc++fs
-      -lGL
       -lSDL2
       -lSDL2_ttf
       -lclang-9
+   em:flags =
+#      -gsource-map -g2
+      --profiling
+#      --source-map-base
 
    # clang workaround
    includes =
       /usr/lib/llvm-9/include/
+   em:ldflags =
+      -s USE_SDL=2
+      -s USE_SDL_TTF=2
+      --preload-file data/
+   em:copy = index.html
 
 
 # ======== Tests =====================================

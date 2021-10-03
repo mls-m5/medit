@@ -300,7 +300,7 @@ void MainWindow::updatePalette(IScreen &screen) {
 }
 
 void MainWindow::updateHighlighting(Editor &editor) {
-
+    return; // TODO: Test, remove this
     auto &timer = _env->context().timer();
     if (_updateTimeHandle) {
         timer.cancel(_updateTimeHandle);

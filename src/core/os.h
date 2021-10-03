@@ -21,7 +21,7 @@ constexpr Os getOs() {
     return Os::Emscripten;
 #else
     return Os::Linux;
-#endif // __EMSCRIPTEN
+#endif // __EMSCRIPTEN__
 #endif
 }
 
