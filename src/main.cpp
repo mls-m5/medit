@@ -76,6 +76,29 @@ std::unique_ptr<ITimer> createTimer() {
     return std::make_unique<Timer>();
 }
 
+void innerMainLoop(IInput &input,
+                   IJobQueue &guiQueue,
+                   std::function<void(KeyEvent)> callback) {
+    auto c = input.getInput();
+
+    // Todo: in the future check main window for unsaved changes
+    // here too
+    while (c != Key::None) {
+        if (c == KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl} ||
+            c == Key::Quit) {
+            medit::main::shouldQuit = true;
+            break;
+        }
+
+        if (c != Key::Unknown) {
+            callback(c);
+        }
+        c = input.getInput();
+    }
+
+    guiQueue.work(false);
+};
+
 } // namespace
 
 int main(int argc, char **argv) {
@@ -133,28 +156,21 @@ int main(int argc, char **argv) {
     timer->start();
     queue->start();
 
+    auto callback = [&](KeyEvent c) { handleKey(c, mainWindow, *screen); };
+
+    // If multithreaded lock gui thread with this
     while (!medit::main::shouldQuit) {
-        auto c = input->getInput();
-
-        // Todo: in the future check main window for unsaved changes here
-        // too
-        while (c != Key::None) {
-            if (c == KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl} ||
-                c == Key::Quit) {
-                medit::main::shouldQuit = true;
-                break;
-            }
-
-            if (c != Key::Unknown) {
-                handleKey(c, mainWindow, *screen);
-            }
-            c = input->getInput();
-        }
-
-        guiQueue->work(false);
+        innerMainLoop(*input, *guiQueue, callback);
     }
 
-    if (Os() != Os::Emscripten) {
+    if (Os() == Os::Emscripten) {
+        // For emscripten we want the handling functions to live on after the
+        // main function has exited to avoid locking the gui
+        queue.release();
+        timer.release();
+        guiQueue.release();
+    }
+    else {
         // Emscripten will run on single thread but is event driven
         queue->stop();
         timer->stop();
