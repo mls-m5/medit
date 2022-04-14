@@ -114,3 +114,18 @@ target_link_libraries(
     medit_core
     )
 
+file(
+    COPY
+    README.md
+    DESTINATION
+    ${CMAKE_BINARY_DIR}
+    )
+
+file(
+    COPY
+    data/oblivion.json
+    data/UbuntuMono-Regular.ttf
+    DESTINATION
+    ${CMAKE_BINARY_DIR}/data
+    )
+
