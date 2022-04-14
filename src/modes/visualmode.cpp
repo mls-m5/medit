@@ -21,6 +21,7 @@ std::shared_ptr<IMode> createVisualMode() {
             {{Key::Delete}, {"neditor.erase\neditor.normalmode"}},
             {{"x"}, {"editor.erase\neditor.normalmode"}},
             {{"d"}, {"editor.erase\neditor.normalmode"}},
+            {{"c"}, {"editor.erase\neditor.insertmode"}},
             {{Key::Escape}, {"editor.normalmode"}},
             //            {{Key::Return}, {"editor.down"}},
             {{"\n"}, {"editor.down"}},

@@ -55,6 +55,11 @@ std::shared_ptr<IMode> createNormalMode() {
         {{"dw"}, {"editor.select_word\neditor.erase"}},
         {{"diw"}, {"editor.select_inner_word\neditor.erase"}},
 
+        {{"cc"}, {"editor.clear_line\neditor.copyindentation"}},
+        {{"cw"}, {"editor.select_word\neditor.erase\neditor.insertmode"}},
+        {{"ciw"},
+         {"editor.select_inner_word\neditor.erase\neditor.insertmode"}},
+
         {{"yy"}, {"editor.yank_line\neditor.normalmode"}},
         {{"yw"}, {"editor.select_word\neditor.yank\neditor.normalmode"}},
         {{"yiw"}, {"editor.select_inner_word\neditor.yank\neditor.normalmode"}},

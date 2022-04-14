@@ -122,6 +122,17 @@ CommandList editorCommands = {
         },
     },
     {
+        "editor.clear_line",
+        [](std::shared_ptr<IEnvironment> env) {
+            auto &e = env->editor();
+            auto cursor = e.cursor();
+            auto line = e.buffer().lineAt(cursor.y());
+            env->registers().save(standardRegister, std::string{line}, true);
+            auto range = CursorRange{home(cursor), end(cursor)};
+            erase(range);
+        },
+    },
+    {
         "editor.insert",
         [](std::shared_ptr<IEnvironment> env) {
             auto &e = env->editor();

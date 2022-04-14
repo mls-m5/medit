@@ -111,6 +111,7 @@ add_executable(
 
 target_link_libraries(
     medit
+    PRIVATE
     medit_core
     )
 
