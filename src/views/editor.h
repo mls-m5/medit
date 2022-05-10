@@ -107,8 +107,6 @@ public:
 
     void updateCursor(IScreen &) const override;
 
-    //    void updatePalette(const IPalette &palette);
-
     void draw(IScreen &) override;
 
     void height(size_t value) override {

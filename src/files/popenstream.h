@@ -18,8 +18,6 @@ private:
 
         ~POpenStreamBuf() override;
 
-        //        static constexpr size_t size = 1024;
-        //        std::array<char, size> buffer;
         std::vector<char> buffer;
 
         FILE *pfile;
