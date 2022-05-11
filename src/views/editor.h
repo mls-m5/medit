@@ -32,15 +32,11 @@ public:
 
     void file(std::unique_ptr<IFile> file);
 
-    IFile *file() {
-        return _file.get();
-    }
+    IFile *file();
 
     filesystem::path path();
 
-    void background(FormatType c) {
-        _background = c;
-    }
+    void background(FormatType c);
 
     void save();
 
@@ -49,59 +45,31 @@ public:
     void undo();
     void redo();
 
-    Buffer &buffer() {
-        return _bufferView.buffer();
-    }
+    Buffer &buffer();
 
-    void buffer(std::unique_ptr<Buffer> buffer) {
-        _bufferView.buffer(std::move(buffer));
-    }
+    void buffer(std::unique_ptr<Buffer> buffer);
 
-    BufferView &bufferView() {
-        return _bufferView;
-    }
+    BufferView &bufferView();
 
-    Cursor cursor() const {
-        return _cursor;
-    }
+    Cursor cursor() const;
 
     //! @param deselect = true if you want to disable the selectionAnchor
     Cursor cursor(Cursor c, bool deselect = false);
-    Cursor cursor(Position position) {
-        return cursor({buffer(), position});
-    }
+    Cursor cursor(Position position);
 
-    void anchor(Cursor cursor) {
-        _selectionAnchor = {cursor};
-    }
+    void anchor(Cursor cursor);
 
-    void clearSelection() {
-        _selectionAnchor = {};
-    }
+    void clearSelection();
 
-    CursorRange selection() {
-        if (_selectionAnchor) {
-            return {*_selectionAnchor, _cursor};
-        }
-        else {
-            return {_cursor};
-        }
-    }
+    CursorRange selection();
 
-    void selection(CursorRange range) {
-        anchor(range.begin());
-        cursor(range.end());
-    }
+    void selection(CursorRange range);
 
     void mode(std::shared_ptr<IMode> mode);
 
-    IMode &mode() {
-        return *_mode;
-    }
+    IMode &mode();
 
-    void showLines(bool value) {
-        _bufferView.showLines(value);
-    }
+    void showLines(bool value);
 
     bool keyPress(std::shared_ptr<IEnvironment>) override;
 
@@ -109,41 +77,21 @@ public:
 
     void draw(IScreen &) override;
 
-    void height(size_t value) override {
-        View::height(value);
-        _bufferView.height(value);
-    }
+    void height(size_t value) override;
 
-    void width(size_t value) override {
-        View::width(value);
-        _bufferView.width(value);
-    }
+    void width(size_t value) override;
 
-    size_t width() const override {
-        return View::width();
-    }
+    size_t width() const override;
 
-    size_t height() const override {
-        return View::height();
-    }
+    size_t height() const override;
 
-    void x(size_t x) override {
-        View::x(x);
-        _bufferView.x(x);
-    }
+    void x(size_t x) override;
 
-    void y(size_t y) override {
-        View::y(y);
-        _bufferView.y(y);
-    }
+    void y(size_t y) override;
 
-    size_t x() const override {
-        return View::x();
-    }
+    size_t x() const override;
 
-    size_t y() const override {
-        return View::y();
-    }
+    size_t y() const override;
 
     //! Make sure that the buffer with the cursor is scrolled so that the cursor
     //! is visible

@@ -99,8 +99,25 @@ void BufferView::drawSpecial(IScreen &screen,
     }
 }
 
+Buffer &BufferView::buffer() {
+    return *_buffer;
+}
+
+const Buffer &BufferView::buffer() const {
+    return *_buffer;
+}
+
 void BufferView::buffer(std::unique_ptr<Buffer> buffer) {
     _buffer = std::move(buffer);
+}
+
+size_t BufferView::numberWidth() const {
+    return _numberWidth;
+}
+
+void BufferView::showLines(bool value) {
+    _showLines = value;
+    _numberWidth = value * 3;
 }
 
 Position BufferView::cursorPosition(Cursor cursor) const {

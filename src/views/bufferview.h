@@ -14,24 +14,15 @@ public:
 
     void drawSpecial(IScreen &, CursorRange &range, FormatType f);
 
-    Buffer &buffer() {
-        return *_buffer;
-    }
+    Buffer &buffer();
 
-    const Buffer &buffer() const {
-        return *_buffer;
-    }
+    const Buffer &buffer() const;
 
     void buffer(std::unique_ptr<Buffer> buffer);
 
-    size_t numberWidth() const {
-        return _numberWidth;
-    }
+    size_t numberWidth() const;
 
-    void showLines(bool value) {
-        _showLines = value;
-        _numberWidth = value * 3;
-    }
+    void showLines(bool value);
 
     Position cursorPosition(Cursor cursor) const;
 
