@@ -31,7 +31,7 @@ void refreshScreen(IWindow &window, IScreen &screen) {
     window.updateCursor(screen);
 
     screen.refresh();
-};
+}
 
 void handleKey(KeyEvent c, MainWindow &mainWindow, IScreen &screen) {
     if (c == Key::Resize) {
@@ -44,7 +44,7 @@ void handleKey(KeyEvent c, MainWindow &mainWindow, IScreen &screen) {
     }
 
     refreshScreen(mainWindow, screen);
-};
+}
 
 enum class UiStyle {
     Standard,
@@ -98,7 +98,7 @@ void innerMainLoop(IInput &input,
     }
 
     guiQueue.work(false);
-};
+}
 
 #ifdef __EMSCRIPTEN__
 
@@ -189,7 +189,7 @@ int mainFunc(int argc, char **argv) {
     registerDefaultPlugins();
     const auto settings = Settings{argc, argv};
 
-    auto input = (IInput *){};
+    auto input = static_cast<IInput *>(nullptr);
     auto ns = [&input, style = settings.style]() -> std::unique_ptr<IScreen> {
         if (style == UiStyle::Standard) {
             auto ns = std::make_unique<NCursesScreen>();

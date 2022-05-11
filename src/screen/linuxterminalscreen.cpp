@@ -181,7 +181,9 @@ KeyEvent LinuxTerminalScreen::getInput() {
     }
     else if (c >= 28 && c <= 31) {
         // For some reason ctrl+shift+7 is 31
-        return KeyEvent{Key::KeyCombination, '4' + c - 28, Modifiers::Ctrl};
+        return KeyEvent{Key::KeyCombination,
+                        static_cast<char>('4' + c - 28),
+                        Modifiers::Ctrl};
     }
     else {
         event.key = Key::Text;

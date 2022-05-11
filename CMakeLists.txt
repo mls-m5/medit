@@ -10,6 +10,20 @@ add_subdirectory(lib/matrix-screen)
 add_subdirectory(plugin)
 add_subdirectory(src)
 
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+    add_compile_options(
+        -pedantic
+        -Wall
+        -Wextra
+        -Woverloaded-virtual
+        -Winit-self
+        -Wunreachable-code
+        -Wno-unused-parameter
+        -Wno-variadic-macros
+        )
+endif(CMAKE_COMPILER_IS_GNUCXX)
+
 add_library(
     medit_common
     INTERFACE

@@ -155,7 +155,9 @@ KeyEvent NCursesScreen::getInput() {
     }
     else if (c >= 28 && c <= 31) {
         // For some reason ctrl+shift+7 is 31
-        return KeyEvent{Key::KeyCombination, '4' + c - 28, Modifiers::Ctrl};
+        return KeyEvent{Key::KeyCombination,
+                        static_cast<char>('4' + c - 28),
+                        Modifiers::Ctrl};
     }
     else if ((c & 0b11111111) == c) {
         Utf8Char uc{static_cast<char>(c)};
