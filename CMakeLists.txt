@@ -54,7 +54,7 @@ target_compile_features(
 
 add_subdirectory(test)
 
-# ======================================================
+# === medit ===================================================
 
 add_executable(
     medit
@@ -85,3 +85,16 @@ file(
     ${CMAKE_BINARY_DIR}/data
     )
 
+# === code playback ===================================================
+
+add_executable(
+    code_playback
+    src/codeplayback/codeplayback.cpp
+    )
+
+target_link_libraries(
+    code_playback
+    PRIVATE
+    medit_common
+    medit_core
+    )

@@ -98,7 +98,7 @@ struct GuiScreen::Buffer {
     matscreen::MatrixScreen screen;
 
     struct Style {
-        sdl::Color fg;
+        sdl::Color fg = sdl::White;
         sdl::Color bg;
     };
 
