@@ -39,6 +39,8 @@ target_compile_features(
     cxx_std_17
     )
 
+add_subdirectory(test)
+
 # ======================================================
 
 add_executable(
