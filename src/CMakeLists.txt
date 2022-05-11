@@ -59,7 +59,7 @@ target_link_libraries (
     ${CMAKE_THREAD_LIBS_INIT}
     )
 
-find_package(LLVM REQUIRED CONFIG)
+#find_package(LLVM REQUIRED CONFIG)
 
 target_include_directories(
     medit_core
@@ -74,6 +74,13 @@ target_link_libraries(
     PRIVATE
     medit_common
     matrix-screen
-    ncurses
-    clang-9
     )
+
+if (NOT EMSCRIPTEN)
+    target_link_libraries(
+        medit_core
+        PRIVATE
+        ncurses
+    )
+
+endif()

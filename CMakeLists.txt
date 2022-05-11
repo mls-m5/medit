@@ -1,6 +1,8 @@
 
 cmake_minimum_required(VERSION 3.23)
 
+enable_testing()
+
 project(medit)
 
 add_subdirectory(lib/json.h)
