@@ -42,6 +42,7 @@ main
       @clangplugin
    src =
       src/main.cpp
+      src/registerdefaultplugins.cpp
    copy =
       README.md
       data/oblivion.json
