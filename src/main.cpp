@@ -53,7 +53,7 @@ enum class UiStyle {
 
 struct Settings {
     filesystem::path file;
-    UiStyle style = UiStyle::Standard;
+    UiStyle style = UiStyle::Matgui;
 
     Settings(int argc, char **argv) {
         if (argc < 1) {
@@ -66,6 +66,9 @@ struct Settings {
 
             if (arg == "--gui") {
                 style = UiStyle::Matgui;
+            }
+            else if (arg == "--cli") {
+                style = UiStyle::Standard;
             }
             else {
                 if (arg.rfind("-") != 0) {

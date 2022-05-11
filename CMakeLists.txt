@@ -71,14 +71,6 @@ target_link_libraries(
     medit_plugins
     )
 
-if (NOT EMSCRIPTEN)
-    target_link_libraries(
-        medit
-        PRIVATE
-        medit_clang_plugins
-        )
-endif()
-
 file(
     COPY
     README.md
