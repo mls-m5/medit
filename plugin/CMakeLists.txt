@@ -1,8 +1,6 @@
 
 enable_testing()
 
-
-
 add_library(
     medit_plugins
     STATIC

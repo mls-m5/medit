@@ -19,7 +19,6 @@ function(test_disabled testname)
         PUBLIC
         medit_common
         medit_core
-        medit_clang_plugins
         medit_plugins
         )
 
