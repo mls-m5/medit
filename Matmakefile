@@ -9,7 +9,7 @@ clangplugin
    out = clangplugin
    includes =
       /usr/lib/llvm-9/include/
-   src = plugin/clang/*.cpp
+   src = src/plugin/clang/*.cpp
    ldflags = -lclang-9
    command = [static]
 #   /usr/lib/llvm-11/include
@@ -30,7 +30,7 @@ core
       src/core/*.cpp
       src/navigation/*.cpp
 
-      plugin/*.cpp
+      src/plugin/*.cpp
    !em:config =
       thread
    command = [static]
@@ -224,8 +224,8 @@ all
    includes =
       include
       src
-      plugin/include
-      plugin/clang/include
+      src/plugin/include
+      src/plugin/clang/include
       lib/json.h/include
       lib/matrix-screen/include
       lib/matrix-screen/lib/sdlpp/include

@@ -1,5 +1,5 @@
 
-
+add_subdirectory(plugin)
 
 add_library(
     medit_core

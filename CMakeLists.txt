@@ -7,7 +7,6 @@ project(medit)
 
 add_subdirectory(lib/json.h)
 add_subdirectory(lib/matrix-screen)
-add_subdirectory(plugin)
 add_subdirectory(src)
 
 
@@ -35,9 +34,9 @@ target_include_directories(
     include/
     src/
     ./
-    plugin/include
-    plugin
-    plugin/clang/include
+    src/plugin/include
+    src/plugin
+    src/plugin/clang/include
     /usr/lib/llvm-9/include
     )
 
