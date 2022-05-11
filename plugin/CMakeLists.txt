@@ -20,7 +20,7 @@ target_link_libraries(
     medit_core
     )
 
-if (!EMSCRIPTEN)
+if (NOT EMSCRIPTEN)
 
 add_library(
     medit_clang_plugins
@@ -45,6 +45,5 @@ target_link_libraries(
     PUBLIC
     medit_clang_plugins
     )
-
 
 endif()
