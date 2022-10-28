@@ -39,7 +39,7 @@ void handleKey(KeyEvent c, MainWindow &mainWindow, IScreen &screen) {
     }
     else {
         mainWindow._env->key(c);
-        mainWindow.keyPress(mainWindow._env);
+        mainWindow.keyPress(mainWindow._scope);
         mainWindow.resize();
     }
 

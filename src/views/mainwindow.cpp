@@ -1,28 +1,29 @@
 
 #include "views/mainwindow.h"
 #include "core/context.h"
-#include "core/jobqueue.h"
+#include "core/ijobqueue.h"
 #include "core/plugins.h"
 #include "core/timer.h"
 #include "files/config.h"
 #include "files/file.h"
 #include "modes/insertmode.h"
-#include "modes/normalmode.h"
 #include "navigation/inavigation.h"
 #include "screen/iscreen.h"
+#include "script/environment.h"
 #include "syntax/iannotation.h"
 #include "syntax/ihighlight.h"
 #include "syntax/ipalette.h"
 #include "text/cursorops.h"
-#include "text/cursorrangeops.h"
 #include "views/inputbox.h"
 #include "views/messagebox.h"
+#include <memory>
 
 MainWindow::MainWindow(IScreen &screen, Context &context)
     : View(screen.width(), screen.height()), _editors(1),
-      _env(std::make_shared<RootScope>(context)), _locator(_project),
+      _env(std::make_unique<Environment>(context)),
+      _scope(std::make_shared<RootScope>(*_env)), _locator(_project),
       _currentEditor(0) {
-    _env->editor(&_editors.front());
+    _scope->editor(&_editors.front());
     for (auto &editor : _editors) {
         editor.showLines(true);
     }
@@ -70,85 +71,83 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
 MainWindow::~MainWindow() = default;
 
 void MainWindow::addCommands(IScreen &screen) {
-    _env->addCommand("window.show_locator", [this](auto &&) {
+    _scope->addCommand("window.show_locator", [this](auto &&) {
         _locator.visible(true);
         _inputFocus = &_locator;
     });
 
-    _env->addCommand("editor.auto_complete",
-                     [this](std::shared_ptr<IScope> env) {
-                         auto &editor = env->editor();
-                         editor.cursor(fix(editor.cursor()));
+    _scope->addCommand("editor.auto_complete",
+                       [this](std::shared_ptr<IScope> env) {
+                           auto &editor = env->editor();
+                           editor.cursor(fix(editor.cursor()));
 
-                         Cursor cursor = editor.cursor();
-                         _completeView.setCursor(cursor, editor.bufferView());
-                         _completeView.triggerShow(_env);
-                     });
+                           Cursor cursor = editor.cursor();
+                           _completeView.setCursor(cursor, editor.bufferView());
+                           _completeView.triggerShow(_scope);
+                       });
 
-    _env->addCommand("editor.format",
-                     [this](std::shared_ptr<IScope> env) {
-                         auto &editor = env->editor();
-                         for (auto &format : _formatting) {
-                             if (format->format(editor)) {
-                                 break;
-                             }
-                         }
-                     });
+    _scope->addCommand("editor.format", [this](std::shared_ptr<IScope> env) {
+        auto &editor = env->editor();
+        for (auto &format : _formatting) {
+            if (format->format(editor)) {
+                break;
+            }
+        }
+    });
 
-    _env->addCommand("editor.goto_definition",
-                     [this](std::shared_ptr<IScope> env) {
-                         for (auto &navigation : _navigation) {
-                             if (navigation->gotoSymbol(env)) {
-                                 break;
-                             }
-                         }
-                     });
+    _scope->addCommand("editor.goto_definition",
+                       [this](std::shared_ptr<IScope> env) {
+                           for (auto &navigation : _navigation) {
+                               if (navigation->gotoSymbol(env)) {
+                                   break;
+                               }
+                           }
+                       });
 
-    _env->addCommand("editor.open", [this](std::shared_ptr<IScope> env) {
+    _scope->addCommand("editor.open", [this](std::shared_ptr<IScope> env) {
         auto path = env->get("path");
         if (path) {
             open(path->value());
         }
     });
 
-    _env->addCommand("messagebox", [this](auto &&) {
+    _scope->addCommand("messagebox", [this](auto &&) {
         showPopup(std::make_unique<MessageBox>());
     });
 
-    _env->addCommand(
-        "editor.show_open", [this](std::shared_ptr<IScope> env) {
-            auto &editor = env->editor();
-            auto path = editor.path();
-            if (path.empty()) {
-                path = filesystem::current_path();
-            }
-            auto input =
-                std::make_unique<InputBox>("Path to open: ", path.string());
-            input->callback([this](std::string value) { open(value); });
-            showPopup(std::move(input));
-        });
+    _scope->addCommand("editor.show_open", [this](std::shared_ptr<IScope> env) {
+        auto &editor = env->editor();
+        auto path = editor.path();
+        if (path.empty()) {
+            path = filesystem::current_path();
+        }
+        auto input =
+            std::make_unique<InputBox>("Path to open: ", path.string());
+        input->callback([this](std::string value) { open(value); });
+        showPopup(std::move(input));
+    });
 
-    _env->addCommand("window.title",
-                     [&screen, this](std::shared_ptr<IScope> env) {
-                         if (auto title = env->get("title")) {
-                             screen.title(title->value());
-                         }
-                         if (auto file = currentEditor().file()) {
-                             screen.title(file->path().string() + " - medit");
-                         }
-                     });
+    _scope->addCommand("window.title",
+                       [&screen, this](std::shared_ptr<IScope> env) {
+                           if (auto title = env->get("title")) {
+                               screen.title(title->value());
+                           }
+                           if (auto file = currentEditor().file()) {
+                               screen.title(file->path().string() + " - medit");
+                           }
+                       });
 
-    _env->addCommand("show_console", [this](auto env) {
-        env->showConsole(true);
+    _scope->addCommand("show_console", [this](auto scope) {
+        _env->showConsole(true);
         _inputFocus = &_console;
     });
 
-    _env->addCommand("escape", [this](std::shared_ptr<IScope> env) {
-        env->showConsole(false);
+    _scope->addCommand("escape", [this](std::shared_ptr<IScope> scope) {
+        _env->showConsole(false);
         _inputFocus = &currentEditor();
     });
 
-    _env->addCommand("switch_editor", [this](auto &&) { switchEditor(); });
+    _scope->addCommand("switch_editor", [this](auto &&) { switchEditor(); });
 }
 
 void MainWindow::resize(size_t w, size_t h) {
@@ -216,7 +215,7 @@ void MainWindow::draw(IScreen &screen) {
 void MainWindow::updateCursor(IScreen &screen) const {
     _inputFocus->updateCursor(screen);
 
-    auto c = _env->key();
+    auto c = _scope->env().key();
     screen.draw(40,
                 screen.height() - 1,
                 ((c.modifiers == Modifiers::Ctrl) ? "ctrl+'" : "'") +
@@ -232,16 +231,16 @@ bool MainWindow::keyPress(std::shared_ptr<IScope> env) {
     }
 
     auto &editor = currentEditor();
-    _env->editor(&editor);
+    _scope->editor(&editor);
     auto scopeEnvironment = std::make_shared<Scope>(env);
     scopeEnvironment->editor(&editor);
     if (_inputFocus->keyPress(scopeEnvironment)) {
         // Todo: Handle this for reallz in the future
         if (_inputFocus == &editor) {
-            _env->editor(&editor);
+            _scope->editor(&editor);
         }
         if (_inputFocus == &_console) {
-            _env->editor(&editor);
+            _scope->editor(&editor);
         }
 
         updateHighlighting(currentEditor());
@@ -288,7 +287,7 @@ void MainWindow::open(filesystem::path path) {
 
     updateHighlighting(editor);
 
-    _env->run({"window.title"});
+    _scope->run({"window.title"});
 }
 
 void MainWindow::updatePalette(IScreen &screen) {
@@ -310,32 +309,33 @@ void MainWindow::updateHighlighting(Editor &editor) {
     }
 
     if (editor.buffer().isColorsOld()) {
-        _updateTimeHandle = timer.setTimeout(1s, [this, env = _env] {
-            auto &queue = env->context().guiQueue();
-            auto &editor = env->editor();
+        _updateTimeHandle =
+            timer.setTimeout(1s, [this, env = _env, scope = _scope] {
+                auto &queue = _env->context().guiQueue();
+                auto &editor = _scope->editor();
 
-            if (editor.buffer().isColorsOld()) {
-                queue.addTask([this, env] {
-                    auto &editor = env->editor();
-                    for (auto &highlight : _highlighting) {
-                        if (highlight->shouldEnable(editor.path())) {
-                            highlight->highlight(env);
+                if (editor.buffer().isColorsOld()) {
+                    queue.addTask([this, scope = _scope] {
+                        auto &editor = scope->editor();
+                        for (auto &highlight : _highlighting) {
+                            if (highlight->shouldEnable(editor.path())) {
+                                highlight->highlight(scope);
 
-                            editor.buffer().isColorsOld(false);
-                            break;
+                                editor.buffer().isColorsOld(false);
+                                break;
+                            }
                         }
-                    }
 
-                    for (auto &annotation : _annotation) {
-                        if (annotation->shouldEnable(editor.path())) {
-                            annotation->annotate(env);
-                            break;
+                        for (auto &annotation : _annotation) {
+                            if (annotation->shouldEnable(editor.path())) {
+                                annotation->annotate(scope);
+                                break;
+                            }
                         }
-                    }
-                    env->context().redrawScreen();
-                });
-            }
-        });
+                        _env->context().redrawScreen();
+                    });
+                }
+            });
     }
 }
 

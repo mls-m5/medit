@@ -3,8 +3,8 @@
 #include "modes/insertmode.h"
 #include "screen/draw.h"
 #include "screen/iscreen.h"
-#include "script/scope.h"
 #include "script/iscope.h"
+#include "script/scope.h"
 #include "syntax/ipalette.h"
 #include "text/buffer.h"
 
@@ -25,16 +25,16 @@ InputBox::InputBox(FString title, std::string defaultValue) : _title(title) {
 
 InputBox::~InputBox() = default;
 
-bool InputBox::keyPress(std::shared_ptr<IScope> env) {
-    auto key = env->key();
+bool InputBox::keyPress(std::shared_ptr<IScope> scope) {
+    auto key = scope->env().key();
 
-    auto context = std::make_shared<Scope>(env);
+    auto context = std::make_shared<Scope>(scope);
 
     context->editor(&_entry);
 
     switch (key.key) {
     case Key::Escape:
-        env->set("return", {});
+        scope->set("return", {});
         close();
         break;
     case Key::Text:

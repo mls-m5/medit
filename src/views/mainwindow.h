@@ -2,17 +2,19 @@
 
 #include "files/project.h"
 #include "meditfwd.h"
+#include "script/environment.h"
 #include "script/rootscope.h"
 #include "syntax/iformat.h"
 #include "views/completeview.h"
 #include "views/editor.h"
-#include "views/listview.h"
 #include "views/locator.h"
 #include "views/window.h"
+#include <memory>
 
 struct MainWindow : public Window {
     std::vector<Editor> _editors;
-    std::shared_ptr<RootScope> _env;
+    std::shared_ptr<Environment> _env;
+    std::shared_ptr<RootScope> _scope;
     Editor _console;
     Locator _locator;
     CompleteView _completeView;

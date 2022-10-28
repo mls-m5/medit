@@ -3,8 +3,8 @@
 #include "files/extensions.h"
 #include "files/file.h"
 #include "files/project.h"
-#include "script/scope.h"
 #include "script/iscope.h"
+#include "script/scope.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
@@ -43,12 +43,12 @@ std::optional<std::string> getIncludeName(IScope &env) {
     return includeName.front();
 }
 
-bool openIncludeByName(std::shared_ptr<IScope> env, std::string name) {
-    auto files = env->project().files();
+bool openIncludeByName(std::shared_ptr<IScope> scope, std::string name) {
+    auto files = scope->env().project().files();
 
     for (auto &path : files) {
         if (path.string().find(name) != std::string::npos) {
-            auto localEnvironment = std::make_shared<Scope>(env);
+            auto localEnvironment = std::make_shared<Scope>(scope);
             localEnvironment->set("path", path.string());
             localEnvironment->run(Command{"editor.open"});
             return true;

@@ -1,11 +1,13 @@
 #pragma once
 
+#include "ienvironment.h"
 #include "iscope.h"
 #include "script/command.h"
 #include "script/standardcommands.h"
 #include <functional>
 #include <map>
 #include <memory>
+#include <stdexcept>
 
 class Scope : public IScope {
     using Action = std::function<void(std::shared_ptr<IScope>)>;
@@ -51,14 +53,8 @@ public:
         return *_editor;
     }
 
-    // @see IEnvironment
-    Editor &console() override {
-        return root().console();
-    }
-
-    // @see IEnvironment
-    KeyEvent key() const override {
-        return root().key();
+    IEnvironment &env() override {
+        return root().env();
     }
 
     // @see IEnvironment
@@ -70,22 +66,8 @@ public:
         return *_parent;
     }
 
-    Project &project() override {
-        return root().project();
-    }
-
-    Context &context() override {
-        return root().context();
-    }
-
-    // @see IEnvironment
-    void showConsole(bool shown) override {
-        root().showConsole(shown);
-    }
-
-    void addCommand(
-        std::string name,
-        std::function<void(std::shared_ptr<IScope>)> f) override {
+    void addCommand(std::string name,
+                    std::function<void(std::shared_ptr<IScope>)> f) override {
         _context[name] = f;
     }
 
@@ -110,10 +92,6 @@ public:
             return parent().findAction(name);
         }
         return nullptr;
-    }
-
-    Registers &registers() override {
-        return root().registers();
     }
 
     //! @see IEnvironment

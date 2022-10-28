@@ -13,18 +13,18 @@ namespace {
 bool isBuilding = false;
 }
 
-void build(std::shared_ptr<IScope> env) {
+void build(std::shared_ptr<IScope> scope) {
 #ifndef __EMSCRIPTEN__
     if (isBuilding) {
         return;
     }
     isBuilding = true;
-    env->showConsole(true);
-    auto &consoleBuffer = env->console().buffer();
+    scope->env().showConsole(true);
+    auto &consoleBuffer = scope->env().console().buffer();
     consoleBuffer.clear();
     consoleBuffer.pushBack(std::string{"trying to build..."});
 
-    auto &project = env->project();
+    auto &project = scope->env().project();
 
     auto root = project.settings().root;
 
@@ -32,26 +32,27 @@ void build(std::shared_ptr<IScope> env) {
         filesystem::current_path(root);
     }
 
-    env->context().jobQueue().addTask([&project, env] {
+    scope->env().context().jobQueue().addTask([&project, scope] {
         POpenStream stream(project.settings().buildCommand, true, 100);
 
         for (std::string line; getline(stream, line);) {
-            env->context().guiQueue().addTask([line, env] {
-                env->console().buffer().pushBack(line);
-                env->console().cursor({0, 100000000});
+            scope->env().context().guiQueue().addTask([line, scope] {
+                scope->env().console().buffer().pushBack(line);
+                scope->env().console().cursor({0, 100000000});
             });
         }
 
-        env->context().guiQueue().addTask([returnCode = stream.returnCode(),
-                                           env] {
-            auto &consoleBuffer = env->console().buffer();
-            if (returnCode) {
-                consoleBuffer.pushBack(FString("failed...", IPalette::error));
-            }
-            else {
-                consoleBuffer.pushBack(std::string{"finished..."});
-            }
-        });
+        scope->env().context().guiQueue().addTask(
+            [returnCode = stream.returnCode(), scope] {
+                auto &consoleBuffer = scope->env().console().buffer();
+                if (returnCode) {
+                    consoleBuffer.pushBack(
+                        FString("failed...", IPalette::error));
+                }
+                else {
+                    consoleBuffer.pushBack(std::string{"finished..."});
+                }
+            });
 
         isBuilding = false;
     });

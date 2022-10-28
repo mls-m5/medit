@@ -11,11 +11,11 @@ Mode::Mode(std::string name,
       _bufferMap(std::move(bufferMap)), _parent(std::move(parent)),
       _cursorStyle(cursorStyle) {}
 
-bool Mode::keyPress(std::shared_ptr<IScope> env) {
+bool Mode::keyPress(std::shared_ptr<IScope> scope) {
     auto lock = shared_from_this();
-    const auto key = env->key();
+    const auto key = scope->env().key();
     const auto &action = _keyMap.find(key);
-    if (_parent && _parent->keyPress(env)) {
+    if (_parent && _parent->keyPress(scope)) {
         return true;
     }
 
@@ -30,7 +30,7 @@ bool Mode::keyPress(std::shared_ptr<IScope> env) {
         }
         else if (m.first == BufferKeyMap::Match) {
             const auto &block = *m.second;
-            env->run(block);
+            scope->run(block);
             _buffer.clear();
             return true;
         }
@@ -38,7 +38,7 @@ bool Mode::keyPress(std::shared_ptr<IScope> env) {
     _buffer.clear();
 
     if (action) {
-        env->run(action);
+        scope->run(action);
         return true;
     }
     return false;

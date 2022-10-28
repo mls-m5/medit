@@ -40,8 +40,8 @@ void CompleteView::updateCompletion(std::string str) {
 }
 
 bool CompleteView::keyPress(std::shared_ptr<IScope> env) {
-    if (env->key().key == Key::Text || env->key().key == Key::Backspace ||
-        env->key().key == Key::Delete) {
+    if (env->env().key().key == Key::Text || env->env().key().key == Key::Backspace ||
+        env->env().key().key == Key::Delete) {
         setCursor(env->editor().cursor(), env->editor().bufferView());
     }
     return _list.keyPress(env);
