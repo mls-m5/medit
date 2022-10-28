@@ -38,24 +38,24 @@ void Editor::background(FormatType c) {
 
 void Editor::save() {
     if (_file) {
-        _file->save(_bufferView.buffer());
-        _bufferView.buffer().isChanged(false);
+        _file->save(buffer());
+        buffer().isChanged(false);
     }
 }
 
 void Editor::load() {
     if (_file) {
-        _file->load(_bufferView.buffer());
-        _bufferView.buffer().isChanged(false);
+        _file->load(buffer());
+        buffer().isChanged(false);
     }
 }
 
 void Editor::undo() {
-    _history.undo(buffer());
+    buffer().history().undo();
 }
 
 void Editor::redo() {
-    _history.redo(buffer());
+    buffer().history().redo();
 }
 
 Buffer &Editor::buffer() {
@@ -76,7 +76,7 @@ Cursor Editor::cursor() const {
 
 Cursor Editor::cursor(Cursor c, bool deselect) {
     _cursor = c;
-    const auto &lines = _bufferView.buffer().lines();
+    const auto &lines = buffer().lines();
     if (_cursor.y() > lines.size()) {
         _cursor.y(lines.size());
     }
@@ -118,8 +118,8 @@ void Editor::mode(std::shared_ptr<IMode> mode) {
     if (_mode) {
         _mode->exit(*this);
     }
-    _mode = move(mode);
-    _history.commit(buffer());
+    _mode = std::move(mode);
+    buffer().history().commit();
     _mode->start(*this);
 }
 
@@ -134,7 +134,7 @@ void Editor::showLines(bool value) {
 bool Editor::keyPress(std::shared_ptr<IScope> env) {
     if (_mode) {
         if (_mode->keyPress(env)) {
-            _history.commit(buffer());
+            buffer().history().commit();
             return true;
         }
         else {

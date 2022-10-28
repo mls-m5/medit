@@ -14,7 +14,6 @@
 class Editor : public View, public IKeySink {
 private:
     BufferView _bufferView;
-    History _history;
     Cursor _cursor;
     std::optional<Cursor> _selectionAnchor;
     std::shared_ptr<IMode> _mode;

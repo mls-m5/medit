@@ -3,49 +3,45 @@
 #include "text/history.h"
 #include <string_view>
 
+using namespace std::literals;
+
 TEST_SUIT_BEGIN
 
-TEST_CASE("instantiate") {
-    auto history = History{};
-}
-
 TEST_CASE("simple undo") {
-    auto history = History{};
-
-    auto testString1 = "hello there";
-    auto testString2 = "wazzup?";
+    auto testString1 = "hello there"s;
+    auto testString2 = "wazzup?"s;
 
     auto buffer = Buffer{testString1};
+    auto &history = buffer.history();
 
-    history.commit(buffer);
+    history.commit();
 
-    buffer = testString2;
+    buffer.text(testString2);
 
-    history.commit(buffer);
+    history.commit();
 
-    history.undo(buffer);
+    history.undo();
 
     ASSERT_EQ(buffer.text(), testString1);
 
-    history.redo(buffer);
+    history.redo();
 
     ASSERT_EQ(buffer.text(), testString2);
 }
 
 TEST_CASE("multi line undo") {
-    auto history = History{};
-
-    auto testString1 = "apa\nbepa\ncepa\ndepa";
+    auto testString1 = "apa\nbepa\ncepa\ndepa"s;
 
     auto buffer = Buffer{testString1};
+    auto &history = buffer.history();
 
-    history.commit(buffer);
+    history.commit();
 
-    buffer = "apa\nbe2pa\nc234epa\ndepa";
+    buffer.text("apa\nbe2pa\nc234epa\ndepa"s);
 
-    history.commit(buffer);
+    history.commit();
 
-    history.undo(buffer);
+    history.undo();
 
     ASSERT_EQ(buffer.text(), testString1);
 }

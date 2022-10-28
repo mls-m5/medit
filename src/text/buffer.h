@@ -2,6 +2,7 @@
 
 #include "meditfwd.h"
 #include "text/fstring.h"
+#include "text/history.h"
 #include <chrono>
 #include <iosfwd>
 #include <string>
@@ -15,9 +16,9 @@ public:
 
     Buffer() = default;
     Buffer(const Buffer &) = delete;
-    Buffer(Buffer &&) = default;
+    Buffer(Buffer &&) = delete;
     Buffer &operator=(const Buffer &) = delete;
-    Buffer &operator=(Buffer &&) = default;
+    Buffer &operator=(Buffer &&) = delete;
 
     Buffer(std::string text) {
         this->text(text);
@@ -96,10 +97,8 @@ public:
     }
 
     void isChanged(bool value) {
-        //        _changed = value;
         if (value) {
             _changedTime = std::chrono::high_resolution_clock::now();
-            //            _oldColors = true;
         }
         else {
             _savedTime = std::chrono::high_resolution_clock::now();
@@ -170,6 +169,10 @@ public:
         }
     }
 
+    History &history() {
+        return _history;
+    }
+
 private:
     std::vector<FString> _lines = {""};
     bool _singleLine = false;
@@ -179,4 +182,5 @@ private:
     TimePoint _changedTime;
     TimePoint _formattedTime;
     TimePoint _savedTime;
+    History _history{*this};
 };
