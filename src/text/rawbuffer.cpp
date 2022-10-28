@@ -72,9 +72,9 @@ void RawBuffer::text(std::ostream &stream) const {
 void RawBuffer::forceThread() const {
     if (std::this_thread::get_id() != _threadId) {
         auto intId = [](auto id) {
-            //                return
-            //                std::to_string(std::hash<std::thread::id>{}(id));
-            return (std::ostringstream{} << id).str();
+            auto ss = std::ostringstream{};
+            ss << id;
+            return ss.str();
         };
         throw std::runtime_error{
             "buffer called from another thread than the one started "
