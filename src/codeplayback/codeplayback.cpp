@@ -28,7 +28,10 @@ int main(int argc, char *argv[]) {
     buffer.insert(0, "hello");
 
     editor.width(screen.width());
-    editor.height(screen.height());
+    editor.height(screen.height() - 1);
+
+    auto lastChar = 0;
+    auto wasAlpha = false;
 
     for (; c != Key::Quit; c = screen.getInput()) {
         if (c != Key::None && c != Key::Unknown) {
@@ -42,7 +45,16 @@ int main(int argc, char *argv[]) {
                 editor.cursor(buffer.end());
                 editor.updateCursor(screen);
                 screen.refresh();
-                std::this_thread::sleep_for(30ms);
+                auto a = isalpha(c);
+                //                if (!isalpha(c) && c != lastChar) {
+                if (!a && a != wasAlpha) {
+                    std::this_thread::sleep_for(100ms);
+                }
+                else {
+                    std::this_thread::sleep_for(20ms);
+                }
+                //                lastChar = c;
+                wasAlpha = a;
             }
             screen.cursorStyle(CursorStyle::Block);
             screen.refresh();
