@@ -1,11 +1,10 @@
 #include "views/editor.h"
-#include "files/file.h"
-#include "keys/keyevent.h"
+#include "files/ifile.h"
 #include "modes/imode.h"
 #include "modes/normalmode.h"
 #include "screen/draw.h"
 #include "screen/iscreen.h"
-#include "syntax/palette.h"
+#include "syntax/ipalette.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
 
@@ -15,21 +14,16 @@ Editor::Editor(std::unique_ptr<Buffer> buffer)
     : _bufferView(std::move(buffer)), _cursor(_bufferView.buffer()),
       _mode(createNormalMode()) {}
 
-void Editor::file(std::unique_ptr<IFile> file) {
-    _file = std::move(file);
-}
+// void Editor::file(std::unique_ptr<IFile> file) {
+//     _file = std::move(file);
+// }
 
 IFile *Editor::file() {
-    return _file.get();
+    return buffer().file();
 }
 
 filesystem::path Editor::path() {
-    if (_file) {
-        return _file->path();
-    }
-    else {
-        return {};
-    }
+    return buffer().path();
 }
 
 void Editor::background(FormatType c) {
@@ -37,17 +31,16 @@ void Editor::background(FormatType c) {
 }
 
 void Editor::save() {
-    if (_file) {
-        _file->save(buffer());
-        buffer().isChanged(false);
-    }
+    buffer().save();
 }
 
 void Editor::load() {
-    if (_file) {
-        _file->load(buffer());
-        buffer().isChanged(false);
-    }
+    buffer().load();
+}
+
+void Editor::open(std::filesystem::path path) {
+    buffer(Buffer::open(path));
+    _cursor = Cursor{buffer()};
 }
 
 void Editor::undo() {

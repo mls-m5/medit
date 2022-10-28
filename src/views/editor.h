@@ -1,13 +1,12 @@
 #pragma once
 
-#include "files/filesystem.h"
 #include "keys/ikeysink.h"
 #include "meditfwd.h"
 #include "text/cursor.h"
 #include "text/cursorrange.h"
 #include "text/formattype.h"
-#include "text/history.h"
 #include "views/bufferview.h"
+#include <filesystem>
 #include <memory>
 #include <optional>
 
@@ -17,7 +16,6 @@ private:
     Cursor _cursor;
     std::optional<Cursor> _selectionAnchor;
     std::shared_ptr<IMode> _mode;
-    std::unique_ptr<IFile> _file;
     FormatType _background = 1;
 
 public:
@@ -33,13 +31,14 @@ public:
 
     IFile *file();
 
-    filesystem::path path();
+    std::filesystem::path path();
 
     void background(FormatType c);
 
     void save();
-
     void load();
+
+    void open(std::filesystem::path path);
 
     void undo();
     void redo();

@@ -9,19 +9,19 @@
 //! first and end second. It is also guaranteed to have a buffer that is not
 //! null (assuming you do not put in a null reference)
 class CursorRange {
-    Buffer *_buffer;
+    RawBuffer *_buffer;
     Position _begin;
     Position _end;
 
 public:
-    constexpr CursorRange(Buffer &buffer, Position begin, Position end)
+    constexpr CursorRange(RawBuffer &buffer, Position begin, Position end)
         : _buffer(&buffer), _begin(begin), _end(end) {
 
         fixOrder();
     }
 
     //! The whole buffer
-    CursorRange(Buffer &buffer)
+    CursorRange(RawBuffer &buffer)
         : _buffer(&buffer), _begin(buffer.begin()), _end(buffer.end()) {}
 
     //! Convert a cursor to a empty range
@@ -74,7 +74,7 @@ public:
         return _begin == _end;
     }
 
-    constexpr Buffer &buffer() {
+    constexpr RawBuffer &buffer() {
         return *_buffer;
     }
 };

@@ -10,7 +10,7 @@ void History::commit() {
     auto text = _buffer.text();
     if (_history.empty() || text != _history.back().old) {
         // Only push changes if there is actually a change
-        _history.emplace_back(Item{std::move(text)});
+        _history.emplace_back(Item{std::move(text), ++_revision});
         _currentState = _buffer.text();
 
         if (_ignoreRedoClear) {

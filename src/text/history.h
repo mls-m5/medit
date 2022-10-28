@@ -12,6 +12,7 @@ public:
     struct Item {
         // Dummy implementation
         std::string old;
+        long revision;
     };
 
     void commit();
@@ -24,6 +25,8 @@ public:
     void clear();
 
 private:
+    long _revision = 1;
+
     std::string _currentState;
     Buffer &_buffer;
 

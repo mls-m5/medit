@@ -22,6 +22,7 @@ add_library(
     text/cursorrangeops.cpp
     text/cursorops.cpp
     text/cursor.cpp
+    text/rawbuffer.cpp
     text/buffer.cpp
     text/history.cpp
     views/messagebox.cpp

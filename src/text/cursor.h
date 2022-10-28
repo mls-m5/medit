@@ -5,21 +5,21 @@
 
 class Cursor : public Position {
 private:
-    Buffer *_buffer;
+    RawBuffer *_buffer;
 
 public:
-    constexpr Buffer &buffer() {
+    constexpr RawBuffer &buffer() {
         return *_buffer;
     }
 
-    constexpr Buffer &buffer() const {
+    constexpr RawBuffer &buffer() const {
         return *_buffer;
     }
 
-    constexpr Cursor(Buffer &buffer, size_t x = 0, size_t y = 0)
+    constexpr Cursor(RawBuffer &buffer, size_t x = 0, size_t y = 0)
         : Position(x, y), _buffer(&buffer) {}
 
-    constexpr Cursor(Buffer &buffer, Position pos)
+    constexpr Cursor(RawBuffer &buffer, Position pos)
         : Position(pos), _buffer(&buffer) {}
 
     constexpr Cursor(const Cursor &) = default;

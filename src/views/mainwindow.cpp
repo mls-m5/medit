@@ -271,17 +271,7 @@ void MainWindow::open(filesystem::path path) {
     }
     auto &editor = currentEditor();
     path = filesystem::absolute(path);
-    auto file = std::make_unique<File>(path);
-
-    editor.buffer(std::make_unique<Buffer>());
-    editor.cursor(Cursor{editor.buffer()});
-    if (filesystem::exists(path)) {
-        file->load(editor.buffer());
-    }
-    else {
-        editor.buffer().clear();
-    }
-    editor.file(std::move(file));
+    editor.open(path);
     editor.bufferView().yScroll(0);
     updateLocatorBuffer();
 

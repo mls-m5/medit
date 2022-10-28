@@ -4,6 +4,7 @@
 
 class IMode;
 class KeyEvent;
+class RawBuffer;
 class Buffer;
 class FString;
 class FChar;
