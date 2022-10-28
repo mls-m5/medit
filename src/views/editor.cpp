@@ -144,8 +144,8 @@ void Editor::updateCursor(IScreen &screen) const {
     if (debug) {
         screen.draw(1,
                     screen.height() - 1,
-                    std::to_string(_cursor.y()) + ", " +
-                        std::to_string(_cursor.x()));
+                    std::to_string(_cursor.y() + 1) + ", " +
+                        std::to_string(_cursor.x() + 1));
 
         screen.draw(10, screen.height() - 1, _mode->name());
     }
