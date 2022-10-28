@@ -45,14 +45,9 @@ void BufferView::draw(IScreen &screen) {
                 screen.draw(x(), y() + ty, fillStr);
                 screen.draw(x() + offset,
                             y() + ty,
-                            //                    {std::string(fill, ' ') +
-                            //                    std::to_string(lineNum) + " ",
                             {std::to_string(lineNum), lineFormat});
                 ++l;
             }
-        }
-        else {
-            //            screen.draw(x(), y() + ty, fillStr);
         }
     }
 }

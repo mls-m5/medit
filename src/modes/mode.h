@@ -10,8 +10,6 @@ class Mode : public IMode, public std::enable_shared_from_this<Mode> {
     std::string _name;
     KeyMap _keyMap;
     std::string _commandBuffer;
-    //    bool _bufferMode = false;
-    //    std::vector<KeyEvent> _bufferTriggers;
     FString _buffer;
     BufferKeyMap _bufferMap;
     std::shared_ptr<IMode> _parent;

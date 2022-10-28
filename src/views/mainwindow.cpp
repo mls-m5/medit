@@ -215,11 +215,12 @@ void MainWindow::draw(IScreen &screen) {
 void MainWindow::updateCursor(IScreen &screen) const {
     _inputFocus->updateCursor(screen);
 
-    auto c = _scope->env().key();
-    screen.draw(40,
-                screen.height() - 1,
-                ((c.modifiers == Modifiers::Ctrl) ? "ctrl+'" : "'") +
-                    c.symbol.toString() + "'" + c.symbol.byteRepresentation());
+    //    auto c = _scope->env().key();
+    //    screen.draw(40,
+    //                screen.height() - 1,
+    //                ((c.modifiers == Modifiers::Ctrl) ? "ctrl+'" : "'") +
+    //                    c.symbol.toString() + "'" +
+    //                    c.symbol.byteRepresentation());
 }
 
 bool MainWindow::keyPress(std::shared_ptr<IScope> env) {
