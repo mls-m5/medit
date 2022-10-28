@@ -1,5 +1,5 @@
 #pragma once
 
-#include "script/ienvironment.h"
+#include "script/iscope.h"
 
-void build(std::shared_ptr<IEnvironment> env);
+void build(std::shared_ptr<IScope> env);

@@ -8,7 +8,7 @@ public:
     ClangAnnotation();
 
     //! @see IAnnotation interface
-    bool annotate(std::shared_ptr<IEnvironment> env) override;
+    bool annotate(std::shared_ptr<IScope> env) override;
 
     //! @see IAnnotation interface
     bool shouldEnable(filesystem::path) override;

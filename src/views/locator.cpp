@@ -11,8 +11,8 @@ Locator::Locator(Project &projectFiles) : _projectFiles(projectFiles) {
     _list.height(20);
 }
 
-bool Locator::keyPress(std::shared_ptr<IEnvironment> env) {
-    auto localEnvironment = std::make_shared<Environment>(env);
+bool Locator::keyPress(std::shared_ptr<IScope> env) {
+    auto localEnvironment = std::make_shared<Scope>(env);
     localEnvironment->editor(this);
     ;
     if (_list.keyPress(localEnvironment)) {

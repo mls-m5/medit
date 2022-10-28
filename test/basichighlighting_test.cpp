@@ -1,6 +1,6 @@
 
 #include "mls-unit-test/unittest.h"
-#include "mock/script/mockenvironment.h"
+#include "mock/script/mockscope.h"
 #include "mock/syntax/mockpalette.h"
 #include "syntax/basichighligting.h"
 #include "syntax/palette.h"
@@ -25,7 +25,7 @@ TEST_CASE("create") {
 TEST_CASE("format all to default") {
     BasicHighlighting hl;
     Editor editor;
-    auto env = std::make_shared<MockEnvironment>();
+    auto env = std::make_shared<MockScope>();
     env->mock_editor_0.returnValueRef(editor);
 
     editor.buffer().text("hello"s);
@@ -44,7 +44,7 @@ TEST_CASE("format all to default") {
 TEST_CASE("format keyword") {
     BasicHighlighting hl;
     Editor editor;
-    auto env = std::make_shared<MockEnvironment>();
+    auto env = std::make_shared<MockScope>();
     env->mock_editor_0.returnValueRef(editor);
 
     editor.buffer().text("int hello"s);
@@ -63,7 +63,7 @@ TEST_CASE("partial match") {
 
     BasicHighlighting hl;
     Editor editor;
-    auto env = std::make_shared<MockEnvironment>();
+    auto env = std::make_shared<MockScope>();
     env->mock_editor_0.returnValueRef(editor);
 
     editor.buffer().text("inte automatic"s);

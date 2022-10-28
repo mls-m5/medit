@@ -16,7 +16,7 @@ bool ClangHighlight::shouldEnable(filesystem::path path) {
     return isCpp(path);
 }
 
-void ClangHighlight::highlight(std::shared_ptr<IEnvironment> env) {
+void ClangHighlight::highlight(std::shared_ptr<IScope> env) {
     auto &editor = env->editor();
     if (!editor.file()) {
         return;

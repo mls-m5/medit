@@ -2,7 +2,7 @@
 
 #include "completion/icompletionsource.h"
 #include "core/plugins.h"
-#include "script/ienvironment.h"
+#include "script/iscope.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
@@ -12,7 +12,7 @@
 class WordCompletions : public ICompletionSource {
 public:
     // @see ICompletions
-    CompletionList list(std::shared_ptr<IEnvironment> env) override {
+    CompletionList list(std::shared_ptr<IScope> env) override {
         std::set<std::string> words;
 
         auto &buffer = env->editor().buffer();
@@ -44,7 +44,7 @@ public:
     }
 
     //! @see ICompletionSource
-    bool shouldComplete(std::shared_ptr<IEnvironment>) override {
+    bool shouldComplete(std::shared_ptr<IScope>) override {
         return true;
     }
 

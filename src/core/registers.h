@@ -5,6 +5,7 @@
 
 constexpr char standardRegister = '"';
 
+// Vim like registers
 class Registers {
 public:
     struct Register {

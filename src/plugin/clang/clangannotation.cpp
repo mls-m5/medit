@@ -6,7 +6,7 @@
 #include "files/extensions.h"
 #include "files/popenstream.h"
 #include "files/project.h"
-#include "script/ienvironment.h"
+#include "script/iscope.h"
 #include "text/startswith.h"
 #include "tmpfile.h"
 #include "views/editor.h"
@@ -67,7 +67,7 @@ struct ClangAnnotation::Data {
 
 ClangAnnotation::ClangAnnotation() : _data(std::make_unique<Data>()) {}
 
-bool ClangAnnotation::annotate(std::shared_ptr<IEnvironment> env) {
+bool ClangAnnotation::annotate(std::shared_ptr<IScope> env) {
     auto project = env->project();
     auto ss = std::ostringstream{};
     auto tmpFile = std::make_shared<TmpFile>(".cpp");

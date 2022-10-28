@@ -2,7 +2,7 @@
 #include "views/listview.h"
 #include "screen/draw.h"
 #include "screen/iscreen.h"
-#include "script/ienvironment.h"
+#include "script/iscope.h"
 #include "syntax/ipalette.h"
 #include "text/cursor.h"
 
@@ -63,7 +63,7 @@ void ListView::draw(IScreen &screen) {
     }
 }
 
-bool ListView::keyPress(std::shared_ptr<IEnvironment> env) {
+bool ListView::keyPress(std::shared_ptr<IScope> env) {
     switch (env->key().key) {
     case Key::Up:
         if (_current > 0) {

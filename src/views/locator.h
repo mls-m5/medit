@@ -2,7 +2,7 @@
 
 #include "files/filesystem.h"
 #include "files/project.h"
-#include "script/environment.h"
+#include "script/scope.h"
 #include "views/editor.h"
 #include "views/listview.h"
 
@@ -16,7 +16,7 @@ public:
     ~Locator() override;
 
     // @see IKeySink
-    bool keyPress(std::shared_ptr<IEnvironment>) override;
+    bool keyPress(std::shared_ptr<IScope>) override;
 
     // @see IView
     void draw(IScreen &) override;

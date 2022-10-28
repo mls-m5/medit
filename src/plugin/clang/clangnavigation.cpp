@@ -2,8 +2,8 @@
 #include "clangcontext.h"
 #include "core/plugins.h"
 #include "files/file.h"
-#include "script/environment.h"
-#include "script/ienvironment.h"
+#include "script/scope.h"
+#include "script/iscope.h"
 #include "text/cursor.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
@@ -11,7 +11,7 @@
 
 using namespace std::literals;
 
-bool ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
+bool ClangNavigation::gotoSymbol(std::shared_ptr<IScope> env) {
     auto context = ClangContext{env, *getClangModel()};
 
     constexpr bool debug = true;
@@ -94,7 +94,7 @@ bool ClangNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     auto path = env->editor().path();
 
     if (!filenameStr.empty() && path != filenameStr) {
-        auto localEnvironment = std::make_shared<Environment>(env);
+        auto localEnvironment = std::make_shared<Scope>(env);
         localEnvironment->set("path", filenameStr);
         localEnvironment->run(Command{"editor.open"});
         return true;

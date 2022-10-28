@@ -10,7 +10,7 @@ public:
     void draw(IScreen &);
 
     //! @see IKeySink interface
-    bool keyPress(std::shared_ptr<IEnvironment> env);
+    bool keyPress(std::shared_ptr<IScope> env);
 
     //! @see IKeySink interface
     void updateCursor(IScreen &screen) const;

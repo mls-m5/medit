@@ -2,7 +2,7 @@
 
 #include "files/project.h"
 #include "meditfwd.h"
-#include "script/rootenvironment.h"
+#include "script/rootscope.h"
 #include "syntax/iformat.h"
 #include "views/completeview.h"
 #include "views/editor.h"
@@ -12,7 +12,7 @@
 
 struct MainWindow : public Window {
     std::vector<Editor> _editors;
-    std::shared_ptr<RootEnvironment> _env;
+    std::shared_ptr<RootScope> _env;
     Editor _console;
     Locator _locator;
     CompleteView _completeView;
@@ -44,7 +44,7 @@ struct MainWindow : public Window {
     void updateCursor(IScreen &screen) const override;
 
     //! @see IKeySink
-    bool keyPress(std::shared_ptr<IEnvironment>) override;
+    bool keyPress(std::shared_ptr<IScope>) override;
 
     void updateLocatorBuffer();
 

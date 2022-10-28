@@ -6,7 +6,7 @@
 
 class HeaderNavigation : public INavigation {
 public:
-    bool gotoSymbol(std::shared_ptr<IEnvironment> env) override;
+    bool gotoSymbol(std::shared_ptr<IScope> env) override;
 
     static void registerPlugin();
 };

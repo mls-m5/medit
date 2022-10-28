@@ -20,7 +20,7 @@
 
 MainWindow::MainWindow(IScreen &screen, Context &context)
     : View(screen.width(), screen.height()), _editors(1),
-      _env(std::make_shared<RootEnvironment>(context)), _locator(_project),
+      _env(std::make_shared<RootScope>(context)), _locator(_project),
       _currentEditor(0) {
     _env->editor(&_editors.front());
     for (auto &editor : _editors) {
@@ -76,7 +76,7 @@ void MainWindow::addCommands(IScreen &screen) {
     });
 
     _env->addCommand("editor.auto_complete",
-                     [this](std::shared_ptr<IEnvironment> env) {
+                     [this](std::shared_ptr<IScope> env) {
                          auto &editor = env->editor();
                          editor.cursor(fix(editor.cursor()));
 
@@ -86,7 +86,7 @@ void MainWindow::addCommands(IScreen &screen) {
                      });
 
     _env->addCommand("editor.format",
-                     [this](std::shared_ptr<IEnvironment> env) {
+                     [this](std::shared_ptr<IScope> env) {
                          auto &editor = env->editor();
                          for (auto &format : _formatting) {
                              if (format->format(editor)) {
@@ -96,7 +96,7 @@ void MainWindow::addCommands(IScreen &screen) {
                      });
 
     _env->addCommand("editor.goto_definition",
-                     [this](std::shared_ptr<IEnvironment> env) {
+                     [this](std::shared_ptr<IScope> env) {
                          for (auto &navigation : _navigation) {
                              if (navigation->gotoSymbol(env)) {
                                  break;
@@ -104,7 +104,7 @@ void MainWindow::addCommands(IScreen &screen) {
                          }
                      });
 
-    _env->addCommand("editor.open", [this](std::shared_ptr<IEnvironment> env) {
+    _env->addCommand("editor.open", [this](std::shared_ptr<IScope> env) {
         auto path = env->get("path");
         if (path) {
             open(path->value());
@@ -116,7 +116,7 @@ void MainWindow::addCommands(IScreen &screen) {
     });
 
     _env->addCommand(
-        "editor.show_open", [this](std::shared_ptr<IEnvironment> env) {
+        "editor.show_open", [this](std::shared_ptr<IScope> env) {
             auto &editor = env->editor();
             auto path = editor.path();
             if (path.empty()) {
@@ -129,7 +129,7 @@ void MainWindow::addCommands(IScreen &screen) {
         });
 
     _env->addCommand("window.title",
-                     [&screen, this](std::shared_ptr<IEnvironment> env) {
+                     [&screen, this](std::shared_ptr<IScope> env) {
                          if (auto title = env->get("title")) {
                              screen.title(title->value());
                          }
@@ -143,7 +143,7 @@ void MainWindow::addCommands(IScreen &screen) {
         _inputFocus = &_console;
     });
 
-    _env->addCommand("escape", [this](std::shared_ptr<IEnvironment> env) {
+    _env->addCommand("escape", [this](std::shared_ptr<IScope> env) {
         env->showConsole(false);
         _inputFocus = &currentEditor();
     });
@@ -223,7 +223,7 @@ void MainWindow::updateCursor(IScreen &screen) const {
                     c.symbol.toString() + "'" + c.symbol.byteRepresentation());
 }
 
-bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
+bool MainWindow::keyPress(std::shared_ptr<IScope> env) {
     if (_inputFocus == &currentEditor() && _completeView.visible()) {
         if (_completeView.keyPress(env)) {
             updateHighlighting(currentEditor());
@@ -233,7 +233,7 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
 
     auto &editor = currentEditor();
     _env->editor(&editor);
-    auto scopeEnvironment = std::make_shared<Environment>(env);
+    auto scopeEnvironment = std::make_shared<Scope>(env);
     scopeEnvironment->editor(&editor);
     if (_inputFocus->keyPress(scopeEnvironment)) {
         // Todo: Handle this for reallz in the future

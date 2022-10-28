@@ -3,4 +3,4 @@
 #include "meditfwd.h"
 #include <memory>
 
-void toggleComments(std::shared_ptr<IEnvironment> env);
+void toggleComments(std::shared_ptr<IScope> env);

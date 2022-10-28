@@ -26,7 +26,7 @@ public:
          std::shared_ptr<IMode> parent = {},
          BufferKeyMap bufferMap = {});
 
-    bool keyPress(std::shared_ptr<IEnvironment>) override;
+    bool keyPress(std::shared_ptr<IScope>) override;
 
     void startCallback(std::function<void(Editor &)> f) {
         _start = f;

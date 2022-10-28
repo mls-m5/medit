@@ -71,7 +71,7 @@ public:
 
     void showLines(bool value);
 
-    bool keyPress(std::shared_ptr<IEnvironment>) override;
+    bool keyPress(std::shared_ptr<IScope>) override;
 
     void updateCursor(IScreen &) const override;
 

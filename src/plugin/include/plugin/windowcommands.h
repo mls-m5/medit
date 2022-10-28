@@ -1,3 +1,3 @@
 #pragma once
 
-#include "script/ienvironment.h"
+#include "script/iscope.h"

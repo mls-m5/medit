@@ -1,17 +1,17 @@
 #pragma once
 
-#include "ienvironment.h"
+#include "iscope.h"
 #include "script/command.h"
 #include "script/standardcommands.h"
 #include <functional>
 #include <map>
 #include <memory>
 
-class Environment : public IEnvironment {
-    using Action = std::function<void(std::shared_ptr<IEnvironment>)>;
+class Scope : public IScope {
+    using Action = std::function<void(std::shared_ptr<IScope>)>;
     using Functions = std::map<std::string, Action>;
 
-    std::shared_ptr<IEnvironment> _parent = {};
+    std::shared_ptr<IScope> _parent = {};
     Editor *_editor = nullptr;
 
     Functions _context;
@@ -19,7 +19,7 @@ class Environment : public IEnvironment {
     std::map<std::string, Variable> _variables;
 
 public:
-    Environment(std::shared_ptr<IEnvironment> parent) : _parent(parent) {
+    Scope(std::shared_ptr<IScope> parent) : _parent(parent) {
         addStandardCommands(*this);
     }
 
@@ -29,12 +29,12 @@ public:
     }
 
     // @see IEnvironment
-    IEnvironment &root() override {
+    IScope &root() override {
         return _parent->root();
     }
 
     // @see IEnvironment
-    const IEnvironment &root() const override {
+    const IScope &root() const override {
         return _parent->root();
     }
 
@@ -62,7 +62,7 @@ public:
     }
 
     // @see IEnvironment
-    IEnvironment &parent() override {
+    IScope &parent() override {
         if (!_parent) {
             throw std::runtime_error(
                 "trying to access unset parent in enviroment");
@@ -85,7 +85,7 @@ public:
 
     void addCommand(
         std::string name,
-        std::function<void(std::shared_ptr<IEnvironment>)> f) override {
+        std::function<void(std::shared_ptr<IScope>)> f) override {
         _context[name] = f;
     }
 

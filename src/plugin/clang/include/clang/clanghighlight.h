@@ -8,7 +8,7 @@ class ClangHighlight : public IHighlight {
 public:
     //! @see IHighlight
     bool shouldEnable(filesystem::path path) override;
-    void highlight(std::shared_ptr<IEnvironment> env) override;
+    void highlight(std::shared_ptr<IScope> env) override;
 
     //! @see IHighlight
     void update(const IPalette &palette) override;

@@ -1,6 +1,6 @@
 #include "completeview.h"
 #include "keys/keyevent.h"
-#include "script/ienvironment.h"
+#include "script/iscope.h"
 #include "text/cursorops.h"
 #include "text/cursorrange.h"
 #include "text/cursorrangeops.h"
@@ -11,7 +11,7 @@ CompleteView::CompleteView() {
     _list.height(20);
 }
 
-void CompleteView::triggerShow(std::shared_ptr<IEnvironment> env) {
+void CompleteView::triggerShow(std::shared_ptr<IScope> env) {
     _list.visible(true);
     visible(true);
 
@@ -39,7 +39,7 @@ void CompleteView::updateCompletion(std::string str) {
     _list.current(selected);
 }
 
-bool CompleteView::keyPress(std::shared_ptr<IEnvironment> env) {
+bool CompleteView::keyPress(std::shared_ptr<IScope> env) {
     if (env->key().key == Key::Text || env->key().key == Key::Backspace ||
         env->key().key == Key::Delete) {
         setCursor(env->editor().cursor(), env->editor().bufferView());

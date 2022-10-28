@@ -1,13 +1,13 @@
 #include "clang/clangcompletion.h"
 #include "clangcontext.h"
 #include "core/plugins.h"
-#include "script/ienvironment.h"
+#include "script/iscope.h"
 #include "text/cursorops.h"
 #include "clang/clangmodel.h"
 #include <clang-c/Index.h>
 
 std::vector<ClangCompletion::CompleteResult> ClangCompletion::complete(
-    std::shared_ptr<IEnvironment> env) {
+    std::shared_ptr<IScope> env) {
 
     auto context = ClangContext{env, *_model};
 
@@ -67,7 +67,7 @@ ClangCompletion::ClangCompletion() : _model(getClangModel()) {}
 
 ClangCompletion::~ClangCompletion() = default;
 
-bool ClangCompletion::shouldComplete(std::shared_ptr<IEnvironment> env) {
+bool ClangCompletion::shouldComplete(std::shared_ptr<IScope> env) {
     if (!env->editor().file()) {
         return false;
     }
@@ -76,7 +76,7 @@ bool ClangCompletion::shouldComplete(std::shared_ptr<IEnvironment> env) {
 }
 
 ICompletionSource::CompletionList ClangCompletion::list(
-    std::shared_ptr<IEnvironment> env) {
+    std::shared_ptr<IScope> env) {
     auto list = complete(env);
 
     ICompletionSource::CompletionList ret;

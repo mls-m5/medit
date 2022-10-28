@@ -1,7 +1,7 @@
 #include "views/messagebox.h"
 #include "screen/draw.h"
 #include "screen/iscreen.h"
-#include "script/ienvironment.h"
+#include "script/iscope.h"
 #include "text/fchar.h"
 
 MessageBox::MessageBox() {
@@ -18,7 +18,7 @@ void MessageBox::draw(IScreen &screen) {
     screen.draw(x() + 2, y() + 2, {"hello"});
 }
 
-bool MessageBox::keyPress(std::shared_ptr<IEnvironment> ) {
+bool MessageBox::keyPress(std::shared_ptr<IScope> ) {
     close();
     return true;
 }

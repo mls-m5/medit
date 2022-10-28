@@ -40,7 +40,7 @@ AutoComplete::CompletionList AutoComplete::getMatching(std::string beginning) {
     return ret;
 }
 
-void AutoComplete::populate(std::shared_ptr<IEnvironment> env) {
+void AutoComplete::populate(std::shared_ptr<IScope> env) {
     for (auto &source : _sources) {
         if (source->shouldComplete(env)) {
             _items = source->list(env);

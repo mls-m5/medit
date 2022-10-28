@@ -4,7 +4,7 @@
 #include "clangunsavedfiles.h"
 #include "files/filesystem.h"
 #include "files/ifile.h"
-#include "script/ienvironment.h"
+#include "script/iscope.h"
 #include "tmpfile.h"
 #include "views/editor.h"
 #include "clang/clangmodel.h"
@@ -41,7 +41,7 @@ struct ClangContext {
     //        return ClangUnsavedFile{buffer.text(), locationString, tmpPath};
     //    }
 
-    ClangTranslationUnit init(std::shared_ptr<IEnvironment> env,
+    ClangTranslationUnit init(std::shared_ptr<IScope> env,
                               ClangModel &model) {
         auto &project = env->project();
 
@@ -66,7 +66,7 @@ struct ClangContext {
             model.index, project /*, unsavedFile*/, tmpPath};
     }
 
-    ClangContext(std::shared_ptr<IEnvironment> env, ClangModel &model)
+    ClangContext(std::shared_ptr<IScope> env, ClangModel &model)
         //        : unsavedFile(getUnsaved(env)),
         : translationUnit(init(env, model)) {}
 

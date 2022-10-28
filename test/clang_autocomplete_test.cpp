@@ -4,7 +4,7 @@
 #include "files/file.h"
 #include "files/project.h"
 #include "mls-unit-test/unittest.h"
-#include "mock/script/mockenvironment.h"
+#include "mock/script/mockscope.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
 #include "views/editor.h"
@@ -25,7 +25,7 @@ TEST_CASE("create") {
 TEST_CASE("simple complete") {
     auto completion = std::make_unique<ClangCompletion>();
     auto editor = Editor();
-    auto env = std::make_shared<MockEnvironment>();
+    auto env = std::make_shared<MockScope>();
     auto project = Project{};
     env->mock_editor_0.returnValueRef(editor);
     env->mock_project_0.returnValueRef(project);
@@ -48,7 +48,7 @@ TEST_CASE("simple complete") {
 TEST_CASE("simple complete on unsaved file") {
     auto completion = std::make_unique<ClangCompletion>();
     auto editor = Editor();
-    auto env = std::make_shared<MockEnvironment>();
+    auto env = std::make_shared<MockScope>();
     Project project;
     env->mock_editor_0.returnValueRef(editor);
     env->mock_project_0.returnValueRef(project);
@@ -72,7 +72,7 @@ TEST_CASE("simple complete on unsaved file") {
 TEST_CASE("simple complete on unsaved file crossing dot") {
     auto completion = std::make_unique<ClangCompletion>();
     auto editor = Editor();
-    auto env = std::make_shared<MockEnvironment>();
+    auto env = std::make_shared<MockScope>();
     Project project;
     env->mock_editor_0.returnValueRef(editor);
     env->mock_project_0.returnValueRef(project);

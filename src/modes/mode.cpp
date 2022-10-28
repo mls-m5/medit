@@ -11,7 +11,7 @@ Mode::Mode(std::string name,
       _bufferMap(std::move(bufferMap)), _parent(std::move(parent)),
       _cursorStyle(cursorStyle) {}
 
-bool Mode::keyPress(std::shared_ptr<IEnvironment> env) {
+bool Mode::keyPress(std::shared_ptr<IScope> env) {
     auto lock = shared_from_this();
     const auto key = env->key();
     const auto &action = _keyMap.find(key);

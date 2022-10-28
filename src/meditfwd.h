@@ -15,7 +15,7 @@ class IView;
 class IMode;
 class Editor;
 class IFile;
-class IEnvironment;
+class IScope;
 class BufferView;
 class Command;
 class CommandBlock;

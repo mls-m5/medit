@@ -131,7 +131,7 @@ void Editor::showLines(bool value) {
     _bufferView.showLines(value);
 }
 
-bool Editor::keyPress(std::shared_ptr<IEnvironment> env) {
+bool Editor::keyPress(std::shared_ptr<IScope> env) {
     if (_mode) {
         if (_mode->keyPress(env)) {
             _history.commit(buffer());

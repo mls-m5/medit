@@ -1,10 +1,10 @@
 #pragma once
 
 #include "core/registers.h"
-#include "environment.h"
+#include "scope.h"
 #include "meditfwd.h"
 
-class RootEnvironment : public Environment {
+class RootScope : public Scope {
     KeyEvent _lastKeyEvent;
     Editor *_console;
     Project *_project;
@@ -13,8 +13,8 @@ class RootEnvironment : public Environment {
     Registers _registers;
 
 public:
-    RootEnvironment(Context &context)
-        : Environment(nullptr), _context(context) {}
+    RootScope(Context &context)
+        : Scope(nullptr), _context(context) {}
 
     void key(KeyEvent e) {
         _lastKeyEvent = e;
@@ -43,15 +43,15 @@ public:
         return _showConsole;
     }
 
-    IEnvironment &parent() override {
+    IScope &parent() override {
         throw std::runtime_error("trying to access parent of root environment");
     }
 
-    IEnvironment &root() override {
+    IScope &root() override {
         return *this;
     }
 
-    const IEnvironment &root() const override {
+    const IScope &root() const override {
         return *this;
     }
 
