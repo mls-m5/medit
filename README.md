@@ -41,4 +41,7 @@ Todo:
 Requirements
 -------------------------------
   
+For legacy clang plugin: (Its deprecated)
+
+build with -DENABLE_LEGACY_CLANG_PLUGIN
 libclang-10/9

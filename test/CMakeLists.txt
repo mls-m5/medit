@@ -58,7 +58,7 @@ test(project)
 test(utf8char)
 test(wordsiterator)
 
-if (NOT EMSCRIPTEN)
+if (ENABLE_LEGACY_CLANG_PLUGIN)
     test(clang_autocomplete)
     test(clanghighlighting)
 endif()

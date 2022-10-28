@@ -18,7 +18,7 @@ target_link_libraries(
     medit_core
     )
 
-if (NOT EMSCRIPTEN)
+if (ENABLE_LEGACY_CLANG_PLUGIN)
 
 add_library(
     medit_clang_plugins

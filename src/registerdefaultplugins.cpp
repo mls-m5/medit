@@ -3,9 +3,12 @@
 #include "plugin/clangformat.h"
 #include "plugin/jsonformat.h"
 #include "syntax/basichighligting.h"
+
+#ifdef ENABLE_LEGACY_CLANG_PLUGIN
 #include "clang/clangannotation.h"
 #include "clang/clangcompletion.h"
 #include "clang/clangnavigation.h"
+#endif
 
 void registerDefaultPlugins() {
     ClangFormat::registerPlugin();
@@ -13,7 +16,7 @@ void registerDefaultPlugins() {
     JsonFormat::registerPlugin();
     HeaderNavigation::registerPlugin();
 
-#ifndef __EMSCRIPTEN__
+#ifdef ENABLE_LEGACY_CLANG_PLUGIN
     ClangCompletion::registerPlugin();
     ClangAnnotation::registerPlugin();
     ClangNavigation::registerPlugin();
