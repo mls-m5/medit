@@ -11,6 +11,7 @@
 #include "screen/guiscreen.h"
 #include "screen/htmlscreen.h"
 #include "screen/ncursesscreen.h"
+#include "settings.h"
 #include "views/mainwindow.h"
 #include <string>
 #include <thread>
@@ -46,39 +47,6 @@ void handleKey(KeyEvent c, MainWindow &mainWindow, IScreen &screen) {
     refreshScreen(mainWindow, screen);
 }
 
-enum class UiStyle {
-    Standard,
-    Matgui,
-};
-
-struct Settings {
-    filesystem::path file;
-    UiStyle style = UiStyle::Matgui;
-
-    Settings(int argc, char **argv) {
-        if (argc < 1) {
-            return;
-        }
-        auto args = std::vector<std::string>{argv + 1, argv + argc};
-
-        for (size_t i = 0; i < args.size(); ++i) {
-            auto arg = args.at(i);
-
-            if (arg == "--gui") {
-                style = UiStyle::Matgui;
-            }
-            else if (arg == "--cli") {
-                style = UiStyle::Standard;
-            }
-            else {
-                if (arg.rfind("-") != 0) {
-                    file = args.at(i);
-                }
-            }
-        }
-    }
-};
-
 void innerMainLoop(IInput &input,
                    IJobQueue &guiQueue,
                    std::function<void(KeyEvent)> callback) {
@@ -103,9 +71,9 @@ void innerMainLoop(IInput &input,
     guiQueue.work(false);
 }
 
-#ifdef __EMSCRIPTEN__
+// #ifdef __EMSCRIPTEN__
 
-struct EmscriptenData {
+struct MainData {
     std::shared_ptr<IScreen> nativeScreen;
     std::shared_ptr<IScreen> screen;
     std::shared_ptr<IJobQueue> guiQueue;
@@ -116,24 +84,34 @@ struct EmscriptenData {
 
 std::function<void()> emCallback;
 
-EmscriptenData emData;
+MainData mainData;
 
 int mainFunc(int argc, char **argv) {
     registerDefaultPlugins();
     const auto settings = Settings{0, nullptr};
     auto input = (IInput *){};
 
+#ifdef __EMSCRIPTEN__
     auto ns = std::make_unique<HtmlScreen>();
-    //    auto ns = std::make_unique<GuiScreen>();
+#else
+    auto ns = std::make_unique<GuiScreen>();
+#endif
     input = ns.get();
 
     auto bs = std::make_unique<BufferedScreen>(ns.get(), input);
 
     std::shared_ptr<IScreen> screen = std::move(bs);
 
+#ifdef __EMSCRIPTEN__
     auto queue = std::make_shared<JsJobQueue>();
     auto guiQueue = std::make_shared<JsJobQueue>();
     auto timer = std::make_shared<JsTimer>();
+#else
+    auto queue = std::make_shared<JobQueue>();
+    auto guiQueue = std::make_shared<JobQueue>();
+    auto timer = std::make_shared<Timer>();
+#endif
+
     auto context = std::make_shared<Context>(*queue, *guiQueue, *timer);
 
     auto mainWindow = std::make_shared<MainWindow>(*screen, *context);
@@ -163,7 +141,11 @@ int mainFunc(int argc, char **argv) {
 
     using namespace std::chrono_literals;
 
+#ifdef __EMSCRIPTEN__
     auto guiLoopTimer = std::make_shared<JsTimer>();
+#else
+    auto guiLoopTimer = std::make_shared<Timer>();
+#endif
 
     emCallback = [=] {
         innerMainLoop(*input, *guiQueue, callback);
@@ -175,72 +157,14 @@ int mainFunc(int argc, char **argv) {
     guiLoopTimer->start();
     guiLoopTimer->setTimeout(100ms, emCallback);
 
-    EM_ASM(console.log("hej"));
+    mainData.nativeScreen = std::move(ns);
+    mainData.screen = screen;
+    mainData.guiQueue = guiQueue;
+    mainData.queue = queue;
+    mainData.timer = timer;
+    mainData.guiLoopTimer = guiLoopTimer;
 
-    emData.nativeScreen = std::move(ns);
-    emData.screen = screen;
-    emData.guiQueue = guiQueue;
-    emData.queue = queue;
-    emData.timer = timer;
-    emData.guiLoopTimer = guiLoopTimer;
-    return 0;
-}
-
-#else  // __EMSCRIPTEN
-
-int mainFunc(int argc, char **argv) {
-    registerDefaultPlugins();
-    const auto settings = Settings{argc, argv};
-
-    auto input = static_cast<IInput *>(nullptr);
-    auto ns = [&input, style = settings.style]() -> std::unique_ptr<IScreen> {
-        if (style == UiStyle::Standard) {
-            auto ns = std::make_unique<NCursesScreen>();
-            input = ns.get();
-            return ns;
-        }
-        else {
-            auto ns = std::make_unique<GuiScreen>();
-            input = ns.get();
-            return ns;
-        }
-    }();
-
-    auto bs = std::make_unique<BufferedScreen>(ns.get(), input);
-
-    std::unique_ptr<IScreen> screen = std::move(bs);
-
-    auto queue = std::make_unique<JobQueue>();
-    auto guiQueue = std::make_unique<JobQueue>();
-    auto timer = std::make_unique<Timer>();
-    Context context(*queue, *guiQueue, *timer);
-
-    MainWindow mainWindow(*screen, context);
-
-    context.refreshScreenFunc([&] {
-        guiQueue->addTask([&] {
-            refreshScreen(mainWindow, *screen); //
-        });
-    });
-
-    if (settings.file.empty()) {
-        mainWindow.updateLocatorBuffer();
-    }
-    else {
-        mainWindow.open(settings.file);
-    }
-
-    mainWindow.resize();
-    mainWindow.draw(*screen);
-    mainWindow.updateCursor(*screen);
-    screen->refresh();
-
-    timer->start();
-    queue->start();
-
-    auto callback = [&](KeyEvent c) { handleKey(c, mainWindow, *screen); };
-
-    // If multithreaded lock gui thread with this
+#ifndef __EMSCRIPTEN__
     while (!medit::main::shouldQuit) {
         innerMainLoop(*input, *guiQueue, callback);
     }
@@ -248,10 +172,76 @@ int mainFunc(int argc, char **argv) {
     queue->stop();
     timer->stop();
     guiQueue->stop();
-
+#endif
     return 0;
 }
-#endif // __EMSCRIPTEN__
+
+// #else  // __EMSCRIPTEN
+
+// int mainFunc(int argc, char **argv) {
+//     registerDefaultPlugins();
+//     const auto settings = Settings{argc, argv};
+
+//    auto input = static_cast<IInput *>(nullptr);
+//    auto ns = [&input, style = settings.style]() -> std::unique_ptr<IScreen> {
+//        if (style == UiStyle::Standard) {
+//            auto ns = std::make_unique<NCursesScreen>();
+//            input = ns.get();
+//            return ns;
+//        }
+//        else {
+//            auto ns = std::make_unique<GuiScreen>();
+//            input = ns.get();
+//            return ns;
+//        }
+//    }();
+
+//    auto bs = std::make_unique<BufferedScreen>(ns.get(), input);
+
+//    std::unique_ptr<IScreen> screen = std::move(bs);
+
+//    auto queue = std::make_unique<JobQueue>();
+//    auto guiQueue = std::make_unique<JobQueue>();
+//    auto timer = std::make_unique<Timer>();
+//    Context context(*queue, *guiQueue, *timer);
+
+//    MainWindow mainWindow(*screen, context);
+
+//    context.refreshScreenFunc([&] {
+//        guiQueue->addTask([&] {
+//            refreshScreen(mainWindow, *screen); //
+//        });
+//    });
+
+//    if (settings.file.empty()) {
+//        mainWindow.updateLocatorBuffer();
+//    }
+//    else {
+//        mainWindow.open(settings.file);
+//    }
+
+//    mainWindow.resize();
+//    mainWindow.draw(*screen);
+//    mainWindow.updateCursor(*screen);
+//    screen->refresh();
+
+//    timer->start();
+//    queue->start();
+
+//    auto callback = [&](KeyEvent c) { handleKey(c, mainWindow, *screen); };
+
+//    // If multithreaded lock gui thread with this
+//    while (!medit::main::shouldQuit) {
+//        innerMainLoop(*input, *guiQueue, callback);
+//    }
+
+//    queue->stop();
+//    timer->stop();
+//    guiQueue->stop();
+
+//    return 0;
+//}
+// #endif // __EMSCRIPTEN__
 
 } // namespace
 
