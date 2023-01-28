@@ -92,12 +92,22 @@ struct MainData {
     std::shared_ptr<IJobQueue> queue;
     std::shared_ptr<ITimer> timer;
     std::shared_ptr<ITimer> guiLoopTimer;
+    std::shared_ptr<Context> context;
+    std::shared_ptr<MainWindow> mainWindow;
+
+    IInput *input = {};
 
     MainData() = default; // Static initialization
 
     MainData(int argc, char **argv);
 
-    ~MainData();
+    void loop();
+
+    void stop();
+
+    void callback(KeyEvent c) {
+        handleKey(c, *mainWindow, *screen);
+    }
 };
 
 MainData mainData;
@@ -105,7 +115,6 @@ MainData mainData;
 MainData::MainData(int argc, char **argv) {
     registerDefaultPlugins();
     const auto settings = Settings{0, nullptr};
-    auto input = (IInput *){};
 
     {
         auto ns = std::make_unique<ScreenType>();
@@ -119,13 +128,13 @@ MainData::MainData(int argc, char **argv) {
     guiQueue = std::make_shared<QueueType>();
     timer = std::make_shared<TimerType>();
 
-    auto context = std::make_shared<Context>(*queue, *guiQueue, *timer);
+    context = std::make_shared<Context>(*queue, *guiQueue, *timer);
 
-    auto mainWindow = std::make_shared<MainWindow>(*screen, *context);
+    mainWindow = std::make_shared<MainWindow>(*screen, *context);
 
-    context->refreshScreenFunc([=] {
-        guiQueue->addTask([=] {
-            refreshScreen(*mainWindow, *screen); //
+    context->refreshScreenFunc([] {
+        mainData.guiQueue->addTask([] {
+            refreshScreen(*mainData.mainWindow, *mainData.screen); //
         });
     });
 
@@ -143,16 +152,23 @@ MainData::MainData(int argc, char **argv) {
 
     timer->start();
     queue->start();
+}
 
-    auto callback = [=](KeyEvent c) { handleKey(c, *mainWindow, *screen); };
+void MainData::stop() {
+#ifndef __EMSCRIPTEN__
+    queue->stop();
+    timer->stop();
+    guiQueue->stop();
+#endif
+}
 
-    using namespace std::chrono_literals;
-
+void MainData::loop() {
 #ifdef __EMSCRIPTEN__
+    using namespace std::chrono_literals;
     guiLoopTimer = std::make_shared<JsTimer>();
 
     emCallback = [=] {
-        innerMainLoop(*input, *guiQueue, callback);
+        innerMainLoop(*input, *guiQueue, [](auto c) { mainData.callback(c); });
         guiLoopTimer->setTimeout(
             10ms, emCallback); // Todo: Do this faster when it works
     };
@@ -161,21 +177,17 @@ MainData::MainData(int argc, char **argv) {
     guiLoopTimer->setTimeout(100ms, emCallback);
 #else
     while (!medit::main::shouldQuit) {
-        innerMainLoop(*input, *guiQueue, callback);
+        innerMainLoop(*input, *guiQueue, [](auto c) { mainData.callback(c); });
     }
 #endif
-}
-
-MainData::~MainData() {
-    queue->stop();
-    timer->stop();
-    guiQueue->stop();
 }
 
 } // namespace
 
 int main(int argc, char **argv) {
     mainData = MainData(argc, argv);
+    mainData.loop();
+    mainData.stop();
 
     return 0;
 }
