@@ -6,8 +6,12 @@ enable_testing()
 project(medit)
 
 add_subdirectory(lib/json.h)
-add_subdirectory(lib/matrix-screen)
 add_subdirectory(src)
+
+if (NOT EMSCRIPTEN)
+    add_subdirectory(lib/matrix-screen)
+endif()
+
 
 
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -84,6 +88,15 @@ file(
     DESTINATION
     ${CMAKE_BINARY_DIR}/data
     )
+
+if (EMSCRIPTEN)
+    file(
+        COPY
+        index.html
+        DESTINATION
+        .
+        )
+endif()
 
 # === code playback ===================================================
 

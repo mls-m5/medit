@@ -1,9 +1,20 @@
 
-#include "screen/guiscreen.h"
 #include "text/cursorops.h"
 #include "views/editor.h"
 #include <iostream>
 #include <thread>
+
+#ifdef __EMSCRIPTEN__
+
+#include "screen/htmlscreen.h"
+using ScreenType = HtmlScreen;
+
+#else
+
+#include "screen/guiscreen.h"
+using ScreenType = GuiScreen;
+
+#endif
 
 using namespace std::literals;
 
@@ -16,7 +27,7 @@ int main() {
 )_"sv;
 
 int main(int argc, char *argv[]) {
-    auto screen = GuiScreen{};
+    auto screen = ScreenType{};
 
     std::cout << "hello\n";
 

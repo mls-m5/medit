@@ -74,14 +74,14 @@ target_link_libraries(
     medit_core
     PRIVATE
     medit_common
-    matrix-screen
     )
 
 if (NOT EMSCRIPTEN)
     target_link_libraries(
         medit_core
         PRIVATE
-        ncurses
+        matrix-screen
+#        ncurses
     )
 
 endif()

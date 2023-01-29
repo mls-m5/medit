@@ -7,6 +7,8 @@
 #include <mutex>
 #include <thread>
 
+#ifndef __EMSCRIPTEN__
+
 class GuiScreen : public IScreen, public IInput {
 public:
     void draw(size_t x, size_t y, const FString &str) override;
@@ -44,3 +46,5 @@ private:
     struct Buffer;
     std::unique_ptr<Buffer> _buffer;
 };
+
+#endif

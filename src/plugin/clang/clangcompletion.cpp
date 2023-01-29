@@ -1,6 +1,7 @@
 #include "clang/clangcompletion.h"
 #include "clangcontext.h"
 #include "core/plugins.h"
+#include "files/extensions.h"
 #include "script/iscope.h"
 #include "text/cursorops.h"
 #include "clang/clangmodel.h"
@@ -72,7 +73,7 @@ bool ClangCompletion::shouldComplete(std::shared_ptr<IScope> env) {
         return false;
     }
     auto extension = env->editor().file()->path().extension();
-    return extension == ".h" || extension == ".cpp";
+    return isCpp(env->editor().file()->path());
 }
 
 ICompletionSource::CompletionList ClangCompletion::list(

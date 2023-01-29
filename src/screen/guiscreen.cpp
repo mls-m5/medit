@@ -1,4 +1,7 @@
 #include "guiscreen.h"
+
+#ifndef __EMSCRIPTEN__
+
 #include "SDL2/SDL_keyboard.h"
 #include "core/os.h"
 #include "files/fontlocator.h"
@@ -421,3 +424,5 @@ void GuiScreen::cursorStyle(CursorStyle style) {
 size_t GuiScreen::addStyle(const Color &fg, const Color &bg, size_t index) {
     return _buffer->addStyle(fg, bg, index);
 }
+
+#endif
