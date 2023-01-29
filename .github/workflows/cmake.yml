@@ -29,7 +29,7 @@ jobs:
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
         sudo add-apt-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-10 main' -y
         sudo apt update
-        sudo apt-get install -y clang-10 libclang-9-dev libgl-dev libsdl2-image-dev libsdl2-ttf-dev
+        sudo apt-get install -y libgl-dev libsdl2-image-dev libsdl2-ttf-dev
 
 
     - name: Configure CMake
