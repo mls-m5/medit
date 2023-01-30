@@ -99,7 +99,7 @@ struct MainData {
 
     MainData() = default; // Static initialization
 
-    MainData(int argc, char **argv);
+    void start(int argc, char **argv);
 
     void loop();
 
@@ -112,9 +112,9 @@ struct MainData {
 
 MainData mainData;
 
-MainData::MainData(int argc, char **argv) {
+void MainData::start(int argc, char **argv) {
     registerDefaultPlugins();
-    const auto settings = Settings{0, nullptr};
+    const auto settings = Settings{argc, argv};
 
     {
         auto ns = std::make_unique<ScreenType>();
@@ -185,7 +185,7 @@ void MainData::loop() {
 } // namespace
 
 int main(int argc, char **argv) {
-    mainData = MainData(argc, argv);
+    mainData.start(argc, argv);
     mainData.loop();
     mainData.stop();
 
