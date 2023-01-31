@@ -28,6 +28,7 @@ class IAnnotation;
 class Registers;
 
 class CoreEnvironment;
+class BufferEvent;
 class IEnvironment;
 
 class ITimer;

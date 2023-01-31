@@ -1,16 +1,20 @@
 
 #include "completion/icompletionsource.h"
-#include "lsp/lspclient.h"
 #include "navigation/inavigation.h"
 #include "script/ienvironment.h"
 #include "syntax/ihighlight.h"
 #include "text/buffer.h"
 
+namespace lsp {
+class LspClient;
+}
+
 class LspPlugin {
 public:
-    // Notifications
-    void didOpen(IEnvironment &env, Buffer &buffer) {}
-    void didClose(IEnvironment &env, Buffer &buffer) {}
+    LspPlugin();
+    ~LspPlugin();
+
+    void bufferEvent(BufferEvent &event);
 
     static void registerPlugin();
 
@@ -19,7 +23,7 @@ public:
         return plugin;
     }
 
-    lsp::LspClient _client = {""};
+    std::unique_ptr<lsp::LspClient> _client;
 };
 
 class LspComplete : public ICompletionSource {

@@ -24,11 +24,11 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
     , _editors{}
     , _env(std::make_unique<LocalEnvironment>(context))
     , _scope(std::make_shared<RootScope>(*_env))
-    , _console(_env->core().create())
+    , _console(_env->core().create(_env))
     , _locator(_project)
     , _currentEditor(0) {
 
-    _editors.push_back(std::make_unique<Editor>(_env->core().create()));
+    _editors.push_back(std::make_unique<Editor>(_env->core().create(_env)));
     _inputFocus = _editors.front().get();
 
     _scope->editor(_editors.front().get());
@@ -274,7 +274,7 @@ void MainWindow::open(filesystem::path path) {
     auto &editor = currentEditor();
     path = filesystem::absolute(path);
 
-    editor.buffer(_env->core().open(path));
+    editor.buffer(_env->core().open(path, _env));
     editor.bufferView().yScroll(0);
     updateLocatorBuffer();
 
