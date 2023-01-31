@@ -2,6 +2,7 @@
 #include "navigation/headernavigation.h"
 #include "plugin/clangformat.h"
 #include "plugin/jsonformat.h"
+#include "plugin/lsp/lspplugin.h"
 #include "syntax/basichighligting.h"
 
 #ifdef ENABLE_LEGACY_CLANG_PLUGIN
@@ -20,5 +21,7 @@ void registerDefaultPlugins() {
     ClangCompletion::registerPlugin();
     ClangAnnotation::registerPlugin();
     ClangNavigation::registerPlugin();
+#else
+    LspPlugin::registerPlugin();
 #endif
 }

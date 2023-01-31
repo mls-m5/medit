@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     editor.width(screen.width());
     editor.height(screen.height() - 1);
 
-    auto lastChar = 0;
+    //    auto lastChar = 0;
     auto wasAlpha = false;
 
     for (; c != Key::Quit; c = screen.getInput()) {

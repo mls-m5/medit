@@ -5,13 +5,8 @@ enable_testing()
 
 project(medit)
 
-add_subdirectory(lib/json.h)
+add_subdirectory(lib)
 add_subdirectory(src)
-
-if (NOT EMSCRIPTEN)
-    add_subdirectory(lib/matrix-screen)
-endif()
-
 
 
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -25,6 +20,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
         -Wno-unused-parameter
         -Wno-variadic-macros
         )
+
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
 add_library(
@@ -41,7 +37,6 @@ target_include_directories(
     src/plugin/include
     src/plugin
     src/plugin/clang/include
-    /usr/lib/llvm-9/include
     )
 
 target_link_libraries(

@@ -36,6 +36,9 @@ Todo:
   - [x] Basic syntax highlighting
     - [x] Clang-based syntax highlighting
 - [ ] Co-edit files with other people remotely
+- [ ] Mouse control
+  - [ ] Move cursor with mouse
+  - [ ] Select with mouse drag
 
 
 Requirements

@@ -160,7 +160,7 @@ public:
         _singleLine = value;
     }
 
-    bool singleLine() {
+    bool singleLine() const {
         return _singleLine;
     }
 
