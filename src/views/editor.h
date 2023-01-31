@@ -11,15 +11,8 @@
 #include <optional>
 
 class Editor : public View, public IKeySink {
-private:
-    BufferView _bufferView;
-    Cursor _cursor;
-    std::optional<Cursor> _selectionAnchor;
-    std::shared_ptr<IMode> _mode;
-    FormatType _background = 1;
-
 public:
-    Editor(std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>());
+    Editor(std::shared_ptr<Buffer> buffer);
     ~Editor() override;
 
     Editor(const Editor &) = delete;
@@ -38,14 +31,12 @@ public:
     void save();
     void load();
 
-    void open(std::filesystem::path path);
-
     void undo();
     void redo();
 
     Buffer &buffer();
 
-    void buffer(std::unique_ptr<Buffer> buffer);
+    void buffer(std::shared_ptr<Buffer> buffer);
 
     BufferView &bufferView();
 
@@ -94,4 +85,11 @@ public:
     //! Make sure that the buffer with the cursor is scrolled so that the cursor
     //! is visible
     void fitCursor();
+
+private:
+    BufferView _bufferView;
+    Cursor _cursor;
+    std::optional<Cursor> _selectionAnchor;
+    std::shared_ptr<IMode> _mode;
+    FormatType _background = 1;
 };

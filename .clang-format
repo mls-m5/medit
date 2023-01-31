@@ -12,5 +12,8 @@ BraceWrapping:
   BeforeCatch: true
   BeforeElse: true
 
+
+BreakConstructorInitializers: BeforeComma
+
 AlwaysBreakAfterReturnType: None
 PenaltyReturnTypeOnItsOwnLine: 1000000

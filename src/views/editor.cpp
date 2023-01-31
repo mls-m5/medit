@@ -10,13 +10,9 @@
 
 Editor::~Editor() = default;
 
-Editor::Editor(std::unique_ptr<Buffer> buffer)
+Editor::Editor(std::shared_ptr<Buffer> buffer)
     : _bufferView(std::move(buffer)), _cursor(_bufferView.buffer()),
       _mode(createNormalMode()) {}
-
-// void Editor::file(std::unique_ptr<IFile> file) {
-//     _file = std::move(file);
-// }
 
 IFile *Editor::file() {
     return buffer().file();
@@ -38,11 +34,6 @@ void Editor::load() {
     buffer().load();
 }
 
-void Editor::open(std::filesystem::path path) {
-    buffer(Buffer::open(path));
-    _cursor = Cursor{buffer()};
-}
-
 void Editor::undo() {
     buffer().history().undo();
 }
@@ -55,7 +46,8 @@ Buffer &Editor::buffer() {
     return _bufferView.buffer();
 }
 
-void Editor::buffer(std::unique_ptr<Buffer> buffer) {
+void Editor::buffer(std::shared_ptr<Buffer> buffer) {
+    _cursor = Cursor{*buffer};
     _bufferView.buffer(std::move(buffer));
 }
 

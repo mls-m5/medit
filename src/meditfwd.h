@@ -27,6 +27,9 @@ class IPalette;
 class IAnnotation;
 class Registers;
 
+class CoreEnvironment;
+class IEnvironment;
+
 class ITimer;
 class IJobQueue;
 class Context;

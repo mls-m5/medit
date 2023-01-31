@@ -2,7 +2,7 @@
 
 #include "files/project.h"
 #include "meditfwd.h"
-#include "script/environment.h"
+#include "script/localenvironment.h"
 #include "script/rootscope.h"
 #include "syntax/iformat.h"
 #include "views/completeview.h"
@@ -12,8 +12,8 @@
 #include <memory>
 
 struct MainWindow : public Window {
-    std::vector<Editor> _editors;
-    std::shared_ptr<Environment> _env;
+    std::vector<std::unique_ptr<Editor>> _editors;
+    std::shared_ptr<LocalEnvironment> _env;
     std::shared_ptr<RootScope> _scope;
     Editor _console;
     Locator _locator;
@@ -21,7 +21,7 @@ struct MainWindow : public Window {
     Project _project;
     size_t _split = 10;
     FString _splitString;
-    IKeySink *_inputFocus = &_editors.front();
+    IKeySink *_inputFocus = nullptr;
     std::unique_ptr<IWindow> _activePopup;
     size_t _updateTimeHandle = 0;
     size_t _currentEditor = 0;

@@ -5,8 +5,8 @@
 #include "keys/keyevent.h"
 #include "meditfwd.h"
 
-class Environment : public IEnvironment {
-
+/// Environment data for a single user
+class LocalEnvironment : public IEnvironment {
     KeyEvent _lastKeyEvent;
     Editor *_console;
     Project *_project;
@@ -15,7 +15,7 @@ class Environment : public IEnvironment {
     Registers _registers;
 
 public:
-    Environment(Context &context) : _context{context} {}
+    LocalEnvironment(Context &context) : _context{context} {}
 
     void key(KeyEvent e) {
         _lastKeyEvent = e;
@@ -61,4 +61,6 @@ public:
         }
         return *_project;
     }
+
+    CoreEnvironment &core() override;
 };

@@ -19,7 +19,7 @@ size_t getLineNumWidth(size_t numLines) {
 
 BufferView::~BufferView() = default;
 
-BufferView::BufferView(std::unique_ptr<Buffer> buffer)
+BufferView::BufferView(std::shared_ptr<Buffer> buffer)
     : _buffer(std::move(buffer)) {}
 
 void BufferView::draw(IScreen &screen) {
@@ -102,7 +102,7 @@ const Buffer &BufferView::buffer() const {
     return *_buffer;
 }
 
-void BufferView::buffer(std::unique_ptr<Buffer> buffer) {
+void BufferView::buffer(std::shared_ptr<Buffer> buffer) {
     _buffer = std::move(buffer);
 }
 

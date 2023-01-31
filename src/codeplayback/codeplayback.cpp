@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 
     auto c = screen.getInput();
 
-    auto editor = Editor{};
+    auto editor = Editor{std::make_shared<Buffer>()};
 
     auto &buffer = editor.buffer();
     buffer.insert(0, "hello");

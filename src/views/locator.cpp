@@ -3,7 +3,8 @@
 #include "modes/parentmode.h"
 #include "text/buffer.h"
 
-Locator::Locator(Project &projectFiles) : _projectFiles(projectFiles) {
+Locator::Locator(Project &projectFiles)
+    : Editor{std::make_shared<Buffer>()}, _projectFiles(projectFiles) {
     buffer().singleLine(true);
     _list.x(0);
     _list.y(1);

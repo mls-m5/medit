@@ -8,7 +8,8 @@
 #include "syntax/ipalette.h"
 #include "text/buffer.h"
 
-InputBox::InputBox(FString title, std::string defaultValue) : _title(title) {
+InputBox::InputBox(FString title, std::string defaultValue)
+    : _entry{std::make_shared<Buffer>()}, _title{title} {
     x(10);
     y(10);
     width(20);

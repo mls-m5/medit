@@ -24,7 +24,7 @@ TEST_CASE("create") {
 
 TEST_CASE("format all to default") {
     BasicHighlighting hl;
-    Editor editor;
+    Editor editor{std::make_shared<Buffer>()};
     auto env = std::make_shared<MockScope>();
     env->mock_editor_0.returnValueRef(editor);
 
@@ -43,7 +43,7 @@ TEST_CASE("format all to default") {
 
 TEST_CASE("format keyword") {
     BasicHighlighting hl;
-    Editor editor;
+    Editor editor{std::make_shared<Buffer>()};
     auto env = std::make_shared<MockScope>();
     env->mock_editor_0.returnValueRef(editor);
 
@@ -62,7 +62,7 @@ TEST_CASE("format keyword") {
 TEST_CASE("partial match") {
 
     BasicHighlighting hl;
-    Editor editor;
+    Editor editor{std::make_shared<Buffer>()};
     auto env = std::make_shared<MockScope>();
     env->mock_editor_0.returnValueRef(editor);
 

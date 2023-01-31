@@ -12,6 +12,7 @@ add_library(
     keys/keymap.cpp
     syntax/basichighligting.cpp
     syntax/palette.cpp
+    core/coreenvironment.cpp
     core/os.cpp
     core/jsjobqueue.cpp
     core/timer.cpp
@@ -39,6 +40,7 @@ add_library(
     modes/parentmode.cpp
     modes/visualmode.cpp
     modes/mode.cpp
+    script/localenvironment.cpp
     script/standardcommands.cpp
     script/command.cpp
     script/parser.cpp

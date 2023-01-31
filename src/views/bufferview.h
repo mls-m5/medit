@@ -7,7 +7,7 @@
 
 class BufferView : public ScrollView {
 public:
-    BufferView(std::unique_ptr<Buffer> buffer);
+    BufferView(std::shared_ptr<Buffer> buffer);
     ~BufferView() override;
 
     void draw(IScreen &) override;
@@ -18,7 +18,7 @@ public:
 
     const Buffer &buffer() const;
 
-    void buffer(std::unique_ptr<Buffer> buffer);
+    void buffer(std::shared_ptr<Buffer> buffer);
 
     size_t numberWidth() const;
 
@@ -27,7 +27,7 @@ public:
     Position cursorPosition(Cursor cursor) const;
 
 private:
-    std::unique_ptr<Buffer> _buffer;
+    std::shared_ptr<Buffer> _buffer;
 
     bool _showLines = false;
     size_t _numberWidth = 3;

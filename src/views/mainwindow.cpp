@@ -1,6 +1,7 @@
 
 #include "views/mainwindow.h"
 #include "core/context.h"
+#include "core/coreenvironment.h"
 #include "core/ijobqueue.h"
 #include "core/plugins.h"
 #include "core/timer.h"
@@ -9,7 +10,7 @@
 #include "modes/insertmode.h"
 #include "navigation/inavigation.h"
 #include "screen/iscreen.h"
-#include "script/environment.h"
+#include "script/localenvironment.h"
 #include "syntax/iannotation.h"
 #include "syntax/ihighlight.h"
 #include "syntax/ipalette.h"
@@ -19,13 +20,20 @@
 #include <memory>
 
 MainWindow::MainWindow(IScreen &screen, Context &context)
-    : View(screen.width(), screen.height()), _editors(1),
-      _env(std::make_unique<Environment>(context)),
-      _scope(std::make_shared<RootScope>(*_env)), _locator(_project),
-      _currentEditor(0) {
-    _scope->editor(&_editors.front());
+    : View(screen.width(), screen.height())
+    , _editors{}
+    , _env(std::make_unique<LocalEnvironment>(context))
+    , _scope(std::make_shared<RootScope>(*_env))
+    , _console(_env->core().create())
+    , _locator(_project)
+    , _currentEditor(0) {
+
+    _editors.push_back(std::make_unique<Editor>(_env->core().create()));
+    _inputFocus = _editors.front().get();
+
+    _scope->editor(_editors.front().get());
     for (auto &editor : _editors) {
-        editor.showLines(true);
+        editor->showLines(true);
     }
     _console.showLines(false);
     _env->console(&_console);
@@ -162,14 +170,14 @@ void MainWindow::resize(size_t w, size_t h) {
     {
         size_t index = 0;
         for (auto &editor : _editors) {
-            editor.x(index * width() / 2);
-            editor.y(0);
-            editor.width(width() / 2);
+            editor->x(index * width() / 2);
+            editor->y(0);
+            editor->width(width() / 2);
             if (_env->showConsole()) {
-                editor.height(height() - _split);
+                editor->height(height() - _split);
             }
             else {
-                editor.height(height() - 1);
+                editor->height(height() - 1);
             }
 
             ++index;
@@ -194,7 +202,7 @@ void MainWindow::draw(IScreen &screen) {
     screen.cursorStyle(currentEditor().mode().cursorStyle());
 
     for (auto &editor : _editors) {
-        editor.draw(screen);
+        editor->draw(screen);
     }
     if (_env->showConsole()) {
         _console.draw(screen);
@@ -265,7 +273,8 @@ void MainWindow::open(filesystem::path path) {
     }
     auto &editor = currentEditor();
     path = filesystem::absolute(path);
-    editor.open(path);
+
+    editor.buffer(_env->core().open(path));
     editor.bufferView().yScroll(0);
     updateLocatorBuffer();
 
@@ -332,13 +341,13 @@ Editor &MainWindow::currentEditor() {
     if (_currentEditor >= _editors.size()) {
         _currentEditor = _editors.size() - 1;
     }
-    return _editors.at(_currentEditor);
+    return *_editors.at(_currentEditor);
 
     throw std::runtime_error("could not get the right editor");
 }
 
 void MainWindow::resetFocus() {
-    _inputFocus = &_editors.at(_currentEditor);
+    _inputFocus = _editors.at(_currentEditor).get();
 }
 
 void MainWindow::switchEditor() {
