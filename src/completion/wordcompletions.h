@@ -12,7 +12,8 @@
 class WordCompletions : public ICompletionSource {
 public:
     // @see ICompletions
-    CompletionList list(std::shared_ptr<IScope> env) override {
+    void list(std::shared_ptr<IScope> env,
+              CompleteCallbackT callback) override {
         std::set<std::string> words;
 
         auto &buffer = env->editor().buffer();
@@ -40,7 +41,7 @@ public:
         for (auto &word : words) {
             ret.push_back({word, ""});
         }
-        return ret;
+        callback(ret);
     }
 
     //! @see ICompletionSource

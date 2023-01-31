@@ -2,6 +2,7 @@
 
 #include "meditfwd.h"
 #include "text/fstring.h"
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -14,9 +15,11 @@ public:
 
     using CompletionList = std::vector<CompletionItem>;
 
+    using CompleteCallbackT = std::function<void(CompletionList)>;
+
     virtual ~ICompletionSource() = default;
 
-    virtual CompletionList list(std::shared_ptr<IScope>) = 0;
+    virtual void list(std::shared_ptr<IScope>, CompleteCallbackT) = 0;
 
     virtual bool shouldComplete(std::shared_ptr<IScope>) = 0;
 

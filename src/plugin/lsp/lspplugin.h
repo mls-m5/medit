@@ -24,7 +24,7 @@ public:
 
 class LspComplete : public ICompletionSource {
 public:
-    CompletionList list(std::shared_ptr<IScope>) override;
+    void list(std::shared_ptr<IScope>, CompleteCallbackT) override;
     bool shouldComplete(std::shared_ptr<IScope>) override {
         LspPlugin::instance();
         return true;

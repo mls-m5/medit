@@ -77,7 +77,7 @@ bool ClangCompletion::shouldComplete(std::shared_ptr<IScope> env) {
 }
 
 ICompletionSource::CompletionList ClangCompletion::list(
-    std::shared_ptr<IScope> env) {
+    std::shared_ptr<IScope> env, CompleteCallbackT callback) {
     auto list = complete(env);
 
     ICompletionSource::CompletionList ret;
@@ -86,7 +86,7 @@ ICompletionSource::CompletionList ClangCompletion::list(
         ret.push_back({l.completion, l.description});
     }
 
-    return ret;
+    callback(ret);
 }
 
 void ClangCompletion::registerPlugin() {

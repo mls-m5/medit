@@ -20,7 +20,7 @@ public:
     bool shouldComplete(std::shared_ptr<IScope>) override;
 
     //! @ ICompletionSource
-    CompletionList list(std::shared_ptr<IScope> env) override;
+    void list(std::shared_ptr<IScope> env, CompleteCallbackT callback) override;
 
     //! @see ICompletionSource
     int priority() override {

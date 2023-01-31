@@ -9,6 +9,6 @@ void LspPlugin::registerPlugin() {
     registerCompletion<LspComplete>();
 }
 
-ICompletionSource::CompletionList LspComplete::list(std::shared_ptr<IScope>) {
-    return {{"hello", "there"}, {"you", "!"}};
+void LspComplete::list(std::shared_ptr<IScope>, CompleteCallbackT callback) {
+    callback({{"hello", "there"}, {"you", "!"}});
 }
