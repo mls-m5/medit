@@ -117,6 +117,19 @@ void RawBuffer::apply(BufferEdit edit) {
         _lines.begin() + edit.position.y(), lines.begin(), lines.end());
 }
 
+void RawBuffer::format(const CursorRange &range, FormatType f) {
+    // TODO: Implement multiline format
+    if (range.end().x() < range.begin().x()) {
+        return;
+    }
+
+    auto &line = lineAt(range.begin().y());
+
+    for (size_t i = range.begin().x(); i < range.end().x(); ++i) {
+        line.at(i).f = f;
+    }
+}
+
 void RawBuffer::forceThread() const {
     if (std::this_thread::get_id() != _threadId) {
         auto intId = [](auto id) {

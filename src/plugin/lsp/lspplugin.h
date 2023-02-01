@@ -33,6 +33,8 @@ public:
 private:
     std::unique_ptr<lsp::LspClient> _client;
     std::unordered_map<std::string, long> _bufferVersions;
+
+    CoreEnvironment &_core;
 };
 
 class LspComplete : public ICompletionSource {

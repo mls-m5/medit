@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/context.h"
 #include "meditfwd.h"
 #include "text/diagnostics.h"
 #include <filesystem>
@@ -44,9 +45,20 @@ public:
                             std::string source,
                             std::vector<Diagnostics::Diagnostic>);
 
+    Context &context() {
+        return *_context;
+    }
+
+    void context(Context *c) {
+        _context = c;
+    }
+
 private:
     std::vector<std::shared_ptr<Buffer>> _buffers;
     std::mutex _fileMutex;
 
     std::vector<BufferSubscriptionT> _bufferSubscriptions;
+
+    Context *_context =
+        nullptr; // TODO: Handle lifetime of CoreEnvironment better
 };

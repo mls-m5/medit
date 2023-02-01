@@ -171,6 +171,8 @@ public:
 
     void apply(BufferEdit edit);
 
+    void format(const CursorRange &range, FormatType f);
+
 private:
     void forceThread() const;
     std::vector<FString> _lines = {""};

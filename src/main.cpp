@@ -1,5 +1,6 @@
 #include "main.h"
 #include "core/context.h"
+#include "core/coreenvironment.h"
 #include "core/jobqueue.h"
 #include "core/jsjobqueue.h"
 #include "core/jstimer.h"
@@ -129,6 +130,9 @@ void MainData::start(int argc, char **argv) {
     timer = std::make_shared<TimerType>();
 
     context = std::make_shared<Context>(*queue, *guiQueue, *timer);
+
+    // TODO: Core context should probably live in this file somewhere
+    CoreEnvironment::instance().context(context.get());
 
     mainWindow = std::make_shared<MainWindow>(*screen, *context);
 
