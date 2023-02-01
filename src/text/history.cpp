@@ -43,7 +43,7 @@ void History::undo() {
 
     auto edit = revert(_history.back().edit);
 
-    apply(edit);
+    _buffer.apply(edit);
 
     _redo.push_back(std::move(_history.back()));
     _history.pop_back();
@@ -58,7 +58,7 @@ void History::redo() {
 
     auto text = _buffer.text();
     _ignoreRedoClear = true;
-    apply(_redo.back().edit);
+    _buffer.apply(_redo.back().edit);
 
     ++_revision;
 }

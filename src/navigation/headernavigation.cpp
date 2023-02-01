@@ -40,7 +40,7 @@ std::optional<std::string> getIncludeName(IScope &env) {
         return {};
     }
 
-    return includeName.front();
+    return includeName;
 }
 
 bool openIncludeByName(std::shared_ptr<IScope> scope, std::string name) {

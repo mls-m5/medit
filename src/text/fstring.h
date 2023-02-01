@@ -135,7 +135,9 @@ public:
         return {_content.begin() + start, _content.begin() + (start + length)};
     }
 
-    std::vector<FString> split(Utf8Char c) const;
+    std::vector<FString> split(Utf8Char c = '\n') const;
+
+    static FString join(std::vector<FString> strings, Utf8Char c = '\n');
 
     FString operator+(const FString &other);
 

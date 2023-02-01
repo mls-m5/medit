@@ -1,6 +1,7 @@
 
 #include "cursorops.h"
 #include "buffer.h"
+#include "cursorrangeops.h"
 #include "syntax/basichighligting.h"
 #include "views/bufferview.h"
 
@@ -128,6 +129,13 @@ Cursor erase(Cursor cursor) {
         //        colorize(line);
         cursor.x(cursor.x() - 1);
     }
+
+    // TODO: Continue here
+    //    auto end = cursor;
+    //    ++end;
+    //    end = fix(end);
+    //    erase(CursorRange{cursor, end});
+
     return cursor;
 }
 

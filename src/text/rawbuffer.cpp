@@ -73,28 +73,16 @@ void RawBuffer::text(std::ostream &stream) const {
 }
 
 FString RawBuffer::ftext() const {
-    size_t size = _lines.size() - 1;
-
-    for (auto &line : _lines) {
-        size += line.size();
-    }
-
-    auto ret = FString{};
-    ret.resize(size, FChar{"\n"});
-
-    size_t i = 0;
-    for (auto &line : _lines) {
-        for (auto c : line) {
-            ret.at(i) = c;
-            ++i;
-        }
-        ++i;
-    }
-
-    return ret;
+    return FString::join(_lines, '\n');
 }
 
-void RawBuffer::apply(const BufferEdit &edit) {
+void RawBuffer::apply(BufferEdit edit) {
+    edit.trim();
+
+    if (edit.empty()) {
+        return;
+    }
+
     auto pos = edit.position;
 
     auto &from = edit.from;

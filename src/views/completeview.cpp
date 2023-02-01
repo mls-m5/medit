@@ -74,7 +74,7 @@ void CompleteView::setCursor(const Cursor cursor,
                              const BufferView &bufferView) {
     auto begin = autocompleteWordBegin(cursor);
     auto range = CursorRange{begin, cursor};
-    currentText(content(range).front());
+    currentText(content(range));
 
     auto screenPosition = bufferView.cursorPosition(begin);
 

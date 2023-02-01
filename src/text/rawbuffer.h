@@ -169,7 +169,7 @@ public:
         return _singleLine;
     }
 
-    void apply(const BufferEdit &edit);
+    void apply(BufferEdit edit);
 
 private:
     void forceThread() const;

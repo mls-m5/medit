@@ -71,3 +71,26 @@ std::vector<FString> FString::split(Utf8Char c) const {
 
     return ret;
 }
+
+FString FString::join(std::vector<FString> strings, Utf8Char c) {
+
+    size_t size = strings.size() - 1;
+
+    for (auto &line : strings) {
+        size += line.size();
+    }
+
+    auto ret = FString{};
+    ret.resize(size, c);
+
+    size_t i = 0;
+    for (auto &line : strings) {
+        for (auto c : line) {
+            ret.at(i) = c;
+            ++i;
+        }
+        ++i;
+    }
+
+    return ret;
+}

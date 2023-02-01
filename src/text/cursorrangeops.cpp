@@ -6,7 +6,7 @@
 #include <sstream>
 
 //! Returns a list with at least one element
-std::vector<FString> content(CursorRange range) {
+std::vector<FString> contentLines(CursorRange range) {
     auto begin = fix(range.begin());
     auto end = fix(range.end());
 
@@ -27,6 +27,10 @@ std::vector<FString> content(CursorRange range) {
     return res;
 }
 
+FString content(CursorRange range) {
+    return FString::join(contentLines(range));
+}
+
 void format(CursorRange range, FormatType format) {
     for (auto it : range) {
         if (it) {
@@ -36,30 +40,41 @@ void format(CursorRange range, FormatType format) {
 }
 
 Cursor erase(CursorRange range) {
-    auto begin = fix(range.begin());
-    auto end = fix(range.end());
+    range.beginPosition(fix(range.begin()));
+    range.endPosition(fix(range.end()));
 
-    if (begin == end) {
-        return range.begin();
-    }
+    auto oldText = content(range);
 
-    auto &buffer = begin.buffer();
+    BufferEdit edit = {
+        .from = content(range),
+        .to = "",
+        .position = range.begin(),
+    };
 
-    if (begin.y() == end.y()) {
-        auto &line = buffer.lineAt(begin.y());
-        line.erase(line.begin() + begin.x(), line.begin() + end.x());
-        return begin;
-    }
+    range.buffer().apply(std::move(edit));
 
-    {
-        auto &line = buffer.lineAt(begin.y());
-        line.erase(line.begin() + begin.x(), line.end());
+    //    if (begin == end) {
+    //        return range.begin();
+    //    }
 
-        auto &backLine = buffer.lineAt(end.y());
-        line.insert(line.end(), backLine.begin() + end.x(), backLine.end());
-    }
+    //    auto &buffer = begin.buffer();
 
-    buffer.deleteLine(begin.y() + 1, end.y() - begin.y());
+    //    if (begin.y() == end.y()) {
+    //        auto &line = buffer.lineAt(begin.y());
+    //        line.erase(line.begin() + begin.x(), line.begin() + end.x());
+    //        return begin;
+    //    }
+
+    //    {
+    //        auto &line = buffer.lineAt(begin.y());
+    //        line.erase(line.begin() + begin.x(), line.end());
+
+    //        auto &backLine = buffer.lineAt(end.y());
+    //        line.insert(line.end(), backLine.begin() + end.x(),
+    //        backLine.end());
+    //    }
+
+    //    buffer.deleteLine(begin.y() + 1, end.y() - begin.y());
 
     return range.begin();
 }
@@ -117,18 +132,7 @@ std::ostream &operator<<(std::ostream &stream, CursorRange range) {
 }
 
 std::string toString(CursorRange range) {
-    auto content = ::content(range);
-
-    std::ostringstream ss;
-
-    for (auto line : content) {
-        ss << std::string{line} << "\n";
-    }
-
-    auto str = ss.str();
-    str.pop_back(); // Remove extra newline
-
-    return str;
+    return content(range);
 }
 
 CursorRange fix(CursorRange range) {
@@ -163,24 +167,4 @@ CursorRange inner(const Cursor cursor,
     }
 
     return {++begin, end};
-}
-
-Cursor apply(const BufferEdit &edit) {
-    //    auto begin = edit.position;
-    //    auto end = begin;
-    //    for (size_t i = 0; i < edit.from.size(); ++i) {
-    //        ++end;
-    //    }
-
-    //    auto i = begin;
-
-    //    erase({begin, end});
-    //    for (auto c : edit.to) {
-    //        insert(c.c, i);
-    //        ++i;
-    //    }
-
-    edit.position.buffer().apply(edit);
-
-    return edit.position;
 }
