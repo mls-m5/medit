@@ -7,7 +7,8 @@ class Buffer;
 
 class History {
 public:
-    History(Buffer &buffer) : _buffer{buffer} {}
+    History(Buffer &buffer)
+        : _buffer{buffer} {}
 
     struct Item {
         // Dummy implementation
@@ -23,6 +24,13 @@ public:
     //! If you do not want changes to go back any longer
     //! example for when loading a file
     void clear();
+
+    long revision() {
+        if (_history.empty()) {
+            return -1;
+        }
+        return _history.back().revision;
+    }
 
 private:
     long _revision = 1;

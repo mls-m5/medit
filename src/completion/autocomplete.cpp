@@ -1,7 +1,11 @@
 
 
 #include "completion/autocomplete.h"
+#include "core/context.h"
+#include "core/jobqueue.h"
 #include "core/plugins.h"
+#include "script/ienvironment.h"
+#include "script/iscope.h"
 #include <algorithm>
 
 AutoComplete::AutoComplete() {
@@ -27,12 +31,14 @@ AutoComplete::CompletionList AutoComplete::getMatching(std::string beginning) {
     return ret;
 }
 
-void AutoComplete::populate(std::shared_ptr<IScope> env) {
+void AutoComplete::populate(std::shared_ptr<IScope> scope) {
     for (auto &source : _sources) {
-        if (source->shouldComplete(env)) {
-            source->list(env, [this](ICompletionSource::CompletionList list) {
-                this->_items = list;
-            });
+        if (source->shouldComplete(scope)) {
+            auto cb = [this, scope](ICompletionSource::CompletionList list) {
+                scope->env().context().guiQueue().addTask(
+                    [this, list] { this->_items = list; });
+            };
+            source->list(scope, cb);
             break;
         }
     }

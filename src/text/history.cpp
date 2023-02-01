@@ -61,4 +61,5 @@ void History::redo() {
 
 void History::clear() {
     _history.clear();
+    _redo.clear();
 }

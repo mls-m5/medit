@@ -23,6 +23,11 @@ public:
         return plugin;
     }
 
+    lsp::LspClient &client() {
+        return *_client;
+    }
+
+private:
     std::unique_ptr<lsp::LspClient> _client;
 };
 

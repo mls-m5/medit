@@ -9,14 +9,23 @@
 #include "lsp/servernotifications.h"
 #include "registerdefaultplugins.h"
 #include "script/ienvironment.h"
+#include "script/iscope.h"
 #include "views/editor.h"
 
 // TODO: Tidy up this file
 
+namespace {
+
+std::string createURI(std::filesystem::path path) {
+    return "file://" + std::filesystem::absolute(path).string();
+}
+
+} // namespace
+
 using namespace lsp;
 
 LspPlugin::LspPlugin()
-    : _client{std::make_unique<LspClient>("")} {
+    : _client{std::make_unique<LspClient>("--log=verbose")} {
     CoreEnvironment::instance().subscribeToBufferEvents(
         [this](BufferEvent e) { bufferEvent(e); });
 
@@ -35,9 +44,9 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
         auto params = DidOpenTextDocumentParams{
             .textDocument =
                 TextDocumentItem{
-                    .uri = "file://" + event.buffer->path().string(),
+                    .uri = createURI(event.buffer->path()),
                     .languageId = "cpp",
-                    .version = 1,
+                    .version = event.buffer->history().revision(),
                     .text = content,
                 },
         };
@@ -66,6 +75,34 @@ void LspPlugin::registerPlugin() {
     registerCompletion<LspComplete>();
 }
 
-void LspComplete::list(std::shared_ptr<IScope>, CompleteCallbackT callback) {
-    callback({{"hello", "there"}, {"you", "!"}});
+void LspComplete::list(std::shared_ptr<IScope> scope,
+                       CompleteCallbackT callback) {
+    auto params = CompletionParams{};
+    auto &editor = scope->editor();
+    params.textDocument.uri = createURI(editor.path());
+    auto cursor = editor.cursor();
+    params.position.line = cursor.y() + 1;
+    params.position.character = cursor.x() + 1;
+
+    LspPlugin::instance().client().request(
+        params, [callback](lsp::CompletionList result) {
+            auto ret = CompletionList{};
+            for (auto &item : result.items) {
+
+                auto range = TextEdit::Range{
+                    .begin = ::Position(item.textEdit.range.start.character - 1,
+                                        item.textEdit.range.start.line - 1),
+                    .end = ::Position(item.textEdit.range.end.character - 1,
+                                      item.textEdit.range.end.line - 1),
+                };
+
+                ret.push_back(ICompletionSource::CompletionItem{
+                    .name = item.label, // TODO: Redo this class
+                    .description = item.detail,
+                    .edit = {.range = range, .text = item.textEdit.newText},
+                });
+            }
+            //            callback({{"hello", "there"}, {"you", "!"}});
+            callback(std::move(ret));
+        });
 }
