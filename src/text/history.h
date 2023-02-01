@@ -1,5 +1,6 @@
 #pragma once
 
+#include "text/bufferedit.h"
 #include <string>
 #include <vector>
 
@@ -11,9 +12,10 @@ public:
         : _buffer{buffer} {}
 
     struct Item {
-        // Dummy implementation
-        std::string old;
+        BufferEdit edit;
         long revision;
+
+        void trim();
     };
 
     void commit();
@@ -26,16 +28,13 @@ public:
     void clear();
 
     long revision() {
-        if (_history.empty()) {
-            return -1;
-        }
-        return _history.back().revision;
+        return _revision;
     }
 
 private:
     long _revision = 1;
 
-    std::string _currentState;
+    FString _currentState;
     Buffer &_buffer;
 
     std::vector<Item> _history;

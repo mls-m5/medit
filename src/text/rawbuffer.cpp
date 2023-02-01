@@ -69,6 +69,28 @@ void RawBuffer::text(std::ostream &stream) const {
     }
 }
 
+FString RawBuffer::ftext() const {
+    size_t size = _lines.size() - 1;
+
+    for (auto &line : _lines) {
+        size += line.size();
+    }
+
+    auto ret = FString{};
+    ret.resize(size, FChar{"\n"});
+
+    size_t i = 0;
+    for (auto &line : _lines) {
+        for (auto c : line) {
+            ret.at(i) = c;
+            ++i;
+        }
+        ++i;
+    }
+
+    return ret;
+}
+
 void RawBuffer::forceThread() const {
     if (std::this_thread::get_id() != _threadId) {
         auto intId = [](auto id) {

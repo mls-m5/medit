@@ -91,6 +91,10 @@ public:
         return _content.back();
     }
 
+    auto pop_back() {
+        _content.pop_back();
+    }
+
     auto erase(iterator begin, iterator end) {
         return _content.erase(begin, end);
     }
@@ -122,4 +126,6 @@ public:
     }
 
     FString operator+(const FString &other);
+
+    bool operator!=(const FString &other);
 };

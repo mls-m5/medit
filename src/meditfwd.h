@@ -11,6 +11,7 @@ class FChar;
 class Position;
 class Cursor;
 class CursorRange;
+class BufferEdit;
 class IScreen;
 class IView;
 class IMode;

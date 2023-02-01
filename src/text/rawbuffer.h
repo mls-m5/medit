@@ -27,8 +27,10 @@ public:
         this->text(text);
     }
 
-    RawBuffer(std::string_view text) : RawBuffer(std::string(text)) {}
-    RawBuffer(const char *text) : RawBuffer(std::string{text}) {}
+    RawBuffer(std::string_view text)
+        : RawBuffer(std::string(text)) {}
+    RawBuffer(const char *text)
+        : RawBuffer(std::string{text}) {}
 
     void copyFrom(const RawBuffer &buffer) {
         forceThread();
@@ -144,6 +146,9 @@ public:
 
     void text(std::istream &);
     void text(std::ostream &) const;
+
+    //! Get as a continuous string and not a vector of lines
+    FString ftext() const;
 
     friend std::ostream &operator<<(std::ostream &stream,
                                     const RawBuffer &buffer) {

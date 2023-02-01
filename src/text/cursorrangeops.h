@@ -22,3 +22,6 @@ std::ostream &operator<<(std::ostream &, CursorRange);
 [[nodiscard]] CursorRange word(Cursor);
 [[nodiscard]] CursorRange line(Cursor);
 [[nodiscard]] CursorRange inner(Cursor, Utf8Char start, Utf8Char stop);
+
+/// Apply simple text change and return the beginning of the new text
+Cursor apply(const BufferEdit &edit);

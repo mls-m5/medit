@@ -1,6 +1,5 @@
-
-
 #include "text/cursorrangeops.h"
+#include "bufferedit.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
 #include <iostream>
@@ -164,4 +163,22 @@ CursorRange inner(const Cursor cursor,
     }
 
     return {++begin, end};
+}
+
+Cursor apply(const BufferEdit &edit) {
+    auto begin = edit.position;
+    auto end = begin;
+    for (size_t i = 0; i < edit.from.size(); ++i) {
+        ++end;
+    }
+
+    auto i = begin;
+
+    erase({begin, end});
+    for (auto c : edit.to) {
+        insert(c.c, i);
+        ++i;
+    }
+
+    return begin;
 }

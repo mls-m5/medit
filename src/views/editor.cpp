@@ -11,8 +11,9 @@
 Editor::~Editor() = default;
 
 Editor::Editor(std::shared_ptr<Buffer> buffer)
-    : _bufferView(std::move(buffer)), _cursor(_bufferView.buffer()),
-      _mode(createNormalMode()) {}
+    : _bufferView(std::move(buffer))
+    , _cursor(_bufferView.buffer())
+    , _mode(createNormalMode()) {}
 
 IFile *Editor::file() {
     return buffer().file();

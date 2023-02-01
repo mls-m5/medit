@@ -1,16 +1,29 @@
 #include "text/history.h"
+#include "bufferedit.h"
+#include "cursorrangeops.h"
 #include "text/buffer.h"
 
 void History::commit() {
-    //    auto diff = getDiff(_currentState, buffer);
+    // TODO: Only commit the part that change
+    auto text = _buffer.ftext();
 
-    // Todo: This is a dumb implementation, only commit changed part of file in
-    // the future
+    auto edit = BufferEdit{
+        .from = _currentState,
+        .to = text,
+        .position = _buffer.cursor({0, 0}),
+    };
 
-    auto text = _buffer.text();
-    if (_history.empty() || text != _history.back().old) {
-        // Only push changes if there is actually a change
-        _history.emplace_back(Item{std::move(text), ++_revision});
+    edit.trim();
+
+    if (edit.empty()) {
+        return;
+    }
+
+    if (text != _currentState) {
+        _history.push_back({
+            .edit = std::move(edit),
+            .revision = ++_revision,
+        });
         _currentState = _buffer.text();
 
         if (_ignoreRedoClear) {
@@ -28,17 +41,14 @@ void History::undo() {
         return;
     }
 
-    auto text = _buffer.text();
-    auto comparison = text;
-    if (_history.back().old == comparison) {
-        _redo.push_back(Item{std::move(text)});
-        _history.pop_back();
-        if (_history.empty()) {
-            return;
-        }
-    }
+    auto edit = revert(_history.back().edit);
 
-    _buffer.text(_history.back().old);
+    apply(edit);
+
+    _redo.push_back(std::move(_history.back()));
+    _history.pop_back();
+
+    ++_revision;
 }
 
 void History::redo() {
@@ -47,16 +57,10 @@ void History::redo() {
     }
 
     auto text = _buffer.text();
-
     _ignoreRedoClear = true;
+    apply(_redo.back().edit);
 
-    if (text == _redo.back().old) {
-        _redo.pop_back();
-    }
-
-    if (!_redo.empty()) {
-        _buffer.text(_redo.back().old);
-    }
+    ++_revision;
 }
 
 void History::clear() {

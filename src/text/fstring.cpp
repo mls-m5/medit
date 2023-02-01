@@ -34,6 +34,10 @@ FString FString::operator+(const FString &other) {
     return str;
 }
 
+bool FString::operator!=(const FString &other) {
+    return _content != other._content;
+}
+
 FString::operator std::string() const {
     std::string str;
     str.reserve(size());

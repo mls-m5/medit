@@ -30,9 +30,15 @@ void BufferView::draw(IScreen &screen) {
     _numberWidth = getLineNumWidth(_buffer->lines().size()) + 2;
     auto fillStr =
         FString{std::string(_numberWidth, ' '), IPalette::lineNumbers};
+
+    auto fillStrError =
+        FString{std::string(_numberWidth, ' '), IPalette::error};
     for (size_t ty = 0; ty < height(); ++ty) {
         auto l = ty + yScroll();
         if (l < buffer().lines().size()) {
+            bool hasLineDiagnostics =
+                buffer().diagnostics().hasLineDiagnostic(l - 1);
+
             auto &line = _buffer->lines().at(l);
 
             screen.draw(x() + _numberWidth, y() + ty, line);
@@ -42,10 +48,8 @@ void BufferView::draw(IScreen &screen) {
                 auto lineFormat = IPalette::lineNumbers;
 
                 auto offset = 1;
-                screen.draw(x(), y() + ty, fillStr);
-
-                bool hasLineDiagnostics =
-                    buffer().diagnostics().hasLineDiagnostic(l - 1);
+                screen.draw(
+                    x(), y() + ty, hasLineDiagnostics ? fillStrError : fillStr);
 
                 screen.draw(
                     x() + offset,
@@ -76,6 +80,7 @@ void BufferView::drawSpecial(IScreen &screen,
 
     for (size_t ty = 0; ty < height(); ++ty) {
         auto l = ty + yScroll();
+        bool isAffected = false;
         if (l < buffer().lines().size()) {
             auto line = _buffer->lines().at(l);
             if (range.begin().y() == range.end().y() &&
@@ -86,15 +91,18 @@ void BufferView::drawSpecial(IScreen &screen,
                      ++i) {
                     line.at(i).f = f;
                 }
+                isAffected = true;
             }
             else if (l > range.begin().y() && l < range.end().y()) {
                 // Selection on a full line
                 line.format(f);
+                isAffected = true;
             }
             else if (l == range.begin().y()) {
                 // Selection on first line in multi line selection
                 for (auto i = range.begin().x(); i < line.size(); ++i) {
                     line.at(i).f = f;
+                    isAffected = true;
                 }
             }
             else if (l == range.end().y()) {
@@ -102,9 +110,10 @@ void BufferView::drawSpecial(IScreen &screen,
                 for (size_t i = 0; i < range.end().x() && i < line.size();
                      ++i) {
                     line.at(i).f = f;
+                    isAffected = true;
                 }
             }
-            if (!line.empty()) {
+            if (!line.empty() && isAffected) {
                 screen.draw(x() + _numberWidth, y() + ty, line);
             }
         }
