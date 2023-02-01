@@ -3,6 +3,7 @@
 #include "files/file.h"
 #include "files/path.h"
 #include "rawbuffer.h"
+#include "text/diagnostics.h"
 #include "text/history.h"
 #include <filesystem>
 #include <memory>
@@ -56,7 +57,12 @@ public:
         return _file.get();
     }
 
+    Diagnostics &diagnostics() {
+        return _diagnostics;
+    }
+
 private:
     History _history{*this};
     std::unique_ptr<IFile> _file;
+    Diagnostics _diagnostics;
 };

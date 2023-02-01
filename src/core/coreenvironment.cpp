@@ -39,3 +39,15 @@ void CoreEnvironment::emitBufferSubscriptionEvent(BufferEvent e) {
         subscriber(e);
     }
 }
+
+void CoreEnvironment::publishDiagnostics(
+    std::filesystem::path file,
+    std::string source,
+    std::vector<Diagnostics::Diagnostic> data) {
+    for (auto &buffer : _buffers) {
+        if (buffer->path() == file) {
+            buffer->diagnostics().publish(source, std::move(data));
+            return;
+        }
+    }
+}

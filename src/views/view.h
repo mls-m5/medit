@@ -5,7 +5,9 @@
 class View : public virtual IView {
 public:
     View() = default;
-    View(size_t width, size_t height) : _width(width), _height(height) {}
+    View(size_t width, size_t height)
+        : _width(width)
+        , _height(height) {}
     View(const View &) = delete;
     View(View &&) = delete;
     View &operator=(const View &) = delete;
@@ -43,7 +45,7 @@ public:
         _height = value;
     }
 
-    bool visible() {
+    bool visible() const {
         return _visible;
     }
 

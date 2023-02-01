@@ -43,18 +43,33 @@ void BufferView::draw(IScreen &screen) {
 
                 auto offset = 1;
                 screen.draw(x(), y() + ty, fillStr);
-                screen.draw(x() + offset,
-                            y() + ty,
-                            {std::to_string(lineNum), lineFormat});
+
+                bool hasLineDiagnostics =
+                    buffer().diagnostics().hasLineDiagnostic(l - 1);
+
+                screen.draw(
+                    x() + offset,
+                    y() + ty,
+                    {std::to_string(lineNum),
+                     hasLineDiagnostics ? IPalette::error : lineFormat});
+
                 ++l;
             }
         }
     }
+
+    //    for (auto &item : buffer().diagnostics().list()) {
+    //        drawSpecial(screen,
+    //                    CursorRange{buffer(), item.range.begin,
+    //                    item.range.end}, IPalette::selection);
+
+    //        break;
+    //    }
 }
 
 void BufferView::drawSpecial(IScreen &screen,
-                             CursorRange &range,
-                             FormatType f) {
+                             const CursorRange &range,
+                             FormatType f) const {
     if (!visible()) {
         return;
     }
@@ -89,7 +104,9 @@ void BufferView::drawSpecial(IScreen &screen,
                     line.at(i).f = f;
                 }
             }
-            screen.draw(x() + _numberWidth, y() + ty, line);
+            if (!line.empty()) {
+                screen.draw(x() + _numberWidth, y() + ty, line);
+            }
         }
     }
 }

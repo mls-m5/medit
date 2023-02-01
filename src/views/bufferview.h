@@ -12,7 +12,7 @@ public:
 
     void draw(IScreen &) override;
 
-    void drawSpecial(IScreen &, CursorRange &range, FormatType f);
+    void drawSpecial(IScreen &, const CursorRange &range, FormatType f) const;
 
     Buffer &buffer();
 

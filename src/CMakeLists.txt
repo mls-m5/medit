@@ -26,6 +26,7 @@ add_library(
     text/rawbuffer.cpp
     text/buffer.cpp
     text/history.cpp
+    text/diagnostics.cpp
     views/messagebox.cpp
     views/editor.cpp
     views/locator.cpp

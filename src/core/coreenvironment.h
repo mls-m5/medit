@@ -1,6 +1,7 @@
 #pragma once
 
 #include "meditfwd.h"
+#include "text/diagnostics.h"
 #include <filesystem>
 #include <functional>
 #include <memory>
@@ -38,6 +39,10 @@ public:
     void subscribeToBufferEvents(BufferSubscriptionT f);
 
     void emitBufferSubscriptionEvent(BufferEvent e);
+
+    void publishDiagnostics(std::filesystem::path file,
+                            std::string source,
+                            std::vector<Diagnostics::Diagnostic>);
 
 private:
     std::vector<std::shared_ptr<Buffer>> _buffers;

@@ -23,6 +23,18 @@ std::string createURI(std::filesystem::path path) {
     return "file://" + std::filesystem::absolute(path).string();
 }
 
+std::filesystem::path uriToPath(lsp::URI uri) {
+    if (uri.rfind("file://", 0) != 0) {
+        return "invalid uri";
+    }
+
+    return uri.substr(7);
+}
+
+Position toMeditPosition(lsp::Position pos) {
+    return Position(pos.character - 1, pos.line - 1);
+}
+
 } // namespace
 
 using namespace lsp;
@@ -50,6 +62,26 @@ LspPlugin::LspPlugin()
             //                    env->console().cursor({0, 100000000});
             //                });
             //            }
+
+            auto bufferDiagnostics = std::vector<Diagnostics::Diagnostic>{};
+
+            for (auto &item : params.diagnostics) {
+                bufferDiagnostics.push_back(Diagnostics::Diagnostic{
+                    .source = item.source,
+                    .message = item.message,
+                    .range = {toMeditPosition(item.range.start),
+                              toMeditPosition(item.range.end)},
+                });
+            }
+
+            if (bufferDiagnostics.empty()) {
+                return;
+            }
+
+            CoreEnvironment::instance().publishDiagnostics(
+                uriToPath(params.uri),
+                params.diagnostics.front().source,
+                std::move(bufferDiagnostics));
         }});
 }
 
