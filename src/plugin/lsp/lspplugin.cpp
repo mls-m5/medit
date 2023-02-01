@@ -17,6 +17,9 @@
 namespace {
 
 std::string createURI(std::filesystem::path path) {
+    if (path.empty()) {
+        path = "/tmp/tmp.txt";
+    }
     return "file://" + std::filesystem::absolute(path).string();
 }
 
@@ -33,6 +36,21 @@ LspPlugin::LspPlugin()
         //        std::cout << "initialization response:\n";
         //        std::cout << std::setw(2) << j << std::endl;
     });
+
+    _client->subscribe(std::function{
+        [/*env = event.env*/](const PublishDiagnosticsParams &params) {
+            //            auto &console = env->console();
+
+            //            auto &consoleBuffer = console.buffer();
+
+            //            for (auto &d : params.diagnostics) {
+            //                env->context().guiQueue().addTask([text =
+            //                d.message, env] {
+            //                    env->console().buffer().pushBack(text);
+            //                    env->console().cursor({0, 100000000});
+            //                });
+            //            }
+        }});
 }
 
 LspPlugin::~LspPlugin() = default;
@@ -52,27 +70,34 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
         };
 
         _client->notify(params);
-
-        _client->subscribe(std::function{
-            [env = event.env](const PublishDiagnosticsParams &params) {
-                auto &console = env->console();
-
-                auto &consoleBuffer = console.buffer();
-
-                for (auto &d : params.diagnostics) {
-                    env->context().guiQueue().addTask([text = d.message, env] {
-                        env->console().buffer().pushBack(text);
-                        env->console().cursor({0, 100000000});
-                    });
-                }
-            }});
     }
 }
 
 void LspPlugin::registerPlugin() {
+    LspPlugin::instance();
     registerNavigation<LspNavigation>();
     registerHighlighting<LspHighlight>();
     registerCompletion<LspComplete>();
+}
+
+void LspPlugin::updateBuffer(Buffer &buffer) {
+    // TODO: Only update buffers with changed revision
+
+    auto &oldVersion = _bufferVersions[buffer.path().string()];
+
+    if (oldVersion == buffer.history().revision()) {
+        return;
+    }
+
+    oldVersion = buffer.history().revision();
+
+    auto params = DidChangeTextDocumentParams{};
+    params.textDocument.uri = createURI(buffer.path());
+    params.textDocument.version = buffer.history().revision();
+    params.contentChanges.push_back(TextDocumentContentChangeEvent{
+        .text = buffer.text(), // TODO: Only do partial updates
+    });
+    _client->notify(params);
 }
 
 void LspComplete::list(std::shared_ptr<IScope> scope,
@@ -83,6 +108,8 @@ void LspComplete::list(std::shared_ptr<IScope> scope,
     auto cursor = editor.cursor();
     params.position.line = cursor.y() + 1;
     params.position.character = cursor.x() + 1;
+
+    LspPlugin::instance().updateBuffer(scope->editor().buffer());
 
     LspPlugin::instance().client().request(
         params, [callback](lsp::CompletionList result) {
@@ -99,10 +126,21 @@ void LspComplete::list(std::shared_ptr<IScope> scope,
                 ret.push_back(ICompletionSource::CompletionItem{
                     .name = item.label, // TODO: Redo this class
                     .description = item.detail,
-                    .edit = {.range = range, .text = item.textEdit.newText},
+                    .filterText = item.filterText,
+                    .edit =
+                        {
+                            .range = range,
+                            .text = item.textEdit.newText,
+                        },
                 });
             }
             //            callback({{"hello", "there"}, {"you", "!"}});
             callback(std::move(ret));
         });
 }
+
+void LspHighlight::highlight(std::shared_ptr<IScope> scope) {
+    LspPlugin::instance().updateBuffer(scope->editor().buffer());
+}
+
+void LspHighlight::update(const IPalette &palette) {}

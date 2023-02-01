@@ -4,6 +4,7 @@
 #include "script/ienvironment.h"
 #include "syntax/ihighlight.h"
 #include "text/buffer.h"
+#include <unordered_map>
 
 namespace lsp {
 class LspClient;
@@ -27,8 +28,11 @@ public:
         return *_client;
     }
 
+    void updateBuffer(Buffer &);
+
 private:
     std::unique_ptr<lsp::LspClient> _client;
+    std::unordered_map<std::string, long> _bufferVersions;
 };
 
 class LspComplete : public ICompletionSource {
@@ -56,10 +60,8 @@ public:
         LspPlugin::instance();
         return true;
     }
-    void highlight(std::shared_ptr<IScope> env) override {}
-    void update(const IPalette &palette) override {
-        LspPlugin::instance();
-    }
+    void highlight(std::shared_ptr<IScope> env) override;
+    void update(const IPalette &palette) override;
     int priority() override {
         return 100;
     }

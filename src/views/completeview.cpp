@@ -15,8 +15,10 @@ void CompleteView::triggerShow(std::shared_ptr<IScope> env) {
     _list.visible(true);
     visible(true);
 
-    _autoComplete.populate(env);
-    updateCompletion(_currentText);
+    _list.clear();
+
+    _autoComplete.populate(env,
+                           [env, this]() { updateCompletion(_currentText); });
 }
 
 void CompleteView::updateCompletion(std::string str) {
@@ -40,7 +42,8 @@ void CompleteView::updateCompletion(std::string str) {
 }
 
 bool CompleteView::keyPress(std::shared_ptr<IScope> env) {
-    if (env->env().key().key == Key::Text || env->env().key().key == Key::Backspace ||
+    if (env->env().key().key == Key::Text ||
+        env->env().key().key == Key::Backspace ||
         env->env().key().key == Key::Delete) {
         setCursor(env->editor().cursor(), env->editor().bufferView());
     }

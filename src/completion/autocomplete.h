@@ -17,7 +17,7 @@ public:
 
     CompletionList getMatching(std::string beginning);
 
-    void populate(std::shared_ptr<IScope>);
+    void populate(std::shared_ptr<IScope>, std::function<void()> callback);
 
 private:
     CompletionList _items;

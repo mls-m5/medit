@@ -22,6 +22,7 @@ public:
     struct CompletionItem {
         std::string name;
         FString description;
+        std::string filterText;
         TextEdit edit;
     };
 

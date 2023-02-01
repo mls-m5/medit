@@ -22,8 +22,7 @@ AutoComplete::CompletionList AutoComplete::getMatching(std::string beginning) {
     CompletionList ret;
 
     for (auto &item : _items) {
-        // Match parts (this does not work that good)
-        if (item.name.find(beginning) != std::string::npos) {
+        if (item.filterText.find(beginning) != std::string::npos) {
             ret.push_back(item);
         }
     }
@@ -31,12 +30,19 @@ AutoComplete::CompletionList AutoComplete::getMatching(std::string beginning) {
     return ret;
 }
 
-void AutoComplete::populate(std::shared_ptr<IScope> scope) {
+void AutoComplete::populate(std::shared_ptr<IScope> scope,
+                            std::function<void()> callback) {
+    _items.clear();
+
     for (auto &source : _sources) {
         if (source->shouldComplete(scope)) {
-            auto cb = [this, scope](ICompletionSource::CompletionList list) {
+            auto cb = [this, scope, callback](
+                          ICompletionSource::CompletionList list) {
                 scope->env().context().guiQueue().addTask(
-                    [this, list] { this->_items = list; });
+                    [this, list, callback] {
+                        this->_items = list;
+                        callback();
+                    });
             };
             source->list(scope, cb);
             break;
