@@ -46,9 +46,7 @@ public:
 
 class LspNavigation : public INavigation {
 public:
-    bool gotoSymbol(std::shared_ptr<IScope> env) override {
-        return false;
-    }
+    bool gotoSymbol(std::shared_ptr<IScope> scope) override;
 };
 
 class LspHighlight : public IHighlight {

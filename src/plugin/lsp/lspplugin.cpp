@@ -173,7 +173,7 @@ void LspComplete::list(std::shared_ptr<IScope> scope,
     auto &editor = scope->editor();
     params.textDocument.uri = createURI(editor.path());
     auto cursor = editor.cursor();
-    params.position.line = cursor.y() + 1;
+    params.position.line = cursor.y(); // + 1;
     params.position.character = cursor.x() + 1;
 
     LspPlugin::instance().updateBuffer(scope->editor().buffer());
@@ -218,3 +218,7 @@ void LspHighlight::highlight(std::shared_ptr<IScope> scope) {
 }
 
 void LspHighlight::update(const IPalette &palette) {}
+
+bool LspNavigation::gotoSymbol(std::shared_ptr<IScope> env) {
+    return false;
+}

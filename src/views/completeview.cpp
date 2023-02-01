@@ -29,7 +29,7 @@ void CompleteView::updateCompletion(std::string str) {
     _list.clear();
     for (auto &item : values) {
         _list.addLine(FString{item.name + "     ", 0} + item.description,
-                      item.name);
+                      item.edit.text);
     }
 
     if (debug) {
