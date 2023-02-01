@@ -15,17 +15,22 @@ class CursorRange {
 
 public:
     constexpr CursorRange(RawBuffer &buffer, Position begin, Position end)
-        : _buffer(&buffer), _begin(begin), _end(end) {
+        : _buffer(&buffer)
+        , _begin(begin)
+        , _end(end) {
 
         fixOrder();
     }
 
     //! The whole buffer
     CursorRange(RawBuffer &buffer)
-        : _buffer(&buffer), _begin(buffer.begin()), _end(buffer.end()) {}
+        : _buffer(&buffer)
+        , _begin(buffer.begin())
+        , _end(buffer.end()) {}
 
     //! Convert a cursor to a empty range
-    constexpr CursorRange(Cursor both) : CursorRange(both, both) {}
+    constexpr CursorRange(Cursor both)
+        : CursorRange(both, both) {}
 
     constexpr CursorRange(Cursor begin, Cursor end)
         : CursorRange(begin.buffer(), begin, end) {}

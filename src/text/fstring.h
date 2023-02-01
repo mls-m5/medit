@@ -125,7 +125,25 @@ public:
         }
     }
 
+    FString substr(size_t start, size_t length = size_t(-1)) {
+        if (start >= _content.size()) {
+            return {};
+        }
+
+        length = std::min(_content.size() - start, length);
+
+        return {_content.begin() + start, _content.begin() + (start + length)};
+    }
+
+    std::vector<FString> split(Utf8Char c) const;
+
     FString operator+(const FString &other);
 
     bool operator!=(const FString &other);
+    bool operator==(const FString &other);
 };
+
+inline std::ostream &operator<<(std::ostream &out, const FString &str) {
+    out << std::string{str};
+    return out;
+}

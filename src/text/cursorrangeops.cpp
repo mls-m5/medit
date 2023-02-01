@@ -166,19 +166,21 @@ CursorRange inner(const Cursor cursor,
 }
 
 Cursor apply(const BufferEdit &edit) {
-    auto begin = edit.position;
-    auto end = begin;
-    for (size_t i = 0; i < edit.from.size(); ++i) {
-        ++end;
-    }
+    //    auto begin = edit.position;
+    //    auto end = begin;
+    //    for (size_t i = 0; i < edit.from.size(); ++i) {
+    //        ++end;
+    //    }
 
-    auto i = begin;
+    //    auto i = begin;
 
-    erase({begin, end});
-    for (auto c : edit.to) {
-        insert(c.c, i);
-        ++i;
-    }
+    //    erase({begin, end});
+    //    for (auto c : edit.to) {
+    //        insert(c.c, i);
+    //        ++i;
+    //    }
 
-    return begin;
+    edit.position.buffer().apply(edit);
+
+    return edit.position;
 }

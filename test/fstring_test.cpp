@@ -21,4 +21,13 @@ TEST_CASE("convert back to std::string") {
     ASSERT_EQ(s, res);
 }
 
+TEST_CASE("split") {
+    auto f = FString{"hello\nthere\n"};
+    auto split = f.split('\n');
+
+    ASSERT_EQ(split.size(), 3);
+
+    ASSERT_EQ(split.at(0), FString{"hello"});
+}
+
 TEST_SUIT_END

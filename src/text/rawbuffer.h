@@ -169,6 +169,9 @@ public:
         return _singleLine;
     }
 
+    void apply(const BufferEdit &edit);
+
+private:
     void forceThread() const;
     std::vector<FString> _lines = {""};
     bool _singleLine = false;

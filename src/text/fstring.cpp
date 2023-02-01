@@ -1,5 +1,6 @@
 
 #include "text/fstring.h"
+#include <algorithm>
 
 FString::FString(const std::string &str, FormatType f)
     : FString(std::string_view{str}, f) {}
@@ -38,6 +39,10 @@ bool FString::operator!=(const FString &other) {
     return _content != other._content;
 }
 
+bool FString::operator==(const FString &other) {
+    return _content == other._content;
+}
+
 FString::operator std::string() const {
     std::string str;
     str.reserve(size());
@@ -48,4 +53,21 @@ FString::operator std::string() const {
     }
 
     return str;
+}
+
+std::vector<FString> FString::split(Utf8Char c) const {
+    auto ret = std::vector<FString>{};
+
+    auto first = _content.begin();
+
+    auto it = decltype(first){};
+
+    for (; it = std::find(first, _content.end(), c), it != _content.end();
+         first = it, ++first) {
+        ret.push_back({first, it});
+    }
+
+    ret.push_back({first, _content.end()});
+
+    return ret;
 }

@@ -1,4 +1,7 @@
 #include "text/rawbuffer.h"
+#include "cursorops.h"
+#include "cursorrange.h"
+#include "cursorrangeops.h"
 #include "text/cursor.h"
 #include <sstream>
 
@@ -89,6 +92,41 @@ FString RawBuffer::ftext() const {
     }
 
     return ret;
+}
+
+void RawBuffer::apply(const BufferEdit &edit) {
+    auto pos = edit.position;
+
+    auto &from = edit.from;
+
+    auto oldNumLines = std::count(from.begin(), from.end(), Utf8Char{'\n'});
+
+    auto lastOldLineLength = [oldNumLines, &from] {
+        if (oldNumLines) {
+            for (size_t i = from.size() - 1; i != 0; --i) {
+                if (from.at(i) == Utf8Char{'\n'}) {
+                    return from.size() - i - 1;
+                }
+            }
+        }
+        return from.size();
+    }();
+
+    auto lines = edit.to.split('\n');
+
+    auto startStr = lineAt(edit.position.y()).substr(0, edit.position.x());
+    auto endStr =
+        lineAt(edit.position.y() + oldNumLines)
+            .substr((oldNumLines ? 0 : edit.position.x()) + lastOldLineLength);
+
+    lines.front().insert(lines.front().begin(), startStr);
+    lines.back() += endStr;
+
+    _lines.erase(_lines.begin() + edit.position.y(),
+                 _lines.begin() + (edit.position.y() + oldNumLines + 1));
+
+    _lines.insert(
+        _lines.begin() + edit.position.y(), lines.begin(), lines.end());
 }
 
 void RawBuffer::forceThread() const {
