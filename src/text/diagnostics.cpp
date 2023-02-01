@@ -20,10 +20,10 @@ void Diagnostics::publish(std::string source, std::vector<Diagnostic> data) {
     });
 }
 
-bool Diagnostics::hasLineDiagnostic(int line) {
+Diagnostics::Diagnostic *Diagnostics::findLineDiagnostic(int line) {
     for (auto &item : _list) {
         if (item.range.begin.y() == line)
-            return true;
+            return &item;
     }
-    return false;
+    return nullptr;
 }

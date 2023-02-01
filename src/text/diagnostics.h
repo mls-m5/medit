@@ -26,7 +26,7 @@ public:
     void publish(std::string source, std::vector<Diagnostics::Diagnostic> data);
 
     // TODO: Handle this better, use
-    bool hasLineDiagnostic(int line);
+    Diagnostic *findLineDiagnostic(int line);
 
     const std::vector<Diagnostic> &list() const {
         return _list;

@@ -9,6 +9,7 @@ add_library(
     windowcommands.cpp
     clangformat.cpp
     lsp/lspplugin.cpp
+    lsp/headerdetection.cpp
     )
 
 

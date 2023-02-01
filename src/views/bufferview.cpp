@@ -36,12 +36,20 @@ void BufferView::draw(IScreen &screen) {
     for (size_t ty = 0; ty < height(); ++ty) {
         auto l = ty + yScroll();
         if (l < buffer().lines().size()) {
-            bool hasLineDiagnostics =
-                buffer().diagnostics().hasLineDiagnostic(l - 1);
+            auto hasLineDiagnostics =
+                buffer().diagnostics().findLineDiagnostic(l - 1);
 
             auto &line = _buffer->lines().at(l);
 
             screen.draw(x() + _numberWidth, y() + ty, line);
+
+            if (hasLineDiagnostics) {
+                /// TODO: Fix this, just testing
+                screen.draw(
+                    x() + _numberWidth + line.size() + 2,
+                    y() + ty,
+                    FString{hasLineDiagnostics->message, IPalette::comment});
+            }
 
             if (_showLines) {
                 const auto lineNum = l + 1;

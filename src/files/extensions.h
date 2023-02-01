@@ -9,7 +9,7 @@ inline bool isCppHeader(const filesystem::path &path) {
 
 inline bool isCppSource(const filesystem::path &path) {
     auto ext = path.extension();
-    return ext == ".cpp" || ext == ".cc" || ext == ".cxx";
+    return ext == ".cpp" || ext == ".cc" || ext == ".cxx" || ext == "cppm";
 }
 
 inline bool isCSource(const filesystem::path &path) {
