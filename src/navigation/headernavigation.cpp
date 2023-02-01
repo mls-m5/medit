@@ -13,6 +13,7 @@
 namespace {
 
 std::optional<std::string> getIncludeName(IScope &env) {
+    // TODO: This function has been broken
     auto cursor = env.editor().cursor();
     auto line = ::line(cursor);
     {
@@ -44,16 +45,16 @@ std::optional<std::string> getIncludeName(IScope &env) {
 }
 
 bool openIncludeByName(std::shared_ptr<IScope> scope, std::string name) {
-    auto files = scope->env().project().files();
+    //    auto files = scope->env().project().files();
 
-    for (auto &path : files) {
-        if (path.string().find(name) != std::string::npos) {
-            auto localEnvironment = std::make_shared<Scope>(scope);
-            localEnvironment->set("path", path.string());
-            localEnvironment->run(Command{"editor.open"});
-            return true;
-        }
-    }
+    //    for (auto &path : files) {
+    //        if (path.string().find(name) != std::string::npos) {
+    //            auto localEnvironment = std::make_shared<Scope>(scope);
+    //            localEnvironment->set("path", path.string());
+    //            localEnvironment->run(Command{"editor.open"});
+    //            return true;
+    //        }
+    //    }
 
     return false;
 }

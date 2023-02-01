@@ -113,9 +113,9 @@ struct GuiScreen::Buffer {
                  SDL_WINDOWPOS_CENTERED,
                  width * 20,
                  height * 20,
-                 SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN},
-          renderer{window, SDL_RENDERER_ACCELERATED, SDL_RENDERER_PRESENTVSYNC},
-          screen{width, height, fontPath(), 18} {
+                 SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN}
+        , renderer{window, SDL_RENDERER_ACCELERATED, SDL_RENDERER_PRESENTVSYNC}
+        , screen{width, height, fontPath(), 14} {
         styles.resize(16);
         resize(width, height);
     }
@@ -300,7 +300,8 @@ void GuiScreen::cursor(size_t x, size_t y) {
     _buffer->cursorPos.y(y);
 }
 
-GuiScreen::GuiScreen() : _buffer(std::make_unique<Buffer>(80, 40)) {
+GuiScreen::GuiScreen()
+    : _buffer(std::make_unique<Buffer>(80, 40)) {
     sdl::startTextInput();
 }
 

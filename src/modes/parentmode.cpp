@@ -6,6 +6,7 @@
 std::shared_ptr<IMode> createParentMode() {
     auto map = KeyMap{{
         {KeyEvent{Key::F2}, {"editor.goto_definition"}},
+        //        {{"gd"}, {"editor.goto_definition"}},
         {KeyEvent{Key::F4}, {"editor.switch_header"}},
         {KeyEvent{Key::Home}, {"editor.home"}},
         {KeyEvent{Key::End}, {"editor.end"}},

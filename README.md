@@ -38,6 +38,12 @@ Todo:
 - [ ] Mouse control
   - [ ] Move cursor with mouse
   - [ ] Select with mouse drag
+  
+
+
+# Prioritized changes
+- [ ] Faster navigation
+- [ ] Highlighting 
 
 
 ## Requirements

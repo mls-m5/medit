@@ -50,7 +50,9 @@ struct MainWindow : public Window {
 
     void updateLocatorBuffer();
 
-    void open(filesystem::path path);
+    void open(filesystem::path path,
+              std::optional<int> x = {},
+              std::optional<int> y = {});
 
     //! Initialize palette colors
     void updatePalette(IScreen &screen);

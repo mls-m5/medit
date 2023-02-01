@@ -115,7 +115,18 @@ void MainWindow::addCommands(IScreen &screen) {
     _scope->addCommand("editor.open", [this](std::shared_ptr<IScope> env) {
         auto path = env->get("path");
         if (path) {
-            open(path->value());
+
+            std::optional<int> ox;
+            std::optional<int> oy;
+
+            if (auto x = env->get("x")) {
+                ox = std::stoi(x->value());
+            }
+            if (auto y = env->get("y")) {
+                oy = std::stoi(y->value());
+            }
+
+            open(path->value(), ox, oy);
         }
     });
 
@@ -267,7 +278,9 @@ void MainWindow::updateLocatorBuffer() {
     }
 }
 
-void MainWindow::open(filesystem::path path) {
+void MainWindow::open(filesystem::path path,
+                      std::optional<int> x,
+                      std::optional<int> y) {
     if (path.empty()) {
         return;
     }
@@ -276,9 +289,22 @@ void MainWindow::open(filesystem::path path) {
 
     editor.buffer(_env->core().open(path, _env));
     editor.bufferView().yScroll(0);
+
+    {
+        auto cur = editor.cursor();
+        if (x) {
+            cur.x(*x);
+        }
+        if (y) {
+            cur.y(*y);
+        }
+        editor.cursor(cur);
+    }
     updateLocatorBuffer();
 
     updateHighlighting(editor);
+
+    _env->context().redrawScreen();
 
     _scope->run({"window.title"});
 }

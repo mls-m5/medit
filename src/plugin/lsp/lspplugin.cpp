@@ -11,7 +11,9 @@
 #include "registerdefaultplugins.h"
 #include "script/ienvironment.h"
 #include "script/iscope.h"
+#include "script/scope.h"
 #include "views/editor.h"
+#include <iostream>
 
 // TODO: Tidy up this file
 
@@ -51,6 +53,17 @@ std::filesystem::path locateCompileCommands() {
     }
 
     return {};
+}
+
+lsp::Position meditCursorToPosition(Cursor cursor) {
+    auto pos = lsp::Position{};
+    pos.line = cursor.y();      // + 1;
+    pos.character = cursor.x(); // + 1;
+    return pos;
+}
+
+Position clangPositionToLspPosition(lsp::Position pos) {
+    return Position(pos.character, pos.line);
 }
 
 } // namespace
@@ -220,5 +233,31 @@ void LspHighlight::highlight(std::shared_ptr<IScope> scope) {
 void LspHighlight::update(const IPalette &palette) {}
 
 bool LspNavigation::gotoSymbol(std::shared_ptr<IScope> env) {
-    return false;
+    if (!shouldProcessFileWithClang(env->editor().path())) {
+        return false;
+    }
+
+    auto params = TypeDefinitionParams{};
+    params.textDocument.uri = createURI(env->editor().buffer().path());
+    params.position = meditCursorToPosition(env->editor().cursor());
+    LspPlugin::instance().client().request(
+        params, [env](const std::vector<Location> &locations) {
+            if (locations.empty()) {
+                return;
+            }
+
+            env->env().context().guiQueue().addTask([env, locations] {
+                auto localEnvironment = std::make_shared<Scope>(env);
+                localEnvironment->set(
+                    "path", uriToPath(locations.front().uri).string());
+
+                auto pos =
+                    clangPositionToLspPosition(locations.front().range.start);
+
+                localEnvironment->set("x", std::to_string(pos.x()));
+                localEnvironment->set("y", std::to_string(pos.y()));
+                localEnvironment->run(Command{"editor.open"});
+            });
+        });
+    return true;
 }
