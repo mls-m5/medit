@@ -90,6 +90,7 @@ Cursor end(Cursor cursor) {
 }
 
 Cursor insert(Utf8Char c, Cursor cur) {
+    cur = fix(cur);
     cur.buffer().apply({"", {1, c}, cur});
 
     return right(cur);

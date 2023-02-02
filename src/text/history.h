@@ -15,10 +15,19 @@ public:
         BufferEdit edit;
         long revision;
 
+        bool isMajor = false;
+
         void trim();
     };
 
+    //! Add the last change to the history
+    //! Replace this with a function that only takes the specific changes
     void commit();
+
+    //! Remember that the last change was a change you might want to go back to
+    void markMajor();
+
+    void undoMajor();
 
     void undo();
     void redo();
@@ -34,13 +43,11 @@ public:
 private:
     long _revision = 1;
 
-    FString _currentState;
+    FString _currentState; // TODO: Remove this variable
     Buffer &_buffer;
 
     std::vector<Item> _history;
     std::vector<Item> _redo;
-
-    bool _ignoreRedoClear = false;
 
     friend RawBuffer;
 };

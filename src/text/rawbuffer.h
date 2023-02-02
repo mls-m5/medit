@@ -78,12 +78,14 @@ public:
     //        isChanged(true);
     //    }
 
-    [[deprecated]] void pushBack(FString string = {}) {
+    /// Use apply() instead
+    [[deprecated("use apply")]] void pushBack(FString string = {}) {
         //        forceThread();
         _lines.push_back(std::move(string));
         isChanged(true);
     }
 
+    /// Use apply() instead
     [[deprecated]] void deleteLine(size_t l, size_t numLines = 1) {
         //        forceThread();
         if (numLines == 0) {

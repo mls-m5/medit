@@ -29,6 +29,7 @@ public:
     Buffer(FString str, bool isSingleLine = false)
         : _raw{str} {
         _raw.singleLine(isSingleLine);
+        _history.markMajor();
     }
 
     History &history() {
@@ -45,6 +46,7 @@ public:
             file->load(buffer->_raw);
         }
         buffer->_file = std::move(file);
+        buffer->_history.clear();
         return buffer;
     }
 
@@ -159,7 +161,9 @@ public:
 
     Cursor apply(BufferEdit edit) {
         _tv();
-        return _raw.apply(std::move(edit));
+        auto cur = _raw.apply(std::move(edit));
+        _history.commit();
+        return cur;
     }
 
     [[nodiscard]] const FString &lineAtConst(size_t index) const {
@@ -168,10 +172,12 @@ public:
 
     void pushBack(FString string = {}) {
         _raw.pushBack(string);
+        _history.commit();
     }
 
     void deleteLine(size_t l, size_t numLines = 1) {
         _raw.deleteLine(l, numLines);
+        _history.commit();
     }
 
     bool empty() const {
@@ -180,6 +186,8 @@ public:
 
     void text(std::string str) {
         _raw.text(std::move(str));
+        _history.commit();
+        _history.markMajor();
     }
 
     void text(std::string_view str) {
@@ -212,10 +220,18 @@ public:
     }
 
 private:
+    // Function history class uses
+    void applyWithoutHistory(BufferEdit edit) {
+        _tv();
+        _raw.apply(std::move(edit));
+    }
+
     History _history{*this};
     std::unique_ptr<IFile> _file;
     Diagnostics _diagnostics;
     ThreadValidation _tv{"gui thread"};
 
     RawBuffer _raw;
+
+    friend History;
 };

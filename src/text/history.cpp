@@ -1,6 +1,5 @@
 #include "text/history.h"
 #include "bufferedit.h"
-#include "cursorrangeops.h"
 #include "text/buffer.h"
 
 void History::commit() {
@@ -26,13 +25,31 @@ void History::commit() {
         });
         _currentState = _buffer.text();
 
-        if (_ignoreRedoClear) {
-            // Ignore one commit after a redo is done
-            _ignoreRedoClear = false;
-        }
-        else {
-            _redo.clear();
-        }
+        //        if (_ignoreRedoClear) {
+        //            // Ignore one commit after a redo is done
+        //            _ignoreRedoClear = false;
+        //        }
+        //        else {
+        _redo.clear();
+        //        }
+    }
+}
+
+void History::markMajor() {
+    if (_history.empty()) {
+        commit();
+    }
+    if (_history.empty()) {
+        return;
+    }
+    _history.back().isMajor = true;
+}
+
+void History::undoMajor() {
+    undo();
+
+    while (!_history.empty() && !_history.back().isMajor) {
+        undo();
     }
 }
 
@@ -43,10 +60,12 @@ void History::undo() {
 
     auto edit = revert(_history.back().edit);
 
-    _buffer.apply(edit);
+    _buffer.applyWithoutHistory(edit);
 
     _redo.push_back(std::move(_history.back()));
     _history.pop_back();
+
+    _currentState = _buffer.text();
 
     ++_revision;
 }
@@ -57,8 +76,14 @@ void History::redo() {
     }
 
     auto text = _buffer.text();
-    _ignoreRedoClear = true;
-    _buffer.apply(_redo.back().edit);
+    //    _ignoreRedoClear = true;
+    _buffer.applyWithoutHistory(_redo.back().edit);
+
+    _history.push_back(std::move(_redo.back()));
+
+    _redo.pop_back();
+
+    _currentState = _buffer.text();
 
     ++_revision;
 }
@@ -66,4 +91,5 @@ void History::redo() {
 void History::clear() {
     _history.clear();
     _redo.clear();
+    _currentState = _buffer.text();
 }

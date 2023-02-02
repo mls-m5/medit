@@ -105,7 +105,7 @@ void Editor::mode(std::shared_ptr<IMode> mode) {
         _mode->exit(*this);
     }
     _mode = std::move(mode);
-    buffer().history().commit();
+    buffer().history().markMajor();
     _mode->start(*this);
 }
 
@@ -120,7 +120,7 @@ void Editor::showLines(bool value) {
 bool Editor::keyPress(std::shared_ptr<IScope> env) {
     if (_mode) {
         if (_mode->keyPress(env)) {
-            buffer().history().commit();
+            //            buffer().history().markMajor();
             return true;
         }
         else {
