@@ -175,10 +175,10 @@ public:
         _history.commit();
     }
 
-    void deleteLine(size_t l, size_t numLines = 1) {
-        _raw.deleteLine(l, numLines);
-        _history.commit();
-    }
+    //    void deleteLine(size_t l, size_t numLines = 1) {
+    //        _raw.deleteLine(l, numLines);
+    //        _history.commit();
+    //    }
 
     bool empty() const {
         return _raw.empty();

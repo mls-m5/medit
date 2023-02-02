@@ -112,6 +112,11 @@ TEST_CASE("delete line") {
     }
     {
         auto buffer = Buffer{testText};
+        deleteLine({buffer, 1, 1});
+        ASSERT_EQ(buffer.text(), resText1);
+    }
+    {
+        auto buffer = Buffer{testText};
         deleteLine({buffer, 0, 3});
         ASSERT_EQ(buffer.text(), resText2);
     }

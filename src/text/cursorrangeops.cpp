@@ -131,3 +131,11 @@ CursorRange inner(const Cursor cursor,
 CursorRange all(Buffer &buffer) {
     return {buffer.begin(), buffer.end()};
 }
+
+Cursor replace(CursorRange range, FString str) {
+    return apply(BufferEdit{
+        content(range),
+        std::move(str),
+        range.begin(),
+    });
+}

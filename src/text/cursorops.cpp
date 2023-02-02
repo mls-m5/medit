@@ -113,7 +113,8 @@ Cursor deleteLine(Cursor cursor) {
         return {cursor.buffer()};
     }
     cursor = fix(cursor);
-    cursor.buffer().deleteLine(cursor.y());
+    erase(CursorRange{left(home(cursor)), end(cursor)});
+    //    cursor.buffer().deleteLine(cursor.y());
     return cursor;
 }
 

@@ -10,7 +10,8 @@
 
 std::string toString(CursorRange range);
 
-Cursor erase(CursorRange range);
+Cursor replace(CursorRange, FString);
+Cursor erase(CursorRange);
 
 void format(CursorRange, FormatType);
 

@@ -2,7 +2,8 @@
 #include "text/buffer.h"
 #include <fstream>
 
-File::File(filesystem::path path) : _path(path) {}
+File::File(filesystem::path path)
+    : _path(path) {}
 
 void File::load(RawBuffer &buffer) {
     std::ifstream file(_path);

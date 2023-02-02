@@ -86,19 +86,20 @@ public:
     }
 
     /// Use apply() instead
-    [[deprecated]] void deleteLine(size_t l, size_t numLines = 1) {
-        //        forceThread();
-        if (numLines == 0) {
-            return;
-        }
-        else if (_lines.size() > 1) {
-            _lines.erase(_lines.begin() + l, _lines.begin() + l + numLines);
-        }
-        else {
-            _lines.front().clear();
-        }
-        isChanged(true);
-    }
+    //    [[deprecated]] void deleteLine(size_t l, size_t numLines = 1) {
+    //        //        forceThread();
+    //        if (numLines == 0) {
+    //            return;
+    //        }
+    //        else if (_lines.size() > 1) {
+    //            _lines.erase(_lines.begin() + l, _lines.begin() + l +
+    //            numLines);
+    //        }
+    //        else {
+    //            _lines.front().clear();
+    //        }
+    //        isChanged(true);
+    //    }
 
     bool isChanged() const {
         return _changedTime > _savedTime;
