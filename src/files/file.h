@@ -10,8 +10,8 @@ class File : public IFile {
 public:
     File(filesystem::path path);
 
-    void load(RawBuffer &) override;
-    void save(const RawBuffer &) override;
+    void load(Buffer &) override;
+    void save(const Buffer &) override;
     std::string representation() const override;
     filesystem::path path() const override;
 };

@@ -5,7 +5,7 @@
 File::File(filesystem::path path)
     : _path(path) {}
 
-void File::load(RawBuffer &buffer) {
+void File::load(Buffer &buffer) {
     std::ifstream file(_path);
     if (file.is_open()) {
         file >> buffer;
@@ -13,7 +13,7 @@ void File::load(RawBuffer &buffer) {
     }
 }
 
-void File::save(const RawBuffer &buffer) {
+void File::save(const Buffer &buffer) {
     std::ofstream{_path} << buffer << "\n";
 }
 

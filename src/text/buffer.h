@@ -20,15 +20,15 @@ public:
     Buffer &operator=(Buffer &&) = delete;
 
     Buffer(bool isSingleLine) {
-        _raw.singleLine(isSingleLine);
+        _raw.isSingleLine(isSingleLine);
     }
 
     Buffer(const char *str, bool isSingleLine = false)
         : Buffer{FString{str}, isSingleLine} {}
 
-    Buffer(FString str, bool isSingleLine = false)
-        : _raw{str} {
-        _raw.singleLine(isSingleLine);
+    Buffer(FString str, bool isSingleLine = false) {
+        text(str);
+        _raw.isSingleLine(isSingleLine);
         _history.markMajor();
     }
 
@@ -43,7 +43,7 @@ public:
 
         auto file = std::make_unique<File>(path);
         if (std::filesystem::exists(file->path())) {
-            file->load(buffer->_raw);
+            file->load(*buffer);
         }
         buffer->_file = std::move(file);
         buffer->_history.clear();
@@ -53,7 +53,7 @@ public:
     void save() {
         _tv();
         if (_file) {
-            _file->save(_raw);
+            _file->save(*this);
             _raw.isChanged(false);
         }
     }
@@ -61,7 +61,7 @@ public:
     void load() {
         _tv();
         if (_file) {
-            _file->load(_raw);
+            _file->load(*this);
             _raw.isChanged(false);
         }
     }
@@ -90,9 +90,17 @@ public:
         return _raw.ftext();
     }
 
-    [[nodiscard]] auto text() const {
-        _tv();
-        return _raw.text();
+    //    [[nodiscard]] auto text() const {
+    //        _tv();
+    //        return _raw.text();
+    //    }
+
+    [[nodiscard]] std::string text() const {
+        std::ostringstream ss;
+
+        text(ss);
+
+        return ss.str();
     }
 
     [[nodiscard]] const RawBuffer &raw() const {
@@ -104,7 +112,7 @@ public:
         _raw.isColorsOld(value);
     }
 
-    [[nodiscard]] const bool isColorsOld() const {
+    [[nodiscard]] bool isColorsOld() const {
         return _raw.isColorsOld();
     }
 
@@ -154,11 +162,6 @@ public:
         return _raw.lines();
     }
 
-    //    void insert(size_t index, FString string) {
-    //        _tv();
-    //        _raw.insert(index, std::move(string));
-    //    }
-
     Cursor apply(BufferEdit edit) {
         _tv();
         auto cur = _raw.apply(std::move(edit));
@@ -167,35 +170,29 @@ public:
     }
 
     [[nodiscard]] const FString &lineAtConst(size_t index) const {
-        return _raw.lineAtConst(index);
+        return _raw.lineAt(index);
     }
 
-    void pushBack(FString string = {}) {
-        _raw.pushBack(string);
-        _history.commit();
-    }
-
-    //    void deleteLine(size_t l, size_t numLines = 1) {
-    //        _raw.deleteLine(l, numLines);
-    //        _history.commit();
-    //    }
+    void pushBack(FString string = {});
 
     bool empty() const {
         return _raw.empty();
     }
 
     void text(std::string str) {
-        _raw.text(std::move(str));
-        _history.commit();
-        _history.markMajor();
+        std::istringstream ss{std::move(str)};
+
+        text(ss);
     }
 
     void text(std::string_view str) {
-        _raw.text(std::string{str});
+        text(std::string{str});
     }
 
     void text(std::istream &in) {
         _raw.text(in);
+        _history.commit();
+        _history.markMajor();
     }
 
     void text(std::ostream &out) const {
@@ -203,7 +200,7 @@ public:
     }
 
     auto singleLine() const {
-        return _raw.singleLine();
+        return _raw.isSingleLine();
     }
 
     // Does not affect
@@ -217,6 +214,17 @@ public:
 
     void isChanged(bool value) {
         _raw.isChanged(value);
+    }
+
+    [[deprecated]] friend std::ostream &operator<<(std::ostream &stream,
+                                                   const Buffer &buffer) {
+        buffer.text(stream);
+        return stream;
+    }
+
+    friend std::istream &operator>>(std::istream &stream, Buffer &buffer) {
+        buffer.text(stream);
+        return stream;
     }
 
 private:

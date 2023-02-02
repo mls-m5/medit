@@ -5,22 +5,50 @@
 #include "text/cursor.h"
 #include <sstream>
 
-std::string RawBuffer::text() const {
-    std::ostringstream ss;
-
-    text(ss);
-
-    return ss.str();
+const std::vector<FString> &RawBuffer::lines() const {
+    return _lines;
 }
 
-void RawBuffer::text(std::string str) {
-    std::istringstream ss{std::move(str)};
+bool RawBuffer::empty() const {
+    return _lines.empty() || (_lines.size() == 0 && _lines.front().empty());
+}
 
-    text(ss);
+const FString &RawBuffer::lineAt(size_t index) const {
+    return _lines.at(index);
+}
+
+bool RawBuffer::isChanged() const {
+    return _changedTime > _savedTime;
+}
+
+void RawBuffer::isChanged(bool value) {
+    if (value) {
+        _changedTime = std::chrono::high_resolution_clock::now();
+    }
+    else {
+        _savedTime = std::chrono::high_resolution_clock::now();
+    }
+}
+
+void RawBuffer::isColorsOld(bool value) {
+    if (value) {
+    }
+    else {
+        _formattedTime = std::chrono::high_resolution_clock ::now();
+    }
+}
+
+bool RawBuffer::isColorsOld() const {
+    return _formattedTime < _changedTime;
+}
+
+void RawBuffer::clear() {
+    _lines.clear();
+    _lines.push_back({});
+    isChanged(true);
 }
 
 void RawBuffer::text(std::istream &stream) {
-    //    forceThread();
     isChanged(true);
     _lines.clear();
 
@@ -30,7 +58,6 @@ void RawBuffer::text(std::istream &stream) {
 }
 
 void RawBuffer::text(std::ostream &stream) const {
-    //    forceThread();
     if (_lines.empty()) {
         return;
     }
@@ -74,9 +101,9 @@ Cursor RawBuffer::apply(BufferEdit edit) {
 
     auto newLines = edit.to.split('\n');
 
-    auto startStr = lineAt(edit.position.y()).substr(0, edit.position.x());
+    auto startStr = _lines.at(edit.position.y()).substr(0, edit.position.x());
     auto endStr =
-        lineAt(edit.position.y() + oldNumLines)
+        _lines.at(edit.position.y() + oldNumLines)
             .substr((oldNumLines ? 0 : edit.position.x()) + lastOldLineLength);
 
     auto ret = edit.position;
@@ -106,7 +133,7 @@ void RawBuffer::format(const CursorRange &range, FormatType f) {
         return;
     }
 
-    auto &line = lineAt(range.begin().y());
+    auto &line = _lines.at(range.begin().y());
 
     for (size_t i = range.begin().x(); i < range.end().x(); ++i) {
         line.at(i).f = f;

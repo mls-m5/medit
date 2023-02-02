@@ -137,7 +137,7 @@ Cursor split(Cursor cursor) {
     auto &buffer = cursor.buffer();
     auto &lines = cursor.buffer().lines();
     if (lines.empty()) {
-        cursor.buffer().pushBack();
+        insert('\n', cursor.buffer().end());
     }
 
     if (cursor.y() >= lines.size()) {
