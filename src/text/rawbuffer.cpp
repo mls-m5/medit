@@ -60,6 +60,9 @@ void RawBuffer::apply(BufferEdit edit) {
 
     auto lastOldLineLength = [oldNumLines, &from] {
         if (oldNumLines) {
+            if (from.back() == Utf8Char{'\n'}) {
+                return size_t{0};
+            }
             for (size_t i = from.size() - 1; i != 0; --i) {
                 if (from.at(i) == Utf8Char{'\n'}) {
                     return from.size() - i - 1;

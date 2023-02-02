@@ -120,17 +120,19 @@ bool operator==(CursorRange range, std::string_view str) {
     }
 }
 
-// std::ostream &operator<<(std::ostream &stream, CursorRange range) {
-//     for (auto c : range) {
-//         if (c) {
-//             stream.write(&c->c.front(), c->c.size());
-//         }
-//         else {
-//             stream << "\n";
-//         }
-//     }
-//     return stream;
-// }
+std::ostream &operator<<(std::ostream &stream, CursorRange range) {
+    stream << content(range);
+
+    //     for (auto c : range) {
+    //         if (c) {
+    //             stream.write(&c->c.front(), c->c.size());
+    //         }
+    //         else {
+    //             stream << "\n";
+    //         }
+    //     }
+    return stream;
+}
 
 std::string toString(CursorRange range) {
     return content(range);

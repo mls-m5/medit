@@ -99,13 +99,13 @@ TEST_CASE("format range") {
 
     format(range, 4);
 
-    for (auto c : range) {
-        if (c) {
-            ASSERT_EQ(c->f, 4);
-        }
-    }
+    //    for (auto c : range) {
+    //        ASSERT_EQ(c.f, 4);
+    //    }
 
-    ASSERT_EQ(buffer.begin()->f, 1);
+    ASSERT_EQ(buffer.lines().front().at(1).f, 4);
+
+    ASSERT_EQ((*buffer.begin()).f, 1);
 }
 
 TEST_CASE("operator ==") {

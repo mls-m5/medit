@@ -91,22 +91,8 @@ Cursor end(Cursor cursor) {
 
 Cursor insert(Utf8Char c, Cursor cur) {
     cur.buffer().apply({"", {1, c}, cur});
-    //    auto &lines = cur.buffer().lines();
-    //    if (lines.empty()) {
-    //        cur.buffer().pushBack();
-    //    }
-    //    cur = fix(cur);
-    //    if (c == '\n') {
-    //        return split(cur);
-    //    }
-    //    else {
-    //        auto &line = cur.buffer().lineAt(cur.y());
-    //        line.insert(cur.x(), c);
-    //        //        colorize(line);
-    //        cur.x(cur.x() + 1);
-    //    }
 
-    return cur;
+    return right(cur);
 }
 
 Cursor erase(Cursor cursor) {
@@ -131,10 +117,14 @@ Cursor erase(Cursor cursor) {
     //        cursor.x(cursor.x() - 1);
     //    }
 
+    if (cursor.x() == 0 && cursor.y() == 0) {
+        return cursor;
+    }
+
     //     TODO: Continue here
-    auto end = cursor;
-    ++end;
-    end = fix(end);
+    auto end = fix(cursor);
+    cursor = left(cursor);
+    //    end = fix(end);
     erase(CursorRange{cursor, end});
 
     return cursor;
@@ -151,19 +141,23 @@ Cursor deleteLine(Cursor cursor) {
 
 Cursor join(Cursor cursor) {
     auto &buffer = cursor.buffer();
-    auto &lines = buffer.lines();
+    {
+        auto &lines = buffer.lines();
 
-    cursor = end(cursor);
-
-    if (lines.size() <= cursor.y() + 1) {
-        return cursor;
+        if (lines.size() <= cursor.y() + 1) {
+            return cursor;
+        }
     }
+
+    //    cursor = end(cursor);
+
+    auto beginLine = Cursor{buffer, 0, cursor.y() + 1};
 
     //    cursor = end(cursor);
 
     //    auto newLine = Utf8Char{'\n'};
     //    if (content(cursor) == newLine) {
-    erase(cursor);
+    return erase(beginLine);
     //    }
 
     //    auto &line1 = buffer.lineAtConst(cursor.y());
@@ -175,8 +169,7 @@ Cursor join(Cursor cursor) {
 
     //    return {cursor.buffer(), x, cursor.y()};
 
-    ++cursor;
-    return cursor;
+    //    return cursor;
 }
 
 Cursor split(Cursor cursor) {
@@ -240,7 +233,7 @@ Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
 
     cursor.x(indentationStr.size());
 
-    auto oldIndentation = indentationStr;
+    //    auto oldIndentation = indentationStr;
 
     if (!lineAbove.empty() && lineAbove.at(lineAbove.size() - 1).c == '{') {
         indentationStr += autoIndentString;
@@ -248,7 +241,7 @@ Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
     }
 
     auto edit = BufferEdit{
-        oldIndentation,
+        "",
         indentationStr,
         {cursor.buffer(), 0, cursor.y()},
     };

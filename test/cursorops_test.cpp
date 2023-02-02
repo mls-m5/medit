@@ -18,6 +18,18 @@ TEST_CASE("remove character") {
     ASSERT_EQ(buffer.text(), resultText);
 }
 
+TEST_CASE("insert") {
+    const std::string_view testText = "apa";
+    const std::string_view resultText = "apna";
+
+    Buffer buffer{testText};
+
+    auto cur = insert('n', {buffer, 2, 0});
+
+    ASSERT_EQ(buffer.text(), resultText);
+    ASSERT_EQ(cur.x(), 3);
+}
+
 TEST_CASE("remove character on second line") {
     const std::string_view testText = "apa bepa\n bearne";
     const std::string_view resultText = "apa bepa\n barne";
