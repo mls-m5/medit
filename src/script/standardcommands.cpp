@@ -103,7 +103,7 @@ CommandList editorCommands = {
         [](std::shared_ptr<IScope> scope) {
             auto &e = scope->editor();
             auto cursor = e.cursor();
-            auto line = e.buffer().lineAtConst(cursor.y());
+            auto line = e.buffer().lineAt(cursor.y());
             scope->env().registers().save(
                 standardRegister, std::string{line}, true);
             scope->editor().clearSelection();
@@ -114,7 +114,7 @@ CommandList editorCommands = {
         [](std::shared_ptr<IScope> scope) {
             auto &e = scope->editor();
             auto cursor = e.cursor();
-            auto line = e.buffer().lineAtConst(cursor.y());
+            auto line = e.buffer().lineAt(cursor.y());
             scope->env().registers().save(
                 standardRegister, std::string{line}, true);
             e.cursor(deleteLine(e.cursor()));
@@ -125,7 +125,7 @@ CommandList editorCommands = {
         [](std::shared_ptr<IScope> scope) {
             auto &e = scope->editor();
             auto cursor = e.cursor();
-            auto line = e.buffer().lineAtConst(cursor.y());
+            auto line = e.buffer().lineAt(cursor.y());
             scope->env().registers().save(
                 standardRegister, std::string{line}, true);
             auto range = CursorRange{home(cursor), end(cursor)};

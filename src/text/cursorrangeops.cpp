@@ -13,7 +13,7 @@ std::vector<FString> contentLines(CursorRange range) {
     auto &buffer = begin.buffer();
 
     if (begin.y() == end.y()) {
-        auto line = buffer.lineAtConst(begin.y());
+        auto line = buffer.lineAt(begin.y());
         return {{line.begin() + begin.x(), line.begin() + end.x()}};
     }
 

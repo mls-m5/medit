@@ -333,27 +333,28 @@ void MainWindow::updateHighlighting(Editor &editor) {
                 auto &queue = _env->context().guiQueue();
                 auto &editor = _scope->editor();
 
-                if (editor.buffer().isColorsOld()) {
-                    queue.addTask([this, scope = _scope] {
-                        auto &editor = scope->editor();
-                        for (auto &highlight : _highlighting) {
-                            if (highlight->shouldEnable(editor.path())) {
-                                highlight->highlight(scope);
+                queue.addTask(
+                    [this, scope = _scope, &buffer = editor.buffer()] {
+                        if (buffer.isColorsOld()) {
+                            auto &editor = scope->editor();
+                            for (auto &highlight : _highlighting) {
+                                if (highlight->shouldEnable(editor.path())) {
+                                    highlight->highlight(scope);
 
-                                editor.buffer().isColorsOld(false);
-                                break;
+                                    editor.buffer().isColorsOld(false);
+                                    break;
+                                }
                             }
-                        }
 
-                        for (auto &annotation : _annotation) {
-                            if (annotation->shouldEnable(editor.path())) {
-                                annotation->annotate(scope);
-                                break;
+                            for (auto &annotation : _annotation) {
+                                if (annotation->shouldEnable(editor.path())) {
+                                    annotation->annotate(scope);
+                                    break;
+                                }
                             }
+                            _env->context().redrawScreen();
                         }
-                        _env->context().redrawScreen();
                     });
-                }
             });
     }
 }

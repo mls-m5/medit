@@ -13,7 +13,7 @@ void toggleComments(std::shared_ptr<IScope> env) {
     auto stopLine = selection.end().y();
 
     auto hasComment = [&buffer](size_t i) {
-        auto &line = buffer.lineAtConst(i);
+        auto &line = buffer.lineAt(i);
         int slashCount = 0;
         for (auto fc : line) {
             auto c = fc.c.at(0);
@@ -48,7 +48,7 @@ void toggleComments(std::shared_ptr<IScope> env) {
     //    if (totalHasComment) {
     //        // Remove one layer of comments
     //        for (size_t i = startLine; i <= stopLine; ++i) {
-    //            auto &line = buffer.lineAtConst(i);
+    //            auto &line = buffer.lineAt(i);
     //            for (size_t col = 2; col < line.size(); ++col) {
     //                if (line.at(col - 2).c == '/' && line.at(col - 1).c ==
     //                '/') {

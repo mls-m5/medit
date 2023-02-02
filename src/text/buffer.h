@@ -38,35 +38,15 @@ public:
     }
 
     [[nodiscard]] static std::unique_ptr<Buffer> open(
-        std::filesystem::path path) {
-        auto buffer = std::make_unique<Buffer>();
+        std::filesystem::path path);
 
-        auto file = std::make_unique<File>(path);
-        if (std::filesystem::exists(file->path())) {
-            file->load(*buffer);
-        }
-        buffer->_file = std::move(file);
-        buffer->_history.clear();
-        return buffer;
-    }
+    void save();
 
-    void save() {
-        _tv();
-        if (_file) {
-            _file->save(*this);
-            _raw.isChanged(false);
-        }
-    }
-
-    void load() {
-        _tv();
-        if (_file) {
-            _file->load(*this);
-            _raw.isChanged(false);
-        }
-    }
+    /// Reload from buffers used file
+    void load();
 
     [[nodiscard]] Path path() {
+        _tv();
         if (_file) {
             return _file->path();
         }
@@ -90,18 +70,8 @@ public:
         return _raw.ftext();
     }
 
-    //    [[nodiscard]] auto text() const {
-    //        _tv();
-    //        return _raw.text();
-    //    }
-
-    [[nodiscard]] std::string text() const {
-        std::ostringstream ss;
-
-        text(ss);
-
-        return ss.str();
-    }
+    /// Get content as std::string
+    [[nodiscard]] std::string text() const;
 
     [[nodiscard]] const RawBuffer &raw() const {
         _tv();
@@ -109,10 +79,12 @@ public:
     }
 
     void isColorsOld(bool value) {
+        _tv();
         _raw.isColorsOld(value);
     }
 
     [[nodiscard]] bool isColorsOld() const {
+        _tv();
         return _raw.isColorsOld();
     }
 
@@ -169,17 +141,20 @@ public:
         return cur;
     }
 
-    [[nodiscard]] const FString &lineAtConst(size_t index) const {
+    [[nodiscard]] const FString &lineAt(size_t index) const {
+        _tv();
         return _raw.lineAt(index);
     }
 
     void pushBack(FString string = {});
 
-    bool empty() const {
+    [[nodiscard]] bool empty() const {
+        _tv();
         return _raw.empty();
     }
 
     void text(std::string str) {
+        _tv();
         std::istringstream ss{std::move(str)};
 
         text(ss);
@@ -190,34 +165,39 @@ public:
     }
 
     void text(std::istream &in) {
+        _tv();
         _raw.text(in);
         _history.commit();
         _history.markMajor();
     }
 
     void text(std::ostream &out) const {
+        _tv();
         _raw.text(out);
     }
 
-    auto singleLine() const {
+    [[nodiscard]] bool isSingleLine() const {
+        _tv();
         return _raw.isSingleLine();
     }
 
-    // Does not affect
     void format(const CursorRange &range, FormatType f) {
+        _tv();
         _raw.format(range, f);
     }
 
-    bool isChanged() const {
+    [[nodiscard]] bool isChanged() const {
+        _tv();
         return _raw.isChanged();
     }
 
     void isChanged(bool value) {
+        _tv();
         _raw.isChanged(value);
     }
 
-    [[deprecated]] friend std::ostream &operator<<(std::ostream &stream,
-                                                   const Buffer &buffer) {
+    friend std::ostream &operator<<(std::ostream &stream,
+                                    const Buffer &buffer) {
         buffer.text(stream);
         return stream;
     }

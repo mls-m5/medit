@@ -28,9 +28,9 @@ public:
     [[nodiscard]] bool empty() const;
 
     //! Get a line without trigger changed
-    const FString &lineAt(size_t index) const;
+    [[nodiscard]] const FString &lineAt(size_t index) const;
 
-    bool isChanged() const;
+    [[nodiscard]] bool isChanged() const;
 
     void isChanged(bool value);
 
@@ -38,7 +38,7 @@ public:
     void isColorsOld(bool value);
 
     //! If the color needs updating
-    bool isColorsOld() const;
+    [[nodiscard]] bool isColorsOld() const;
 
     void clear();
 
@@ -47,9 +47,9 @@ public:
     void text(std::ostream &) const;
 
     //! Get as a continuous string and not a vector of lines
-    FString ftext() const;
+    [[nodiscard]] FString ftext() const;
 
-    bool isSingleLine() const {
+    [[nodiscard]] bool isSingleLine() const {
         return _isSingleLine;
     }
 

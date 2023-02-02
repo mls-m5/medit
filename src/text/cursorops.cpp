@@ -159,7 +159,7 @@ Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
 
     auto &lines = cursor.buffer().lines();
 
-    auto &line = cursor.buffer().lineAtConst(cursor.y());
+    auto &line = cursor.buffer().lineAt(cursor.y());
     auto &lineAbove = lines.at(cursor.y() - 1);
 
     std::string indentationStr;
@@ -248,7 +248,7 @@ Cursor wordEnd(Cursor cursor) {
 Utf8Char content(Cursor cursor) {
     cursor = fix(cursor);
 
-    auto &line = cursor.buffer().lineAtConst(cursor.y());
+    auto &line = cursor.buffer().lineAt(cursor.y());
 
     if (cursor.x() == line.size()) {
         return '\n';
