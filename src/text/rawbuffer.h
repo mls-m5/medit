@@ -33,7 +33,7 @@ public:
         : RawBuffer(std::string{text}) {}
 
     void copyFrom(const RawBuffer &buffer) {
-        forceThread();
+        //        forceThread();
 
         _lines = buffer.lines();
         _singleLine = buffer._singleLine;
@@ -42,34 +42,34 @@ public:
     }
 
     [[nodiscard]] const std::vector<FString> &lines() const {
-        forceThread();
+        //        forceThread();
         return _lines;
     }
 
     [[nodiscard]] bool empty() const {
-        forceThread();
+        //        forceThread();
         return _lines.empty() || (_lines.size() == 0 && _lines.front().empty());
     }
 
     //! Get a line and trigger changed
-    FString &lineAt(size_t index) {
-        forceThread();
+    [[deprecated]] FString &lineAt(size_t index) {
+        //        forceThread();
         isChanged(true);
         return _lines.at(index);
     }
 
     //! Get a line without trigger changed
     const FString &lineAtConst(size_t index) const {
-        forceThread();
+        //        forceThread();
         return _lines.at(index);
     }
 
-    void insert(size_t index, FString string) {
-        forceThread();
+    [[deprecated]] void insert(size_t index, FString string) {
+        //        forceThread();
         if (_singleLine) {
             auto pos =
                 (index == 0) ? _lines.front().begin() : _lines.front().end();
-            _lines.front().insert(pos, string);
+            _lines.front().insert(pos, std::move(string));
         }
         else {
             _lines.insert(_lines.begin() + index, std::move(string));
@@ -77,14 +77,14 @@ public:
         isChanged(true);
     }
 
-    void pushBack(FString string = {}) {
-        forceThread();
+    [[deprecated]] void pushBack(FString string = {}) {
+        //        forceThread();
         _lines.push_back(std::move(string));
         isChanged(true);
     }
 
-    void deleteLine(size_t l, size_t numLines = 1) {
-        forceThread();
+    [[deprecated]] void deleteLine(size_t l, size_t numLines = 1) {
+        //        forceThread();
         if (numLines == 0) {
             return;
         }
@@ -110,6 +110,7 @@ public:
         }
     }
 
+    // Allowed to be non-const because it does not change the actual text
     void isColorsOld(bool value) {
         if (value) {
         }
@@ -124,45 +125,34 @@ public:
     }
 
     void clear() {
-        forceThread();
+        //        forceThread();
         _lines.clear();
         _lines.push_back({});
         isChanged(true);
     }
 
-    //! Create a cursor from a position
-    Cursor cursor(Position pos);
-
-    Cursor begin();
-    Cursor end();
-    FChar front() const;
-    FChar back() const;
-
     std::string text() const;
-    void text(std::string);
-    void text(std::string_view str) {
+    [[deprecated]] void text(std::string);
+    [[deprecated]] void text(std::string_view str) {
         text(std::string{str});
     }
 
-    void text(std::istream &);
-    void text(std::ostream &) const;
+    [[deprecated]] void text(std::istream &);
+    [[deprecated]] void text(std::ostream &) const;
 
     //! Get as a continuous string and not a vector of lines
     FString ftext() const;
 
-    friend std::ostream &operator<<(std::ostream &stream,
-                                    const RawBuffer &buffer) {
+    [[deprecated]] friend std::ostream &operator<<(std::ostream &stream,
+                                                   const RawBuffer &buffer) {
         buffer.text(stream);
         return stream;
     }
 
-    friend std::istream &operator>>(std::istream &stream, RawBuffer &buffer) {
+    [[deprecated]] friend std::istream &operator>>(std::istream &stream,
+                                                   RawBuffer &buffer) {
         buffer.text(stream);
         return stream;
-    }
-
-    void singleLine(bool value) {
-        _singleLine = value;
     }
 
     bool singleLine() const {
@@ -173,13 +163,17 @@ public:
 
     void format(const CursorRange &range, FormatType f);
 
+    void singleLine(bool value) {
+        _singleLine = value;
+    }
+
 private:
-    void forceThread() const;
     std::vector<FString> _lines = {""};
     bool _singleLine = false;
-    const std::thread::id _threadId = std::this_thread::get_id();
     using TimePoint = std::chrono::high_resolution_clock::time_point;
     TimePoint _changedTime;
     TimePoint _formattedTime;
     TimePoint _savedTime;
+
+    //    friend Buffer;
 };

@@ -41,4 +41,6 @@ private:
     std::vector<Item> _redo;
 
     bool _ignoreRedoClear = false;
+
+    friend RawBuffer;
 };

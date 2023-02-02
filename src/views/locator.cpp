@@ -4,8 +4,9 @@
 #include "text/buffer.h"
 
 Locator::Locator(Project &projectFiles)
-    : Editor{std::make_shared<Buffer>()}, _projectFiles(projectFiles) {
-    buffer().singleLine(true);
+    : Editor{std::make_shared<Buffer>(true)}
+    , _projectFiles(projectFiles) {
+    //    buffer().singleLine(true);
     _list.x(0);
     _list.y(1);
     _list.width(20);

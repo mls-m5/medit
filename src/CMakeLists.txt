@@ -16,6 +16,7 @@ add_library(
     core/os.cpp
     core/jsjobqueue.cpp
     core/timer.cpp
+    core/threadvalidation.cpp
     core/registers.cpp
     core/jstimer.cpp
     core/plugins.cpp
