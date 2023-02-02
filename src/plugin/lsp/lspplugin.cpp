@@ -112,8 +112,8 @@ LspPlugin::LspPlugin()
         //        std::cout << std::setw(2) << j << std::endl;
     });
 
-    _client->subscribe(std::function{
-        [/*env = event.env*/](const PublishDiagnosticsParams &params) {
+    _client->subscribe(
+        std::function{[](const PublishDiagnosticsParams &params) {
             auto bufferDiagnostics = std::vector<Diagnostics::Diagnostic>{};
 
             for (auto &item : params.diagnostics) {
@@ -126,11 +126,14 @@ LspPlugin::LspPlugin()
                 });
             }
 
-            CoreEnvironment::instance().publishDiagnostics(
-                uriToPath(params.uri),
-                "clangd",
-                //                params.diagnostics.front().source,
-                std::move(bufferDiagnostics));
+            CoreEnvironment::instance().context().guiQueue().addTask(
+                [path = uriToPath(params.uri), bufferDiagnostics] {
+                    CoreEnvironment::instance().publishDiagnostics(
+                        path,
+                        "clangd",
+                        //                params.diagnostics.front().source,
+                        std::move(bufferDiagnostics));
+                });
         }});
 }
 

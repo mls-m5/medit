@@ -3,6 +3,7 @@
 #include "core/context.h"
 #include "meditfwd.h"
 #include "text/diagnostics.h"
+#include "threadvalidation.h"
 #include <filesystem>
 #include <functional>
 #include <memory>
@@ -56,6 +57,8 @@ public:
 private:
     std::vector<std::shared_ptr<Buffer>> _buffers;
     std::mutex _fileMutex;
+
+    ThreadValidation _tv{"core thread (gui thread)"};
 
     std::vector<BufferSubscriptionT> _bufferSubscriptions;
 

@@ -224,7 +224,7 @@ private:
     History _history{*this};
     std::unique_ptr<IFile> _file;
     Diagnostics _diagnostics;
-    ThreadValidation _tv;
+    ThreadValidation _tv{"gui thread"};
 
     RawBuffer _raw;
 };
