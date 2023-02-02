@@ -21,7 +21,9 @@
 [[nodiscard]] std::optional<Cursor> find(Cursor, Utf8Char);
 [[nodiscard]] std::optional<Cursor> rfind(Cursor, Utf8Char);
 
+// TODO: change this order, cursor should really be first
 Cursor insert(Utf8Char, Cursor);
+Cursor insert(Cursor, FString);
 
 //! Remove the character before the cursor
 Cursor erase(Cursor);
@@ -38,9 +40,8 @@ Cursor split(Cursor);
 Cursor copyIndentation(Cursor, std::string autoIndentString = "    ");
 
 Utf8Char content(Cursor);
-// FChar *contentPtr(Cursor);
 
 //! For autocompleteon find the first character of the word to be completed
 Cursor autocompleteWordBegin(const Cursor cursor);
 
-void apply(BufferEdit &edit);
+Cursor apply(BufferEdit edit);

@@ -156,6 +156,18 @@ TEST_CASE("split line") {
     }
 }
 
+TEST_CASE("insert string") {
+    const auto testText = std::string_view{"apa bepa"};
+    const auto resText1 = std::string_view{"apa-cepa bepa"};
+
+    {
+        auto buffer = Buffer{testText};
+        auto cursor = insert({buffer, 3, 0}, "-cepa");
+        ASSERT_EQ(buffer.text(), resText1);
+        ASSERT_EQ(cursor.x(), 8);
+    }
+}
+
 TEST_CASE("split empty buffer without crashing") {
     auto buffer = Buffer{};
     split({buffer, 10, 10});

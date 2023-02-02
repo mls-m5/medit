@@ -96,35 +96,12 @@ Cursor insert(Utf8Char c, Cursor cur) {
 }
 
 Cursor erase(Cursor cursor) {
-    //    auto &lines = cursor.buffer().lines();
-    //    if (lines.empty()) {
-    //        return {cursor.buffer()};
-    //    }
-    //    else if (lines.size() == 1 && lines.front().empty()) {
-    //        return {cursor.buffer()};
-    //    }
-    //    cursor = fix(cursor);
-    //    auto &line = cursor.buffer().lineAt(cursor.y());
-    //    if (cursor.x() == 0) {
-    //        if (cursor.y() > 0) {
-    //            cursor.y(cursor.y() - 1);
-    //            return join(cursor);
-    //        }
-    //    }
-    //    else {
-    //        line.erase(cursor.x() - 1, 1);
-    //        //        colorize(line);
-    //        cursor.x(cursor.x() - 1);
-    //    }
-
     if (cursor.x() == 0 && cursor.y() == 0) {
         return cursor;
     }
 
-    //     TODO: Continue here
     auto end = fix(cursor);
     cursor = left(cursor);
-    //    end = fix(end);
     erase(CursorRange{cursor, end});
 
     return cursor;
@@ -149,27 +126,9 @@ Cursor join(Cursor cursor) {
         }
     }
 
-    //    cursor = end(cursor);
-
     auto beginLine = Cursor{buffer, 0, cursor.y() + 1};
 
-    //    cursor = end(cursor);
-
-    //    auto newLine = Utf8Char{'\n'};
-    //    if (content(cursor) == newLine) {
     return erase(beginLine);
-    //    }
-
-    //    auto &line1 = buffer.lineAtConst(cursor.y());
-    //    auto &line2 = buffer.lineAtConst(cursor.y() + 1);
-    //    auto x = line1.size();
-
-    //    line1 += line2;
-    //    deleteLine({cursor.buffer(), 0, cursor.y() + 1});
-
-    //    return {cursor.buffer(), x, cursor.y()};
-
-    //    return cursor;
 }
 
 Cursor split(Cursor cursor) {
@@ -184,23 +143,7 @@ Cursor split(Cursor cursor) {
     }
     else {
         const auto &line = lines.at(cursor.y());
-
-        if (cursor.x() >= line.size()) {
-            cursor.buffer().insert(cursor.y() + 1, FString{});
-        }
-        else {
-            //            cursor.buffer().insert(cursor.y() + 1,
-            //                                   {
-            //                                       line.begin() + cursor.x(),
-            //                                       line.end(),
-            //                                   });
-
-            //            auto &l = buffer.lineAtConst(cursor.y());
-
-            //            l.erase(l.begin() + cursor.x(), l.end());
-
-            cursor.buffer().apply({"", "\n", cursor});
-        }
+        cursor.buffer().apply({"", "\n", cursor});
         return {cursor.buffer(), 0, cursor.y() + 1};
     }
 }
@@ -227,13 +170,7 @@ Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
         }
     }
 
-    //    while (!line.empty() && isspace(line.at(0).c.at(0))) {
-    //        line.erase(line.begin(), line.begin() + 1);
-    //    }
-
     cursor.x(indentationStr.size());
-
-    //    auto oldIndentation = indentationStr;
 
     if (!lineAbove.empty() && lineAbove.at(lineAbove.size() - 1).c == '{') {
         indentationStr += autoIndentString;
@@ -247,9 +184,6 @@ Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
     };
 
     apply(edit);
-    //    cursor.buffer().apply(edit);
-
-    //        line.insert(line.begin(), FString{indentationStr});
     return cursor;
 }
 
@@ -321,18 +255,6 @@ Utf8Char content(Cursor cursor) {
     return line.at(cursor.x()).c;
 }
 
-// FChar *contentPtr(Cursor cursor) {
-//     cursor = fix(cursor);
-
-//    auto &line = cursor.buffer().lineAt(cursor.y());
-
-//    if (cursor.x() == line.size()) {
-//        return nullptr;
-//    }
-
-//    return &line.at(cursor.x());
-//}
-
 Cursor autocompleteWordBegin(const Cursor cursor) {
     auto currentChar = content(left(cursor)).at(0);
     Cursor begin = cursor;
@@ -370,6 +292,12 @@ std::optional<Cursor> rfind(Cursor cursor, Utf8Char c) {
     return {};
 }
 
-void apply(BufferEdit &edit) {
-    edit.position.buffer().apply(edit);
+Cursor apply(BufferEdit edit) {
+    return edit.position.buffer().apply(std::move(edit));
+}
+
+Cursor insert(Cursor cur, FString str) {
+    cur = fix(cur);
+
+    return apply(BufferEdit{"", std::move(str), cur});
 }

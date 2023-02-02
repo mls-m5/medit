@@ -33,11 +33,6 @@ FString content(CursorRange range) {
 
 void format(CursorRange range, FormatType format) {
     range.buffer().format(range, format);
-    //    for (auto it : range) {
-    //        if (it) {
-    //            it->f = format;
-    //        }
-    //    }
 }
 
 Cursor erase(CursorRange range) {
@@ -53,29 +48,6 @@ Cursor erase(CursorRange range) {
     };
 
     range.buffer().apply(std::move(edit));
-
-    //    if (begin == end) {
-    //        return range.begin();
-    //    }
-
-    //    auto &buffer = begin.buffer();
-
-    //    if (begin.y() == end.y()) {
-    //        auto &line = buffer.lineAt(begin.y());
-    //        line.erase(line.begin() + begin.x(), line.begin() + end.x());
-    //        return begin;
-    //    }
-
-    //    {
-    //        auto &line = buffer.lineAt(begin.y());
-    //        line.erase(line.begin() + begin.x(), line.end());
-
-    //        auto &backLine = buffer.lineAt(end.y());
-    //        line.insert(line.end(), backLine.begin() + end.x(),
-    //        backLine.end());
-    //    }
-
-    //    buffer.deleteLine(begin.y() + 1, end.y() - begin.y());
 
     return range.begin();
 }
@@ -99,16 +71,9 @@ bool operator==(CursorRange range, std::string_view str) {
             return false;
             break;
         }
-        //        if (c == nullptr) {
-        //            if (str.at(i) != '\n') {
-        //                return false;
-        //            }
-        //        }
-        //        else {
         if (c.c.at(0) != str.at(i)) {
             return false;
         }
-        //        }
         ++i;
     }
 
@@ -122,15 +87,6 @@ bool operator==(CursorRange range, std::string_view str) {
 
 std::ostream &operator<<(std::ostream &stream, CursorRange range) {
     stream << content(range);
-
-    //     for (auto c : range) {
-    //         if (c) {
-    //             stream.write(&c->c.front(), c->c.size());
-    //         }
-    //         else {
-    //             stream << "\n";
-    //         }
-    //     }
     return stream;
 }
 

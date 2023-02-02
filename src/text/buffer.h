@@ -23,9 +23,6 @@ public:
         _raw.singleLine(isSingleLine);
     }
 
-    //    Buffer(std::string_view str, bool isSingleLine = false)
-    //        : Buffer{FString{str}, isSingleLine} {}
-
     Buffer(const char *str, bool isSingleLine = false)
         : Buffer{FString{str}, isSingleLine} {}
 
@@ -155,20 +152,14 @@ public:
         return _raw.lines();
     }
 
-    //! Get a line and trigger changed
-    //    [[deprecated]] FString &lineAt(size_t index) {
+    //    void insert(size_t index, FString string) {
     //        _tv();
-    //        return _raw.lineAt(index);
+    //        _raw.insert(index, std::move(string));
     //    }
 
-    void insert(size_t index, FString string) {
+    Cursor apply(BufferEdit edit) {
         _tv();
-        _raw.insert(index, std::move(string));
-    }
-
-    void apply(BufferEdit edit) {
-        _tv();
-        _raw.apply(std::move(edit));
+        return _raw.apply(std::move(edit));
     }
 
     [[nodiscard]] const FString &lineAtConst(size_t index) const {

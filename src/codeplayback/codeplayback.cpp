@@ -36,7 +36,8 @@ int main(int argc, char *argv[]) {
     auto editor = Editor{std::make_shared<Buffer>()};
 
     auto &buffer = editor.buffer();
-    buffer.insert(0, "hello");
+    insert(buffer.begin(), "hello");
+    //    buffer.insert(0, "hello");
 
     editor.width(screen.width());
     editor.height(screen.height() - 1);

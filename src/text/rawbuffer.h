@@ -64,18 +64,19 @@ public:
         return _lines.at(index);
     }
 
-    [[deprecated]] void insert(size_t index, FString string) {
-        //        forceThread();
-        if (_singleLine) {
-            auto pos =
-                (index == 0) ? _lines.front().begin() : _lines.front().end();
-            _lines.front().insert(pos, std::move(string));
-        }
-        else {
-            _lines.insert(_lines.begin() + index, std::move(string));
-        }
-        isChanged(true);
-    }
+    //    [[deprecated]] void insert(size_t index, FString string) {
+    //        //        forceThread();
+    //        if (_singleLine) {
+    //            auto pos =
+    //                (index == 0) ? _lines.front().begin() :
+    //                _lines.front().end();
+    //            _lines.front().insert(pos, std::move(string));
+    //        }
+    //        else {
+    //            _lines.insert(_lines.begin() + index, std::move(string));
+    //        }
+    //        isChanged(true);
+    //    }
 
     [[deprecated]] void pushBack(FString string = {}) {
         //        forceThread();
@@ -159,7 +160,7 @@ public:
         return _singleLine;
     }
 
-    void apply(BufferEdit edit);
+    Cursor apply(BufferEdit edit);
 
     void format(const CursorRange &range, FormatType f);
 

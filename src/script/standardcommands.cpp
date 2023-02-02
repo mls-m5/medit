@@ -187,7 +187,9 @@ CommandList editorCommands = {
             auto str = scope->env().registers().load(standardRegister);
             auto cursor = scope->editor().cursor();
             if (str.isLine) {
-                scope->editor().buffer().insert(cursor.y(), str.value);
+                insert({cursor.buffer(), 0, cursor.y()}, str.value + '\n');
+                //                scope->editor().buffer().insert(cursor.y(),
+                //                str.value);
             }
             else {
                 for (auto c : str.value) {
@@ -204,7 +206,9 @@ CommandList editorCommands = {
             auto str = scope->env().registers().load(standardRegister);
             auto cursor = scope->editor().cursor();
             if (str.isLine) {
-                scope->editor().buffer().insert(cursor.y() + 1, str.value);
+                insert({cursor.buffer(), 0, cursor.y() + 1}, str.value + '\n');
+                //                scope->editor().buffer().insert(cursor.y() +
+                //                1, str.value);
                 cursor.y(cursor.y() + 1);
                 scope->editor().cursor(cursor);
             }

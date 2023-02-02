@@ -45,14 +45,14 @@ FString RawBuffer::ftext() const {
     return FString::join(_lines, '\n');
 }
 
-void RawBuffer::apply(BufferEdit edit) {
+Cursor RawBuffer::apply(BufferEdit edit) {
     edit.trim();
 
     if (edit.empty()) {
-        return;
+        return edit.position;
     }
 
-    auto pos = edit.position;
+    const auto pos = edit.position;
 
     auto &from = edit.from;
 
@@ -72,21 +72,32 @@ void RawBuffer::apply(BufferEdit edit) {
         return from.size();
     }();
 
-    auto lines = edit.to.split('\n');
+    auto newLines = edit.to.split('\n');
 
     auto startStr = lineAt(edit.position.y()).substr(0, edit.position.x());
     auto endStr =
         lineAt(edit.position.y() + oldNumLines)
             .substr((oldNumLines ? 0 : edit.position.x()) + lastOldLineLength);
 
-    lines.front().insert(lines.front().begin(), startStr);
-    lines.back() += endStr;
+    auto ret = edit.position;
+    ret.y(ret.y() + _lines.size() - oldNumLines);
+    if (newLines.size() == 1) {
+        ret.x(pos.x() + newLines.back().size());
+    }
+    else {
+        ret.x(newLines.back().size());
+    }
+
+    newLines.front().insert(newLines.front().begin(), startStr);
+    newLines.back() += endStr;
 
     _lines.erase(_lines.begin() + edit.position.y(),
                  _lines.begin() + (edit.position.y() + oldNumLines + 1));
 
     _lines.insert(
-        _lines.begin() + edit.position.y(), lines.begin(), lines.end());
+        _lines.begin() + edit.position.y(), newLines.begin(), newLines.end());
+
+    return ret;
 }
 
 void RawBuffer::format(const CursorRange &range, FormatType f) {
