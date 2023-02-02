@@ -248,6 +248,10 @@ CommandList editorCommands = {
         [](std::shared_ptr<IScope> scope) { scope->editor().undo(); },
     },
     {
+        "editor.undo_major",
+        [](std::shared_ptr<IScope> scope) { scope->editor().undoMajor(); },
+    },
+    {
         "editor.redo",
         [](std::shared_ptr<IScope> scope) { scope->editor().redo(); },
     },

@@ -32,6 +32,7 @@ public:
     void load();
 
     void undo();
+    void undoMajor();
     void redo();
 
     Buffer &buffer();

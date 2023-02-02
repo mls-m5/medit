@@ -39,6 +39,10 @@ void Editor::undo() {
     buffer().history().undo();
 }
 
+void Editor::undoMajor() {
+    buffer().history().undoMajor();
+}
+
 void Editor::redo() {
     buffer().history().redo();
 }
