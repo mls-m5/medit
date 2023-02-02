@@ -7,6 +7,6 @@ Cursor &Cursor::operator++() {
     return *this = right(*this);
 }
 
-FChar *Cursor::operator*() {
-    return contentPtr(*this);
+FChar Cursor::operator*() {
+    return content(*this);
 }

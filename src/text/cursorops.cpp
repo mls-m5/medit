@@ -90,51 +90,52 @@ Cursor end(Cursor cursor) {
 }
 
 Cursor insert(Utf8Char c, Cursor cur) {
-    auto &lines = cur.buffer().lines();
-    if (lines.empty()) {
-        cur.buffer().pushBack();
-    }
-    cur = fix(cur);
-    if (c == '\n') {
-        return split(cur);
-    }
-    else {
-        auto &line = cur.buffer().lineAt(cur.y());
-        line.insert(cur.x(), c);
-        //        colorize(line);
-        cur.x(cur.x() + 1);
-    }
+    cur.buffer().apply({"", {1, c}, cur});
+    //    auto &lines = cur.buffer().lines();
+    //    if (lines.empty()) {
+    //        cur.buffer().pushBack();
+    //    }
+    //    cur = fix(cur);
+    //    if (c == '\n') {
+    //        return split(cur);
+    //    }
+    //    else {
+    //        auto &line = cur.buffer().lineAt(cur.y());
+    //        line.insert(cur.x(), c);
+    //        //        colorize(line);
+    //        cur.x(cur.x() + 1);
+    //    }
 
     return cur;
 }
 
 Cursor erase(Cursor cursor) {
-    auto &lines = cursor.buffer().lines();
-    if (lines.empty()) {
-        return {cursor.buffer()};
-    }
-    else if (lines.size() == 1 && lines.front().empty()) {
-        return {cursor.buffer()};
-    }
-    cursor = fix(cursor);
-    auto &line = cursor.buffer().lineAt(cursor.y());
-    if (cursor.x() == 0) {
-        if (cursor.y() > 0) {
-            cursor.y(cursor.y() - 1);
-            return join(cursor);
-        }
-    }
-    else {
-        line.erase(cursor.x() - 1, 1);
-        //        colorize(line);
-        cursor.x(cursor.x() - 1);
-    }
+    //    auto &lines = cursor.buffer().lines();
+    //    if (lines.empty()) {
+    //        return {cursor.buffer()};
+    //    }
+    //    else if (lines.size() == 1 && lines.front().empty()) {
+    //        return {cursor.buffer()};
+    //    }
+    //    cursor = fix(cursor);
+    //    auto &line = cursor.buffer().lineAt(cursor.y());
+    //    if (cursor.x() == 0) {
+    //        if (cursor.y() > 0) {
+    //            cursor.y(cursor.y() - 1);
+    //            return join(cursor);
+    //        }
+    //    }
+    //    else {
+    //        line.erase(cursor.x() - 1, 1);
+    //        //        colorize(line);
+    //        cursor.x(cursor.x() - 1);
+    //    }
 
-    // TODO: Continue here
-    //    auto end = cursor;
-    //    ++end;
-    //    end = fix(end);
-    //    erase(CursorRange{cursor, end});
+    //     TODO: Continue here
+    auto end = cursor;
+    ++end;
+    end = fix(end);
+    erase(CursorRange{cursor, end});
 
     return cursor;
 }
@@ -158,14 +159,24 @@ Cursor join(Cursor cursor) {
         return cursor;
     }
 
-    auto &line1 = buffer.lineAt(cursor.y());
-    auto &line2 = buffer.lineAt(cursor.y() + 1);
-    auto x = line1.size();
+    //    cursor = end(cursor);
 
-    line1 += line2;
-    deleteLine({cursor.buffer(), 0, cursor.y() + 1});
+    //    auto newLine = Utf8Char{'\n'};
+    //    if (content(cursor) == newLine) {
+    erase(cursor);
+    //    }
 
-    return {cursor.buffer(), x, cursor.y()};
+    //    auto &line1 = buffer.lineAtConst(cursor.y());
+    //    auto &line2 = buffer.lineAtConst(cursor.y() + 1);
+    //    auto x = line1.size();
+
+    //    line1 += line2;
+    //    deleteLine({cursor.buffer(), 0, cursor.y() + 1});
+
+    //    return {cursor.buffer(), x, cursor.y()};
+
+    ++cursor;
+    return cursor;
 }
 
 Cursor split(Cursor cursor) {
@@ -185,15 +196,17 @@ Cursor split(Cursor cursor) {
             cursor.buffer().insert(cursor.y() + 1, FString{});
         }
         else {
-            cursor.buffer().insert(cursor.y() + 1,
-                                   {
-                                       line.begin() + cursor.x(),
-                                       line.end(),
-                                   });
+            //            cursor.buffer().insert(cursor.y() + 1,
+            //                                   {
+            //                                       line.begin() + cursor.x(),
+            //                                       line.end(),
+            //                                   });
 
-            auto &l = buffer.lineAt(cursor.y());
+            //            auto &l = buffer.lineAtConst(cursor.y());
 
-            l.erase(l.begin() + cursor.x(), l.end());
+            //            l.erase(l.begin() + cursor.x(), l.end());
+
+            cursor.buffer().apply({"", "\n", cursor});
         }
         return {cursor.buffer(), 0, cursor.y() + 1};
     }
@@ -208,7 +221,7 @@ Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
 
     auto &lines = cursor.buffer().lines();
 
-    auto &line = cursor.buffer().lineAt(cursor.y());
+    auto &line = cursor.buffer().lineAtConst(cursor.y());
     auto &lineAbove = lines.at(cursor.y() - 1);
 
     std::string indentationStr;
@@ -221,18 +234,29 @@ Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
         }
     }
 
-    while (!line.empty() && isspace(line.at(0).c.at(0))) {
-        line.erase(line.begin(), line.begin() + 1);
-    }
+    //    while (!line.empty() && isspace(line.at(0).c.at(0))) {
+    //        line.erase(line.begin(), line.begin() + 1);
+    //    }
 
     cursor.x(indentationStr.size());
+
+    auto oldIndentation = indentationStr;
 
     if (!lineAbove.empty() && lineAbove.at(lineAbove.size() - 1).c == '{') {
         indentationStr += autoIndentString;
         cursor.x(cursor.x() + autoIndentString.size());
     }
 
-    line.insert(line.begin(), FString{indentationStr});
+    auto edit = BufferEdit{
+        oldIndentation,
+        indentationStr,
+        {cursor.buffer(), 0, cursor.y()},
+    };
+
+    apply(edit);
+    //    cursor.buffer().apply(edit);
+
+    //        line.insert(line.begin(), FString{indentationStr});
     return cursor;
 }
 
@@ -295,7 +319,7 @@ Cursor wordEnd(Cursor cursor) {
 Utf8Char content(Cursor cursor) {
     cursor = fix(cursor);
 
-    auto &line = cursor.buffer().lineAt(cursor.y());
+    auto &line = cursor.buffer().lineAtConst(cursor.y());
 
     if (cursor.x() == line.size()) {
         return '\n';
@@ -304,17 +328,17 @@ Utf8Char content(Cursor cursor) {
     return line.at(cursor.x()).c;
 }
 
-FChar *contentPtr(Cursor cursor) {
-    cursor = fix(cursor);
+// FChar *contentPtr(Cursor cursor) {
+//     cursor = fix(cursor);
 
-    auto &line = cursor.buffer().lineAt(cursor.y());
+//    auto &line = cursor.buffer().lineAt(cursor.y());
 
-    if (cursor.x() == line.size()) {
-        return nullptr;
-    }
+//    if (cursor.x() == line.size()) {
+//        return nullptr;
+//    }
 
-    return &line.at(cursor.x());
-}
+//    return &line.at(cursor.x());
+//}
 
 Cursor autocompleteWordBegin(const Cursor cursor) {
     auto currentChar = content(left(cursor)).at(0);
@@ -351,4 +375,8 @@ std::optional<Cursor> rfind(Cursor cursor, Utf8Char c) {
     }
 
     return {};
+}
+
+void apply(BufferEdit &edit) {
+    edit.position.buffer().apply(edit);
 }

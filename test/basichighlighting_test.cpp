@@ -37,7 +37,7 @@ TEST_CASE("format all to default") {
     hl.highlight(env);
 
     for (auto c : editor.buffer()) {
-        ASSERT_EQ(c->f, 1);
+        ASSERT_EQ(c.f, 1);
     }
 }
 

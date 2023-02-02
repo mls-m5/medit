@@ -156,10 +156,10 @@ public:
     }
 
     //! Get a line and trigger changed
-    [[deprecated]] FString &lineAt(size_t index) {
-        _tv();
-        return _raw.lineAt(index);
-    }
+    //    [[deprecated]] FString &lineAt(size_t index) {
+    //        _tv();
+    //        return _raw.lineAt(index);
+    //    }
 
     void insert(size_t index, FString string) {
         _tv();

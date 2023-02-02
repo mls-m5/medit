@@ -2,6 +2,7 @@
 
 #include "meditfwd.h"
 #include "text/position.h"
+#include <optional>
 
 class Cursor : public Position {
 private:
@@ -33,9 +34,5 @@ public:
 
     //! Returns a pointer because somtimes there is no character (like when
     //! there is a line-break
-    FChar *operator*();
-
-    FChar *operator->() {
-        return **this;
-    }
+    FChar operator*();
 };

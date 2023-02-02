@@ -38,7 +38,9 @@ Cursor split(Cursor);
 Cursor copyIndentation(Cursor, std::string autoIndentString = "    ");
 
 Utf8Char content(Cursor);
-FChar *contentPtr(Cursor);
+// FChar *contentPtr(Cursor);
 
 //! For autocompleteon find the first character of the word to be completed
 Cursor autocompleteWordBegin(const Cursor cursor);
+
+void apply(BufferEdit &edit);

@@ -16,10 +16,13 @@ void format(CursorRange, FormatType);
 
 bool operator==(CursorRange, std::string_view);
 
-std::ostream &operator<<(std::ostream &, CursorRange);
+// std::ostream &operator<<(std::ostream &, CursorRange);
 
 [[nodiscard]] CursorRange fix(CursorRange);
 
 [[nodiscard]] CursorRange word(Cursor);
 [[nodiscard]] CursorRange line(Cursor);
 [[nodiscard]] CursorRange inner(Cursor, Utf8Char start, Utf8Char stop);
+
+//! The whole buffer
+[[nodiscard]] CursorRange all(Buffer &buffer);

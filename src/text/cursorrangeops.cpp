@@ -32,11 +32,12 @@ FString content(CursorRange range) {
 }
 
 void format(CursorRange range, FormatType format) {
-    for (auto it : range) {
-        if (it) {
-            it->f = format;
-        }
-    }
+    range.buffer().format(range, format);
+    //    for (auto it : range) {
+    //        if (it) {
+    //            it->f = format;
+    //        }
+    //    }
 }
 
 Cursor erase(CursorRange range) {
@@ -98,16 +99,16 @@ bool operator==(CursorRange range, std::string_view str) {
             return false;
             break;
         }
-        if (c == nullptr) {
-            if (str.at(i) != '\n') {
-                return false;
-            }
+        //        if (c == nullptr) {
+        //            if (str.at(i) != '\n') {
+        //                return false;
+        //            }
+        //        }
+        //        else {
+        if (c.c.at(0) != str.at(i)) {
+            return false;
         }
-        else {
-            if (c->c.at(0) != str.at(i)) {
-                return false;
-            }
-        }
+        //        }
         ++i;
     }
 
@@ -119,17 +120,17 @@ bool operator==(CursorRange range, std::string_view str) {
     }
 }
 
-std::ostream &operator<<(std::ostream &stream, CursorRange range) {
-    for (auto c : range) {
-        if (c) {
-            stream.write(&c->c.front(), c->c.size());
-        }
-        else {
-            stream << "\n";
-        }
-    }
-    return stream;
-}
+// std::ostream &operator<<(std::ostream &stream, CursorRange range) {
+//     for (auto c : range) {
+//         if (c) {
+//             stream.write(&c->c.front(), c->c.size());
+//         }
+//         else {
+//             stream << "\n";
+//         }
+//     }
+//     return stream;
+// }
 
 std::string toString(CursorRange range) {
     return content(range);
@@ -167,4 +168,8 @@ CursorRange inner(const Cursor cursor,
     }
 
     return {++begin, end};
+}
+
+CursorRange all(Buffer &buffer) {
+    return {buffer.begin(), buffer.end()};
 }

@@ -47,39 +47,41 @@ void BasicHighlighting::highlight(std::shared_ptr<IScope> env) {
         return;
     }
 
-    for (auto c : buffer) {
-        if (c) {
-            c->f = IPalette::standard;
-        }
-    }
+    format(all(buffer), IPalette::standard);
+
+    //    for (auto c : buffer) {
+    //        if (c) {
+    //            c->f = IPalette::standard;
+    //        }
+    //    }
 
     for (auto word : Words(buffer)) {
         highlightWord(word);
     }
 
     // Identify comment
-    for (size_t i = 0; i < buffer.lines().size(); ++i) {
-        auto &line = buffer.lineAt(i);
-        for (size_t i = 1; i < line.size(); ++i) {
+    //    for (size_t i = 0; i < buffer.lines().size(); ++i) {
+    //        auto &line = buffer.lineAt(i);
+    //        for (size_t i = 1; i < line.size(); ++i) {
 
-            if (line.at(i - 1).c == '/' && line.at(i).c == '/') {
-                --i;
-                for (; i < line.size(); ++i) {
-                    auto &c = line.at(i);
-                    c.f = IPalette::comment;
-                }
-                break;
-            }
-        }
+    //            if (line.at(i - 1).c == '/' && line.at(i).c == '/') {
+    //                --i;
+    //                for (; i < line.size(); ++i) {
+    //                    auto &c = line.at(i);
+    //                    c.f = IPalette::comment;
+    //                }
+    //                break;
+    //            }
+    //        }
 
-        if (!line.empty()) {
-            if (line.front().c == '#') {
-                for (auto &c : line) {
-                    c.f = IPalette::comment;
-                }
-            }
-        }
-    }
+    //        if (!line.empty()) {
+    //            if (line.front().c == '#') {
+    //                for (auto &c : line) {
+    //                    c.f = IPalette::comment;
+    //                }
+    //            }
+    //        }
+    //    }
 }
 
 void BasicHighlighting::update(const IPalette &palette) {}
