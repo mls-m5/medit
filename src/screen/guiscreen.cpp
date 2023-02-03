@@ -394,6 +394,15 @@ KeyEvent GuiScreen::getInput() {
             break;
         }
         break;
+
+    case SDL_MOUSEWHEEL:
+        if (sdlEvent.wheel.y > 0) {
+            return KeyEvent{Key::PageUp};
+        }
+        else if (sdlEvent.wheel.y < 0) {
+            return KeyEvent{Key::PageDown};
+        }
+        break;
     }
 
     return KeyEvent{Key::Unknown};
