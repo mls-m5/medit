@@ -66,15 +66,17 @@ void innerMainLoop(IInput &input,
 
     // Todo: in the future check main window for unsaved changes
     // here too
-    while (c != Key::None) {
-        if (c == KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl} ||
-            c == Key::Quit) {
-            medit::main::shouldQuit = true;
-            break;
-        }
+    while (!std::holds_alternative<NullEvent>(c)) {
+        if (auto key = std::get_if<KeyEvent>(&c)) {
+            if (*key == KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl} ||
+                *key == Key::Quit) {
+                medit::main::shouldQuit = true;
+                break;
+            }
 
-        if (c != Key::Unknown) {
-            callback(c);
+            if (*key != Key::Unknown) {
+                callback(*key);
+            }
         }
         c = input.getInput();
     }

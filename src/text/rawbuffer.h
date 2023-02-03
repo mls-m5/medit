@@ -42,8 +42,6 @@ public:
 
     void clear();
 
-    /// Should be accompanied by _history.commit()
-    //    void text(std::istream &);
     void text(std::ostream &) const;
 
     //! Get as a continuous string and not a vector of lines
@@ -57,6 +55,7 @@ public:
         _isSingleLine = value;
     }
 
+    /// The only function that is allowed to edit the content of the buffer
     /// Should be accompanied by _history.commit();
     Cursor apply(BufferEdit edit);
 

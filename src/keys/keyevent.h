@@ -1,10 +1,11 @@
 #pragma once
 
 #include "text/utf8char.h"
+#include <variant>
 
 enum class Key {
     Unknown,
-    None,
+    //    None,
     Any,
     Text,
     KeyCombination,
@@ -76,3 +77,35 @@ public:
     Modifiers modifiers = Modifiers::None;
     bool state = true;
 };
+
+class MouseEvent {
+    int button = 1;
+    int x = -1;
+    int y = -1;
+};
+
+class MouseDownEvent : public MouseEvent {};
+
+class MouseMoveEvent : public MouseEvent {};
+
+class GenericEvent {
+    //    enum EventType {
+    //        Quit,
+    //        None,
+    //    };
+
+    //    EventType type;
+};
+
+struct NullEvent {};
+
+using Event = std::variant<NullEvent, KeyEvent, MouseDownEvent, MouseMoveEvent>;
+
+// constexpr bool operator!=(const KeyEvent &a, const Event &b) {
+//     return !std::holds_alternative<KeyEvent>(b) ||
+//            !(a == std::get<KeyEvent>(b));
+// }
+
+// constexpr bool operator!=(const Event &a, const KeyEvent &b) {
+//     return b != a;
+// }

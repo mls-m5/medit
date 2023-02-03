@@ -48,5 +48,5 @@ public:
     void cursorStyle(CursorStyle) override;
 
     //! @see IInput
-    KeyEvent getInput() override;
+    Event getInput() override;
 };

@@ -152,7 +152,7 @@ size_t LinuxTerminalScreen::height() const {
 
 void LinuxTerminalScreen::title(std::string title) {}
 
-KeyEvent LinuxTerminalScreen::getInput() {
+Event LinuxTerminalScreen::getInput() {
     KeyEvent event;
 
     auto c = std::cin.get();

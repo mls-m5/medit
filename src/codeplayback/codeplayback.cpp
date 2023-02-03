@@ -45,8 +45,19 @@ int main(int argc, char *argv[]) {
     //    auto lastChar = 0;
     auto wasAlpha = false;
 
-    for (; c != Key::Quit; c = screen.getInput()) {
-        if (c != Key::None && c != Key::Unknown) {
+    auto shouldQuit = [](const Event &event) {
+        if (auto p = std::get_if<KeyEvent>(&event)) {
+            return *p == Key::Quit;
+        }
+        return false;
+    };
+
+    for (; !shouldQuit(c); c = screen.getInput()) {
+        auto key = std::get_if<KeyEvent>(&c);
+        if (!key) {
+            continue;
+        }
+        if (*key != Key::Unknown) {
             screen.cursorStyle(CursorStyle::Block);
 
             for (auto c : testText) {

@@ -62,20 +62,19 @@ bool openIncludeByName(std::shared_ptr<IScope> scope, std::string name) {
 } // namespace
 
 bool HeaderNavigation::gotoSymbol(std::shared_ptr<IScope> env) {
+    //    auto file = env->editor().file();
+    //    if (!file) {
+    //        return false;
+    //    }
+    //    auto filename = file->path();
 
-    auto file = env->editor().file();
-    if (!file) {
-        return false;
-    }
-    auto filename = file->path();
+    //    if (!isCpp(filename)) {
+    //        return false;
+    //    }
 
-    if (!isCpp(filename)) {
-        return false;
-    }
-
-    if (auto includeName = getIncludeName(*env)) {
-        return openIncludeByName(env, *includeName);
-    }
+    //    if (auto includeName = getIncludeName(*env)) {
+    //        return openIncludeByName(env, *includeName);
+    //    }
 
     return false;
 }

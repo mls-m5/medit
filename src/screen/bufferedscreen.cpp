@@ -58,8 +58,10 @@ void BufferedScreen::forceThread() {
 }
 
 BufferedScreen::BufferedScreen(IScreen *screen, IInput *input)
-    : _backend(screen), _input(input), _canvas(std::make_unique<Canvas>()),
-      _threadId(std::this_thread::get_id()) {
+    : _backend(screen)
+    , _input(input)
+    , _canvas(std::make_unique<Canvas>())
+    , _threadId(std::this_thread::get_id()) {
     _canvas->resize(_backend->width(), _backend->height());
 }
 
@@ -127,11 +129,11 @@ void BufferedScreen::cursorStyle(CursorStyle style) {
     _backend->cursorStyle(style);
 }
 
-KeyEvent BufferedScreen::getInput() {
-    auto key = _input->getInput();
-    if (key == Key::Resize) {
-
+Event BufferedScreen::getInput() {
+    auto event = _input->getInput();
+    if (std::holds_alternative<KeyEvent>(event);
+        std::get<KeyEvent>(event) == Key::Resize) {
         _canvas->resize(_backend->width(), _backend->height());
     }
-    return key;
+    return event;
 }

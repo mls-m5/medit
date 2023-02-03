@@ -134,10 +134,10 @@ NCursesScreen::~NCursesScreen() {
     system("reset");
 }
 
-KeyEvent NCursesScreen::getInput() {
+Event NCursesScreen::getInput() {
     const auto c = getch();
     if (c == ERR) {
-        return KeyEvent{Key::None};
+        return NullEvent{};
     }
     else if (c == KEY_RESIZE) {
         ::endwin();

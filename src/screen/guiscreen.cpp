@@ -322,7 +322,7 @@ Modifiers getModState() {
         static_cast<int>(alt ? Modifiers::Alt : Modifiers::None));
 }
 
-KeyEvent GuiScreen::getInput() {
+Event GuiScreen::getInput() {
     auto e = [] {
         if (getOs() == Os::Emscripten) {
             return sdl::pollEvent();
@@ -333,7 +333,7 @@ KeyEvent GuiScreen::getInput() {
     }();
 
     if (!e) {
-        return Key::None;
+        return NullEvent{};
     }
 
     auto sdlEvent = *e;

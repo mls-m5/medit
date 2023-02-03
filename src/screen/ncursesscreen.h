@@ -19,7 +19,7 @@ public:
     NCursesScreen();
     ~NCursesScreen() override;
 
-    KeyEvent getInput() override;
+    Event getInput() override;
 
     size_t x() const override;
     size_t y() const override;
