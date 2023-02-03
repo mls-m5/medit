@@ -14,6 +14,7 @@
 #include "script/scope.h"
 #include "syntax/basichighligting.h"
 #include "syntax/ipalette.h"
+#include "text/cursorrangeops.h"
 #include "views/editor.h"
 #include <iostream>
 
@@ -25,7 +26,7 @@ bool shouldProcessFileWithClang(std::filesystem::path path) {
     return isCpp(path) || isCSource(path);
 }
 
-std::string createURI(std::filesystem::path path) {
+std::string pathToUri(std::filesystem::path path) {
     if (path.empty()) {
         path = "/tmp/tmp.txt";
     }
@@ -89,10 +90,6 @@ using namespace lsp;
 
 LspPlugin::LspPlugin()
     : _core{CoreEnvironment::instance()} {
-    auto previousPath = filesystem::current_path();
-
-    //    setStandardHeaders();
-
     auto args = std::string{"--log=info "};
 
     auto compileCommandsPath = locateCompileCommands();
@@ -105,14 +102,12 @@ LspPlugin::LspPlugin()
 
     _client = std::make_unique<LspClient>(args);
 
-    //    filesystem::current_path(previousPath);
-
     CoreEnvironment::instance().subscribeToBufferEvents(
         [this](BufferEvent e) { bufferEvent(e); });
 
     _client->request(InitializeParams{}, [](const nlohmann::json &j) {
-        //        std::cout << "initialization response:\n";
-        //        std::cout << std::setw(2) << j << std::endl;
+        std::cout << "initialization response:\n";
+        std::cout << std::setw(2) << j << std::endl;
     });
 
     _client->subscribe(
@@ -153,7 +148,7 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
         auto params = DidOpenTextDocumentParams{
             .textDocument =
                 TextDocumentItem{
-                    .uri = createURI(event.buffer->path()),
+                    .uri = pathToUri(event.buffer->path()),
                     .languageId = "cpp",
                     .version = event.buffer->history().revision(),
                     .text = content,
@@ -162,26 +157,29 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
 
         _client->notify(params);
 
-        {
-            auto params = DocumentSymbolParams{};
-            params.textDocument.uri = createURI(event.buffer->path());
+        // This is not what I expected it to be
+        //        {
+        //            auto params = DocumentSymbolParams{};
+        //            params.textDocument.uri = createURI(event.buffer->path());
 
-            _client->request(
-                params,
-                [this, buffer = event.buffer](
-                    const nlohmann::json &json
-                    /*const DocumentSymbolParams::ReturnT &symbols*/) {
-                    std::cout << json << std::endl;
+        //            _client->request(
+        //                params,
+        //                [this, buffer = event.buffer](
+        //                    const nlohmann::json &json
+        //                    /*const DocumentSymbolParams::ReturnT &symbols*/)
+        //                    { std::cout << json << std::endl;
 
-                    auto symbols = json.get<DocumentSymbolParams::ReturnT>();
-                    if (symbols.empty()) {
-                        return;
-                    }
+        //                    auto symbols =
+        //                    json.get<DocumentSymbolParams::ReturnT>(); if
+        //                    (symbols.empty()) {
+        //                        return;
+        //                    }
 
-                    _core.context().guiQueue().addTask(
-                        [buffer, symbols] { applyFormat(buffer, symbols); });
-                });
-        }
+        //                    _core.context().guiQueue().addTask(
+        //                        [buffer, symbols] { applyFormat(buffer,
+        //                        symbols); });
+        //                });
+        //        }
     }
 }
 
@@ -190,6 +188,67 @@ void LspPlugin::registerPlugin() {
     registerNavigation<LspNavigation>();
     registerHighlighting<LspHighlight>();
     registerCompletion<LspComplete>();
+}
+
+void LspPlugin::handleSemanticTokens(std::shared_ptr<Buffer> buffer,
+                                     std::vector<long> data) {
+
+    struct Item {
+        long *data;
+
+        /// at index 5*i - deltaLine: token line number, relative to the
+        /// previous
+        ///    token
+        long deltaLine = data[0];
+
+        /// at index 5*i+1 - deltaStart: token start character, relative to the
+        ///    previous token (relative to 0 or the previous token’s start if
+        ///    they are on the same line)
+        long deltaStart = data[1];
+
+        /// at index 5*i+2 - length: the length of the token.
+        long length = data[2];
+
+        /// at index 5*i+3 - tokenType: will be looked up in
+        ///    SemanticTokensLegend.tokenTypes. We currently ask that tokenType
+        ///    < 65536.
+        long tokenTytpe = data[3];
+
+        /// at index 5*i+4 - tokenModifiers: each set bit will be looked up in
+        ///    SemanticTokensLegend.tokenModifiers
+        long tokenModifiers = data[4];
+    };
+
+    //    format(all(*buffer), IPalette::standard);
+
+    BasicHighlighting::highlightStatic(*buffer);
+
+    Cursor cur = buffer->begin();
+
+    for (size_t i = 0; i < data.size(); i += 5) {
+        auto item = Item{data.data() + i};
+
+        cur.y(cur.y() + item.deltaLine);
+        if (item.deltaLine) {
+            cur.x(item.deltaStart);
+        }
+        else {
+            cur.x(item.deltaStart + cur.x());
+        }
+
+        Cursor end = cur;
+        end.x(cur.x() + item.length);
+
+        format({cur, end}, IPalette::identifier);
+
+        std::cout << "dx: " << item.deltaStart << "\tdy:" << item.deltaLine
+                  << "\tx: " << cur.x() << "\ty: " << cur.y()
+                  << "\tl: " << item.length << "\t";
+        std::cout << content({cur, end}) << "\n";
+
+        //        cur = end;
+    }
+    std::cout.flush();
 }
 
 void LspPlugin::updateBuffer(Buffer &buffer) {
@@ -208,12 +267,26 @@ void LspPlugin::updateBuffer(Buffer &buffer) {
     oldVersion = buffer.history().revision();
 
     auto params = DidChangeTextDocumentParams{};
-    params.textDocument.uri = createURI(buffer.path());
+    params.textDocument.uri = pathToUri(buffer.path());
     params.textDocument.version = buffer.history().revision();
     params.contentChanges.push_back(TextDocumentContentChangeEvent{
         .text = buffer.text(), // TODO: Only do partial updates
     });
     _client->notify(params);
+
+    {
+        auto params = SemanticTokensParams{};
+        params.textDocument.uri = pathToUri(buffer.path());
+
+        _client->request(
+            params,
+            [this, buffer = buffer.shared_from_this()](SemanticTokens data) {
+                CoreEnvironment::instance().context().guiQueue().addTask(
+                    [buffer, data, this] {
+                        handleSemanticTokens(buffer, std::move(data.data));
+                    });
+            });
+    }
 }
 
 void LspComplete::list(std::shared_ptr<IScope> scope,
@@ -226,7 +299,7 @@ void LspComplete::list(std::shared_ptr<IScope> scope,
 
     auto params = CompletionParams{};
     auto &editor = scope->editor();
-    params.textDocument.uri = createURI(editor.path());
+    params.textDocument.uri = pathToUri(editor.path());
     auto cursor = editor.cursor();
     params.position.line = cursor.y(); // + 1;
     params.position.character = cursor.x() + 1;
@@ -280,7 +353,7 @@ bool LspNavigation::gotoSymbol(std::shared_ptr<IScope> env) {
     }
 
     auto params = TypeDefinitionParams{};
-    params.textDocument.uri = createURI(env->editor().buffer().path());
+    params.textDocument.uri = pathToUri(env->editor().buffer().path());
     params.position = meditCursorToPosition(env->editor().cursor());
     LspPlugin::instance().client().request(
         params, [env](const std::vector<Location> &locations) {

@@ -19,6 +19,9 @@ public:
 
     static void registerPlugin();
 
+    void handleSemanticTokens(std::shared_ptr<Buffer> buffer,
+                              std::vector<long>);
+
     static LspPlugin &instance() {
         static LspPlugin plugin;
         return plugin;

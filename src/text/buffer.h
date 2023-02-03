@@ -11,7 +11,7 @@
 
 // Text stored in memory with assosiated undo/redo-history and associated
 // filename information
-class Buffer {
+class Buffer : public std::enable_shared_from_this<Buffer> {
 public:
     Buffer() = default;
     Buffer(const Buffer &) = delete;
