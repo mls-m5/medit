@@ -68,6 +68,8 @@ struct MainWindow : public Window {
 
     void switchEditor();
 
+    void paste(std::string text);
+
 private:
     void addCommands(IScreen &screen);
 };

@@ -45,22 +45,28 @@ void refreshScreen(IWindow &window, IScreen &screen) {
     screen.refresh();
 }
 
-void handleKey(KeyEvent c, MainWindow &mainWindow, IScreen &screen) {
-    if (c == Key::Resize) {
-        mainWindow.resize(screen.width(), screen.height());
-    }
-    else {
-        mainWindow._env->key(c);
-        mainWindow.keyPress(mainWindow._scope);
-        mainWindow.resize();
-    }
+void handleKey(Event e, MainWindow &mainWindow, IScreen &screen) {
+    if (auto c = std::get_if<KeyEvent>(&e)) {
+        if (*c == Key::Resize) {
+            mainWindow.resize(screen.width(), screen.height());
+        }
+        else {
+            mainWindow._env->key(*c);
+            mainWindow.keyPress(mainWindow._scope);
+            mainWindow.resize();
+        }
 
-    refreshScreen(mainWindow, screen);
+        refreshScreen(mainWindow, screen);
+    }
+    if (auto p = std::get_if<PasteEvent>(&e)) {
+        mainWindow.paste(p->text);
+        refreshScreen(mainWindow, screen);
+    }
 }
 
 void innerMainLoop(IInput &input,
                    IJobQueue &guiQueue,
-                   std::function<void(KeyEvent)> callback) {
+                   std::function<void(Event)> callback) {
 
     auto c = input.getInput();
 
@@ -77,6 +83,9 @@ void innerMainLoop(IInput &input,
             if (*key != Key::Unknown) {
                 callback(*key);
             }
+        }
+        else {
+            callback(c);
         }
         c = input.getInput();
     }
@@ -108,7 +117,7 @@ struct MainData {
 
     void stop();
 
-    void callback(KeyEvent c) {
+    void callback(Event c) {
         handleKey(c, *mainWindow, *screen);
     }
 

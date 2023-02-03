@@ -107,7 +107,7 @@ Cursor RawBuffer::apply(BufferEdit edit) {
             .substr((oldNumLines ? 0 : edit.position.x()) + lastOldLineLength);
 
     auto ret = edit.position;
-    ret.y(ret.y() + _lines.size() - oldNumLines);
+    ret.y(ret.y() + newLines.size() - oldNumLines - 1);
     if (newLines.size() == 1) {
         ret.x(pos.x() + newLines.back().size());
     }

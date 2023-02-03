@@ -378,3 +378,7 @@ void MainWindow::switchEditor() {
     _currentEditor = (_currentEditor + 1) % _editors.size();
     _inputFocus = &currentEditor();
 }
+
+void MainWindow::paste(std::string text) {
+    currentEditor().cursor(insert(currentEditor().cursor(), text));
+}

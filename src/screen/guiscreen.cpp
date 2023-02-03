@@ -349,6 +349,13 @@ Event GuiScreen::getInput() {
             return keyEvent;
         }
 
+        if (sdlEvent.key.keysym.mod == 64 && sdlEvent.key.keysym.sym == 'v') {
+            if (SDL_HasClipboardText()) {
+                return PasteEvent{SDL_GetClipboardText()};
+            }
+            return NullEvent{};
+        }
+
         keyEvent.modifiers = getModState();
 
         if (keyEvent.modifiers != Modifiers::None &&

@@ -90,18 +90,14 @@ class MouseMoveEvent {
     int y = -1;
 };
 
-class GenericEvent {
-    //    enum EventType {
-    //        Quit,
-    //        None,
-    //    };
-
-    //    EventType type;
-};
-
 struct NullEvent {};
 
-using Event = std::variant<NullEvent, KeyEvent, MouseDownEvent, MouseMoveEvent>;
+struct PasteEvent {
+    std::string text;
+};
+
+using Event = std::
+    variant<NullEvent, KeyEvent, MouseDownEvent, MouseMoveEvent, PasteEvent>;
 
 // constexpr bool operator!=(const KeyEvent &a, const Event &b) {
 //     return !std::holds_alternative<KeyEvent>(b) ||
