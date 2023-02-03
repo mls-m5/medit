@@ -30,16 +30,16 @@ filesystem::path Project::root(filesystem::path path) const {
             return path;
         }
 
-        if (filesystem::exists(path / "/.git")) {
+        if (filesystem::exists(path / ".git")) {
             return path;
         }
 
-        auto newPath = filesystem::path("");
-        for (auto it = path.begin(); it != --path.end(); ++it) {
-            newPath /= it->string();
-        }
+        //        auto newPath = filesystem::path("");
+        //        for (auto it = path.begin(); it != --path.end(); ++it) {
+        //            newPath /= it->string();
+        //        }
 
-        path = newPath;
+        path = path.parent_path();
 
     } while (!path.empty());
 
