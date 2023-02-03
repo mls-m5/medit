@@ -388,6 +388,8 @@ std::string MainWindow::copy(bool shouldCut) {
     auto text = content(currentEditor().selection());
     if (shouldCut) {
         erase(currentEditor().selection());
+        // TODO: selection clearing should be handled by erase
+        currentEditor().clearSelection();
     }
     return text;
 }

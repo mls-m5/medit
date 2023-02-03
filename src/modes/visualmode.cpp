@@ -5,7 +5,7 @@
 #include "modes/parentmode.h"
 #include "views/editor.h"
 
-std::shared_ptr<IMode> createVisualMode() {
+std::shared_ptr<IMode> createVisualMode(bool blockSelection) {
     auto map = KeyMap{
         {
             {{Key::Left}, {"editor.left"}},
@@ -22,6 +22,8 @@ std::shared_ptr<IMode> createVisualMode() {
             {{"x"}, {"editor.erase\neditor.normalmode"}},
             {{"d"}, {"editor.erase\neditor.normalmode"}},
             {{"c"}, {"editor.erase\neditor.insertmode"}},
+            {{"V"}, {"editor.visualblockmode"}},
+            {{"v"}, {"editor.visualmode"}},
             {{Key::Escape}, {"editor.normalmode"}},
             //            {{Key::Return}, {"editor.down"}},
             {{"\n"}, {"editor.down"}},
@@ -48,7 +50,8 @@ std::shared_ptr<IMode> createVisualMode() {
                                        std::move(map),
                                        CursorStyle::Block,
                                        createParentMode(),
-                                       std::move(bufferMap));
+                                       std::move(bufferMap),
+                                       blockSelection);
 
     mode->startCallback([](Editor &e) { e.anchor(e.cursor()); });
     mode->exitCallback([](Editor &e) { e.clearSelection(); });

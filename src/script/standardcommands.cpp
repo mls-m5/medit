@@ -39,12 +39,6 @@ CommandList navigationCommands = {
         "editor.up",
         [](std::shared_ptr<IScope> scope) {
             auto &e = scope->editor();
-            //            if (e.cursor().y() == 0) {
-            //                return;
-            //            }
-            //            auto cursor = e.cursor();
-            //            cursor.y(cursor.y() - 1);
-            //            e.cursor(cursor);
             e.cursor(up(e.cursor()));
         },
     },
@@ -52,9 +46,6 @@ CommandList navigationCommands = {
         "editor.down",
         [](std::shared_ptr<IScope> scope) {
             auto &e = scope->editor();
-            //            auto cursor = e.cursor();
-            //            cursor.y(e.cursor().y() + 1);
-            //            e.cursor(cursor);
             e.cursor(down(e.cursor()));
         },
     },
@@ -300,6 +291,12 @@ CommandList editorCommands = {
         "editor.visualmode",
         [](std::shared_ptr<IScope> scope) {
             scope->editor().mode(createVisualMode());
+        },
+    },
+    {
+        "editor.visualblockmode",
+        [](std::shared_ptr<IScope> scope) {
+            scope->editor().mode(createVisualMode(true));
         },
     },
     {

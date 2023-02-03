@@ -91,12 +91,21 @@ void Editor::clearSelection() {
 }
 
 CursorRange Editor::selection() {
+    if (_mode->isBlockSelection()) {
+        if (!_selectionAnchor) {
+            return {home(_cursor), end(_cursor)};
+        }
+
+        auto range = CursorRange{*_selectionAnchor, _cursor};
+        range.beginPosition(home(range.begin()));
+        range.endPosition(right(end(range.end())));
+        return range;
+    }
+
     if (_selectionAnchor) {
         return {*_selectionAnchor, _cursor};
     }
-    else {
-        return {_cursor};
-    }
+    return {_cursor};
 }
 
 void Editor::selection(CursorRange range) {

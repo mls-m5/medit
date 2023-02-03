@@ -15,5 +15,8 @@ public:
     virtual void exit(Editor &) = 0;
     virtual CursorStyle cursorStyle() const = 0;
 
+    /// If only whole lines can be selected
+    virtual bool isBlockSelection() const = 0;
+
     virtual ~IMode() = default;
 };

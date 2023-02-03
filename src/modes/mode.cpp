@@ -6,10 +6,14 @@ Mode::Mode(std::string name,
            KeyMap map,
            CursorStyle cursorStyle,
            std::shared_ptr<IMode> parent,
-           BufferKeyMap bufferMap)
-    : _name(std::move(name)), _keyMap(std::move(map)),
-      _bufferMap(std::move(bufferMap)), _parent(std::move(parent)),
-      _cursorStyle(cursorStyle) {}
+           BufferKeyMap bufferMap,
+           bool isBlockSelection)
+    : _name(std::move(name))
+    , _keyMap(std::move(map))
+    , _bufferMap(std::move(bufferMap))
+    , _parent(std::move(parent))
+    , _cursorStyle(cursorStyle)
+    , _isBlockSelection{isBlockSelection} {}
 
 bool Mode::keyPress(std::shared_ptr<IScope> scope) {
     auto lock = shared_from_this();

@@ -16,13 +16,15 @@ class Mode : public IMode, public std::enable_shared_from_this<Mode> {
     std::function<void(Editor &)> _start;
     std::function<void(Editor &)> _exit;
     CursorStyle _cursorStyle = CursorStyle::Block;
+    bool _isBlockSelection = false;
 
 public:
     Mode(std::string name,
          KeyMap map,
          CursorStyle cursorStyle = CursorStyle::Block,
          std::shared_ptr<IMode> parent = {},
-         BufferKeyMap bufferMap = {});
+         BufferKeyMap bufferMap = {},
+         bool isBlockSelection = false);
 
     bool keyPress(std::shared_ptr<IScope>) override;
 
@@ -50,5 +52,9 @@ public:
 
     CursorStyle cursorStyle() const override {
         return _cursorStyle;
+    }
+
+    bool isBlockSelection() const override {
+        return _isBlockSelection;
     }
 };
