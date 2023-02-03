@@ -93,7 +93,7 @@ using namespace lsp;
 
 LspPlugin::LspPlugin()
     : _core{CoreEnvironment::instance()} {
-    auto args = std::string{"--log=info "};
+    auto args = std::string{"--log=error "}; //   std::string{"--log=info "};
 
     auto compileCommandsPath = locateCompileCommands();
 
@@ -109,8 +109,8 @@ LspPlugin::LspPlugin()
         [this](BufferEvent e) { bufferEvent(e); });
 
     _client->request(InitializeParams{}, [](const nlohmann::json &j) {
-        std::cout << "initialization response:\n";
-        std::cout << std::setw(2) << j << std::endl;
+        //        std::cout << "initialization response:\n";
+        //        std::cout << std::setw(2) << j << std::endl;
     });
 
     _client->subscribe(
