@@ -1,17 +1,33 @@
 #pragma once
 
 #include <filesystem>
+#include <iostream>
 #include <string>
 #include <vector>
 
 enum class UiStyle {
-    Standard,
+    Terminal,
     Matgui,
 };
 
 struct Settings {
     std::filesystem::path file;
     UiStyle style = UiStyle::Matgui;
+
+    static constexpr auto helpStr = R"_(
+medit text editor
+
+usage:
+
+medit -[flags] [file]
+
+flags:
+
+--gui                 force start with graphic interface
+--cli                 start in terminal
+--help                print this string
+
+    )_";
 
     Settings(int argc, char **argv) {
         if (argc < 1) {
@@ -26,7 +42,11 @@ struct Settings {
                 style = UiStyle::Matgui;
             }
             else if (arg == "--cli") {
-                style = UiStyle::Standard;
+                style = UiStyle::Terminal;
+            }
+            else if (arg == "--help") {
+                std::cout << helpStr << std::endl;
+                std::exit(0);
             }
             else {
                 if (arg.rfind("-") != 0) {

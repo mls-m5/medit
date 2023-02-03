@@ -36,8 +36,12 @@ inline bool isMatmake(const filesystem::path &path) {
     return path.filename() == "Matmakefile";
 }
 
+inline bool isCmakeLists(const filesystem::path &path) {
+    return path.filename() == "CMakeLists.txt";
+}
+
 inline bool isKnownExtension(const filesystem::path &path) {
     return isCppHeader(path) || isCppSource(path) || isCSource(path) ||
            isCpp(path) || isJson(path) || isMarkdown(path) || isMake(path) ||
-           isMatmake(path);
+           isMatmake(path) || isCmakeLists(path);
 }

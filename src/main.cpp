@@ -109,6 +109,19 @@ struct MainData {
     void callback(KeyEvent c) {
         handleKey(c, *mainWindow, *screen);
     }
+
+    void createScreen(const Settings &settings) {
+        //        if (settings.style == UiStyle::Terminal) {
+        //            auto ns = std::make_unique<NCursesScreen>();
+        //            input = ns.get();
+        //            nativeScreen = std::move(ns);
+        //        }
+        //        else {
+        auto ns = std::make_unique<ScreenType>();
+        input = ns.get();
+        nativeScreen = std::move(ns);
+        //        }
+    }
 };
 
 MainData mainData;
@@ -117,11 +130,7 @@ void MainData::start(int argc, char **argv) {
     registerDefaultPlugins();
     const auto settings = Settings{argc, argv};
 
-    {
-        auto ns = std::make_unique<ScreenType>();
-        input = ns.get();
-        nativeScreen = std::move(ns);
-    }
+    createScreen(settings);
 
     screen = std::make_unique<BufferedScreen>(nativeScreen.get(), input);
 
