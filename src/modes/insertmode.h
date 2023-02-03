@@ -1,6 +1,6 @@
 #pragma once
 
-#include "keys/keyevent.h"
+#include "keys/event.h"
 #include "modes/imode.h"
 
 #include <memory>

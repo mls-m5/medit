@@ -1,6 +1,6 @@
 #pragma once
 
-#include "keyevent.h"
+#include "event.h"
 #include "script/command.h"
 #include <vector>
 

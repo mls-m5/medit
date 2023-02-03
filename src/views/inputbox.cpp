@@ -1,5 +1,5 @@
 #include "views/inputbox.h"
-#include "keys/keyevent.h"
+#include "keys/event.h"
 #include "modes/insertmode.h"
 #include "screen/draw.h"
 #include "screen/iscreen.h"

@@ -1,5 +1,5 @@
 #include "completeview.h"
-#include "keys/keyevent.h"
+#include "keys/event.h"
 #include "script/iscope.h"
 #include "text/cursorops.h"
 #include "text/cursorrange.h"

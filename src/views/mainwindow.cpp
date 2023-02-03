@@ -15,6 +15,7 @@
 #include "syntax/ihighlight.h"
 #include "syntax/ipalette.h"
 #include "text/cursorops.h"
+#include "text/cursorrangeops.h"
 #include "views/inputbox.h"
 #include "views/messagebox.h"
 #include <memory>
@@ -381,4 +382,12 @@ void MainWindow::switchEditor() {
 
 void MainWindow::paste(std::string text) {
     currentEditor().cursor(insert(currentEditor().cursor(), text));
+}
+
+std::string MainWindow::copy(bool shouldCut) {
+    auto text = content(currentEditor().selection());
+    if (shouldCut) {
+        erase(currentEditor().selection());
+    }
+    return text;
 }

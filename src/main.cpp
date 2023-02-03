@@ -55,13 +55,17 @@ void handleKey(Event e, MainWindow &mainWindow, IScreen &screen) {
             mainWindow.keyPress(mainWindow._scope);
             mainWindow.resize();
         }
-
-        refreshScreen(mainWindow, screen);
     }
     if (auto p = std::get_if<PasteEvent>(&e)) {
         mainWindow.paste(p->text);
-        refreshScreen(mainWindow, screen);
     }
+    if (auto ce = std::get_if<CopyEvent>(&e)) {
+        auto text = mainWindow.copy(ce->shouldCut);
+        ce->callback(text);
+    }
+
+    // TODO: Update when open buffers change instead
+    refreshScreen(mainWindow, screen);
 }
 
 void innerMainLoop(IInput &input,

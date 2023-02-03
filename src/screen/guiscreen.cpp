@@ -349,11 +349,21 @@ Event GuiScreen::getInput() {
             return keyEvent;
         }
 
-        if (sdlEvent.key.keysym.mod == 64 && sdlEvent.key.keysym.sym == 'v') {
-            if (SDL_HasClipboardText()) {
-                return PasteEvent{SDL_GetClipboardText()};
+        if (sdlEvent.key.keysym.mod == 64) {
+            auto sym = sdlEvent.key.keysym.sym;
+
+            if (sym == 'v') {
+                if (SDL_HasClipboardText()) {
+                    return PasteEvent{SDL_GetClipboardText()};
+                }
+                return NullEvent{};
             }
-            return NullEvent{};
+            if (sym == 'c' || sym == 'x') {
+                return CopyEvent{[](std::string text) {
+                                     SDL_SetClipboardText(text.c_str());
+                                 },
+                                 sym == 'x'};
+            }
         }
 
         keyEvent.modifiers = getModState();

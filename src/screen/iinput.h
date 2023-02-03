@@ -1,6 +1,6 @@
 #pragma once
 
-#include "keys/keyevent.h"
+#include "keys/event.h"
 
 class IInput {
 public:

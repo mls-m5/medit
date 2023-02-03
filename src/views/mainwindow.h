@@ -69,6 +69,7 @@ struct MainWindow : public Window {
     void switchEditor();
 
     void paste(std::string text);
+    std::string copy(bool shouldCut);
 
 private:
     void addCommands(IScreen &screen);

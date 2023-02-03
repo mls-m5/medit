@@ -1,6 +1,7 @@
 #pragma once
 
 #include "text/utf8char.h"
+#include <functional>
 #include <variant>
 
 enum class Key {
@@ -96,14 +97,16 @@ struct PasteEvent {
     std::string text;
 };
 
-using Event = std::
-    variant<NullEvent, KeyEvent, MouseDownEvent, MouseMoveEvent, PasteEvent>;
+// Request the server to send back data to be copied
+struct CopyEvent {
+    std::function<void(std::string)> callback;
 
-// constexpr bool operator!=(const KeyEvent &a, const Event &b) {
-//     return !std::holds_alternative<KeyEvent>(b) ||
-//            !(a == std::get<KeyEvent>(b));
-// }
+    bool shouldCut = false;
+};
 
-// constexpr bool operator!=(const Event &a, const KeyEvent &b) {
-//     return b != a;
-// }
+using Event = std::variant<NullEvent,
+                           KeyEvent,
+                           MouseDownEvent,
+                           MouseMoveEvent,
+                           PasteEvent,
+                           CopyEvent>;

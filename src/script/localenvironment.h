@@ -2,7 +2,7 @@
 
 #include "core/registers.h"
 #include "ienvironment.h"
-#include "keys/keyevent.h"
+#include "keys/event.h"
 #include "meditfwd.h"
 
 /// Environment data for a single user
