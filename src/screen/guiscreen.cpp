@@ -113,8 +113,8 @@ struct GuiScreen::Buffer {
         : window{"medit",
                  SDL_WINDOWPOS_CENTERED,
                  SDL_WINDOWPOS_CENTERED,
-                 width * 20,
-                 height * 20,
+                 width * 8,
+                 height * 8,
                  SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN}
         , renderer{window, SDL_RENDERER_ACCELERATED, SDL_RENDERER_PRESENTVSYNC}
         , screen{width, height, fontPath(), 14} {
@@ -402,6 +402,12 @@ Event GuiScreen::getInput() {
         else if (sdlEvent.wheel.y < 0) {
             return KeyEvent{Key::PageDown};
         }
+        break;
+
+    case SDL_MOUSEBUTTONDOWN:
+        //        return MouseDownEvent{1, sdlEvent.button.x,
+        //        sdlEvent.button.y};
+
         break;
     }
 

@@ -78,15 +78,17 @@ public:
     bool state = true;
 };
 
-class MouseEvent {
+class MouseDownEvent {
     int button = 1;
     int x = -1;
     int y = -1;
 };
 
-class MouseDownEvent : public MouseEvent {};
-
-class MouseMoveEvent : public MouseEvent {};
+class MouseMoveEvent {
+    int button = 1;
+    int x = -1;
+    int y = -1;
+};
 
 class GenericEvent {
     //    enum EventType {

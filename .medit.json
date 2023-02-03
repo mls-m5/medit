@@ -1,5 +1,5 @@
 {
-    "build": "matmake2 -t gcc-debug",
+    "build": "cd build/default ; cmake ../.. ; cmake --build .",
     "flags": [
         "-std=c++2a",
         "-Isrc",
