@@ -41,7 +41,7 @@ std::filesystem::path uriToPath(lsp::URI uri) {
 }
 
 Position toMeditPosition(lsp::Position pos) {
-    return Position(pos.character - 1, pos.line - 1);
+    return Position(pos.character /*- 1*/, pos.line /*- 1*/);
 }
 
 CursorRange toMeditRange(Buffer &b, lsp::Range range) {
@@ -51,6 +51,8 @@ CursorRange toMeditRange(Buffer &b, lsp::Range range) {
 
 void applyFormat(std::shared_ptr<Buffer> buffer,
                  const std::vector<lsp::DocumentSymbol> &symbols) {
+
+    BasicHighlighting::highlightStatic(*buffer);
     for (auto &symbol : symbols) {
         buffer->format(toMeditRange(*buffer, symbol.location.range),
                        IPalette::error);
@@ -166,19 +168,18 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
 
             _client->request(
                 params,
-                [this, buffer = event.buffer](const nlohmann::json &symbols) {
-                    std::cout << symbols << std::endl;
-                    //                                 const
-                    //                                 DocumentSymbolParams::ReturnT
-                    //                                 &symbols) {
-                    //                    if (symbols.empty()) {
-                    //                        return;
-                    //                    }
+                [this, buffer = event.buffer](
+                    const nlohmann::json &json
+                    /*const DocumentSymbolParams::ReturnT &symbols*/) {
+                    std::cout << json << std::endl;
 
-                    //                    _core.context().guiQueue().addTask(
-                    //                        [buffer, symbols] {
-                    //                        applyFormat(buffer,
-                    //                        symbols); });
+                    auto symbols = json.get<DocumentSymbolParams::ReturnT>();
+                    if (symbols.empty()) {
+                        return;
+                    }
+
+                    _core.context().guiQueue().addTask(
+                        [buffer, symbols] { applyFormat(buffer, symbols); });
                 });
         }
     }
@@ -269,8 +270,6 @@ bool LspHighlight::shouldEnable(filesystem::path path) {
 
 void LspHighlight::highlight(std::shared_ptr<IScope> scope) {
     LspPlugin::instance().updateBuffer(scope->editor().buffer());
-
-    BasicHighlighting::highlightStatic(scope->editor().buffer());
 }
 
 void LspHighlight::update(const IPalette &palette) {}

@@ -64,10 +64,6 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
 
             if (line.at(x - 1).c == '/' && line.at(x).c == '/') {
                 --x;
-                //                for (; i < line.size(); ++i) {
-                //                    auto &c = line.at(i);
-                //                    c.f = IPalette::comment;
-                //                }
 
                 auto range = CursorRange{buffer, {x, y}, {10000, y}};
                 format(range, IPalette::comment);
@@ -79,9 +75,6 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
             if (line.front().c == '#') {
                 auto range = CursorRange{buffer, {0, y}, {10000, y}};
                 format(range, IPalette::comment);
-                //                for (auto &c : line) {
-                //                    c.f = IPalette::comment;
-                //                }
             }
         }
     }
