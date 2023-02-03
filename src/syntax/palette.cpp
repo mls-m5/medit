@@ -140,9 +140,13 @@ bool Palette::update(IScreen &screen) {
         fixFormat("def:identifier", BasicPalette::identifier);
         fixFormat("def:statement", BasicPalette::statement);
         fixFormat("def:comment", BasicPalette::comment);
+        fixFormat("def:preprocessor", BasicPalette::preprocessor);
+        fixFormat("def:constant", BasicPalette::constant);
         fixFormat("def:string", BasicPalette::string);
         fixFormat("def:type", BasicPalette::type);
         fixFormat("def:error", BasicPalette::error);
+        fixFormat("def:warning", BasicPalette::warning);
+        fixFormat("def:note", BasicPalette::note);
 
         auto standardStyle = _styles[standardFormatName];
         screen.addStyle(standardStyle.color, standardStyle.background, 0);

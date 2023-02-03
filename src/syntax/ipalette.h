@@ -7,6 +7,7 @@
 
 class IPalette {
 public:
+    // TODO: Add more formating styles
     enum BasicPalette : FormatType {
         standard = 1,
 
@@ -17,12 +18,17 @@ public:
         comment,
         lineNumbers,
 
+        preprocessor,
+
         currentLine,
+        constant,
         string,
 
         selection,
 
         error,
+        warning,
+        note,
     };
 
     virtual ~IPalette() = default;

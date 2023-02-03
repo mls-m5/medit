@@ -156,30 +156,7 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
         };
 
         _client->notify(params);
-
-        // This is not what I expected it to be
-        //        {
-        //            auto params = DocumentSymbolParams{};
-        //            params.textDocument.uri = createURI(event.buffer->path());
-
-        //            _client->request(
-        //                params,
-        //                [this, buffer = event.buffer](
-        //                    const nlohmann::json &json
-        //                    /*const DocumentSymbolParams::ReturnT &symbols*/)
-        //                    { std::cout << json << std::endl;
-
-        //                    auto symbols =
-        //                    json.get<DocumentSymbolParams::ReturnT>(); if
-        //                    (symbols.empty()) {
-        //                        return;
-        //                    }
-
-        //                    _core.context().guiQueue().addTask(
-        //                        [buffer, symbols] { applyFormat(buffer,
-        //                        symbols); });
-        //                });
-        //        }
+        requestSemanticsToken(event.buffer);
     }
 }
 
@@ -190,8 +167,8 @@ void LspPlugin::registerPlugin() {
     registerCompletion<LspComplete>();
 }
 
-void LspPlugin::handleSemanticTokens(std::shared_ptr<Buffer> buffer,
-                                     std::vector<long> data) {
+void LspPlugin::handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
+                                      std::vector<long> data) {
 
     struct Item {
         long *data;
@@ -212,7 +189,7 @@ void LspPlugin::handleSemanticTokens(std::shared_ptr<Buffer> buffer,
         /// at index 5*i+3 - tokenType: will be looked up in
         ///    SemanticTokensLegend.tokenTypes. We currently ask that tokenType
         ///    < 65536.
-        long tokenTytpe = data[3];
+        long tokenType = data[3];
 
         /// at index 5*i+4 - tokenModifiers: each set bit will be looked up in
         ///    SemanticTokensLegend.tokenModifiers
@@ -224,6 +201,38 @@ void LspPlugin::handleSemanticTokens(std::shared_ptr<Buffer> buffer,
     BasicHighlighting::highlightStatic(*buffer);
 
     Cursor cur = buffer->begin();
+
+    static std::unordered_map<lsp::SemanticTokenTypes, IPalette::BasicPalette>
+        translation = {
+            {SemanticTokenTypes::Type, IPalette::type},
+            {SemanticTokenTypes::Class, IPalette::type},
+            {SemanticTokenTypes::Enum, IPalette::type},
+            {SemanticTokenTypes::Interface, IPalette::type},
+            {SemanticTokenTypes::Struct, IPalette::type},
+            {SemanticTokenTypes::TypeParameter, IPalette::type},
+            {SemanticTokenTypes::Parameter, IPalette::identifier},
+            {SemanticTokenTypes::Variable, IPalette::identifier},
+            {SemanticTokenTypes::Property, IPalette::identifier},
+            {SemanticTokenTypes::EnumMember, IPalette::identifier},
+            {SemanticTokenTypes::Event, IPalette::identifier},
+            {SemanticTokenTypes::Function, IPalette::identifier},
+            {SemanticTokenTypes::Method, IPalette::identifier},
+            {SemanticTokenTypes::Macro, IPalette::comment},
+            {SemanticTokenTypes::Keyword, IPalette::identifier},
+            {SemanticTokenTypes::Modifier, IPalette::statement},
+            {SemanticTokenTypes::Comment, IPalette::standard},
+            {SemanticTokenTypes::String, IPalette::string},
+            {SemanticTokenTypes::Number, IPalette::constant},
+            {SemanticTokenTypes::Regexp, IPalette::standard},
+            {SemanticTokenTypes::Operator, IPalette::standard},
+        };
+
+    auto translate = [](SemanticTokenTypes t) {
+        if (auto f = translation.find(t); f != translation.end()) {
+            return f->second;
+        }
+        return IPalette::standard;
+    };
 
     for (size_t i = 0; i < data.size(); i += 5) {
         auto item = Item{data.data() + i};
@@ -239,16 +248,28 @@ void LspPlugin::handleSemanticTokens(std::shared_ptr<Buffer> buffer,
         Cursor end = cur;
         end.x(cur.x() + item.length);
 
-        format({cur, end}, IPalette::identifier);
+        format({cur, end},
+               translate(static_cast<SemanticTokenTypes>(item.tokenType)));
 
-        std::cout << "dx: " << item.deltaStart << "\tdy:" << item.deltaLine
-                  << "\tx: " << cur.x() << "\ty: " << cur.y()
-                  << "\tl: " << item.length << "\t";
-        std::cout << content({cur, end}) << "\n";
-
-        //        cur = end;
+        //        std::cout << "dx: " << item.deltaStart << "\tdy:" <<
+        //        item.deltaLine
+        //                  << "\tx: " << cur.x() << "\ty: " << cur.y()
+        //                  << "\tl: " << item.length << "\t";
+        //        std::cout << content({cur, end}) << "\n";
     }
-    std::cout.flush();
+    //    std::cout.flush();
+}
+
+void LspPlugin::requestSemanticsToken(std::shared_ptr<Buffer> buffer) {
+    auto params = SemanticTokensParams{};
+    params.textDocument.uri = pathToUri(buffer->path());
+
+    _client->request(params, [this, buffer](SemanticTokens data) {
+        CoreEnvironment::instance().context().guiQueue().addTask(
+            [buffer, data, this] {
+                handleSemanticsTokens(buffer, std::move(data.data));
+            });
+    });
 }
 
 void LspPlugin::updateBuffer(Buffer &buffer) {
@@ -274,19 +295,7 @@ void LspPlugin::updateBuffer(Buffer &buffer) {
     });
     _client->notify(params);
 
-    {
-        auto params = SemanticTokensParams{};
-        params.textDocument.uri = pathToUri(buffer.path());
-
-        _client->request(
-            params,
-            [this, buffer = buffer.shared_from_this()](SemanticTokens data) {
-                CoreEnvironment::instance().context().guiQueue().addTask(
-                    [buffer, data, this] {
-                        handleSemanticTokens(buffer, std::move(data.data));
-                    });
-            });
-    }
+    requestSemanticsToken(buffer.shared_from_this());
 }
 
 void LspComplete::list(std::shared_ptr<IScope> scope,
