@@ -126,16 +126,16 @@ struct MainData {
     }
 
     void createScreen(const Settings &settings) {
-        //        if (settings.style == UiStyle::Terminal) {
-        //            auto ns = std::make_unique<NCursesScreen>();
-        //            input = ns.get();
-        //            nativeScreen = std::move(ns);
-        //        }
-        //        else {
-        auto ns = std::make_unique<ScreenType>();
-        input = ns.get();
-        nativeScreen = std::move(ns);
-        //        }
+        if (settings.style == UiStyle::Terminal) {
+            auto ns = std::make_unique<NCursesScreen>();
+            input = ns.get();
+            nativeScreen = std::move(ns);
+        }
+        else {
+            auto ns = std::make_unique<ScreenType>();
+            input = ns.get();
+            nativeScreen = std::move(ns);
+        }
     }
 };
 

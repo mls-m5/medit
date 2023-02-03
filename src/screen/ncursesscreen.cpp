@@ -184,7 +184,8 @@ size_t NCursesScreen::y() const {
 }
 
 size_t NCursesScreen::width() const {
-    return static_cast<size_t>(::COLS);
+    return static_cast<size_t>(::COLS *
+                               2); // TODO: Figure out why 2 is required here
 }
 
 size_t NCursesScreen::height() const {

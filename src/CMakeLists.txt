@@ -86,7 +86,7 @@ if (NOT EMSCRIPTEN)
         medit_core
         PRIVATE
         matrix-screen
-#        ncurses
+        ncurses
     )
 
 endif()
