@@ -39,7 +39,11 @@ Todo:
   - [x] Mouse wheel control
   - [ ] Move cursor with mouse
   - [ ] Select with mouse drag
-  
+- [ ] File synch
+  - [ ] Detect when open buffer is changed on disk
+  - [ ] Prompt if buffer contains unsaved changes, otherwise replace
+- [ ] Scripting
+  - [ ] Use real scripting language
 
 
 # Prioritized changes

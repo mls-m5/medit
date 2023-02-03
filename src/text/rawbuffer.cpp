@@ -124,18 +124,38 @@ Cursor RawBuffer::apply(BufferEdit edit) {
     _lines.insert(
         _lines.begin() + edit.position.y(), newLines.begin(), newLines.end());
 
+    isColorsOld(true);
+    isChanged(true);
+
     return ret;
 }
 
-void RawBuffer::format(const CursorRange &range, FormatType f) {
-    // TODO: Implement multiline format
+void RawBuffer::format(CursorRange range, FormatType f) {
+    range = fix(range);
+
     if (range.end().x() < range.begin().x()) {
         return;
     }
 
-    auto &line = _lines.at(range.begin().y());
+    if (range.end().y() == range.begin().y()) {
+        auto &line = _lines.at(range.begin().y());
 
-    for (size_t i = range.begin().x(); i < range.end().x(); ++i) {
-        line.at(i).f = f;
+        for (size_t i = range.begin().x(); i < range.end().x(); ++i) {
+            line.at(i).f = f;
+        }
+        return;
+    }
+
+    {
+        auto &line1 = _lines.at(range.begin().y());
+        for (size_t i = range.begin().x(); i < line1.size(); ++i) {
+            line1.at(i).f = f;
+        }
+    }
+    {
+        auto &line2 = _lines.at(range.end().y());
+        for (size_t i = 0; i < range.end().x(); ++i) {
+            line2.at(i).f = f;
+        }
     }
 }

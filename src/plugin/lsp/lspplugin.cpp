@@ -12,6 +12,7 @@
 #include "script/ienvironment.h"
 #include "script/iscope.h"
 #include "script/scope.h"
+#include "syntax/basichighligting.h"
 #include "syntax/ipalette.h"
 #include "views/editor.h"
 #include <iostream>
@@ -268,6 +269,8 @@ bool LspHighlight::shouldEnable(filesystem::path path) {
 
 void LspHighlight::highlight(std::shared_ptr<IScope> scope) {
     LspPlugin::instance().updateBuffer(scope->editor().buffer());
+
+    BasicHighlighting::highlightStatic(scope->editor().buffer());
 }
 
 void LspHighlight::update(const IPalette &palette) {}

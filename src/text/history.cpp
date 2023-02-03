@@ -2,7 +2,7 @@
 #include "bufferedit.h"
 #include "text/buffer.h"
 
-void History::commit() {
+bool History::commit() {
     // TODO: Only commit the part that change
     auto text = _buffer.ftext();
 
@@ -15,7 +15,7 @@ void History::commit() {
     edit.trim();
 
     if (edit.empty()) {
-        return;
+        return false;
     }
 
     if (text != _currentState) {
@@ -25,14 +25,10 @@ void History::commit() {
         });
         _currentState = _buffer.text();
 
-        //        if (_ignoreRedoClear) {
-        //            // Ignore one commit after a redo is done
-        //            _ignoreRedoClear = false;
-        //        }
-        //        else {
         _redo.clear();
-        //        }
     }
+
+    return true;
 }
 
 void History::markMajor() {

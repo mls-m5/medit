@@ -22,7 +22,7 @@ public:
 
     //! Add the last change to the history
     //! Replace this with a function that only takes the specific changes
-    void commit();
+    bool commit();
 
     //! Remember that the last change was a change you might want to go back to
     void markMajor();

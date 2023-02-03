@@ -181,10 +181,7 @@ public:
         return _raw.isSingleLine();
     }
 
-    void format(const CursorRange &range, FormatType f) {
-        _tv();
-        _raw.format(range, f);
-    }
+    void format(const CursorRange &range, FormatType f);
 
     [[nodiscard]] bool isChanged() const {
         _tv();

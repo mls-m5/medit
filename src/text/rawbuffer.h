@@ -60,7 +60,7 @@ public:
     /// Should be accompanied by _history.commit();
     Cursor apply(BufferEdit edit);
 
-    void format(const CursorRange &range, FormatType f);
+    void format(CursorRange range, FormatType f);
 
 private:
     std::vector<FString> _lines = {""};
