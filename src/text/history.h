@@ -22,7 +22,7 @@ public:
 
     //! Add the last change to the history
     //! Replace this with a function that only takes the specific changes
-    bool commit();
+    bool commit(BufferEdit edit);
 
     //! Remember that the last change was a change you might want to go back to
     void markMajor();
@@ -43,7 +43,7 @@ public:
 private:
     long _revision = 1;
 
-    FString _currentState; // TODO: Remove this variable
+    //    FString _currentState; // TODO: Remove this variable
     Buffer &_buffer;
 
     std::vector<Item> _history;

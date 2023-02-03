@@ -44,6 +44,7 @@ Todo:
   - [ ] Prompt if buffer contains unsaved changes, otherwise replace
 - [ ] Scripting
   - [ ] Use real scripting language
+- [ ] ctrl+backspace to erase whole word
 
 
 # Prioritized changes
@@ -76,5 +77,6 @@ CompileFlags:
 
 Note that if you have multiplie compile_commands.json-files in your directory
 Medit could pick the wrong one.
+
 
 

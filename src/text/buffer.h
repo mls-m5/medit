@@ -136,8 +136,8 @@ public:
 
     Cursor apply(BufferEdit edit) {
         _tv();
+        _history.commit(edit);
         auto cur = _raw.apply(std::move(edit));
-        _history.commit();
         return cur;
     }
 

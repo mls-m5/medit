@@ -41,6 +41,7 @@ std::string Buffer::text() const {
 
 void Buffer::pushBack(FString string) {
     _tv();
+    string.insert(0, '\n');
     insert(end(), std::move(string));
 }
 
