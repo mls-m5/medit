@@ -43,7 +43,7 @@ public:
     void clear();
 
     /// Should be accompanied by _history.commit()
-    void text(std::istream &);
+    //    void text(std::istream &);
     void text(std::ostream &) const;
 
     //! Get as a continuous string and not a vector of lines

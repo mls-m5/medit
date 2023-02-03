@@ -48,14 +48,14 @@ void RawBuffer::clear() {
     isChanged(true);
 }
 
-void RawBuffer::text(std::istream &stream) {
-    isChanged(true);
-    _lines.clear();
+// void RawBuffer::text(std::istream &stream) {
+//     isChanged(true);
+//     _lines.clear();
 
-    for (std::string line; getline(stream, line);) {
-        _lines.emplace_back(std::move(line));
-    }
-}
+//    for (std::string line; getline(stream, line);) {
+//        _lines.emplace_back(std::move(line));
+//    }
+//}
 
 void RawBuffer::text(std::ostream &stream) const {
     if (_lines.empty()) {

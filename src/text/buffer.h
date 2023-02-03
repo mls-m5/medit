@@ -164,12 +164,7 @@ public:
         text(std::string{str});
     }
 
-    void text(std::istream &in) {
-        _tv();
-        _raw.text(in);
-        _history.commit();
-        _history.markMajor();
-    }
+    void text(std::istream &in);
 
     void text(std::ostream &out) const {
         _tv();

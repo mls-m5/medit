@@ -16,9 +16,13 @@ public:
     constexpr FChar &operator=(const FChar &) = default;
     constexpr FChar &operator=(FChar &&) = default;
 
-    constexpr FChar(char c, FormatType f = {}) : c(c), f(f) {}
-    constexpr FChar(char *begin, size_t size) : c(begin, size) {}
-    constexpr FChar(Utf8Char c) : c(c) {}
+    constexpr FChar(char c, FormatType f = {})
+        : c(c)
+        , f(f) {}
+    constexpr FChar(char *begin, size_t size)
+        : c(begin, size) {}
+    constexpr FChar(Utf8Char c)
+        : c(c) {}
 
     constexpr auto size() const {
         return c.size();
@@ -32,11 +36,18 @@ public:
         return std::string{std::string_view{*this}};
     }
 
+    //    friend bool operator==(const FChar &a, const FChar b) {
+    //        return a.c == b.c && a.f == b.f;
+    //    }
+
+    //    friend bool operator!=(const FChar &a, const FChar b) {
+    //        return a.c != b.c || a.f != b.f;
+    //    }
     friend bool operator==(const FChar &a, const FChar b) {
-        return a.c == b.c && a.f == b.f;
+        return a.c == b.c;
     }
 
     friend bool operator!=(const FChar &a, const FChar b) {
-        return a.c != b.c || a.f != b.f;
+        return a.c != b.c;
     }
 };

@@ -74,6 +74,8 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
     _annotation = createAnnotations();
 
     _navigation = createNavigation();
+
+    updateLocatorBuffer();
 }
 
 MainWindow::~MainWindow() = default;
@@ -270,12 +272,7 @@ bool MainWindow::keyPress(std::shared_ptr<IScope> env) {
 
 void MainWindow::updateLocatorBuffer() {
     auto &editor = currentEditor();
-    if (editor.file()) {
-        _project.updateCache(editor.path());
-    }
-    else {
-        _project.updateCache(filesystem::current_path());
-    }
+    _project.updateCache(filesystem::current_path());
 }
 
 void MainWindow::open(filesystem::path path,
@@ -300,7 +297,7 @@ void MainWindow::open(filesystem::path path,
         }
         editor.cursor(cur);
     }
-    updateLocatorBuffer();
+    //    updateLocatorBuffer();
 
     updateHighlighting(editor);
 

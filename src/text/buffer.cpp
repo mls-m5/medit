@@ -1,6 +1,7 @@
 #include "buffer.h"
 #include "cursorops.h"
 #include "cursorrange.h"
+#include "cursorrangeops.h"
 
 std::unique_ptr<Buffer> Buffer::open(std::filesystem::__cxx11::path path) {
     auto buffer = std::make_unique<Buffer>();
@@ -41,6 +42,16 @@ std::string Buffer::text() const {
 void Buffer::pushBack(FString string) {
     _tv();
     insert(end(), std::move(string));
+}
+
+void Buffer::text(std::istream &in) {
+    auto ss = std::ostringstream{};
+
+    ss << in.rdbuf();
+
+    auto fstr = FString{ss.str()};
+
+    replace(all(*this), std::move(fstr));
 }
 
 void Buffer::format(const CursorRange &range, FormatType f) {

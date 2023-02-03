@@ -41,13 +41,16 @@ std::filesystem::path uriToPath(lsp::URI uri) {
     return uri.substr(7);
 }
 
-Position toMeditPosition(lsp::Position pos) {
-    return Position(pos.character /*- 1*/, pos.line /*- 1*/);
+/// @param offest   of the input is offsetted by 1 character and need sto be
+/// adjusted for
+Position toMeditPosition(lsp::Position pos, bool offset = false) {
+    return Position(pos.character - 1 * offset, pos.line - 1 * offset);
 }
 
-CursorRange toMeditRange(Buffer &b, lsp::Range range) {
-    return CursorRange{
-        b, toMeditPosition(range.start), toMeditPosition(range.end)};
+CursorRange toMeditRange(Buffer &b, lsp::Range range, bool offset = false) {
+    return CursorRange{b,
+                       toMeditPosition(range.start, offset),
+                       toMeditPosition(range.end, offset)};
 }
 
 void applyFormat(std::shared_ptr<Buffer> buffer,
@@ -119,8 +122,8 @@ LspPlugin::LspPlugin()
                     .source =
                         "clangd", // item.source, could not get this to work
                     .message = item.message,
-                    .range = {toMeditPosition(item.range.start),
-                              toMeditPosition(item.range.end)},
+                    .range = {toMeditPosition(item.range.start, true),
+                              toMeditPosition(item.range.end, true)},
                 });
             }
 
