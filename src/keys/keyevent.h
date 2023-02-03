@@ -14,6 +14,8 @@ enum class Key {
     Right,
     Home,
     End,
+    PageUp,
+    PageDown,
     Backspace,
     Delete,
     //    Return, never used
@@ -55,7 +57,10 @@ public:
                        Utf8Char symbol = {},
                        Modifiers modifiers = Modifiers::None,
                        bool state = true)
-        : key(key), symbol(symbol), modifiers(modifiers), state(state) {}
+        : key(key)
+        , symbol(symbol)
+        , modifiers(modifiers)
+        , state(state) {}
 
     constexpr friend bool operator==(const KeyEvent &a, const KeyEvent &b) {
         return a.key == b.key && a.modifiers == b.modifiers &&

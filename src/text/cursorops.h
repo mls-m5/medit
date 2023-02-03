@@ -10,6 +10,8 @@
 [[nodiscard]] Cursor fix(Cursor);
 [[nodiscard]] Cursor right(Cursor, bool allowLineChange = true);
 [[nodiscard]] Cursor left(Cursor, bool allowLineChange = true);
+[[nodiscard]] Cursor up(Cursor);
+[[nodiscard]] Cursor down(Cursor);
 [[nodiscard]] Cursor home(Cursor);
 [[nodiscard]] Cursor end(Cursor);
 

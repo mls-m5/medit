@@ -10,6 +10,8 @@ std::shared_ptr<IMode> createParentMode() {
         {KeyEvent{Key::F4}, {"editor.switch_header"}},
         {KeyEvent{Key::Home}, {"editor.home"}},
         {KeyEvent{Key::End}, {"editor.end"}},
+        {KeyEvent{Key::PageUp}, {"editor.page_up"}},
+        {KeyEvent{Key::PageDown}, {"editor.page_down"}},
         {KeyEvent{Key::KeyCombination, 'T', Modifiers::Ctrl}, {"show_console"}},
         {KeyEvent{Key::KeyCombination, 'E', Modifiers::Ctrl},
          {"switch_editor"}},

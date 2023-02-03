@@ -16,7 +16,7 @@
 
 namespace {
 
-auto keyMap = std::array<std::pair<int, Key>, 22>{{
+auto keyMap = std::array<std::pair<int, Key>, 24>{{
     {SDL_SCANCODE_UNKNOWN, Key::Unknown},
     {SDL_SCANCODE_ESCAPE, Key::Escape},
     {SDL_SCANCODE_UP, Key::Up},
@@ -25,6 +25,8 @@ auto keyMap = std::array<std::pair<int, Key>, 22>{{
     {SDL_SCANCODE_RIGHT, Key::Right},
     {SDL_SCANCODE_HOME, Key::Home},
     {SDL_SCANCODE_END, Key::End},
+    {SDL_SCANCODE_PAGEUP, Key::PageUp},
+    {SDL_SCANCODE_PAGEDOWN, Key::PageDown},
     {SDL_SCANCODE_BACKSPACE, Key::Backspace},
     {SDL_SCANCODE_DELETE, Key::Delete},
     {SDL_SCANCODE_F1, Key::F1},

@@ -303,3 +303,16 @@ Cursor insert(Cursor cur, FString str) {
 
     return apply(BufferEdit{"", std::move(str), cur});
 }
+
+Cursor up(Cursor cur) {
+    if (cur.y() == 0) {
+        return cur;
+    }
+    cur.y(cur.y() - 1);
+    return cur;
+}
+
+Cursor down(Cursor cur) {
+    cur.y(cur.y() + 1);
+    return fix(cur);
+}

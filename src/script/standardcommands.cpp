@@ -39,21 +39,23 @@ CommandList navigationCommands = {
         "editor.up",
         [](std::shared_ptr<IScope> scope) {
             auto &e = scope->editor();
-            if (e.cursor().y() == 0) {
-                return;
-            }
-            auto cursor = e.cursor();
-            cursor.y(cursor.y() - 1);
-            e.cursor(cursor);
+            //            if (e.cursor().y() == 0) {
+            //                return;
+            //            }
+            //            auto cursor = e.cursor();
+            //            cursor.y(cursor.y() - 1);
+            //            e.cursor(cursor);
+            e.cursor(up(e.cursor()));
         },
     },
     {
         "editor.down",
         [](std::shared_ptr<IScope> scope) {
             auto &e = scope->editor();
-            auto cursor = e.cursor();
-            cursor.y(e.cursor().y() + 1);
-            e.cursor(cursor);
+            //            auto cursor = e.cursor();
+            //            cursor.y(e.cursor().y() + 1);
+            //            e.cursor(cursor);
+            e.cursor(down(e.cursor()));
         },
     },
     {
@@ -93,6 +95,29 @@ CommandList navigationCommands = {
         [](std::shared_ptr<IScope> scope) {
             auto &e = scope->editor();
             e.cursor(end(e.cursor()));
+        },
+    },
+    {
+        "editor.page_up",
+        [](std::shared_ptr<IScope> scope) {
+            auto &e = scope->editor();
+            auto c = e.cursor();
+
+            for (size_t i = 0; i < 10; ++i) {
+                c = up(c);
+            }
+            e.cursor(c);
+        },
+    },
+    {
+        "editor.page_down",
+        [](std::shared_ptr<IScope> scope) {
+            auto &e = scope->editor();
+            auto c = e.cursor();
+            for (size_t i = 0; i < 10; ++i) {
+                c = down(c);
+            }
+            e.cursor(c);
         },
     },
 };
