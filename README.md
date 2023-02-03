@@ -16,9 +16,9 @@ Todo:
   - [ ] Full row visual mode
   - [ ] Implement all navigation shortcuts for all modes (iw aw 'i{' etc)
 - [x] Undo/Redo
-  - [ ] Improve memory usage for undo/redo
+  - [x] Improve memory usage for undo/redo
 - [x] Multiple open editors
-- [ ] Keep buffers open in background
+- [x] Keep buffers open in background
 - [x] Buffered screen output
 - [x] Delayed syntax highlighting
 - [x] Save files
@@ -36,6 +36,7 @@ Todo:
     - [x] Clang-based syntax highlighting
 - [ ] Co-edit files with other people remotely
 - [ ] Mouse control
+  - [x] Mouse wheel control
   - [ ] Move cursor with mouse
   - [ ] Select with mouse drag
   
