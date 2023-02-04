@@ -81,6 +81,10 @@ void NCursesScreen::init() {
     ::raw();
     ::keypad(stdscr, true);
     ::noecho();
+
+    //    mousemask(ALL_MOUSE_EVENTS, NULL);
+    mousemask(BUTTON1_PRESSED, NULL);
+
     ::timeout(10);
 }
 
@@ -139,13 +143,30 @@ Event NCursesScreen::getInput() {
     if (c == ERR) {
         return NullEvent{};
     }
-    else if (c == KEY_RESIZE) {
+
+    if (c == KEY_RESIZE) {
         ::endwin();
         ::refresh();
         ::clear();
         init();
         return KeyEvent{Key::Resize};
     }
+
+    if (c == KEY_MOUSE) {
+        MEVENT event;
+        getmouse(&event);
+
+        if (event.id == -1) {
+            return NullEvent{};
+        }
+
+        return MouseDownEvent{1, event.x, event.y};
+    }
+
+    if (c == 409) { // Seems to come with scrool wheel
+        return NullEvent{};
+    }
+
     else if (auto f = keytranslations.find(c); f != keytranslations.end()) {
         return KeyEvent{f->second.key, f->second.text};
     }
