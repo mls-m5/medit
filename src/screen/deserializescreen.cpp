@@ -31,7 +31,37 @@ void DeserializeScreen::handle(const nlohmann::json &json) {
 
     if (method == "draw") {
         _screen->draw(json["x"], json["y"], std::string{json["text"]});
+        return;
+    }
 
+    if (method == "cursor") {
+        _screen->cursor(json["x"], json["y"]);
+        return;
+    }
+
+    if (method == "cursorStyle") {
+        _screen->cursorStyle(json["value"]);
+        return;
+    }
+
+    if (method == "title") {
+        _screen->title(json["value"]);
+        return;
+    }
+
+    if (method == "get/x") {
+        send(nlohmann::json{
+            {"id", id},
+            {"value", _screen->x()},
+        });
+        return;
+    }
+
+    if (method == "get/y") {
+        send(nlohmann::json{
+            {"id", id},
+            {"value", _screen->y()},
+        });
         return;
     }
 
@@ -63,5 +93,7 @@ void DeserializeScreen::handle(const nlohmann::json &json) {
 }
 
 void DeserializeScreen::send(const nlohmann::json &data) {
-    throw std::runtime_error{"not implemented"};
+    auto ss = std::stringstream{};
+    ss << data;
+    _callback(ss.str());
 }

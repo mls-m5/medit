@@ -4,9 +4,10 @@
 SerializeScreen::SerializeScreen(std::shared_ptr<IConnection> connection)
     : _connection{connection} {
     connection->subscribe([this](std::string_view str) {
-        //        auto ss = std::istringstream{std::string{str}};
-        //        auto json = Json{};
-        //        ss >> json;
+        auto ss = std::istringstream{std::string{str}};
+        auto json = nlohmann::json{};
+        ss >> json;
+        receive(json);
     });
 }
 
@@ -15,12 +16,6 @@ SerializeScreen::~SerializeScreen() {
 }
 
 void SerializeScreen::draw(size_t x, size_t y, const FString &str) {
-    //    Json json;
-    //    json["method"] = "draw";
-    //    json["x"] = x;
-    //    json["y"] = y;
-    //    json["text"].string(str);
-    //    send(json);
     send(nlohmann::json{
         {"method", "draw"},
         {"x", static_cast<double>(x)},
@@ -33,18 +28,12 @@ void SerializeScreen::refresh() {
     send(nlohmann::json{
         {"method", "refresh"},
     });
-    //    Json json;
-    //    json["method"] = "refresh";
-    //    send(json);
 }
 
 void SerializeScreen::clear() {
     send(nlohmann::json{
         {"method", "clear"},
     });
-    //    Json json;
-    //    json["method"] = "clear";
-    //    send(json);
 }
 
 void SerializeScreen::cursor(size_t x, size_t y) {
@@ -56,38 +45,38 @@ void SerializeScreen::cursor(size_t x, size_t y) {
 }
 
 size_t SerializeScreen::x() const {
-    //    Json json;
-    //    json["method"] = "get/x";
-    //    auto res = const_cast<SerializeScreen &>(*this).request(json);
-    //    return res;
+    auto r = const_cast<SerializeScreen *>(this)->request({
+        {"method", "get/x"},
+    });
+    return r["value"];
 }
 
 size_t SerializeScreen::y() const {
-    //    Json json;
-    //    json["method"] = "get/x";
-    //    auto res = const_cast<SerializeScreen &>(*this).request(json);
-    //    return res;
+    auto r = const_cast<SerializeScreen *>(this)->request({
+        {"method", "get/y"},
+    });
+    return r["value"];
 }
 
 size_t SerializeScreen::width() const {
-    //    Json json;
-    //    json["method"] = "get/width";
-    //    auto res = const_cast<SerializeScreen &>(*this).request(json);
-    //    return res;
+    auto r = const_cast<SerializeScreen *>(this)->request({
+        {"method", "get/width"},
+    });
+    return r["value"];
 }
 
 size_t SerializeScreen::height() const {
-    //    Json json;
-    //    json["method"] = "get/height";
-    //    auto res = const_cast<SerializeScreen &>(*this).request(json);
-    //    return res;
+    auto r = const_cast<SerializeScreen *>(this)->request({
+        {"method", "get/height"},
+    });
+    return r["value"];
 }
 
 void SerializeScreen::title(std::string title) {
-    //    Json json;
-    //    json["method"] = "title";
-    //    json["title"] = title;
-    //    send(json);
+    send(nlohmann::json{
+        {"method", "title"},
+        {"value", title},
+    });
 }
 
 const IPalette &SerializeScreen::palette() const {}
@@ -108,7 +97,7 @@ size_t SerializeScreen::addStyle(const Color &foreground,
 void SerializeScreen::cursorStyle(CursorStyle style) {
     send({
         {"method", "cursorStyle"},
-        {"style", static_cast<double>(style)},
+        {"value", static_cast<double>(style)},
     });
 }
 

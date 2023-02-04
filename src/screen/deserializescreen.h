@@ -23,6 +23,7 @@ public:
 private:
     void handle(const nlohmann::json &json);
 
+    //! Outgoing data from this class
     void send(const nlohmann::json &data);
 
     std::shared_ptr<IScreen> _screen;
