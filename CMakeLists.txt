@@ -32,7 +32,7 @@ target_include_directories(
     medit_common
     INTERFACE
     include/
-    src/
+    ${CMAKE_SOURCE_DIR}/src/
     ./
     src/plugin/include
     src/plugin
@@ -43,6 +43,7 @@ target_link_libraries(
     medit_common
     INTERFACE
     json
+    ${CMAKE_THREAD_LIBS_INIT}
     )
 
 target_compile_features(
@@ -64,7 +65,7 @@ add_executable(
 target_link_libraries(
     medit
     PRIVATE
-    medit_core
+    lib_medit
     medit_common
     medit_plugins
     )
@@ -104,5 +105,5 @@ target_link_libraries(
     code_playback
     PRIVATE
     medit_common
-    medit_core
+    lib_medit
     )

@@ -41,3 +41,5 @@ class ICompletionSource;
 class IAnnotation;
 class IFormat;
 class INavigation;
+
+class IConnection;

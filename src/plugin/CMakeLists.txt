@@ -17,7 +17,7 @@ target_link_libraries(
     medit_plugins
     PUBLIC
     medit_common
-    medit_core
+    lib_medit
     lsp-client
     )
 
@@ -37,7 +37,7 @@ if (ENABLE_LEGACY_CLANG_PLUGIN)
         medit_clang_plugins
         PUBLIC
         medit_common
-        medit_core
+        lib_medit
         clang-9
         )
 

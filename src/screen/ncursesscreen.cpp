@@ -1,5 +1,5 @@
 #ifndef __EMSCRIPTEN__
-#include "screen/ncursesscreen.h"
+#include "ncursesscreen.h"
 #include "syntax/color.h"
 #include <map>
 #include <ncurses.h>

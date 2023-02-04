@@ -1,17 +1,10 @@
 
 add_subdirectory(plugin)
 
+# ------------- shared files ----------------------------
 add_library(
     medit_core
     STATIC
-    files/config.cpp
-    files/popenstream.cpp
-    files/file.cpp
-    files/project.cpp
-    files/fontlocator.cpp
-    keys/keymap.cpp
-    syntax/basichighligting.cpp
-    syntax/palette.cpp
     core/coreenvironment.cpp
     core/os.cpp
     core/jsjobqueue.cpp
@@ -20,6 +13,79 @@ add_library(
     core/registers.cpp
     core/jstimer.cpp
     core/plugins.cpp
+    syntax/palette.cpp
+    )
+
+target_link_libraries(
+    medit_core
+    PUBLIC
+    medit_common
+    )
+
+
+# ------------------------- gui screen --------------------
+
+add_library(
+    medit_sdl_screen
+    STATIC
+    screen/guiscreen.cpp
+    files/fontlocator.cpp
+    )
+
+target_link_libraries(
+    medit_sdl_screen
+    PUBLIC
+        medit_common
+        medit_core
+    PRIVATE
+        matrix-screen
+    )
+
+# ---------------------- ncurses screen --------------------
+
+if (NOT EMSCRIPTEN)
+    add_library(
+        medit_terminal_screen
+        STATIC
+        screen/ncursesscreen.cpp
+        )
+
+    target_link_libraries(
+        medit_terminal_screen
+        PUBLIC
+            medit_common
+            medit_core
+        PRIVATE
+            ncurses
+        )
+endif()
+
+# --------------------- remote screen ----------------------
+
+add_library(
+    medit_remote_screen
+    STATIC
+    screen/serializescreen.cpp
+    )
+
+target_link_libraries(
+    medit_remote_screen
+    PUBLIC
+        medit_common
+        medit_core
+    PRIVATE
+    )
+
+# ---------------------- master lib ------------------------
+add_library(
+    lib_medit
+    STATIC
+    files/config.cpp
+    files/popenstream.cpp
+    files/file.cpp
+    files/project.cpp
+    keys/keymap.cpp
+    syntax/basichighligting.cpp
     text/fstring.cpp
     text/cursorrangeops.cpp
     text/cursorops.cpp
@@ -51,42 +117,25 @@ add_library(
     navigation/headernavigation.cpp
     completion/autocomplete.cpp
     screen/draw.cpp
-    screen/ncursesscreen.cpp
     screen/linuxterminalscreen.cpp
     screen/htmlscreen.cpp
     screen/bufferedscreen.cpp
-    screen/guiscreen.cpp
     )
 
-find_package (Threads)
 target_link_libraries (
-    medit_core
+    lib_medit
     PUBLIC
-    ${CMAKE_THREAD_LIBS_INIT}
-    )
-
-#find_package(LLVM REQUIRED CONFIG)
-
-target_include_directories(
     medit_core
-    PUBLIC
-    include
-    src
+    medit_common
+    medit_sdl_screen
+    medit_terminal_screen
+    medit_remote_screen
     )
-
 
 target_link_libraries(
-    medit_core
+    lib_medit
     PRIVATE
     medit_common
     )
 
-if (NOT EMSCRIPTEN)
-    target_link_libraries(
-        medit_core
-        PRIVATE
-        matrix-screen
-        ncurses
-    )
 
-endif()

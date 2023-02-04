@@ -18,7 +18,7 @@ function(test_disabled testname)
         ${testname}_test
         PUBLIC
         medit_common
-        medit_core
+        lib_medit
         medit_plugins
         )
 
