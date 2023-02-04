@@ -133,7 +133,6 @@ void Editor::showLines(bool value) {
 bool Editor::keyPress(std::shared_ptr<IScope> env) {
     if (_mode) {
         if (_mode->keyPress(env)) {
-            //            buffer().history().markMajor();
             return true;
         }
         else {
@@ -142,6 +141,20 @@ bool Editor::keyPress(std::shared_ptr<IScope> env) {
     }
 
     return false;
+}
+
+bool Editor::mouseDown(int x, int y) {
+    if (!isInside(x, y)) {
+        return false;
+    }
+
+    int relX = x - this->x() - bufferView().numberWidth();
+    int relY = y - this->y();
+
+    // TODO: It does not seem to select when clicking where there is no text
+    cursor(fix(Cursor(buffer(), relX, relY + _bufferView.yScroll())));
+
+    return true;
 }
 
 void Editor::updateCursor(IScreen &screen) const {

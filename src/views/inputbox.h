@@ -11,14 +11,19 @@ public:
     ~InputBox();
 
     //! @see IKeySink interface
-    bool keyPress(std::shared_ptr<IScope>);
-    void updateCursor(IScreen &screen) const;
+    bool keyPress(std::shared_ptr<IScope>) override;
+    void updateCursor(IScreen &screen) const override;
 
     //! @see IView
-    void draw(IScreen &);
+    void draw(IScreen &) override;
 
     void callback(std::function<void(std::string)> callback) {
         _callback = callback;
+    }
+
+    // TODO: Implement
+    bool mouseDown(int x, int ty) override {
+        return false;
     }
 
 private:

@@ -46,4 +46,9 @@ public:
     size_t current() const {
         return _current;
     }
+
+    // TODO: Handle this for subclasses
+    bool mouseDown(int x, int y) override {
+        return false;
+    }
 };

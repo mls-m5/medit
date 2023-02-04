@@ -384,6 +384,12 @@ void MainWindow::paste(std::string text) {
     currentEditor().cursor(insert(currentEditor().cursor(), text));
 }
 
+bool MainWindow::mouseDown(int x, int y) {
+    currentEditor().mouseDown(x, y);
+
+    return true;
+}
+
 std::string MainWindow::copy(bool shouldCut) {
     auto text = content(currentEditor().selection());
     if (shouldCut) {

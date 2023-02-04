@@ -14,4 +14,8 @@ public:
 
     //! @see IKeySink interface
     void updateCursor(IScreen &screen) const;
+
+    bool mouseDown(int x, int ty) override {
+        return false;
+    }
 };

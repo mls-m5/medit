@@ -37,6 +37,10 @@ public:
 
     void setCursor(Cursor cursor, const BufferView &bufferView);
 
+    bool mouseDown(int x, int ty) override {
+        return false;
+    }
+
 private:
     void currentText(std::string str);
 

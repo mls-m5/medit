@@ -422,8 +422,10 @@ Event GuiScreen::getInput() {
         break;
 
     case SDL_MOUSEBUTTONDOWN:
-        //        return MouseDownEvent{1, sdlEvent.button.x,
-        //        sdlEvent.button.y};
+        return MouseDownEvent{
+            1,
+            sdlEvent.button.x / _buffer->screen.cache.charWidth,
+            sdlEvent.button.y / _buffer->screen.cache.charHeight};
 
         break;
     }

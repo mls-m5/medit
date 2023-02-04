@@ -53,6 +53,8 @@ public:
 
     CursorRange selection();
 
+    //! Set selection and make selection stay when moving cursor
+    //! If you just want to move the cursor, use cursor(...) instead
     void selection(CursorRange range);
 
     void mode(std::shared_ptr<IMode> mode);
@@ -62,6 +64,8 @@ public:
     void showLines(bool value);
 
     bool keyPress(std::shared_ptr<IScope>) override;
+
+    bool mouseDown(int x, int y) override;
 
     void updateCursor(IScreen &) const override;
 

@@ -17,4 +17,5 @@ public:
     virtual void y(size_t value) = 0;
     virtual void width(size_t) = 0;
     virtual void height(size_t) = 0;
+    virtual bool isInside(int x, int y) = 0;
 };

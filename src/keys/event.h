@@ -79,13 +79,15 @@ public:
     bool state = true;
 };
 
-class MouseDownEvent {
+struct MouseDownEvent {
+public:
     int button = 1;
     int x = -1;
     int y = -1;
 };
 
-class MouseMoveEvent {
+struct MouseMoveEvent {
+public:
     int button = 1;
     int x = -1;
     int y = -1;

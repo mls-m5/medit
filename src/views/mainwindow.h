@@ -69,6 +69,8 @@ struct MainWindow : public Window {
     void switchEditor();
 
     void paste(std::string text);
+
+    bool mouseDown(int x, int y) override;
     std::string copy(bool shouldCut);
 
 private:

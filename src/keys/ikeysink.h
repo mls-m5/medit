@@ -13,4 +13,7 @@ public:
     virtual void updateCursor(IScreen &screen) const = 0;
 
     virtual ~IKeySink() = default;
+
+    //! @return true if key is handled
+    virtual bool mouseDown(int x, int y) = 0;
 };

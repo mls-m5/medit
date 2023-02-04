@@ -53,6 +53,12 @@ public:
         _visible = value;
     }
 
+    bool isInside(int x, int y) override {
+        return x >= static_cast<int>(_x) && y >= static_cast<int>(_y) &&
+               x <= static_cast<int>(_x + _width) &&
+               y < static_cast<int>(_y + _height);
+    }
+
 private:
     size_t _x = 0;
     size_t _y = 0;
