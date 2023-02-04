@@ -74,6 +74,7 @@ target_link_libraries(
     PUBLIC
         medit_common
         medit_core
+        nlohmann_json::nlohmann_json
     PRIVATE
     )
 

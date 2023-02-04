@@ -141,8 +141,8 @@ public:
 
     FString operator+(const FString &other);
 
-    bool operator!=(const FString &other);
-    bool operator==(const FString &other);
+    bool operator!=(const FString &other) const;
+    bool operator==(const FString &other) const;
 };
 
 inline std::ostream &operator<<(std::ostream &out, const FString &str) {

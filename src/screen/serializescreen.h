@@ -1,8 +1,8 @@
 #pragma once
 
 #include "iconnection.h"
+#include "nlohmann/json.hpp"
 #include "screen/iscreen.h"
-#include "json/json.h"
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
@@ -40,16 +40,16 @@ private:
     std::shared_ptr<IConnection> _connection;
     volatile std::atomic_long _currentRequest = 1;
     volatile std::atomic_long _receivedRequest = 0;
-    class Json createRequest(std::string name);
+    nlohmann::json createRequest(std::string name);
 
-    void send(const Json &);
-    Json request(Json);
+    void send(const nlohmann::json &);
+    nlohmann::json request(nlohmann::json);
 
     //! Where the remote data enters this class
-    void receive(Json);
+    void receive(const nlohmann::json &);
 
     std::mutex _mutex;
     std::condition_variable _cv;
 
-    Json _receivedData;
+    nlohmann::json _receivedData;
 };

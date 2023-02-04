@@ -35,11 +35,11 @@ FString FString::operator+(const FString &other) {
     return str;
 }
 
-bool FString::operator!=(const FString &other) {
+bool FString::operator!=(const FString &other) const {
     return _content != other._content;
 }
 
-bool FString::operator==(const FString &other) {
+bool FString::operator==(const FString &other) const {
     return _content == other._content;
 }
 

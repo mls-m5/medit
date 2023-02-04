@@ -1,5 +1,5 @@
 #include "deserializescreen.h"
-#include "json/json.h"
+#include "nlohmann/json.hpp"
 #include <sstream>
 
 DeserializeScreen::DeserializeScreen(std::shared_ptr<IScreen> screen)
@@ -15,37 +15,39 @@ void DeserializeScreen::close() {
 }
 
 void DeserializeScreen::write(std::string_view data) {
-    auto ss = std::ostringstream{std::string{data}};
-
-    auto json = Json::Parse(std::string{data});
-
-    handle(json);
+    handle(nlohmann::json::parse(data));
 }
 
-void DeserializeScreen::handle(const Json &json) {
+void DeserializeScreen::handle(const nlohmann::json &json) {
     long id = 0;
     if (auto f = json.find("id"); f != json.end()) {
-        id = std::stol(f->value);
+        id = *f;
     }
 
     auto method = std::string{};
     if (auto f = json.find("method"); f != json.end()) {
-        method = f->string();
+        method = *f;
     }
 
-    if (method == "width") {
-        auto r = Json{};
-        r["id"] = id;
-        r["value"] = _screen->width();
-        send(r);
+    if (method == "draw") {
+        _screen->draw(json["x"], json["y"], std::string{json["text"]});
+
         return;
     }
 
-    if (method == "height") {
-        auto r = Json{};
-        r["id"] = id;
-        r["value"] = _screen->height();
-        send(r);
+    if (method == "get/width") {
+        send(nlohmann::json{
+            {"id", id},
+            {"value", _screen->width()},
+        });
+        return;
+    }
+
+    if (method == "get/height") {
+        send(nlohmann::json{
+            {"id", id},
+            {"value", _screen->height()},
+        });
         return;
     }
 
@@ -60,6 +62,6 @@ void DeserializeScreen::handle(const Json &json) {
     }
 }
 
-void DeserializeScreen::send(const Json &data) {
+void DeserializeScreen::send(const nlohmann::json &data) {
     throw std::runtime_error{"not implemented"};
 }
