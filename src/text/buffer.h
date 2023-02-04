@@ -134,17 +134,10 @@ public:
         return _raw.lines();
     }
 
-    Cursor apply(BufferEdit edit) {
-        _tv();
-        _history.commit(edit);
-        auto cur = _raw.apply(std::move(edit));
-        return cur;
-    }
+    //! Apply changes and apply to history
+    Cursor apply(BufferEdit edit);
 
-    [[nodiscard]] const FString &lineAt(size_t index) const {
-        _tv();
-        return _raw.lineAt(index);
-    }
+    [[nodiscard]] const FString &lineAt(size_t index) const;
 
     void pushBack(FString string = {});
 
@@ -153,23 +146,13 @@ public:
         return _raw.empty();
     }
 
-    void text(std::string str) {
-        _tv();
-        std::istringstream ss{std::move(str)};
+    void text(std::string str);
 
-        text(ss);
-    }
-
-    void text(std::string_view str) {
-        text(std::string{str});
-    }
+    void text(std::string_view str);
 
     void text(std::istream &in);
 
-    void text(std::ostream &out) const {
-        _tv();
-        _raw.text(out);
-    }
+    void text(std::ostream &out) const;
 
     [[nodiscard]] bool isSingleLine() const {
         _tv();

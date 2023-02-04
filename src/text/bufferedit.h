@@ -5,7 +5,8 @@
 #include "utf8char.h"
 #include <vector>
 
-struct BufferEdit {
+class BufferEdit {
+public:
     // TODO: Maybe create a better stringtype (basic_string does not work)
     FString from;
     FString to;

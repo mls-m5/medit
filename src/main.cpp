@@ -36,69 +36,6 @@ using TimerType = Timer;
 
 namespace {
 
-void refreshScreen(IWindow &window, IScreen &screen) {
-    screen.clear();
-    window.draw(screen);
-
-    window.updateCursor(screen);
-
-    screen.refresh();
-}
-
-void handleKey(Event e, MainWindow &mainWindow, IScreen &screen) {
-    if (auto c = std::get_if<KeyEvent>(&e)) {
-        if (*c == Key::Resize) {
-            mainWindow.resize(screen.width(), screen.height());
-        }
-        else {
-            mainWindow._env->key(*c);
-            mainWindow.keyPress(mainWindow._scope);
-            mainWindow.resize();
-        }
-    }
-    if (auto p = std::get_if<PasteEvent>(&e)) {
-        mainWindow.paste(p->text);
-    }
-    if (auto ce = std::get_if<CopyEvent>(&e)) {
-        auto text = mainWindow.copy(ce->shouldCut);
-        ce->callback(text);
-    }
-
-    // TODO: Update when open buffers change instead
-    refreshScreen(mainWindow, screen);
-}
-
-void innerMainLoop(IInput &input,
-                   IJobQueue &guiQueue,
-                   std::function<void(Event)> callback) {
-
-    auto c = input.getInput();
-
-    // Todo: in the future check main window for unsaved changes
-    // here too
-    while (!std::holds_alternative<NullEvent>(c)) {
-        if (auto key = std::get_if<KeyEvent>(&c)) {
-            if (*key == KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl} ||
-                *key == Key::Quit) {
-                medit::main::shouldQuit = true;
-                break;
-            }
-
-            if (*key != Key::Unknown) {
-                callback(*key);
-            }
-        }
-        else {
-            callback(c);
-        }
-        c = input.getInput();
-    }
-
-    guiQueue.work(false);
-}
-
-// #ifdef __EMSCRIPTEN__
-
 std::function<void()> emCallback;
 
 struct MainData {
@@ -137,6 +74,68 @@ struct MainData {
             nativeScreen = std::move(ns);
         }
     }
+
+    void refreshScreen(IWindow &window, IScreen &screen) {
+        screen.clear();
+        window.draw(screen);
+
+        window.updateCursor(screen);
+
+        screen.refresh();
+    }
+
+    void handleKey(Event e, MainWindow &mainWindow, IScreen &screen) {
+        if (auto c = std::get_if<KeyEvent>(&e)) {
+            if (*c == Key::Resize) {
+                mainWindow.resize(screen.width(), screen.height());
+            }
+            else {
+                mainWindow._env->key(*c);
+                mainWindow.keyPress(mainWindow._scope);
+                mainWindow.resize();
+            }
+        }
+        if (auto p = std::get_if<PasteEvent>(&e)) {
+            mainWindow.paste(p->text);
+        }
+        if (auto ce = std::get_if<CopyEvent>(&e)) {
+            auto text = mainWindow.copy(ce->shouldCut);
+            ce->callback(text);
+        }
+
+        // TODO: Update when open buffers change instead
+        refreshScreen(mainWindow, screen);
+    }
+
+    void innerMainLoop(IInput &input,
+                       IJobQueue &guiQueue,
+                       std::function<void(Event)> callback) {
+
+        auto c = input.getInput();
+
+        // Todo: in the future check main window for unsaved changes
+        // here too
+        while (!std::holds_alternative<NullEvent>(c)) {
+            if (auto key = std::get_if<KeyEvent>(&c)) {
+                if (*key ==
+                        KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl} ||
+                    *key == Key::Quit) {
+                    medit::main::shouldQuit = true;
+                    break;
+                }
+
+                if (*key != Key::Unknown) {
+                    callback(*key);
+                }
+            }
+            else {
+                callback(c);
+            }
+            c = input.getInput();
+        }
+
+        guiQueue.work(false);
+    }
 };
 
 MainData mainData;
@@ -160,8 +159,8 @@ void MainData::start(int argc, char **argv) {
 
     mainWindow = std::make_shared<MainWindow>(*screen, *context);
 
-    context->refreshScreenFunc([] {
-        mainData.guiQueue->addTask([] {
+    context->refreshScreenFunc([this] {
+        mainData.guiQueue->addTask([this] {
             refreshScreen(*mainData.mainWindow, *mainData.screen); //
         });
     });

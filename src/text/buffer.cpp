@@ -39,10 +39,33 @@ std::string Buffer::text() const {
     return ss.str();
 }
 
+Cursor Buffer::apply(BufferEdit edit) {
+    _tv();
+    _history.commit(edit);
+    auto cur = _raw.apply(std::move(edit));
+    return cur;
+}
+
+const FString &Buffer::lineAt(size_t index) const {
+    _tv();
+    return _raw.lineAt(index);
+}
+
 void Buffer::pushBack(FString string) {
     _tv();
     string.insert(0, '\n');
     insert(end(), std::move(string));
+}
+
+void Buffer::text(std::string str) {
+    _tv();
+    std::istringstream ss{std::move(str)};
+
+    text(ss);
+}
+
+void Buffer::text(std::string_view str) {
+    text(std::string{str});
 }
 
 void Buffer::text(std::istream &in) {
@@ -53,6 +76,11 @@ void Buffer::text(std::istream &in) {
     auto fstr = FString{ss.str()};
 
     replace(all(*this), std::move(fstr));
+}
+
+void Buffer::text(std::ostream &out) const {
+    _tv();
+    _raw.text(out);
 }
 
 void Buffer::format(const CursorRange &range, FormatType f) {
