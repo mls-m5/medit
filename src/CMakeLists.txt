@@ -66,6 +66,7 @@ add_library(
     medit_remote_screen
     STATIC
     screen/serializescreen.cpp
+    screen/deserializescreen.cpp
     )
 
 target_link_libraries(

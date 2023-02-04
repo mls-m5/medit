@@ -2,13 +2,24 @@
 
 #include "iconnection.h"
 #include "screen/iscreen.h"
+#include "json/json.h"
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
 
 //! Screen used on server to serialize screen calls to binary form
 class SerializeScreen : public IScreen {
-    SerializeScreen(IConnection &connection);
+public:
+    SerializeScreen(std::shared_ptr<IConnection> connection);
+    ~SerializeScreen();
+
+    SerializeScreen() = delete;
+    SerializeScreen(const SerializeScreen &) = delete;
+    SerializeScreen(SerializeScreen &&) = delete;
+    SerializeScreen &operator=(const SerializeScreen &) = delete;
+    SerializeScreen &operator=(SerializeScreen &&) = delete;
 
     // IScreen interface
-public:
     void draw(size_t x, size_t y, const FString &str);
     void refresh();
     void clear();
@@ -24,4 +35,21 @@ public:
                     const Color &background,
                     size_t index);
     void cursorStyle(CursorStyle);
+
+private:
+    std::shared_ptr<IConnection> _connection;
+    volatile std::atomic_long _currentRequest = 1;
+    volatile std::atomic_long _receivedRequest = 0;
+    class Json createRequest(std::string name);
+
+    void send(const Json &);
+    Json request(Json);
+
+    //! Where the remote data enters this class
+    void receive(Json);
+
+    std::mutex _mutex;
+    std::condition_variable _cv;
+
+    Json _receivedData;
 };
