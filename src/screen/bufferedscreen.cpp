@@ -110,9 +110,9 @@ void BufferedScreen::title(std::string title) {
     _backend->title(title);
 }
 
-const IPalette &BufferedScreen::palette() const {
-    return _backend->palette();
-}
+// const IPalette &BufferedScreen::palette() const {
+//     return _backend->palette();
+// }
 
 void BufferedScreen::palette(const Palette &palette) {
     _backend->palette(palette);

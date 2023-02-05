@@ -29,7 +29,7 @@ public:
     size_t width() const override;
     size_t height() const override;
     void title(std::string title) override;
-    const IPalette &palette() const override;
+    //    const IPalette &palette() const override;
     void palette(const Palette &palette) override;
     size_t addStyle(const Color &foreground,
                     const Color &background,

@@ -357,7 +357,7 @@ void LspHighlight::highlight(std::shared_ptr<IScope> scope) {
     LspPlugin::instance().updateBuffer(scope->editor().buffer());
 }
 
-void LspHighlight::update(const IPalette &palette) {}
+// void LspHighlight::update(const IPalette &palette) {}
 
 bool LspNavigation::gotoSymbol(std::shared_ptr<IScope> env) {
     if (!shouldProcessFileWithClang(env->editor().path())) {

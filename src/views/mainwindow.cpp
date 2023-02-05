@@ -218,7 +218,7 @@ void MainWindow::resize(size_t w, size_t h) {
 }
 
 void MainWindow::draw(IScreen &screen) {
-    updatePalette(screen);
+    //    updatePalette(screen);
     screen.cursorStyle(currentEditor().mode().cursorStyle());
 
     for (auto &editor : _editors) {
@@ -313,13 +313,13 @@ void MainWindow::open(filesystem::path path,
     _scope->run({"window.title"});
 }
 
-void MainWindow::updatePalette(IScreen &screen) {
-    //    if (screen.palette().update(screen)) {
-    for (auto &highligting : _highlighting) {
-        highligting->update(screen.palette());
-    }
-    //    }
-}
+// void MainWindow::updatePalette(IScreen &screen) {
+//     if (screen.palette().update(screen)) {
+//    for (auto &highligting : _highlighting) {
+//        highligting->update(screen.palette());
+//    }
+//    }
+//}
 
 void MainWindow::updateHighlighting(Editor &editor) {
 #ifdef __EMSCRIPTEN__

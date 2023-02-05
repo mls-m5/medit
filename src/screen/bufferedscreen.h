@@ -36,8 +36,8 @@ public:
     size_t height() const override;
     //! @see IScreen
     void title(std::string title) override;
-    //! @see IScreen
-    const IPalette &palette() const override;
+    //    //! @see IScreen
+    //    const IPalette &palette() const override;
     //! @see IScreen
     void palette(const Palette &palette) override;
     //! @see IScreen

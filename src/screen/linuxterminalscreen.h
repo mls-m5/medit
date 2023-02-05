@@ -20,9 +20,9 @@ public:
     size_t height() const override;
     void title(std::string title) override;
 
-    const IPalette &palette() const override {
-        return _palette;
-    }
+    //    const IPalette &palette() const override {
+    //        return _palette;
+    //    }
 
     //    IPalette &palette() override {
     //        return _palette;

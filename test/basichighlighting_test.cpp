@@ -32,7 +32,7 @@ TEST_CASE("format all to default") {
 
     Palette palette;
 
-    hl.update(palette);
+    //    hl.update(palette);
 
     hl.highlight(env);
 
@@ -51,7 +51,7 @@ TEST_CASE("format keyword") {
 
     Palette palette;
 
-    hl.update(palette);
+    //    hl.update(palette);
 
     hl.highlight(env);
 
@@ -70,7 +70,7 @@ TEST_CASE("partial match") {
 
     Palette palette;
 
-    hl.update(palette);
+    //    hl.update(palette);
 
     hl.highlight(env);
 

@@ -80,12 +80,12 @@ void SerializeScreen::title(std::string title) {
     });
 }
 
-const IPalette &SerializeScreen::palette() const {}
+// const IPalette &SerializeScreen::palette() const {}
 
 void SerializeScreen::palette(const Palette &palette) {
     send({
         {"method", "palette"},
-        {"value", nlohmann::json{palette}},
+        {"value", palette},
     });
 }
 

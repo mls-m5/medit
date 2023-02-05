@@ -55,7 +55,7 @@ struct MainWindow : public Window {
               std::optional<int> y = {});
 
     //! Initialize palette colors
-    void updatePalette(IScreen &screen);
+    //    void updatePalette(IScreen &screen);
 
     //! Update editor with new highlighting
     void updateHighlighting(Editor &editor);

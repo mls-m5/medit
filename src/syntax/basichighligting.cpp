@@ -82,7 +82,7 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
     buffer.isColorsOld(false);
 }
 
-void BasicHighlighting::update(const IPalette &palette) {}
+// void BasicHighlighting::update(const IPalette &palette) {}
 
 void BasicHighlighting::registerPlugin() {
     registerHighlighting<BasicHighlighting>();

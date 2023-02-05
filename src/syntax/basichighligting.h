@@ -16,7 +16,7 @@ public:
     bool shouldEnable(filesystem::path) override;
     static void highlightStatic(Buffer &buffer);
     void highlight(std::shared_ptr<IScope>) override;
-    void update(const IPalette &palette) override;
+    //    void update(const IPalette &palette) override;
 
     //! @see IHighlight
     int priority() override {

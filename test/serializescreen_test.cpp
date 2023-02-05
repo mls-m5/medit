@@ -2,6 +2,7 @@
 #include "mock/screen/mockscreen.h"
 #include "screen/deserializescreen.h"
 #include "screen/serializescreen.h"
+#include "syntax/palette.h"
 #include <future>
 
 using namespace std::literals;
@@ -110,6 +111,15 @@ TEST_CASE("cursorStyle(...)") {
     f.output->mock_cursorStyle_1.expectNum(1);
 
     f.ss.cursorStyle(CursorStyle::Beam);
+}
+
+TEST_CASE("palette(...)") {
+    auto f = Fixture{};
+
+    f.output->mock_palette_1.expectNum(1);
+
+    auto palette = Palette{};
+    f.ss.palette(palette);
 }
 
 TEST_SUIT_END

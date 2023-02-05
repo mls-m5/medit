@@ -60,7 +60,7 @@ class LspHighlight : public IHighlight {
 public:
     bool shouldEnable(filesystem::path) override;
     void highlight(std::shared_ptr<IScope> env) override;
-    void update(const IPalette &palette) override;
+    //    void update(const IPalette &palette) override;
     int priority() override {
         return 100;
     }

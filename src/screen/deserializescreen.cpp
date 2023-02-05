@@ -1,5 +1,6 @@
 #include "deserializescreen.h"
 #include "nlohmann/json.hpp"
+#include "syntax/palette.h"
 #include <sstream>
 
 DeserializeScreen::DeserializeScreen(std::shared_ptr<IScreen> screen)
@@ -86,8 +87,18 @@ void DeserializeScreen::handle(const nlohmann::json &json) {
         return;
     }
 
+    if (method == "clear") {
+        _screen->clear();
+        return;
+    }
+
     if (method == "refresh") {
         _screen->refresh();
+        return;
+    }
+
+    if (method == "palette") {
+        _screen->palette(json["value"]);
         return;
     }
 }
