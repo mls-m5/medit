@@ -19,7 +19,13 @@ public:
     NCursesScreen();
     ~NCursesScreen() override;
 
-    Event getInput() override;
+    void subscribe(CallbackT f) override {
+        _callback = f;
+    }
+
+    void unsubscribe() override {
+        _callback = {};
+    }
 
     size_t x() const override;
     size_t y() const override;
@@ -39,6 +45,8 @@ public:
     void cursorStyle(CursorStyle) override;
 
 private:
+    Event getInput();
+
     void init();
 
     void forceThread();
@@ -54,7 +62,12 @@ private:
 
     CursorStyle _currentCursor = CursorStyle::Block;
 
+    bool _isRunning = true;
+
     std::thread::id _threadId;
+    std::thread _ncursesThread;
+
+    CallbackT _callback;
 
     // Without a mutex ncurses will segfault at some random times
     // when writing to the screen and getting input simultaneously
@@ -62,6 +75,8 @@ private:
 
     //! @see IScreen interface
     size_t addStyle(const Color &fg, const Color &bg, size_t index) override;
+
+    void loop();
 };
 
 #endif

@@ -1,6 +1,7 @@
 #include "main.h"
 #include "core/context.h"
 #include "core/coreenvironment.h"
+#include "core/debugoutput.h"
 #include "core/jobqueue.h"
 #include "core/jsjobqueue.h"
 #include "core/jstimer.h"
@@ -76,15 +77,14 @@ struct MainData {
     }
 
     void refreshScreen(IWindow &window, IScreen &screen) {
+        window.updateCursor(screen);
         screen.clear();
         window.draw(screen);
-
-        window.updateCursor(screen);
-
         screen.refresh();
     }
 
     void handleKey(Event e, MainWindow &mainWindow, IScreen &screen) {
+        debugOutput("handleKey start");
         // TODO: Consider moving this function to mainWindow
         if (auto c = std::get_if<KeyEvent>(&e)) {
             if (*c == Key::Resize) {
@@ -107,25 +107,23 @@ struct MainData {
             mainWindow.mouseDown(ce->x, ce->y);
         }
 
+        debugOutput("handleKey");
         // TODO: Update when open buffers change instead
-        refreshScreen(mainWindow, screen);
+        //        refreshScreen(mainWindow, screen);
     }
 
-    void innerMainLoop(IInput &input,
-                       IJobQueue &guiQueue,
-                       std::function<void(Event)> callback) {
+    void handleEvent(const IInput::EventListT &list) {
 
-        auto c = input.getInput();
+        for (auto &c : list) {
+            if (std::holds_alternative<NullEvent>(c)) {
+                return;
+            }
 
-        // Todo: in the future check main window for unsaved changes
-        // here too
-        while (!std::holds_alternative<NullEvent>(c)) {
             if (auto key = std::get_if<KeyEvent>(&c)) {
                 if (*key ==
                         KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl} ||
                     *key == Key::Quit) {
                     medit::main::shouldQuit = true;
-                    break;
                 }
 
                 if (*key != Key::Unknown) {
@@ -135,10 +133,14 @@ struct MainData {
             else {
                 callback(c);
             }
-            c = input.getInput();
         }
+        refreshScreen(*mainWindow, *screen);
+    }
 
-        guiQueue.work(false);
+    void innerMainLoop(IInput &input,
+                       IJobQueue &guiQueue,
+                       std::function<void(Event)> callback) {
+        guiQueue.work(true);
     }
 };
 
@@ -194,6 +196,15 @@ void MainData::stop() {
 }
 
 void MainData::loop() {
+    input->subscribe([this](IInput::EventListT list) {
+        this->guiQueue->addTask([e = list, this] {
+            handleEvent(e);
+            if (medit::main::shouldQuit) {
+                return;
+            }
+        });
+    });
+
 #ifdef __EMSCRIPTEN__
     using namespace std::chrono_literals;
     guiLoopTimer = std::make_shared<JsTimer>();

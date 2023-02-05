@@ -20,17 +20,15 @@ public:
     GuiScreen();
     ~GuiScreen() noexcept override;
 
-    Event getInput() override;
+    void subscribe(CallbackT f) override;
+
+    void unsubscribe() override;
 
     size_t x() const override;
     size_t y() const override;
     size_t width() const override;
     size_t height() const override;
     void title(std::string title) override;
-
-    //    const IPalette &palette() const override {
-    //        return _palette;
-    //    }
 
     void palette(const Palette &palette) override {
         _palette = palette;
@@ -43,8 +41,12 @@ public:
 private:
     Palette _palette;
 
+    std::thread _thread;
+
     struct Buffer;
     std::unique_ptr<Buffer> _buffer;
+
+    std::mutex _mutex;
 };
 
 #endif

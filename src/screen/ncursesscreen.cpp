@@ -128,14 +128,18 @@ void NCursesScreen::cursor(size_t x, size_t y) {
     ::move(y, x);
 }
 
-NCursesScreen::NCursesScreen() {
-    init();
-    _threadId = std::this_thread::get_id();
-}
+NCursesScreen::NCursesScreen()
+    : _ncursesThread([this] {
+        init();
+        _threadId = std::this_thread::get_id();
+    }) {}
 
 NCursesScreen::~NCursesScreen() {
     ::endwin();
     system("reset");
+    _isRunning = false;
+
+    _ncursesThread.join();
 }
 
 Event NCursesScreen::getInput() {
@@ -252,6 +256,24 @@ size_t NCursesScreen::addStyle(const Color &fg, const Color &bg, size_t index) {
     else {
         ::init_pair(index, _lastColor - 1, _lastColor);
         return index;
+    }
+}
+
+void NCursesScreen::loop() {
+    using namespace std::literals;
+    for (; _isRunning;) {
+
+        auto list = EventListT{};
+
+        for (Event e; e = getInput(), !std::holds_alternative<NullEvent>(e);) {
+            list.push_back(std::move(e));
+        }
+
+        if (_callback) {
+            _callback(std::move(list));
+        }
+
+        std::this_thread::sleep_for(10ms);
     }
 }
 

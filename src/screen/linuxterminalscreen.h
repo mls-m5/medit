@@ -29,7 +29,7 @@ public:
     //    }
 
     //! IInput
-    Event getInput() override;
+    Event getInput();
 
     size_t addStyle(const Color &foreground,
                     const Color &background,

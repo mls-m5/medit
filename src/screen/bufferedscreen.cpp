@@ -1,5 +1,6 @@
 
 #include "screen/bufferedscreen.h"
+#include "core/debugoutput.h"
 #include "screen/iscreen.h"
 
 struct BufferedScreen::Canvas {
@@ -47,6 +48,7 @@ struct BufferedScreen::Canvas {
         }
 
         screen.cursor(_cursorX, _cursorY);
+        screen.refresh();
     }
 };
 
@@ -73,10 +75,10 @@ void BufferedScreen::draw(size_t x, size_t y, const FString &str) {
 }
 
 void BufferedScreen::refresh() {
+    debugOutput("buffered screen refresh");
     forceThread();
     _canvas->resize(_backend->width(), _backend->height());
     _canvas->refresh(*_backend);
-    _backend->refresh();
 }
 
 void BufferedScreen::clear() {
@@ -110,17 +112,9 @@ void BufferedScreen::title(std::string title) {
     _backend->title(title);
 }
 
-// const IPalette &BufferedScreen::palette() const {
-//     return _backend->palette();
-// }
-
 void BufferedScreen::palette(const Palette &palette) {
     _backend->palette(palette);
 }
-
-// IPalette &BufferedScreen::palette() {
-//     return _backend->palette();
-// }
 
 size_t BufferedScreen::addStyle(const Color &foreground,
                                 const Color &background,
@@ -133,11 +127,10 @@ void BufferedScreen::cursorStyle(CursorStyle style) {
     _backend->cursorStyle(style);
 }
 
-Event BufferedScreen::getInput() {
-    auto event = _input->getInput();
-    if (std::holds_alternative<KeyEvent>(event);
-        std::get<KeyEvent>(event) == Key::Resize) {
-        _canvas->resize(_backend->width(), _backend->height());
-    }
-    return event;
+void BufferedScreen::subscribe(CallbackT f) {
+    _input->subscribe(f);
+}
+
+void BufferedScreen::unsubscribe() {
+    _input->unsubscribe();
 }

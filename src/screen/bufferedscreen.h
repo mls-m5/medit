@@ -48,5 +48,8 @@ public:
     void cursorStyle(CursorStyle) override;
 
     //! @see IInput
-    Event getInput() override;
+    void subscribe(CallbackT f) override;
+
+    //! @see IInput
+    void unsubscribe() override;
 };

@@ -3,7 +3,10 @@
 #ifndef __EMSCRIPTEN__
 
 #include "SDL2/SDL_keyboard.h"
+#include "condition_variable"
+#include "core/debugoutput.h"
 #include "core/os.h"
+#include "core/threadvalidation.h"
 #include "files/fontlocator.h"
 #include "matrixscreen.h"
 #include "sdlpp/events.hpp"
@@ -13,6 +16,7 @@
 #include "syntax/color.h"
 #include "text/position.h"
 #include <array>
+#include <iostream>
 
 namespace {
 
@@ -87,6 +91,16 @@ bool shouldIgnoreTextInput(char c) {
     }
 }
 
+Modifiers getModState() {
+    auto modState = sdl::modState();
+
+    bool ctrl = modState & (KMOD_LCTRL | KMOD_RCTRL);
+    bool alt = modState & (KMOD_LALT | KMOD_RALT);
+
+    return static_cast<Modifiers>(
+        static_cast<int>(ctrl ? Modifiers::Ctrl : Modifiers::None) |
+        static_cast<int>(alt ? Modifiers::Alt : Modifiers::None));
+}
 } // namespace
 
 struct GuiScreen::Buffer {
@@ -102,12 +116,21 @@ struct GuiScreen::Buffer {
     sdl::Renderer renderer;
     matscreen::MatrixScreen screen;
 
+    CallbackT _callback;
+
     struct Style {
         sdl::Color fg = sdl::White;
         sdl::Color bg;
     };
 
     std::vector<Style> styles;
+
+    std::thread _screenThread;
+
+    bool _isRunning = true;
+    bool shouldRefresh = true;
+
+    ThreadValidation tv{"gui screen"};
 
     Buffer(int width, int height)
         : window{"medit",
@@ -118,8 +141,13 @@ struct GuiScreen::Buffer {
                  SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN}
         , renderer{window, SDL_RENDERER_ACCELERATED, SDL_RENDERER_PRESENTVSYNC}
         , screen{width, height, fontPath(), 14} {
+        sdl::startTextInput();
         styles.resize(16);
         resize(width, height);
+    }
+
+    void stop() {
+        _isRunning = false;
     }
 
     // Save data to be drawn
@@ -227,6 +255,8 @@ struct GuiScreen::Buffer {
 
     // Update the screen
     void refresh() {
+        tv();
+        debugOutput("guiscreen refresh start()");
         for (size_t y = 0; y < lines.size(); ++y) {
             renderLine(y, lines.at(y));
         }
@@ -263,6 +293,8 @@ struct GuiScreen::Buffer {
         }
 
         renderer.present();
+
+        debugOutput("guiscreen refresh stop()");
     }
 
     size_t addStyle(const Color &fg, const Color &bg, size_t index) {
@@ -283,6 +315,163 @@ struct GuiScreen::Buffer {
 
         return index;
     }
+
+    void subscribe(CallbackT f) {
+        _callback = f;
+    }
+
+    void unsubscribe() {
+        _callback = {};
+    }
+
+    void loop() {
+        tv();
+        // TODO: Refactor this to use sdls wating functions
+        using namespace std::literals;
+        for (; _isRunning;) {
+            auto list = EventListT{};
+
+            //            debugOutput("getEvents1()");
+            for (Event e;
+                 e = getInput(), !std::holds_alternative<NullEvent>(e);) {
+                list.push_back(std::move(e));
+            }
+            //            debugOutput("getEvents2()");
+
+            if (!list.empty() && _callback) {
+                debugOutput("callback1");
+                _callback(std::move(list));
+                debugOutput("callback2");
+            }
+
+            //            std::this_thread::sleep_for(10ms);
+
+            if (shouldRefresh) {
+                refresh(); // TODO: Only refresh when changes
+                shouldRefresh = false;
+            }
+
+            //            debugOutput("guiscreen.loop()");
+        }
+    }
+
+    Event getInput() {
+        tv();
+        auto e = [] {
+            if (getOs() == Os::Emscripten) {
+                return sdl::pollEvent();
+            }
+            else {
+#warning create blocking way to wait for events
+                // Example push event to sdls queue when a refresh shold be done
+                return sdl::waitEventTimeout(1);
+            }
+        }();
+
+        if (!e) {
+            return NullEvent{};
+        }
+
+        auto sdlEvent = *e;
+
+        switch (sdlEvent.type) {
+        case SDL_QUIT:
+            return {Key::Quit};
+            break;
+        case SDL_KEYDOWN: {
+            auto keyEvent = scancodeToMeditKey(sdlEvent.key);
+
+            if (keyEvent.key == Key::Unknown) {
+                return NullEvent{};
+                //                return keyEvent;
+            }
+
+            if (sdlEvent.key.keysym.mod == 64) {
+                auto sym = sdlEvent.key.keysym.sym;
+
+                if (sym == 'v') {
+                    if (SDL_HasClipboardText()) {
+                        return PasteEvent{SDL_GetClipboardText()};
+                    }
+                    return NullEvent{};
+                }
+                if (sym == 'c' || sym == 'x') {
+                    return CopyEvent{[](std::string text) {
+                                         SDL_SetClipboardText(text.c_str());
+                                     },
+                                     sym == 'x'};
+                }
+            }
+
+            keyEvent.modifiers = getModState();
+
+            if (keyEvent.modifiers != Modifiers::None &&
+                (keyEvent.key == Key::Space || keyEvent.symbol == "\n" ||
+                 keyEvent.key == Key::Tab)) {
+                keyEvent.key = Key::KeyCombination;
+            }
+
+            // This is to prevent text input to be registered twice (as text and
+            // as keydown)
+            if (keyEvent.key == Key::KeyCombination &&
+                keyEvent.modifiers == Modifiers::None) {
+                return NullEvent{};
+                //                return {Key::Unknown};
+            }
+
+            return keyEvent;
+
+            break;
+        }
+
+        case SDL_TEXTINPUT: {
+            auto text = sdlEvent.text;
+
+            auto ch = Utf8Char{text.text};
+
+            if (shouldIgnoreTextInput(ch[0])) {
+                return NullEvent{};
+                //                return KeyEvent{Key::Unknown};
+            }
+
+            return KeyEvent{Key::Text, ch};
+        } break;
+
+        case SDL_WINDOWEVENT:
+            switch (sdlEvent.window.event) {
+            case SDL_WINDOWEVENT_RESIZED: {
+                resizePixels(
+                    sdlEvent.window.data1, sdlEvent.window.data2, false);
+                return KeyEvent{Key::Resize};
+                break;
+            }
+            default:
+                return NullEvent{};
+                //                return Key::Unknown;
+                break;
+            }
+            break;
+
+        case SDL_MOUSEWHEEL:
+            if (sdlEvent.wheel.y > 0) {
+                return KeyEvent{Key::PageUp};
+            }
+            else if (sdlEvent.wheel.y < 0) {
+                return KeyEvent{Key::PageDown};
+            }
+            break;
+
+        case SDL_MOUSEBUTTONDOWN:
+            return MouseDownEvent{1,
+                                  sdlEvent.button.x / screen.cache.charWidth,
+                                  sdlEvent.button.y / screen.cache.charHeight};
+
+            break;
+        }
+
+        return NullEvent{};
+        //        return KeyEvent{Key::Unknown};
+    }
 };
 
 void GuiScreen::draw(size_t x, size_t y, const FString &str) {
@@ -293,7 +482,8 @@ void GuiScreen::refresh() {
     if (_palette.isChanged()) {
         _palette.update(*this);
     }
-    _buffer->refresh();
+    _buffer->shouldRefresh = true;
+    //    _buffer->refresh();
 }
 
 void GuiScreen::clear() {
@@ -305,135 +495,31 @@ void GuiScreen::cursor(size_t x, size_t y) {
     _buffer->cursorPos.y(y);
 }
 
-GuiScreen::GuiScreen()
-    : _buffer(std::make_unique<Buffer>(80, 40)) {
-    sdl::startTextInput();
+GuiScreen::GuiScreen() {
+    std::condition_variable cv;
+
+    _thread = std::thread([this, &cv] {
+        _buffer = std::make_unique<Buffer>(80, 40);
+        cv.notify_one();
+        _buffer->loop();
+    });
+
+    auto lock = std::unique_lock{_mutex};
+    cv.wait(lock);
 }
 
 GuiScreen::~GuiScreen() noexcept {
+    _buffer->stop();
+    _thread.join();
     _buffer.reset();
 };
 
-Modifiers getModState() {
-    auto modState = sdl::modState();
-
-    bool ctrl = modState & (KMOD_LCTRL | KMOD_RCTRL);
-    bool alt = modState & (KMOD_LALT | KMOD_RALT);
-
-    return static_cast<Modifiers>(
-        static_cast<int>(ctrl ? Modifiers::Ctrl : Modifiers::None) |
-        static_cast<int>(alt ? Modifiers::Alt : Modifiers::None));
+void GuiScreen::subscribe(CallbackT f) {
+    _buffer->subscribe(f);
 }
 
-Event GuiScreen::getInput() {
-    auto e = [] {
-        if (getOs() == Os::Emscripten) {
-            return sdl::pollEvent();
-        }
-        else {
-            return sdl::waitEventTimeout(100);
-        }
-    }();
-
-    if (!e) {
-        return NullEvent{};
-    }
-
-    auto sdlEvent = *e;
-
-    switch (sdlEvent.type) {
-    case SDL_QUIT:
-        return {Key::Quit};
-        break;
-    case SDL_KEYDOWN: {
-        auto keyEvent = scancodeToMeditKey(sdlEvent.key);
-
-        if (keyEvent.key == Key::Unknown) {
-            return keyEvent;
-        }
-
-        if (sdlEvent.key.keysym.mod == 64) {
-            auto sym = sdlEvent.key.keysym.sym;
-
-            if (sym == 'v') {
-                if (SDL_HasClipboardText()) {
-                    return PasteEvent{SDL_GetClipboardText()};
-                }
-                return NullEvent{};
-            }
-            if (sym == 'c' || sym == 'x') {
-                return CopyEvent{[](std::string text) {
-                                     SDL_SetClipboardText(text.c_str());
-                                 },
-                                 sym == 'x'};
-            }
-        }
-
-        keyEvent.modifiers = getModState();
-
-        if (keyEvent.modifiers != Modifiers::None &&
-            (keyEvent.key == Key::Space || keyEvent.symbol == "\n" ||
-             keyEvent.key == Key::Tab)) {
-            keyEvent.key = Key::KeyCombination;
-        }
-
-        // This is to prevent text input to be registered twice (as text and as
-        // keydown)
-        if (keyEvent.key == Key::KeyCombination &&
-            keyEvent.modifiers == Modifiers::None) {
-            return {Key::Unknown};
-        }
-
-        return keyEvent;
-
-        break;
-    }
-
-    case SDL_TEXTINPUT: {
-        auto text = sdlEvent.text;
-
-        auto ch = Utf8Char{text.text};
-
-        if (shouldIgnoreTextInput(ch[0])) {
-            return KeyEvent{Key::Unknown};
-        }
-
-        return KeyEvent{Key::Text, ch};
-    } break;
-
-    case SDL_WINDOWEVENT:
-        switch (sdlEvent.window.event) {
-        case SDL_WINDOWEVENT_RESIZED: {
-            /*auto dims =*/_buffer->resizePixels(
-                sdlEvent.window.data1, sdlEvent.window.data2, false);
-            return KeyEvent{Key::Resize};
-            break;
-        }
-        default:
-            return Key::Unknown;
-            break;
-        }
-        break;
-
-    case SDL_MOUSEWHEEL:
-        if (sdlEvent.wheel.y > 0) {
-            return KeyEvent{Key::PageUp};
-        }
-        else if (sdlEvent.wheel.y < 0) {
-            return KeyEvent{Key::PageDown};
-        }
-        break;
-
-    case SDL_MOUSEBUTTONDOWN:
-        return MouseDownEvent{
-            1,
-            sdlEvent.button.x / _buffer->screen.cache.charWidth,
-            sdlEvent.button.y / _buffer->screen.cache.charHeight};
-
-        break;
-    }
-
-    return KeyEvent{Key::Unknown};
+void GuiScreen::unsubscribe() {
+    _buffer->unsubscribe();
 }
 
 size_t GuiScreen::x() const {

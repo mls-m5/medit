@@ -23,6 +23,8 @@ public:
 
     //! @param index should be left default for most cases
     //! set index to place new style on, otherwise a new location is picked
+    //! It's only used internally between screen and Palette
+    //! TODO: Remove this, make the screen read from the palette instoad
     virtual size_t addStyle(
         const Color &foreground,
         const Color &background,
