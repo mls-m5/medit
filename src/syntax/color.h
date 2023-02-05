@@ -1,5 +1,6 @@
 #pragma once
 
+#include "nlohmann/json.hpp"
 #include <string_view>
 
 class Color {
@@ -23,7 +24,10 @@ public:
                     unsigned char g,
                     unsigned char b,
                     bool notSet = false)
-        : _r(r), _g(g), _b(b), _notSet(notSet) {}
+        : _r(r)
+        , _g(g)
+        , _b(b)
+        , _notSet(notSet) {}
 
     constexpr auto r() const {
         return _r;
@@ -61,4 +65,6 @@ private:
         }
         return 0;
     }
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Color, _r, _g, _b)
 };

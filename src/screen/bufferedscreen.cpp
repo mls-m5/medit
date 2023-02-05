@@ -114,9 +114,13 @@ const IPalette &BufferedScreen::palette() const {
     return _backend->palette();
 }
 
-IPalette &BufferedScreen::palette() {
-    return _backend->palette();
+void BufferedScreen::palette(const Palette &palette) {
+    _backend->palette(palette);
 }
+
+// IPalette &BufferedScreen::palette() {
+//     return _backend->palette();
+// }
 
 size_t BufferedScreen::addStyle(const Color &foreground,
                                 const Color &background,

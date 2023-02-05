@@ -290,6 +290,9 @@ void GuiScreen::draw(size_t x, size_t y, const FString &str) {
 }
 
 void GuiScreen::refresh() {
+    if (_palette.isChanged()) {
+        _palette.update(*this);
+    }
     _buffer->refresh();
 }
 

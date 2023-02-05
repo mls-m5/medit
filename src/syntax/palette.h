@@ -2,6 +2,8 @@
 
 #include "files/filesystem.h"
 #include "meditfwd.h"
+#include "nlohmann/json.hpp"
+#include "syntax/color.h"
 #include "syntax/ipalette.h"
 #include "text/formattype.h"
 #include <iosfwd>
@@ -9,9 +11,33 @@
 
 inline const std::string standardFormatName = "text";
 
-class Palette /*: public IPalette*/ {
-    struct Style;
+struct Style {
+    Color color = {255, 255, 255, true};
+    Color background;
+    FormatType f = 0;
 
+    void setProperty(std::string_view name, Color value) {
+        if (name == "foreground") {
+            color = value;
+        }
+        else if (name == "background") {
+            background = value;
+        }
+    }
+
+    void setStandard(Color fg, Color bg) {
+        if (!color) {
+            color = fg;
+        }
+        if (!background) {
+            background = bg;
+        }
+    }
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Style, color, background, f);
+};
+
+class Palette /*: public IPalette*/ {
     bool _isChanged = true;
 
     std::map<std::string, Color> _palette;
@@ -33,12 +59,13 @@ public:
     Color getColor(std::string_view name) const;
     Color getStyleColor(std::string_view name) const;
 
-    //! @see IPalette
     bool update(IScreen &screen) /*override*/;
-    //! @see IPalette
     void load(filesystem::path) /*override*/;
-    //! @see IPalette
     void load(std::istream &stream);
+
+    bool isChanged() const {
+        return _isChanged;
+    }
 
     enum BasicPalette : FormatType {
         standard = 1,
@@ -62,4 +89,6 @@ public:
         warning,
         note,
     };
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Palette, _palette, _styles)
 };

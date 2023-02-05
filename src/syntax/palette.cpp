@@ -5,30 +5,6 @@
 #include <algorithm>
 #include <fstream>
 
-struct Palette::Style {
-    Color color = {255, 255, 255, true};
-    Color background;
-    FormatType f = 0;
-
-    void setProperty(std::string_view name, Color value) {
-        if (name == "foreground") {
-            color = value;
-        }
-        else if (name == "background") {
-            background = value;
-        }
-    }
-
-    void setStandard(Color fg, Color bg) {
-        if (!color) {
-            color = fg;
-        }
-        if (!background) {
-            background = bg;
-        }
-    }
-};
-
 Palette::Palette() = default;
 
 Palette::~Palette() = default;
@@ -92,7 +68,7 @@ Color Palette::getColor(std::string_view name) const {
     return {};
 }
 
-Palette::Style *Palette::getStyle(const std::string &name) {
+Style *Palette::getStyle(const std::string &name) {
     if (auto f = _styles.find(name); f != _styles.end()) {
         return &f->second;
     }

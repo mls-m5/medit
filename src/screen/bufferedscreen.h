@@ -39,7 +39,7 @@ public:
     //! @see IScreen
     const IPalette &palette() const override;
     //! @see IScreen
-    IPalette &palette() override;
+    void palette(const Palette &palette) override;
     //! @see IScreen
     size_t addStyle(const Color &foreground,
                     const Color &background,

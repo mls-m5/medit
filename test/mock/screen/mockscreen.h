@@ -17,8 +17,8 @@ public:
     MOCK_METHOD0(size_t, width, (), const override);
     MOCK_METHOD0(size_t, height, (), const override);
     MOCK_METHOD1(void, title, (std::string title), override);
-    MOCK_METHOD0(const IPalette &, palette, (), const);
-    IPalette &palette() {} // TODO: Redo this anyway
+    MOCK_METHOD0(const IPalette &, palette, (), const override);
+    MOCK_METHOD1(void, palette, (const Palette &), override);
     MOCK_METHOD3(size_t,
                  addStyle,
                  (const Color &foreground,

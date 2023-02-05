@@ -44,6 +44,7 @@ target_link_libraries(
     INTERFACE
     json
     ${CMAKE_THREAD_LIBS_INIT}
+    nlohmann_json::nlohmann_json
     )
 
 target_compile_features(

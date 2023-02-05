@@ -31,8 +31,9 @@ public:
         return _palette;
     }
 
-    IPalette &palette() override {
-        return _palette;
+    void palette(const Palette &palette) override {
+        _palette = palette;
+        _palette.update(*this);
     }
 
     void cursorStyle(CursorStyle) override;

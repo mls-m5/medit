@@ -20,21 +20,21 @@ public:
     SerializeScreen &operator=(SerializeScreen &&) = delete;
 
     // IScreen interface
-    void draw(size_t x, size_t y, const FString &str);
-    void refresh();
-    void clear();
-    void cursor(size_t x, size_t y);
-    size_t x() const;
-    size_t y() const;
-    size_t width() const;
-    size_t height() const;
-    void title(std::string title);
-    const IPalette &palette() const;
-    IPalette &palette();
+    void draw(size_t x, size_t y, const FString &str) override;
+    void refresh() override;
+    void clear() override;
+    void cursor(size_t x, size_t y) override;
+    size_t x() const override;
+    size_t y() const override;
+    size_t width() const override;
+    size_t height() const override;
+    void title(std::string title) override;
+    const IPalette &palette() const override;
+    void palette(const Palette &palette) override;
     size_t addStyle(const Color &foreground,
                     const Color &background,
-                    size_t index);
-    void cursorStyle(CursorStyle);
+                    size_t index) override;
+    void cursorStyle(CursorStyle) override;
 
 private:
     std::shared_ptr<IConnection> _connection;

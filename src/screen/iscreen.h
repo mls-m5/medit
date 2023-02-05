@@ -19,7 +19,7 @@ public:
     virtual size_t height() const = 0;
     virtual void title(std::string title) = 0;
     virtual const IPalette &palette() const = 0;
-    virtual IPalette &palette() = 0;
+    virtual void palette(const Palette &) = 0;
 
     //! @param index should be left default for most cases
     //! set index to place new style on, otherwise a new location is picked

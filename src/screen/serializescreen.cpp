@@ -1,5 +1,6 @@
 #include "serializescreen.h"
 #include "nlohmann/json.hpp"
+#include "syntax/palette.h"
 
 SerializeScreen::SerializeScreen(std::shared_ptr<IConnection> connection)
     : _connection{connection} {
@@ -81,7 +82,12 @@ void SerializeScreen::title(std::string title) {
 
 const IPalette &SerializeScreen::palette() const {}
 
-IPalette &SerializeScreen::palette() {}
+void SerializeScreen::palette(const Palette &palette) {
+    send({
+        {"method", "palette"},
+        {"value", nlohmann::json{palette}},
+    });
+}
 
 size_t SerializeScreen::addStyle(const Color &foreground,
                                  const Color &background,

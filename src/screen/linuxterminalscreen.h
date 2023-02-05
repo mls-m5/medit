@@ -24,9 +24,9 @@ public:
         return _palette;
     }
 
-    IPalette &palette() override {
-        return _palette;
-    }
+    //    IPalette &palette() override {
+    //        return _palette;
+    //    }
 
     //! IInput
     Event getInput() override;

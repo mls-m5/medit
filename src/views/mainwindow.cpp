@@ -39,7 +39,13 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
     _console.showLines(false);
     _env->console(&_console);
     _env->project(&_project);
-    screen.palette().load(findConfig("data/oblivion.json"));
+    //    screen.palette().load(findConfig("data/oblivion.json"));
+
+    {
+        auto palette = Palette{};
+        palette.load(findConfig("data/oblivion.json"));
+        screen.palette(palette);
+    }
 
     _locator.mode(createInsertMode());
     _locator.showLines(false);
@@ -68,7 +74,7 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
               _highlighting.end(),
               [](auto &&a, auto &&b) { return a->priority() > b->priority(); });
 
-    updatePalette(screen);
+    //    updatePalette(screen);
 
     _formatting = createFormat();
 
@@ -308,11 +314,11 @@ void MainWindow::open(filesystem::path path,
 }
 
 void MainWindow::updatePalette(IScreen &screen) {
-    if (screen.palette().update(screen)) {
-        for (auto &highligting : _highlighting) {
-            highligting->update(screen.palette());
-        }
+    //    if (screen.palette().update(screen)) {
+    for (auto &highligting : _highlighting) {
+        highligting->update(screen.palette());
     }
+    //    }
 }
 
 void MainWindow::updateHighlighting(Editor &editor) {
