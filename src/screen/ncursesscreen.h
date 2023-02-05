@@ -2,9 +2,12 @@
 
 #ifndef __EMSCRIPTEN__
 
+#include "core/threadvalidation.h"
 #include "screen/iinput.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
+#include <deque>
+#include <functional>
 #include <mutex>
 #include <thread>
 
@@ -33,14 +36,7 @@ public:
     size_t height() const override;
     void title(std::string title) override;
 
-    //    const IPalette &palette() const override {
-    //        return _palette;
-    //    }
-
-    void palette(const Palette &palette) override {
-        _palette = palette;
-        _palette.update(*this);
-    }
+    void palette(const Palette &palette) override;
 
     void cursorStyle(CursorStyle) override;
 
@@ -48,8 +44,6 @@ private:
     Event getInput();
 
     void init();
-
-    void forceThread();
 
     bool _hasColors = true;
 
@@ -62,16 +56,16 @@ private:
 
     CursorStyle _currentCursor = CursorStyle::Block;
 
-    bool _isRunning = true;
+    ThreadValidation _tv{"ncurses thread"};
 
-    std::thread::id _threadId;
+    bool _isRunning = false;
+
     std::thread _ncursesThread;
+    std::mutex _mutex;
 
     CallbackT _callback;
 
-    // Without a mutex ncurses will segfault at some random times
-    // when writing to the screen and getting input simultaneously
-    //    std::mutex _accessMutex;
+    std::deque<std::function<void()>> _threadQueue;
 
     //! @see IScreen interface
     size_t addStyle(const Color &fg, const Color &bg, size_t index) override;

@@ -343,9 +343,7 @@ struct GuiScreen::Buffer {
             }
 
             if (!list.empty() && _callback) {
-                //                debugOutput("callback1");
                 _callback(std::move(list));
-                //                debugOutput("callback2");
             }
 
             if (shouldRefresh) {
@@ -362,7 +360,6 @@ struct GuiScreen::Buffer {
                 return sdl::pollEvent();
             }
             else {
-                //                debugOutput("getInput -> waitEventTimeOut");
                 if (wait) {
                     return sdl::waitEventTimeout(10000);
                 }
@@ -375,7 +372,6 @@ struct GuiScreen::Buffer {
         if (!e) {
             return NullEvent{};
         }
-        //        debugOutput("getInput -> after waitEventTimeOut");
 
         auto sdlEvent = *e;
 
@@ -388,7 +384,6 @@ struct GuiScreen::Buffer {
 
             if (keyEvent.key == Key::Unknown) {
                 return NullEvent{};
-                //                return keyEvent;
             }
 
             if (sdlEvent.key.keysym.mod == 64) {

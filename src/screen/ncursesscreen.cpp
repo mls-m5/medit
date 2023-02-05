@@ -62,6 +62,8 @@ void reducedPalette() {
 void NCursesScreen::init() {
     ::initscr();
 
+    _tv.reset();
+
     if (!has_colors()) {
         _hasColors = false;
     }
@@ -88,61 +90,75 @@ void NCursesScreen::init() {
     ::timeout(10);
 }
 
-void NCursesScreen::forceThread() {
-    if (_threadId != std::this_thread::get_id()) {
-        throw std::runtime_error{
-            "trying to call ncurses screen from non gui thread"};
-    }
-}
-
-void NCursesScreen::draw(size_t x, size_t y, const FString &str) {
-    forceThread();
-    ::move(y, x);
-    for (size_t tx = 0, i = 0; i < str.size() && tx < width() - this->x();
-         ++tx, ++i) {
-        auto c = str.at(i);
-        attron(COLOR_PAIR(c.f));
-        if (c.c == '\t') {
-            ::printw("%s", std::string{std::string(_tabWidth, ' ')}.c_str());
-            tx += _tabWidth - 1;
+void NCursesScreen::draw(size_t x, size_t y, const FString &rstr) {
+    auto str = rstr;
+    _threadQueue.push_back([str, this, x, y] {
+        _tv();
+        ::move(y, x);
+        for (size_t tx = 0, i = 0; i < str.size() && tx < width() - this->x();
+             ++tx, ++i) {
+            auto c = str.at(i);
+            attron(COLOR_PAIR(c.f));
+            if (c.c == '\t') {
+                ::printw("%s",
+                         std::string{std::string(_tabWidth, ' ')}.c_str());
+                tx += _tabWidth - 1;
+            }
+            else {
+                ::printw("%s", std::string{std::string_view{c}}.c_str());
+            }
+            attroff(COLOR_PAIR(c.f));
         }
-        else {
-            ::printw("%s", std::string{std::string_view{c}}.c_str());
-        }
-        attroff(COLOR_PAIR(c.f));
-    }
+    });
 }
 
 void NCursesScreen::refresh() {
-    forceThread();
-    ::refresh();
+    _threadQueue.push_back([this] {
+        _tv();
+        ::refresh();
+    });
 }
 
 void NCursesScreen::clear() {
-    forceThread();
-    ::clear();
+    _threadQueue.push_back([this] {
+        _tv();
+        ::clear();
+    });
 }
 
 void NCursesScreen::cursor(size_t x, size_t y) {
-    forceThread();
-    ::move(y, x);
+    _threadQueue.push_back([this, x, y] {
+        _tv();
+        ::move(y, x);
+    });
 }
 
 NCursesScreen::NCursesScreen()
     : _ncursesThread([this] {
         init();
-        _threadId = std::this_thread::get_id();
-    }) {}
+        _isRunning = true;
+        loop();
+    }) {
+
+    using namespace std::literals;
+
+    while (!_isRunning) {
+        std::this_thread::sleep_for(10ms);
+    }
+}
 
 NCursesScreen::~NCursesScreen() {
-    ::endwin();
-    system("reset");
-    _isRunning = false;
+    _threadQueue.push_back([this] {
+        ::endwin();
+        system("reset");
+        _isRunning = false;
+    });
 
     _ncursesThread.join();
 }
 
 Event NCursesScreen::getInput() {
+    _tv();
     const auto c = getch();
     if (c == ERR) {
         return NullEvent{};
@@ -221,15 +237,22 @@ void NCursesScreen::title(std::string title) {
     // Not implemented
 }
 
+void NCursesScreen::palette(const Palette &palette) {
+    _palette = palette;
+    _threadQueue.push_back([this] {
+        _tv();
+        _palette.update(*this);
+    });
+}
+
 void NCursesScreen::cursorStyle(CursorStyle style) {
-    forceThread();
     if (_currentCursor != style) {
         // Not implemented
     }
 }
 
 size_t NCursesScreen::addStyle(const Color &fg, const Color &bg, size_t index) {
-    forceThread();
+    _tv();
     if (!_hasColors) {
         return 1;
     }
@@ -269,8 +292,12 @@ void NCursesScreen::loop() {
             list.push_back(std::move(e));
         }
 
-        if (_callback) {
+        if (_callback && !list.empty()) {
             _callback(std::move(list));
+        }
+
+        for (; !_threadQueue.empty(); _threadQueue.pop_front()) {
+            _threadQueue.front()();
         }
 
         std::this_thread::sleep_for(10ms);

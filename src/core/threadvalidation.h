@@ -15,7 +15,10 @@ public:
         validate();
     }
 
+    /// Validate against this thread instead
+    void reset();
+
 private:
-    const std::thread::id _threadId = std::this_thread::get_id();
+    std::thread::id _threadId = std::this_thread::get_id();
     std::string _name;
 };

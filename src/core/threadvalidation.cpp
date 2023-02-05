@@ -19,3 +19,7 @@ void ThreadValidation::validate() const {
             ") vs started from " + intId(_threadId)};
     }
 }
+
+void ThreadValidation::reset() {
+    _threadId = std::this_thread::get_id();
+}
