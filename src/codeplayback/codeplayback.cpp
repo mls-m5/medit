@@ -35,54 +35,49 @@ int main(int argc, char *argv[]) {
 
     auto &buffer = editor.buffer();
     insert(buffer.begin(), "hello");
-    //    buffer.insert(0, "hello");
 
     editor.width(screen.width());
     editor.height(screen.height() - 1);
 
-    //    auto lastChar = 0;
     auto wasAlpha = false;
 
-    auto shouldQuit = [](const Event &event) {
-        if (auto p = std::get_if<KeyEvent>(&event)) {
-            return *p == Key::Quit;
+    bool isRunning = true;
+    screen.subscribe([&isRunning](IInput::EventListT list) {
+        for (auto e : list) {
+            if (auto k = std::get_if<KeyEvent>(&e)) {
+                if (k->key == Key::Quit) {
+                    isRunning = false;
+                }
+            }
         }
-        return false;
-    };
+    });
 
-    //    // TODO: fix this
-    //    auto c = screen.getInput();
-    //    for (; !shouldQuit(c); c = screen.getInput()) {
-    //        auto key = std::get_if<KeyEvent>(&c);
-    //        if (!key) {
-    //            continue;
-    //        }
-    //        if (*key != Key::Unknown) {
-    //            screen.cursorStyle(CursorStyle::Block);
+    for (; isRunning;) {
+        screen.cursorStyle(CursorStyle::Block);
 
-    //            for (auto c : testText) {
-    //                screen.cursorStyle(CursorStyle::Beam);
-    //                insert(c, buffer.end());
-    //                editor.draw(screen);
-    //                // editor.bufferView().cursorPosition(buffer.end());
-    //                editor.cursor(buffer.end());
-    //                editor.updateCursor(screen);
-    //                screen.refresh();
-    //                auto a = isalpha(c);
-    //                //                if (!isalpha(c) && c != lastChar) {
-    //                if (!a && a != wasAlpha) {
-    //                    std::this_thread::sleep_for(100ms);
-    //                }
-    //                else {
-    //                    std::this_thread::sleep_for(20ms);
-    //                }
-    //                //                lastChar = c;
-    //                wasAlpha = a;
-    //            }
-    //            screen.cursorStyle(CursorStyle::Block);
-    //            screen.refresh();
-    //        }
-    //    }
+        for (auto c : testText) {
+            screen.cursorStyle(CursorStyle::Beam);
+            insert(c, buffer.end());
+            editor.draw(screen);
+            // editor.bufferView().cursorPosition(buffer.end());
+            editor.cursor(buffer.end());
+            editor.updateCursor(screen);
+            screen.refresh();
+            auto a = isalpha(c);
+            //                if (!isalpha(c) && c != lastChar) {
+            if (!a && a != wasAlpha) {
+                std::this_thread::sleep_for(100ms);
+            }
+            else {
+                std::this_thread::sleep_for(20ms);
+            }
+            wasAlpha = a;
+        }
+        screen.cursorStyle(CursorStyle::Block);
+        screen.refresh();
+    }
+
+    screen.unsubscribe();
 
     return 0;
 }
