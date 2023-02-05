@@ -75,7 +75,7 @@ void BufferedScreen::draw(size_t x, size_t y, const FString &str) {
 }
 
 void BufferedScreen::refresh() {
-    debugOutput("buffered screen refresh");
+    //    debugOutput("buffered screen refresh");
     forceThread();
     _canvas->resize(_backend->width(), _backend->height());
     _canvas->refresh(*_backend);

@@ -256,7 +256,7 @@ struct GuiScreen::Buffer {
     // Update the screen
     void refresh() {
         tv();
-        debugOutput("guiscreen refresh start()");
+        //        debugOutput("guiscreen refresh start()");
         for (size_t y = 0; y < lines.size(); ++y) {
             renderLine(y, lines.at(y));
         }
@@ -294,7 +294,7 @@ struct GuiScreen::Buffer {
 
         renderer.present();
 
-        debugOutput("guiscreen refresh stop()");
+        //        debugOutput("guiscreen refresh stop()");
     }
 
     size_t addStyle(const Color &fg, const Color &bg, size_t index) {
@@ -331,46 +331,51 @@ struct GuiScreen::Buffer {
         for (; _isRunning;) {
             auto list = EventListT{};
 
-            //            debugOutput("getEvents1()");
+            {
+                Event e = getInput(true);
+                if (!std::holds_alternative<NullEvent>(e)) {
+                    list.push_back(std::move(e));
+                }
+            }
             for (Event e;
-                 e = getInput(), !std::holds_alternative<NullEvent>(e);) {
+                 e = getInput(false), !std::holds_alternative<NullEvent>(e);) {
                 list.push_back(std::move(e));
             }
-            //            debugOutput("getEvents2()");
 
             if (!list.empty() && _callback) {
-                debugOutput("callback1");
+                //                debugOutput("callback1");
                 _callback(std::move(list));
-                debugOutput("callback2");
+                //                debugOutput("callback2");
             }
-
-            //            std::this_thread::sleep_for(10ms);
 
             if (shouldRefresh) {
                 refresh(); // TODO: Only refresh when changes
                 shouldRefresh = false;
             }
-
-            //            debugOutput("guiscreen.loop()");
         }
     }
 
-    Event getInput() {
+    Event getInput(bool wait) {
         tv();
-        auto e = [] {
+        auto e = [wait] {
             if (getOs() == Os::Emscripten) {
                 return sdl::pollEvent();
             }
             else {
-#warning create blocking way to wait for events
-                // Example push event to sdls queue when a refresh shold be done
-                return sdl::waitEventTimeout(1);
+                //                debugOutput("getInput -> waitEventTimeOut");
+                if (wait) {
+                    return sdl::waitEventTimeout(10000);
+                }
+                else {
+                    return sdl::pollEvent();
+                }
             }
         }();
 
         if (!e) {
             return NullEvent{};
         }
+        //        debugOutput("getInput -> after waitEventTimeOut");
 
         auto sdlEvent = *e;
 
@@ -483,7 +488,9 @@ void GuiScreen::refresh() {
         _palette.update(*this);
     }
     _buffer->shouldRefresh = true;
-    //    _buffer->refresh();
+    auto event = SDL_Event{};
+    event.type = SDL_USEREVENT;
+    sdl::pushEvent(event);
 }
 
 void GuiScreen::clear() {

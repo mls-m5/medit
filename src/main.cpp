@@ -84,7 +84,7 @@ struct MainData {
     }
 
     void handleKey(Event e, MainWindow &mainWindow, IScreen &screen) {
-        debugOutput("handleKey start");
+        //        debugOutput("handleKey start");
         // TODO: Consider moving this function to mainWindow
         if (auto c = std::get_if<KeyEvent>(&e)) {
             if (*c == Key::Resize) {
@@ -107,7 +107,7 @@ struct MainData {
             mainWindow.mouseDown(ce->x, ce->y);
         }
 
-        debugOutput("handleKey");
+        //        debugOutput("handleKey");
         // TODO: Update when open buffers change instead
         //        refreshScreen(mainWindow, screen);
     }
