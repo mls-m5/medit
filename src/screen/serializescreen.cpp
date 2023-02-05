@@ -1,6 +1,7 @@
 #include "serializescreen.h"
 #include "nlohmann/json.hpp"
 #include "syntax/palette.h"
+#include <sstream>
 
 SerializeScreen::SerializeScreen(std::shared_ptr<IConnection> connection)
     : _connection{connection} {

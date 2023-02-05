@@ -22,6 +22,9 @@ void registerDefaultPlugins() {
     ClangAnnotation::registerPlugin();
     ClangNavigation::registerPlugin();
 #else
+#endif
+
+#ifndef __EMSCRIPTEN__
     LspPlugin::registerPlugin();
 #endif
 }

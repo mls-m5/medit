@@ -132,7 +132,8 @@ struct HtmlScreen::Grid {
     }
 };
 
-HtmlScreen::HtmlScreen() : _grid(std::make_unique<Grid>()) {
+HtmlScreen::HtmlScreen()
+    : _grid(std::make_unique<Grid>()) {
     staticPointer = this;
 }
 
@@ -175,12 +176,8 @@ size_t HtmlScreen::height() const {
 
 void HtmlScreen::title(std::string title) {}
 
-const IPalette &HtmlScreen::palette() const {
-    return _palette;
-}
-
-IPalette &HtmlScreen::palette() {
-    return _palette;
+void HtmlScreen::palette(const Palette &palette) {
+    _palette = palette;
 }
 
 size_t HtmlScreen::addStyle(const Color &foreground,
@@ -191,19 +188,16 @@ size_t HtmlScreen::addStyle(const Color &foreground,
 
 void HtmlScreen::cursorStyle(CursorStyle) {}
 
-KeyEvent HtmlScreen::getInput() {
-    if (_eventQueue.empty()) {
-        return KeyEvent{Key::None};
-    }
+void HtmlScreen::subscribe(CallbackT f) {
+    _callback = f;
+}
 
-    auto event = _eventQueue.front();
-    _eventQueue.pop();
-
-    return event;
+void HtmlScreen::unsubscribe() {
+    _callback = {};
 }
 
 void HtmlScreen::sendKeyEvent(KeyEvent event) {
-    _eventQueue.push(event);
+    _callback({event});
 }
 
 #endif

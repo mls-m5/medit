@@ -32,9 +32,7 @@ public:
     // @see IScreen
     void title(std::string title) override;
     // @see IScreen
-    const IPalette &palette() const override;
-    // @see IScreen
-    IPalette &palette() override;
+    void palette(const Palette &) override;
     // @see IScreen
     size_t addStyle(const Color &foreground,
                     const Color &background,
@@ -43,7 +41,10 @@ public:
     void cursorStyle(CursorStyle) override;
 
     // @see IInput
-    KeyEvent getInput() override;
+    void subscribe(CallbackT f) override;
+
+    // @see IInput
+    void unsubscribe() override;
 
     void sendKeyEvent(KeyEvent event);
 
@@ -54,7 +55,7 @@ private:
 
     Palette _palette;
 
-    std::queue<KeyEvent> _eventQueue;
+    CallbackT _callback;
 };
 
 #endif

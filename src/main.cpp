@@ -21,7 +21,7 @@
 
 #ifdef __EMSCRIPTEN__
 
-#include "emscripten.h"
+// #include <emscripten.h>
 
 using ScreenType = HtmlScreen;
 using QueueType = JsJobQueue;
@@ -37,7 +37,7 @@ using TimerType = Timer;
 
 namespace {
 
-std::function<void()> emCallback;
+// std::function<void()> emCallback;
 
 struct MainData {
     std::shared_ptr<IScreen> nativeScreen;
@@ -64,6 +64,11 @@ struct MainData {
     }
 
     void createScreen(const Settings &settings) {
+#ifdef __EMSCRIPTEN__
+        auto ns = std::make_unique<ScreenType>();
+        input = ns.get();
+        nativeScreen = std::move(ns);
+#else
         if (settings.style == UiStyle::Terminal) {
             auto ns = std::make_unique<NCursesScreen>();
             input = ns.get();
@@ -74,6 +79,7 @@ struct MainData {
             input = ns.get();
             nativeScreen = std::move(ns);
         }
+#endif
     }
 
     void refreshScreen(IWindow &window, IScreen &screen) {
@@ -137,12 +143,6 @@ struct MainData {
         }
         refreshScreen(*mainWindow, *screen);
     }
-
-    void innerMainLoop(IInput &input,
-                       IJobQueue &guiQueue,
-                       std::function<void(Event)> callback) {
-        guiQueue.work(true);
-    }
 };
 
 MainData mainData;
@@ -186,17 +186,7 @@ void MainData::start(int argc, char **argv) {
 
     timer->start();
     queue->start();
-}
 
-void MainData::stop() {
-#ifndef __EMSCRIPTEN__
-    queue->stop();
-    timer->stop();
-    guiQueue->stop();
-#endif
-}
-
-void MainData::loop() {
     input->subscribe([this](IInput::EventListT list) {
         this->guiQueue->addTask([e = list, this] {
             handleEvent(e);
@@ -205,22 +195,21 @@ void MainData::loop() {
             }
         });
     });
+}
+
+void MainData::stop() {
+    queue->stop();
+    timer->stop();
+    guiQueue->stop();
+}
+
+void MainData::loop() {
 
 #ifdef __EMSCRIPTEN__
-    using namespace std::chrono_literals;
-    guiLoopTimer = std::make_shared<JsTimer>();
-
-    emCallback = [=] {
-        innerMainLoop(*input, *guiQueue, [](auto c) { mainData.callback(c); });
-        guiLoopTimer->setTimeout(
-            10ms, emCallback); // Todo: Do this faster when it works
-    };
-
-    guiLoopTimer->start();
-    guiLoopTimer->setTimeout(100ms, emCallback);
+    guiQueue->start();
 #else
     while (!medit::main::shouldQuit) {
-        innerMainLoop(*input, *guiQueue, [](auto c) { mainData.callback(c); });
+        guiQueue->work(true);
     }
 #endif
 }
@@ -230,7 +219,9 @@ void MainData::loop() {
 int main(int argc, char **argv) {
     mainData.start(argc, argv);
     mainData.loop();
+#ifndef __EMSCRIPTEN__
     mainData.stop();
+#endif
 
     return 0;
 }

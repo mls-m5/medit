@@ -18,7 +18,6 @@ public:
     virtual size_t width() const = 0;
     virtual size_t height() const = 0;
     virtual void title(std::string title) = 0;
-    //    virtual const IPalette &palette() const = 0;
     virtual void palette(const Palette &) = 0;
 
     //! @param index should be left default for most cases

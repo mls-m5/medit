@@ -8,7 +8,6 @@ add_library(
     build.cpp
     windowcommands.cpp
     clangformat.cpp
-    lsp/lspplugin.cpp
     lsp/headerdetection.cpp
     )
 
@@ -18,8 +17,24 @@ target_link_libraries(
     PUBLIC
     medit_common
     lib_medit
-    lsp-client
     )
+
+if (NOT EMSCRIPTEN)
+
+    target_link_libraries(
+        medit_plugins
+        PUBLIC
+        lsp-client
+        )
+
+    target_sources(
+        medit_plugins
+        PRIVATE
+        lsp/lspplugin.cpp
+
+        )
+
+endif()
 
 if (ENABLE_LEGACY_CLANG_PLUGIN)
 

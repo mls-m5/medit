@@ -93,6 +93,9 @@ if (EMSCRIPTEN)
         DESTINATION
         .
         )
+
+    SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -gsource-map ")
+    SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} --source-map-base http://localhost:8000/")
 endif()
 
 # === code playback ===================================================

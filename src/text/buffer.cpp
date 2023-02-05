@@ -2,8 +2,9 @@
 #include "cursorops.h"
 #include "cursorrange.h"
 #include "cursorrangeops.h"
+#include <sstream>
 
-std::unique_ptr<Buffer> Buffer::open(std::filesystem::__cxx11::path path) {
+std::unique_ptr<Buffer> Buffer::open(std::filesystem::path path) {
     auto buffer = std::make_unique<Buffer>();
 
     auto file = std::make_unique<File>(path);

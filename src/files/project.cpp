@@ -95,6 +95,12 @@ filesystem::path Project::findSwitchHeader(filesystem::path path) {
 
 std::vector<filesystem::path> Project::findProjectFiles(
     const filesystem::path &pathInProject, size_t max) {
+
+#ifdef __EMSCRIPTEN__
+
+    return {};
+#endif
+
     auto &root = _settings.root;
     root = this->root(pathInProject);
 

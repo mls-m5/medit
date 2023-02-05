@@ -25,6 +25,7 @@ target_link_libraries(
 
 # ------------------------- gui screen --------------------
 
+if (NOT EMSCRIPTEN)
 add_library(
     medit_sdl_screen
     STATIC
@@ -40,6 +41,7 @@ target_link_libraries(
     PRIVATE
         matrix-screen
     )
+endif()
 
 # ---------------------- ncurses screen --------------------
 
@@ -129,10 +131,17 @@ target_link_libraries (
     PUBLIC
     medit_core
     medit_common
-    medit_sdl_screen
-    medit_terminal_screen
     medit_remote_screen
     )
+
+if (NOT EMSCRIPTEN)
+    target_link_libraries (
+        lib_medit
+        PUBLIC
+        medit_sdl_screen
+        medit_terminal_screen
+        )
+endif()
 
 target_link_libraries(
     lib_medit
