@@ -1,7 +1,7 @@
 
 #include "mls-unit-test/unittest.h"
 #include "mock/script/mockscope.h"
-#include "mock/syntax/mockpalette.h"
+// #include "mock/syntax/mockpalette.h"
 #include "syntax/basichighligting.h"
 #include "syntax/palette.h"
 #include "views/editor.h"
@@ -30,7 +30,7 @@ TEST_CASE("format all to default") {
 
     editor.buffer().text("hello"s);
 
-    MockPalette palette;
+    Palette palette;
 
     hl.update(palette);
 
@@ -49,7 +49,7 @@ TEST_CASE("format keyword") {
 
     editor.buffer().text("int hello"s);
 
-    MockPalette palette;
+    Palette palette;
 
     hl.update(palette);
 
@@ -68,7 +68,7 @@ TEST_CASE("partial match") {
 
     editor.buffer().text("inte automatic"s);
 
-    MockPalette palette;
+    Palette palette;
 
     hl.update(palette);
 

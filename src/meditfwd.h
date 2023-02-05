@@ -24,7 +24,8 @@ class CommandBlock;
 class ClangModel;
 class Project;
 class Color;
-class IPalette;
+class Palette;
+using IPalette = Palette;
 class IAnnotation;
 class Registers;
 

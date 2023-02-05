@@ -9,9 +9,8 @@
 
 inline const std::string standardFormatName = "text";
 
-class Palette : public IPalette {
+class Palette /*: public IPalette*/ {
     struct Style;
-
 
     bool _isChanged = true;
 
@@ -30,15 +29,37 @@ public:
         return stream;
     }
 
-    FormatType getFormat(std::string name) const override;
+    FormatType getFormat(std::string name) const /*override*/;
     Color getColor(std::string_view name) const;
     Color getStyleColor(std::string_view name) const;
 
     //! @see IPalette
-    bool update(IScreen &screen) override;
+    bool update(IScreen &screen) /*override*/;
     //! @see IPalette
-    void load(filesystem::path) override;
+    void load(filesystem::path) /*override*/;
     //! @see IPalette
     void load(std::istream &stream);
-    //! @see IPalette
+
+    enum BasicPalette : FormatType {
+        standard = 1,
+
+        identifier,
+        statement,
+        type,
+
+        comment,
+        lineNumbers,
+
+        preprocessor,
+
+        currentLine,
+        constant,
+        string,
+
+        selection,
+
+        error,
+        warning,
+        note,
+    };
 };

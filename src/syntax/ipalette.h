@@ -1,43 +1,48 @@
 #pragma once
 
-#include "files/filesystem.h"
-#include "meditfwd.h"
-#include "text/formattype.h"
-#include <string>
+#include "palette.h"
 
-class IPalette {
-public:
-    // TODO: Add more formating styles
-    enum BasicPalette : FormatType {
-        standard = 1,
+// TODO: Refactor away this
+using IPalette = Palette;
 
-        identifier,
-        statement,
-        type,
+// #include "files/filesystem.h"
+// #include "meditfwd.h"
+// #include "text/formattype.h"
+// #include <string>
 
-        comment,
-        lineNumbers,
+// class IPalette {
+// public:
+//     // TODO: Add more formating styles
+//     enum BasicPalette : FormatType {
+//         standard = 1,
 
-        preprocessor,
+//        identifier,
+//        statement,
+//        type,
 
-        currentLine,
-        constant,
-        string,
+//        comment,
+//        lineNumbers,
 
-        selection,
+//        preprocessor,
 
-        error,
-        warning,
-        note,
-    };
+//        currentLine,
+//        constant,
+//        string,
 
-    virtual ~IPalette() = default;
+//        selection,
 
-    virtual FormatType getFormat(std::string name) const = 0;
+//        error,
+//        warning,
+//        note,
+//    };
 
-    //! Register changes of palette to screen
-    virtual void load(filesystem::path) = 0;
-    virtual bool update(IScreen &screen) = 0;
+//    virtual ~IPalette() = default;
 
-    //! Used to get the most basic colors used most often
-};
+//    virtual FormatType getFormat(std::string name) const = 0;
+
+//    //! Register changes of palette to screen
+//    virtual void load(filesystem::path) = 0;
+//    virtual bool update(IScreen &screen) = 0;
+
+//    //! Used to get the most basic colors used most often
+//};
