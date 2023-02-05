@@ -115,7 +115,13 @@ nlohmann::json SerializeScreen::request(nlohmann::json json) {
     _connection->write(ss.str());
 
     auto lock = std::unique_lock(_mutex);
-    _cv.wait(lock, [this, id] { return _receivedRequest = id; });
+
+    // The response arrived before started looking for it
+    if (_receivedRequest == id) {
+        return std::move(_receivedData);
+    }
+
+    _cv.wait(lock, [this, id] { return _receivedRequest == id; });
 
     lock.lock();
     return std::move(_receivedData);
