@@ -1,6 +1,7 @@
 #pragma once
 
 #include "itimer.h"
+#include <condition_variable>
 #include <functional>
 #include <mutex>
 #include <thread>
@@ -37,6 +38,7 @@ private:
     std::mutex _waitMutex;
     std::mutex _mutex;
     std::thread _thread;
+    std::condition_variable _cv;
     std::vector<Trigger> _triggers;
     bool _isRunning = false;
     size_t nextRef = 0;

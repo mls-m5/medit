@@ -124,6 +124,7 @@ struct MainData {
                         KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl} ||
                     *key == Key::Quit) {
                     medit::main::shouldQuit = true;
+                    guiQueue->stop();
                 }
 
                 if (*key != Key::Unknown) {
