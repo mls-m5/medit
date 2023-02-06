@@ -4,7 +4,9 @@
 #include "script/iscope.h"
 #include "text/fchar.h"
 
-MessageBox::MessageBox() {
+MessageBox::MessageBox(IWindow &parent)
+    : View{&parent}
+    , Window{&parent} {
     x(10);
     y(10);
     width(50);
@@ -18,7 +20,7 @@ void MessageBox::draw(IScreen &screen) {
     screen.draw(x() + 2, y() + 2, {"hello"});
 }
 
-bool MessageBox::keyPress(std::shared_ptr<IScope> ) {
+bool MessageBox::keyPress(std::shared_ptr<IScope>) {
     close();
     return true;
 }

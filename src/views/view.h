@@ -4,9 +4,11 @@
 
 class View : public virtual IView {
 public:
-    View() = default;
-    View(size_t width, size_t height)
-        : _width(width)
+    View(IView *parent)
+        : _parent{parent} {}
+    View(IView *parent, size_t width, size_t height)
+        : _parent{parent}
+        , _width(width)
         , _height(height) {}
     View(const View &) = delete;
     View(View &&) = delete;
@@ -59,7 +61,16 @@ public:
                y < static_cast<int>(_y + _height);
     }
 
+    IView *parent() override {
+        return _parent;
+    }
+
+    IWindow *window() override {
+        return _parent->window();
+    }
+
 private:
+    IView *_parent = nullptr;
     size_t _x = 0;
     size_t _y = 0;
     size_t _width = 10;

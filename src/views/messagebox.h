@@ -4,7 +4,7 @@
 
 class MessageBox : public Window {
 public:
-    MessageBox();
+    MessageBox(IWindow &parent);
 
     //! @see IView interface
     void draw(IScreen &) override;
@@ -18,4 +18,6 @@ public:
     bool mouseDown(int x, int ty) override {
         return false;
     }
+
+    void triggerRedraw() override {}
 };

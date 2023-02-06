@@ -12,7 +12,7 @@ public:
     ListView _list;
     Project &_projectFiles;
 
-    Locator(Project &projectFiles);
+    Locator(IView *parent, Project &projectFiles);
     ~Locator() override;
 
     // @see IKeySink

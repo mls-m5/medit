@@ -9,13 +9,13 @@ std::shared_ptr<Buffer> CoreEnvironment::open(
     std::scoped_lock g{_fileMutex};
     for (auto &buffer : _buffers) {
         if (buffer->path() == path) {
-            emitBufferSubscriptionEvent({buffer, env, BufferEvent::Open});
+            emitBufferSubscriptionEvent({buffer, BufferEvent::Open});
             return buffer;
         }
     }
 
     _buffers.push_back(Buffer::open(path));
-    emitBufferSubscriptionEvent({_buffers.back(), env, BufferEvent::Open});
+    emitBufferSubscriptionEvent({_buffers.back(), BufferEvent::Open});
     return _buffers.back();
 }
 
@@ -23,7 +23,7 @@ std::shared_ptr<Buffer> CoreEnvironment::create(
     std::shared_ptr<IEnvironment> env) {
     _tv();
     _buffers.push_back(std::make_shared<Buffer>());
-    emitBufferSubscriptionEvent({_buffers.back(), env, BufferEvent::Open});
+    emitBufferSubscriptionEvent({_buffers.back(), BufferEvent::Open});
     return _buffers.back();
 }
 
@@ -32,15 +32,32 @@ CoreEnvironment &CoreEnvironment::instance() {
     return core;
 }
 
-void CoreEnvironment::subscribeToBufferEvents(BufferSubscriptionT f) {
+void CoreEnvironment::subscribeToBufferEvents(BufferSubscriptionCallbackT f,
+                                              Buffer *buffer,
+                                              void *ref) {
     _tv();
-    _bufferSubscriptions.push_back(f);
+    _bufferSubscriptions.push_back({f, buffer, ref});
+}
+
+void CoreEnvironment::unsubscribeToBufferEvents(void *reference) {
+    _tv();
+
+    if (!reference) {
+        return;
+    }
+
+    auto it =
+        std::remove_if(_bufferSubscriptions.begin(),
+                       _bufferSubscriptions.end(),
+                       [reference](auto &s) { return s.ref == reference; });
+
+    _bufferSubscriptions.erase(it, _bufferSubscriptions.end());
 }
 
 void CoreEnvironment::emitBufferSubscriptionEvent(BufferEvent e) {
     _tv();
     for (auto &subscriber : _bufferSubscriptions) {
-        subscriber(e);
+        subscriber.f(e);
     }
 }
 
@@ -52,7 +69,8 @@ void CoreEnvironment::publishDiagnostics(
     for (auto &buffer : _buffers) {
         if (buffer->path() == file) {
             buffer->diagnostics().publish(source, std::move(data));
-            _context->redrawScreen();
+            emitBufferSubscriptionEvent({buffer, BufferEvent::Redraw});
+            //            _context->redrawScreen();
             return;
         }
     }

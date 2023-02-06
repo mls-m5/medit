@@ -14,7 +14,7 @@ class ListView : public ScrollView, public IKeySink {
     size_t _current = 0;
 
 public:
-    ListView();
+    ListView(IView *parent);
     ~ListView() override;
 
     void addLine(FString text, std::any dataContent = {});

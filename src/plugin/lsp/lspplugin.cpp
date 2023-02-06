@@ -106,7 +106,7 @@ LspPlugin::LspPlugin()
     _client = std::make_unique<LspClient>(args);
 
     CoreEnvironment::instance().subscribeToBufferEvents(
-        [this](BufferEvent e) { bufferEvent(e); });
+        [this](BufferEvent e) { bufferEvent(e); }, nullptr, this);
 
     _client->request(InitializeParams{}, [](const nlohmann::json &j) {
         //        std::cout << "initialization response:\n";

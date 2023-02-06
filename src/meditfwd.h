@@ -30,6 +30,7 @@ class IAnnotation;
 class Registers;
 
 class MainWindow;
+class IWindow;
 
 class CoreEnvironment;
 class BufferEvent;

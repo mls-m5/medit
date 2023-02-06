@@ -71,6 +71,19 @@ struct MainWindow : public Window {
     bool mouseDown(int x, int y) override;
     void copy(bool shouldCut);
 
+    //! Queue up that the window should be redrawn
+    void triggerRedraw() override;
+
+    void refreshScreen();
+
+    IEnvironment &env() override {
+        return *_env;
+    }
+
+    IWindow *window() override {
+        return this;
+    }
+
 private:
     void addCommands(IScreen &screen);
 };

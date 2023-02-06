@@ -87,12 +87,12 @@ struct MainData {
         });
     }
 
-    void refreshScreen(IWindow &window, IScreen &screen) {
-        window.updateCursor(screen);
-        screen.clear();
-        window.draw(screen);
-        screen.refresh();
-    }
+    //    void refreshScreen(IWindow &window, IScreen &screen) {
+    //        window.updateCursor(screen);
+    //        screen.clear();
+    //        window.draw(screen);
+    //        screen.refresh();
+    //    }
 
     void handleKey(Event e, MainWindow &mainWindow, IScreen &screen) {
         // TODO: Consider moving this function to mainWindow
@@ -136,7 +136,7 @@ struct MainData {
                 callback(c);
             }
         }
-        refreshScreen(*mainWindow, *screen);
+        //        refreshScreen(*mainWindow, *screen);
     }
 };
 
@@ -161,11 +161,11 @@ void MainData::start(int argc, char **argv) {
 
     mainWindow = std::make_shared<MainWindow>(*screen, *context);
 
-    context->refreshScreenFunc([this] {
-        mainData.guiQueue->addTask([this] {
-            refreshScreen(*mainData.mainWindow, *mainData.screen); //
-        });
-    });
+    //    mainWindow->env().refreshScreenFunc([this] {
+    //        mainData.guiQueue->addTask([this] {
+    //            refreshScreen(*mainData.mainWindow, *mainData.screen); //
+    //        });
+    //    });
 
     if (settings.file.empty()) {
         mainWindow->updateLocatorBuffer();
@@ -211,3 +211,4 @@ int main(int argc, char **argv) {
 
     return 0;
 }
+

@@ -7,4 +7,8 @@ class IWindow : public virtual IView, public virtual IKeySink {
 public:
     virtual bool isClosed() = 0;
     virtual void close() = 0;
+
+    virtual void triggerRedraw() = 0;
+
+    virtual IEnvironment &env() = 0;
 };

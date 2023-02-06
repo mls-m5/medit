@@ -18,4 +18,8 @@ public:
     virtual void width(size_t) = 0;
     virtual void height(size_t) = 0;
     virtual bool isInside(int x, int y) = 0;
+
+    virtual IView *parent() = 0;
+
+    virtual IWindow *window() = 0;
 };

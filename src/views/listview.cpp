@@ -12,9 +12,10 @@ struct ListView::ListItem {
     std::any content;
 };
 
-ListView::ListView() = default;
-
 ListView::~ListView() = default;
+
+ListView::ListView(IView *parent)
+    : ScrollView{parent} {}
 
 void ListView::addLine(FString text, std::any dataContent) {
     _lines.push_back({std::move(text), std::move(dataContent)});

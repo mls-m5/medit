@@ -2,6 +2,7 @@
 #include "mls-unit-test/unittest.h"
 #include "mock/script/mockenvironment.h"
 #include "mock/script/mockscope.h"
+#include "mock/views/mockwindow.h"
 #include "modes/mode.h"
 #include "text/buffer.h"
 #include "views/editor.h"
@@ -36,7 +37,7 @@ TEST_CASE("create mode") {
 TEST_CASE("match keypress") {
     auto mode = createTestMode();
     auto scope = std::make_shared<MockScope>();
-    Editor editor{std::make_shared<Buffer>()};
+    Editor editor{nullptr, std::make_shared<Buffer>()};
 
     scope->mock_editor_0.returnValueRef(editor);
     scope->mock_run_1.returnValue(true);
@@ -57,7 +58,7 @@ TEST_CASE("match keypress") {
 TEST_CASE("default action") {
     auto mode = createTestMode(true);
     auto scope = std::make_shared<MockScope>();
-    Editor editor{std::make_shared<Buffer>()};
+    Editor editor{nullptr, std::make_shared<Buffer>()};
 
     scope->mock_run_1.returnValue(true);
     scope->mock_run_1.expectNum(1);
@@ -70,7 +71,7 @@ TEST_CASE("default action") {
 TEST_CASE("buffered keypress") {
     auto mode = createTestMode();
     auto scope = std::make_shared<MockScope>();
-    Editor editor{std::make_shared<Buffer>()};
+    Editor editor{nullptr, std::make_shared<Buffer>()};
 
     scope->mock_editor_0.returnValueRef(editor);
     //    scope->mock_run_1.onCall([](auto &&) { return true; });

@@ -13,7 +13,7 @@ public:
         std::string postfix;
     };
 
-    CompleteView();
+    CompleteView(IView *parent);
 
     //! @param cursorPosition is the cursors position _on the screen_
     void triggerShow(std::shared_ptr<IScope>);

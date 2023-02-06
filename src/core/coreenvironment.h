@@ -12,10 +12,11 @@
 
 struct BufferEvent {
     std::shared_ptr<Buffer> buffer;
-    std::shared_ptr<IEnvironment> env;
+    //    std::shared_ptr<IEnvironment> env;
     enum {
         Open,
         Close,
+        Redraw, // For example new diagnostics is published or buffer changed
     } type = Open;
 };
 
@@ -35,10 +36,15 @@ public:
 
     static CoreEnvironment &instance();
 
-    using BufferSubscriptionT = std::function<void(BufferEvent)>;
+    using BufferSubscriptionCallbackT = std::function<void(BufferEvent)>;
 
-    /// TODO: create unsubscribe
-    void subscribeToBufferEvents(BufferSubscriptionT f);
+    //! @param buffer which buffer to subscribe to, null if all buffers
+    //! @param reference a reference to be used when unsubscibing, can be null
+    void subscribeToBufferEvents(BufferSubscriptionCallbackT f,
+                                 Buffer *buffer,
+                                 void *reference);
+
+    void unsubscribeToBufferEvents(void *reference);
 
     void emitBufferSubscriptionEvent(BufferEvent e);
 
@@ -60,7 +66,13 @@ private:
 
     ThreadValidation _tv{"core thread (gui thread)"};
 
-    std::vector<BufferSubscriptionT> _bufferSubscriptions;
+    struct BufferSubscription {
+        BufferSubscriptionCallbackT f;
+        Buffer *buffer = nullptr;
+        void *ref = nullptr;
+    };
+
+    std::vector<BufferSubscription> _bufferSubscriptions;
 
     Context *_context =
         nullptr; // TODO: Handle lifetime of CoreEnvironment better

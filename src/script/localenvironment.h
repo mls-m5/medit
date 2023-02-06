@@ -14,6 +14,7 @@ class LocalEnvironment : public IEnvironment {
     bool _showConsole = false;
     Context &_context;
     Registers _registers;
+    //    std::function<void()> _refreshScreenFunc;
 
 public:
     LocalEnvironment(MainWindow &mw, Context &context)
@@ -70,4 +71,11 @@ public:
     MainWindow &mainWindow() override {
         return _mainWindow;
     }
+
+    //    void refreshScreenFunc(std::function<void()> f) {
+    //        _refreshScreenFunc = f;
+    //    }
+
+    //! Trigger redraw of winow
+    void redrawScreen();
 };

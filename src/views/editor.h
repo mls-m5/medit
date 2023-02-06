@@ -12,7 +12,7 @@
 
 class Editor : public View, public IKeySink {
 public:
-    Editor(std::shared_ptr<Buffer> buffer);
+    Editor(IView *parent, std::shared_ptr<Buffer> buffer);
     ~Editor() override;
 
     Editor(const Editor &) = delete;
@@ -92,6 +92,10 @@ public:
     void fitCursor();
 
 private:
+    void subscribeToBuffer();
+
+    void unsubscribe();
+
     BufferView _bufferView;
     Cursor _cursor;
     std::optional<Cursor> _selectionAnchor;

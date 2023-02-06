@@ -3,8 +3,9 @@
 #include "modes/parentmode.h"
 #include "text/buffer.h"
 
-Locator::Locator(Project &projectFiles)
-    : Editor{std::make_shared<Buffer>(true)}
+Locator::Locator(IView *parent, Project &projectFiles)
+    : Editor{parent, std::make_shared<Buffer>(true)}
+    , _list{parent}
     , _projectFiles(projectFiles) {
     //    buffer().singleLine(true);
     _list.x(0);

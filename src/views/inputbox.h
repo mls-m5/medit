@@ -7,7 +7,7 @@
 
 class InputBox : public Window {
 public:
-    InputBox(FString title, std::string defaultValue = {});
+    InputBox(IWindow *parent, FString title, std::string defaultValue = {});
     ~InputBox();
 
     //! @see IKeySink interface

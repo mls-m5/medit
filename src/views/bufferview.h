@@ -7,7 +7,7 @@
 
 class BufferView : public ScrollView {
 public:
-    BufferView(std::shared_ptr<Buffer> buffer);
+    BufferView(IView *parent, std::shared_ptr<Buffer> buffer);
     ~BufferView() override;
 
     void draw(IScreen &) override;

@@ -6,7 +6,9 @@
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
 
-CompleteView::CompleteView() {
+CompleteView::CompleteView(IView *parent)
+    : View{parent}
+    , _list{parent} {
     _list.width(20);
     _list.height(20);
 }

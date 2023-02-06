@@ -1,19 +1,26 @@
 #include "views/editor.h"
+#include "core/coreenvironment.h"
 #include "files/ifile.h"
 #include "modes/imode.h"
 #include "modes/normalmode.h"
 #include "screen/draw.h"
 #include "screen/iscreen.h"
+#include "script/ienvironment.h"
 #include "syntax/ipalette.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
+#include "views/iwindow.h"
 
 Editor::~Editor() = default;
 
-Editor::Editor(std::shared_ptr<Buffer> buffer)
-    : _bufferView(std::move(buffer))
+Editor::Editor(IView *parent, std::shared_ptr<Buffer> buffer)
+    : View{parent}
+    , _bufferView(parent, std::move(buffer))
     , _cursor(_bufferView.buffer())
-    , _mode(createNormalMode()) {}
+    , _mode(createNormalMode()) {
+
+    subscribeToBuffer();
+}
 
 IFile *Editor::file() {
     return buffer().file();
@@ -73,6 +80,10 @@ Cursor Editor::cursor(Cursor c, bool deselect) {
     fitCursor();
     if (deselect) {
         _selectionAnchor.reset();
+    }
+
+    if (auto w = window()) {
+        w->triggerRedraw();
     }
 
     return _cursor;
@@ -225,4 +236,20 @@ size_t Editor::y() const {
 
 void Editor::fitCursor() {
     bufferView().fitPosition(_cursor);
+}
+
+void Editor::subscribeToBuffer() {
+    if (auto w = window()) {
+        auto &core = w->env().core();
+        core.subscribeToBufferEvents(
+            [w](const BufferEvent &e) { w->triggerRedraw(); },
+            &_bufferView.buffer(),
+            this);
+    }
+}
+
+void Editor::unsubscribe() {
+    if (auto w = window()) {
+        w->env().core().unsubscribeToBufferEvents(this);
+    }
 }

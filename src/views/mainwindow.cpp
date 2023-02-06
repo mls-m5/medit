@@ -21,16 +21,19 @@
 #include <memory>
 
 MainWindow::MainWindow(IScreen &screen, Context &context)
-    : View(screen.width(), screen.height())
+    : Window{nullptr}
+    , View(nullptr, screen.width(), screen.height())
     , _screen{screen}
     , _editors{}
     , _env(std::make_unique<LocalEnvironment>(*this, context))
     , _scope(std::make_shared<RootScope>(*_env))
-    , _console(_env->core().create(_env))
-    , _locator(_project)
+    , _console(this, _env->core().create(_env))
+    , _locator(this, _project)
+    , _completeView(this)
     , _currentEditor(0) {
 
-    _editors.push_back(std::make_unique<Editor>(_env->core().create(_env)));
+    _editors.push_back(
+        std::make_unique<Editor>(this, _env->core().create(_env)));
     _inputFocus = _editors.front().get();
 
     _scope->editor(_editors.front().get());
@@ -140,7 +143,7 @@ void MainWindow::addCommands(IScreen &screen) {
     });
 
     _scope->addCommand("messagebox", [this](auto &&) {
-        showPopup(std::make_unique<MessageBox>());
+        showPopup(std::make_unique<MessageBox>(*this));
     });
 
     _scope->addCommand("editor.show_open", [this](std::shared_ptr<IScope> env) {
@@ -150,7 +153,7 @@ void MainWindow::addCommands(IScreen &screen) {
             path = filesystem::current_path();
         }
         auto input =
-            std::make_unique<InputBox>("Path to open: ", path.string());
+            std::make_unique<InputBox>(this, "Path to open: ", path.string());
         input->callback([this](std::string value) { open(value); });
         showPopup(std::move(input));
     });
@@ -308,7 +311,7 @@ void MainWindow::open(filesystem::path path,
 
     updateHighlighting(editor);
 
-    _env->context().redrawScreen();
+    //    _env->context().redrawScreen();
 
     _scope->run({"window.title"});
 }
@@ -356,7 +359,8 @@ void MainWindow::updateHighlighting(Editor &editor) {
                                     break;
                                 }
                             }
-                            _env->context().redrawScreen();
+                            triggerRedraw();
+                            //                            _env->context().redrawScreen();
                         }
                     });
             });
@@ -405,4 +409,16 @@ void MainWindow::copy(bool shouldCut) {
     }
 
     _screen.clipboardData(text);
+}
+
+void MainWindow::triggerRedraw() {
+    //    _env->redrawScreen();
+    _env->context().guiQueue().addTask([this] { refreshScreen(); });
+}
+
+void MainWindow::refreshScreen() {
+    updateCursor(_screen);
+    _screen.clear();
+    draw(_screen);
+    _screen.refresh();
 }

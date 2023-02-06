@@ -39,7 +39,7 @@ void build(std::shared_ptr<IScope> scope) {
             scope->env().context().guiQueue().addTask([line, scope] {
                 scope->env().console().buffer().pushBack(line);
                 scope->env().console().cursor({0, 100000000});
-                scope->env().context().redrawScreen();
+                //                scope->env().context().redrawScreen();
             });
         }
 
@@ -49,11 +49,11 @@ void build(std::shared_ptr<IScope> scope) {
                 if (returnCode) {
                     consoleBuffer.pushBack(
                         FString("failed...", IPalette::error));
-                    scope->env().context().redrawScreen();
+                    //                    scope->env().context().redrawScreen();
                 }
                 else {
                     consoleBuffer.pushBack(std::string{"finished..."});
-                    scope->env().context().redrawScreen();
+                    //                    scope->env().context().redrawScreen();
                 }
             });
 

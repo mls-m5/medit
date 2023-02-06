@@ -19,8 +19,9 @@ size_t getLineNumWidth(size_t numLines) {
 
 BufferView::~BufferView() = default;
 
-BufferView::BufferView(std::shared_ptr<Buffer> buffer)
-    : _buffer(std::move(buffer)) {}
+BufferView::BufferView(IView *parent, std::shared_ptr<Buffer> buffer)
+    : ScrollView{parent}
+    , _buffer(std::move(buffer)) {}
 
 void BufferView::draw(IScreen &screen) {
     if (!visible()) {
