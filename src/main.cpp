@@ -39,8 +39,6 @@ using TimerType = Timer;
 
 namespace {
 
-// std::function<void()> emCallback;
-
 struct MainData {
     std::shared_ptr<IScreen> nativeScreen;
     std::shared_ptr<IScreen> screen;
@@ -79,6 +77,14 @@ struct MainData {
             nativeScreen = std::make_unique<ScreenType>();
         }
 #endif
+        nativeScreen->subscribe([this](IScreen::EventListT list) {
+            this->guiQueue->addTask([e = list, this] {
+                handleEvent(e);
+                if (medit::main::shouldQuit) {
+                    return;
+                }
+            });
+        });
     }
 
     void refreshScreen(IWindow &window, IScreen &screen) {
@@ -109,7 +115,6 @@ struct MainData {
     }
 
     void handleEvent(const IScreen::EventListT &list) {
-
         for (auto &c : list) {
             if (std::holds_alternative<NullEvent>(c)) {
                 return;
@@ -141,13 +146,13 @@ void MainData::start(int argc, char **argv) {
     registerDefaultPlugins();
     const auto settings = Settings{argc, argv};
 
-    createScreen(settings);
-
-    screen = std::make_unique<BufferedScreen>(nativeScreen.get());
-
     queue = std::make_shared<QueueType>();
     guiQueue = std::make_shared<QueueType>();
     timer = std::make_shared<TimerType>();
+
+    createScreen(settings);
+
+    screen = std::make_unique<BufferedScreen>(nativeScreen.get());
 
     context = std::make_shared<Context>(*queue, *guiQueue, *timer);
 
@@ -176,15 +181,6 @@ void MainData::start(int argc, char **argv) {
 
     timer->start();
     queue->start();
-
-    screen->subscribe([this](IScreen::EventListT list) {
-        this->guiQueue->addTask([e = list, this] {
-            handleEvent(e);
-            if (medit::main::shouldQuit) {
-                return;
-            }
-        });
-    });
 }
 
 void MainData::stop() {

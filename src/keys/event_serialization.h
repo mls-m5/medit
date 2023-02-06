@@ -24,18 +24,29 @@ inline void from_json(const nlohmann::json &j, Event &e) {
     case 0:
         e = NullEvent{};
         break;
-    case 1:
-        e = KeyEvent{je};
+    case 1: {
+        auto pe = KeyEvent{};
+        from_json(je, pe);
+        e = pe;
         break;
-    case 2:
-        e = MouseDownEvent{je};
+    }
+    case 2: {
+        auto pe = MouseDownEvent{};
+        from_json(je, pe);
+        e = pe;
         break;
-    case 3:
-        e = MouseMoveEvent{je};
+    }
+    case 3: {
+        auto pe = MouseMoveEvent{};
+        from_json(je, pe);
+        e = pe;
         break;
-    case 4:
-        //        e = PasteEvent{je};
-        e = PasteEvent{je["text"]};
+    }
+    case 4: {
+        auto pe = PasteEvent{};
+        from_json(je, pe);
+        e = pe;
         break;
+    }
     }
 }
