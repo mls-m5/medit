@@ -1,5 +1,6 @@
 #pragma once
 
+#include "nlohmann/json.hpp"
 #include "text/utf8char.h"
 #include <functional>
 #include <variant>

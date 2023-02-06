@@ -99,6 +99,14 @@ public:
         return _data.end();
     }
 
+    constexpr auto begin() const {
+        return _data.begin();
+    }
+
+    constexpr auto end() const {
+        return _data.end();
+    }
+
     constexpr auto size() const {
         size_t sum = 0;
         for (auto byte : _data) {

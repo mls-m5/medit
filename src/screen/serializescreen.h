@@ -62,4 +62,6 @@ private:
     std::condition_variable _cv;
 
     nlohmann::json _receivedData;
+
+    CallbackT _callback;
 };

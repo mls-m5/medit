@@ -1,4 +1,5 @@
 #include "serializescreen.h"
+#include "keys/event_serialization.h"
 #include "nlohmann/json.hpp"
 #include "syntax/palette.h"
 #include <sstream>
@@ -109,11 +110,11 @@ void SerializeScreen::cursorStyle(CursorStyle style) {
 }
 
 void SerializeScreen::subscribe(CallbackT f) {
-#warning "implement this";
+    _callback = f;
 }
 
 void SerializeScreen::unsubscribe() {
-#warning "implement this";
+    _callback = {};
 }
 
 std::string SerializeScreen::clipboardData() {
@@ -163,6 +164,9 @@ void SerializeScreen::receive(const nlohmann::json &json) {
         _receivedData = std::move(json); // Note: json + it is moved from
     }
     else {
+        std::vector<Event> e = json;
+        _callback(e);
+
         return;
     }
     _cv.notify_all();

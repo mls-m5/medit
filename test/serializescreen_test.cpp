@@ -8,7 +8,22 @@
 using namespace std::literals;
 
 struct Fixture {
+    int subscription() {
+        output->mock_unsubscribe_0.expectNum(1);
+        output->mock_subscribe_1.expectNum(1);
+        output->mock_subscribe_1.onCall(
+            [this](IScreen::CallbackT f) { _callback = f; });
+        return 0;
+    }
+
+    void sendEvent(std::vector<Event> e) {
+        _callback(std::move(e));
+    }
+
+    IScreen::CallbackT _callback;
+
     std::shared_ptr<MockScreen> output = std::make_shared<MockScreen>();
+    int _sub = subscription(); // Just do it in right order
     std::shared_ptr<DeserializeScreen> ds =
         std::make_shared<DeserializeScreen>(output);
     SerializeScreen ss{ds};
@@ -141,6 +156,39 @@ TEST_CASE("clipboard(...)") {
             []() -> std::string { return "hello2"; });
 
         EXPECT_EQ(f.ss.clipboardData(), "hello2");
+    }
+}
+
+TEST_CASE("key callback") {
+    {
+        auto f = Fixture{};
+
+        bool wasCalled = false;
+        auto cb = [&wasCalled](auto &&) { wasCalled = true; };
+        f.ss.subscribe(cb);
+
+        f.sendEvent({KeyEvent{}});
+
+        EXPECT(wasCalled);
+    }
+    {
+        auto f = Fixture{};
+
+        bool wasCalled = false;
+        auto cb = [&wasCalled](auto &&list) {
+            wasCalled = true;
+            if (list.empty()) {
+                return;
+            }
+            auto p = std::get_if<PasteEvent>(&list.front());
+            EXPECT(p);
+            EXPECT_EQ(p->text, "hello there");
+        };
+        f.ss.subscribe(cb);
+
+        f.sendEvent({PasteEvent{"hello there"}});
+
+        EXPECT(wasCalled);
     }
 }
 

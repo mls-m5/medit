@@ -1,10 +1,14 @@
 #include "deserializescreen.h"
+#include "keys/event_serialization.h"
 #include "nlohmann/json.hpp"
 #include "syntax/palette.h"
 #include <sstream>
 
 DeserializeScreen::DeserializeScreen(std::shared_ptr<IScreen> screen)
-    : _screen{screen} {}
+    : _screen{screen} {
+    _screen->subscribe(
+        [this](IScreen::EventListT list) { screenCallback(std::move(list)); });
+}
 
 void DeserializeScreen::subscribe(
     std::function<void(std::string_view)> callback) {
@@ -12,6 +16,7 @@ void DeserializeScreen::subscribe(
 }
 
 void DeserializeScreen::close() {
+    _screen->unsubscribe();
     _screen.reset();
 }
 
@@ -119,4 +124,8 @@ void DeserializeScreen::send(const nlohmann::json &data) {
     auto ss = std::stringstream{};
     ss << data;
     _callback(ss.str());
+}
+
+void DeserializeScreen::screenCallback(IScreen::EventListT list) {
+    send(list);
 }

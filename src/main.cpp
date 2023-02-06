@@ -27,6 +27,7 @@ using TimerType = JsTimer;
 
 #else
 
+#include "screen/deserializescreen.h"
 #include "screen/guiscreen.h"
 #include "screen/ncursesscreen.h"
 #include "screen/serializescreen.h"
@@ -69,9 +70,11 @@ struct MainData {
         if (settings.style == UiStyle::Terminal) {
             nativeScreen = std::make_unique<NCursesScreen>();
         }
-        //        if (settings.style == UiStyle::Remote) {
-        //            nativeScreen = std::make_unique<SerializeScreen>();
-        //        }
+        else if (settings.style == UiStyle::Remote) {
+            auto deserializeScreen = std::make_shared<DeserializeScreen>(
+                std::make_unique<ScreenType>());
+            nativeScreen = std::make_unique<SerializeScreen>(deserializeScreen);
+        }
         else {
             nativeScreen = std::make_unique<ScreenType>();
         }

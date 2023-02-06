@@ -2,7 +2,7 @@
 
 #include "iconnection.h"
 #include "iscreen.h"
-#include "nlohmann/json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include <memory>
 
 class DeserializeScreen : public IConnection {
@@ -25,6 +25,8 @@ private:
 
     //! Outgoing data from this class
     void send(const nlohmann::json &data);
+
+    void screenCallback(IScreen::EventListT list);
 
     std::shared_ptr<IScreen> _screen;
     std::function<void(std::string_view)> _callback;

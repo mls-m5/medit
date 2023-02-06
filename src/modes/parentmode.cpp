@@ -36,9 +36,6 @@ std::shared_ptr<IMode> createParentMode() {
 
     }};
 
-    //    auto bufferMap = BufferKeyMap{{
-    //    }};
-
     map.defaultAction({});
 
     return std::make_shared<Mode>("parent", std::move(map), CursorStyle::Block);
