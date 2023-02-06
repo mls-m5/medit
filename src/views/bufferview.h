@@ -27,6 +27,10 @@ public:
     Position cursorPosition(Cursor cursor) const;
 
 private:
+    void subscribeToBuffer();
+
+    void unsubscribe();
+
     std::shared_ptr<Buffer> _buffer;
 
     bool _showLines = false;

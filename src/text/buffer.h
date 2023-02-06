@@ -182,11 +182,34 @@ public:
         return stream;
     }
 
+    /// Subscribe to changes
+    void subscribe(std::function<void()> f, void *ref) {
+        _tv();
+
+        _subscribers.push_back({f, ref});
+    }
+
+    void unsubscribe(void *ref) {
+        auto it = std::remove_if(_subscribers.begin(),
+                                 _subscribers.end(),
+                                 [ref](auto &s) { return s.ref == ref; });
+
+        _subscribers.erase(it, _subscribers.end());
+    }
+
+    void emitChangeSignal() const {
+        _tv();
+        for (auto &sub : _subscribers) {
+            sub.f();
+        }
+    }
+
 private:
     // Function history class uses
     void applyWithoutHistory(BufferEdit edit) {
         _tv();
         _raw.apply(std::move(edit));
+        emitChangeSignal();
     }
 
     History _history{*this};
@@ -197,4 +220,11 @@ private:
     RawBuffer _raw;
 
     friend History;
+
+    struct Subscriber {
+        std::function<void()> f;
+        void *ref;
+    };
+
+    std::vector<Subscriber> _subscribers;
 };

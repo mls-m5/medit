@@ -69,7 +69,9 @@ void CoreEnvironment::publishDiagnostics(
     for (auto &buffer : _buffers) {
         if (buffer->path() == file) {
             buffer->diagnostics().publish(source, std::move(data));
-            emitBufferSubscriptionEvent({buffer, BufferEvent::Redraw});
+            //            emitBufferSubscriptionEvent({buffer,
+            //            BufferEvent::Redraw});
+            buffer->emitChangeSignal();
             //            _context->redrawScreen();
             return;
         }

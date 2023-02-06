@@ -221,7 +221,6 @@ void MainWindow::resize(size_t w, size_t h) {
 }
 
 void MainWindow::draw(IScreen &screen) {
-    //    updatePalette(screen);
     screen.cursorStyle(currentEditor().mode().cursorStyle());
 
     for (auto &editor : _editors) {
@@ -307,22 +306,11 @@ void MainWindow::open(filesystem::path path,
         }
         editor.cursor(cur);
     }
-    //    updateLocatorBuffer();
 
     updateHighlighting(editor);
 
-    //    _env->context().redrawScreen();
-
     _scope->run({"window.title"});
 }
-
-// void MainWindow::updatePalette(IScreen &screen) {
-//     if (screen.palette().update(screen)) {
-//    for (auto &highligting : _highlighting) {
-//        highligting->update(screen.palette());
-//    }
-//    }
-//}
 
 void MainWindow::updateHighlighting(Editor &editor) {
 #ifdef __EMSCRIPTEN__
@@ -360,7 +348,6 @@ void MainWindow::updateHighlighting(Editor &editor) {
                                 }
                             }
                             triggerRedraw();
-                            //                            _env->context().redrawScreen();
                         }
                     });
             });
@@ -412,13 +399,17 @@ void MainWindow::copy(bool shouldCut) {
 }
 
 void MainWindow::triggerRedraw() {
-    //    _env->redrawScreen();
-    _env->context().guiQueue().addTask([this] { refreshScreen(); });
+    _shouldRedraw = true;
+    _env->context().guiQueue().addTask([this] { /*refreshScreen();*/ });
 }
 
 void MainWindow::refreshScreen() {
-    updateCursor(_screen);
-    _screen.clear();
-    draw(_screen);
-    _screen.refresh();
+    if (_shouldRedraw) {
+        _shouldRedraw = false;
+
+        updateCursor(_screen);
+        _screen.clear();
+        draw(_screen);
+        _screen.refresh();
+    }
 }

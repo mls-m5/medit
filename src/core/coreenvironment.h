@@ -16,7 +16,8 @@ struct BufferEvent {
     enum {
         Open,
         Close,
-        Redraw, // For example new diagnostics is published or buffer changed
+        //        Redraw, // For example new diagnostics is published or buffer
+        //        changed
     } type = Open;
 };
 

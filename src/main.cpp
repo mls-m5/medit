@@ -135,8 +135,8 @@ struct MainData {
             else {
                 callback(c);
             }
+            mainWindow->triggerRedraw();
         }
-        //        refreshScreen(*mainWindow, *screen);
     }
 };
 
@@ -160,12 +160,6 @@ void MainData::start(int argc, char **argv) {
     CoreEnvironment::instance().context(context.get());
 
     mainWindow = std::make_shared<MainWindow>(*screen, *context);
-
-    //    mainWindow->env().refreshScreenFunc([this] {
-    //        mainData.guiQueue->addTask([this] {
-    //            refreshScreen(*mainData.mainWindow, *mainData.screen); //
-    //        });
-    //    });
 
     if (settings.file.empty()) {
         mainWindow->updateLocatorBuffer();
@@ -196,6 +190,7 @@ void MainData::loop() {
 #else
     while (!medit::main::shouldQuit) {
         guiQueue->work(true);
+        mainWindow->refreshScreen();
     }
 #endif
 }
@@ -211,4 +206,3 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-

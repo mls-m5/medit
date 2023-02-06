@@ -17,10 +17,7 @@ Editor::Editor(IView *parent, std::shared_ptr<Buffer> buffer)
     : View{parent}
     , _bufferView(parent, std::move(buffer))
     , _cursor(_bufferView.buffer())
-    , _mode(createNormalMode()) {
-
-    subscribeToBuffer();
-}
+    , _mode(createNormalMode()) {}
 
 IFile *Editor::file() {
     return buffer().file();
@@ -236,20 +233,4 @@ size_t Editor::y() const {
 
 void Editor::fitCursor() {
     bufferView().fitPosition(_cursor);
-}
-
-void Editor::subscribeToBuffer() {
-    if (auto w = window()) {
-        auto &core = w->env().core();
-        core.subscribeToBufferEvents(
-            [w](const BufferEvent &e) { w->triggerRedraw(); },
-            &_bufferView.buffer(),
-            this);
-    }
-}
-
-void Editor::unsubscribe() {
-    if (auto w = window()) {
-        w->env().core().unsubscribeToBufferEvents(this);
-    }
 }

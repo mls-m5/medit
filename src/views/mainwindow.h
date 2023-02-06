@@ -26,6 +26,7 @@ struct MainWindow : public Window {
     std::unique_ptr<IWindow> _activePopup;
     size_t _updateTimeHandle = 0;
     size_t _currentEditor = 0;
+    bool _shouldRedraw = true;
 
     //! Move these somewhere else
     std::vector<std::unique_ptr<IHighlight>> _highlighting;
@@ -72,8 +73,10 @@ struct MainWindow : public Window {
     void copy(bool shouldCut);
 
     //! Queue up that the window should be redrawn
+    //! Sets _shouldRedraw = true and force guithread to work
     void triggerRedraw() override;
 
+    /// Redraw screen if _shouldRefraw is true
     void refreshScreen();
 
     IEnvironment &env() override {

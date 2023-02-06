@@ -92,10 +92,6 @@ public:
     void fitCursor();
 
 private:
-    void subscribeToBuffer();
-
-    void unsubscribe();
-
     BufferView _bufferView;
     Cursor _cursor;
     std::optional<Cursor> _selectionAnchor;

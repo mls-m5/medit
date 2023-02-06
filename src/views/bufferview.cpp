@@ -4,6 +4,7 @@
 #include "text/buffer.h"
 #include "text/cursor.h"
 #include "text/cursorrange.h"
+#include "views/iwindow.h"
 
 namespace {
 
@@ -21,7 +22,9 @@ BufferView::~BufferView() = default;
 
 BufferView::BufferView(IView *parent, std::shared_ptr<Buffer> buffer)
     : ScrollView{parent}
-    , _buffer(std::move(buffer)) {}
+    , _buffer(std::move(buffer)) {
+    subscribeToBuffer();
+}
 
 void BufferView::draw(IScreen &screen) {
     if (!visible()) {
@@ -138,7 +141,9 @@ const Buffer &BufferView::buffer() const {
 }
 
 void BufferView::buffer(std::shared_ptr<Buffer> buffer) {
+    unsubscribe();
     _buffer = std::move(buffer);
+    subscribeToBuffer();
 }
 
 size_t BufferView::numberWidth() const {
@@ -152,4 +157,14 @@ void BufferView::showLines(bool value) {
 
 Position BufferView::cursorPosition(Cursor cursor) const {
     return {x() + cursor.x() + _numberWidth, y() + cursor.y() - yScroll()};
+}
+
+void BufferView::subscribeToBuffer() {
+    if (auto w = window()) {
+        _buffer->subscribe([w]() { w->triggerRedraw(); }, this);
+    }
+}
+
+void BufferView::unsubscribe() {
+    _buffer->unsubscribe(this);
 }
