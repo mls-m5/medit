@@ -13,7 +13,7 @@
 #include "script/localenvironment.h"
 #include "syntax/iannotation.h"
 #include "syntax/ihighlight.h"
-#include "syntax/ipalette.h"
+#include "syntax/palette.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "views/inputbox.h"

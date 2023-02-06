@@ -45,16 +45,16 @@ const auto keytranslations = std::map<int, KeyTranslation>{
 };
 
 void reducedPalette() {
-    ::init_pair(IPalette::standard, COLOR_WHITE, COLOR_BLACK);
-    ::init_pair(IPalette::selection, COLOR_BLUE, COLOR_WHITE);
-    ::init_pair(IPalette::statement, COLOR_RED, COLOR_BLACK);
-    ::init_pair(IPalette::identifier, COLOR_RED, COLOR_BLACK);
-    ::init_pair(IPalette::comment, COLOR_BLUE, COLOR_BLACK);
-    ::init_pair(IPalette::lineNumbers, COLOR_BLUE, COLOR_BLACK);
-    ::init_pair(IPalette::currentLine, COLOR_WHITE, COLOR_BLACK);
-    ::init_pair(IPalette::string, COLOR_YELLOW, COLOR_BLACK);
-    ::init_pair(IPalette::type, COLOR_RED, COLOR_BLACK);
-    ::init_pair(IPalette::error, COLOR_BLACK, COLOR_RED);
+    ::init_pair(Palette::standard, COLOR_WHITE, COLOR_BLACK);
+    ::init_pair(Palette::selection, COLOR_BLUE, COLOR_WHITE);
+    ::init_pair(Palette::statement, COLOR_RED, COLOR_BLACK);
+    ::init_pair(Palette::identifier, COLOR_RED, COLOR_BLACK);
+    ::init_pair(Palette::comment, COLOR_BLUE, COLOR_BLACK);
+    ::init_pair(Palette::lineNumbers, COLOR_BLUE, COLOR_BLACK);
+    ::init_pair(Palette::currentLine, COLOR_WHITE, COLOR_BLACK);
+    ::init_pair(Palette::string, COLOR_YELLOW, COLOR_BLACK);
+    ::init_pair(Palette::type, COLOR_RED, COLOR_BLACK);
+    ::init_pair(Palette::error, COLOR_BLACK, COLOR_RED);
 }
 
 } // namespace

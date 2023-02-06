@@ -1,6 +1,6 @@
 #include "views/bufferview.h"
 #include "screen/iscreen.h"
-#include "syntax/ipalette.h"
+#include "syntax/palette.h"
 #include "text/buffer.h"
 #include "text/cursor.h"
 #include "text/cursorrange.h"
@@ -33,10 +33,10 @@ void BufferView::draw(IScreen &screen) {
 
     _numberWidth = getLineNumWidth(_buffer->lines().size()) + 2;
     auto fillStr =
-        FString{std::string(_numberWidth, ' '), IPalette::lineNumbers};
+        FString{std::string(_numberWidth, ' '), Palette::lineNumbers};
 
     auto fillStrError =
-        FString{std::string(_numberWidth, ' '), IPalette::error};
+        FString{std::string(_numberWidth, ' '), Palette::error};
     for (size_t ty = 0; ty < height(); ++ty) {
         auto l = ty + yScroll();
         if (l < buffer().lines().size()) {
@@ -52,12 +52,12 @@ void BufferView::draw(IScreen &screen) {
                 screen.draw(
                     x() + _numberWidth + line.size() + 2,
                     y() + ty,
-                    FString{hasLineDiagnostics->message, IPalette::comment});
+                    FString{hasLineDiagnostics->message, Palette::comment});
             }
 
             if (_showLines) {
                 const auto lineNum = l + 1;
-                auto lineFormat = IPalette::lineNumbers;
+                auto lineFormat = Palette::lineNumbers;
 
                 auto offset = 1;
                 screen.draw(
@@ -67,7 +67,7 @@ void BufferView::draw(IScreen &screen) {
                     x() + offset,
                     y() + ty,
                     {std::to_string(lineNum),
-                     hasLineDiagnostics ? IPalette::error : lineFormat});
+                     hasLineDiagnostics ? Palette::error : lineFormat});
 
                 ++l;
             }

@@ -5,7 +5,7 @@
 #include "screen/iscreen.h"
 #include "script/iscope.h"
 #include "script/scope.h"
-#include "syntax/ipalette.h"
+#include "syntax/palette.h"
 #include "text/buffer.h"
 
 InputBox::InputBox(IWindow *parent, FString title, std::string defaultValue)
@@ -72,7 +72,7 @@ void InputBox::updateCursor(IScreen &screen) const {
 
 void InputBox::draw(IScreen &screen) {
     width(screen.width() - x());
-    ::fillRect(screen, {' ', IPalette::standard}, *this);
+    ::fillRect(screen, {' ', Palette::standard}, *this);
     ::draw(screen, x() + 1, y() + 1, _title);
 
     _entry.draw(screen);

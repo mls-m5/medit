@@ -13,7 +13,7 @@
 #include "script/iscope.h"
 #include "script/scope.h"
 #include "syntax/basichighligting.h"
-#include "syntax/ipalette.h"
+#include "syntax/palette.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
 #include <iostream>
@@ -205,36 +205,36 @@ void LspPlugin::handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
 
     Cursor cur = buffer->begin();
 
-    static std::unordered_map<lsp::SemanticTokenTypes, IPalette::BasicPalette>
+    static std::unordered_map<lsp::SemanticTokenTypes, Palette::BasicPalette>
         translation = {
-            {SemanticTokenTypes::Type, IPalette::type},
-            {SemanticTokenTypes::Class, IPalette::type},
-            {SemanticTokenTypes::Enum, IPalette::type},
-            {SemanticTokenTypes::Interface, IPalette::type},
-            {SemanticTokenTypes::Struct, IPalette::type},
-            {SemanticTokenTypes::TypeParameter, IPalette::type},
-            {SemanticTokenTypes::Parameter, IPalette::identifier},
-            {SemanticTokenTypes::Variable, IPalette::identifier},
-            {SemanticTokenTypes::Property, IPalette::identifier},
-            {SemanticTokenTypes::EnumMember, IPalette::identifier},
-            {SemanticTokenTypes::Event, IPalette::identifier},
-            {SemanticTokenTypes::Function, IPalette::identifier},
-            {SemanticTokenTypes::Method, IPalette::identifier},
-            {SemanticTokenTypes::Macro, IPalette::comment},
-            {SemanticTokenTypes::Keyword, IPalette::identifier},
-            {SemanticTokenTypes::Modifier, IPalette::statement},
-            {SemanticTokenTypes::Comment, IPalette::standard},
-            {SemanticTokenTypes::String, IPalette::string},
-            {SemanticTokenTypes::Number, IPalette::constant},
-            {SemanticTokenTypes::Regexp, IPalette::standard},
-            {SemanticTokenTypes::Operator, IPalette::standard},
+            {SemanticTokenTypes::Type, Palette::type},
+            {SemanticTokenTypes::Class, Palette::type},
+            {SemanticTokenTypes::Enum, Palette::type},
+            {SemanticTokenTypes::Interface, Palette::type},
+            {SemanticTokenTypes::Struct, Palette::type},
+            {SemanticTokenTypes::TypeParameter, Palette::type},
+            {SemanticTokenTypes::Parameter, Palette::identifier},
+            {SemanticTokenTypes::Variable, Palette::identifier},
+            {SemanticTokenTypes::Property, Palette::identifier},
+            {SemanticTokenTypes::EnumMember, Palette::identifier},
+            {SemanticTokenTypes::Event, Palette::identifier},
+            {SemanticTokenTypes::Function, Palette::identifier},
+            {SemanticTokenTypes::Method, Palette::identifier},
+            {SemanticTokenTypes::Macro, Palette::comment},
+            {SemanticTokenTypes::Keyword, Palette::identifier},
+            {SemanticTokenTypes::Modifier, Palette::statement},
+            {SemanticTokenTypes::Comment, Palette::standard},
+            {SemanticTokenTypes::String, Palette::string},
+            {SemanticTokenTypes::Number, Palette::constant},
+            {SemanticTokenTypes::Regexp, Palette::standard},
+            {SemanticTokenTypes::Operator, Palette::standard},
         };
 
     auto translate = [](SemanticTokenTypes t) {
         if (auto f = translation.find(t); f != translation.end()) {
             return f->second;
         }
-        return IPalette::standard;
+        return Palette::standard;
     };
 
     for (size_t i = 0; i < data.size(); i += 5) {

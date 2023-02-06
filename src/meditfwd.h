@@ -25,7 +25,6 @@ class ClangModel;
 class Project;
 class Color;
 class Palette;
-using IPalette = Palette;
 class IAnnotation;
 class Registers;
 

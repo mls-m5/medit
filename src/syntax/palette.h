@@ -4,7 +4,7 @@
 #include "meditfwd.h"
 #include "nlohmann/json.hpp"
 #include "syntax/color.h"
-#include "syntax/ipalette.h"
+#include "syntax/palette.h"
 #include "text/formattype.h"
 #include <iosfwd>
 #include <map>

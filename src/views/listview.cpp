@@ -4,7 +4,7 @@
 #include "screen/draw.h"
 #include "screen/iscreen.h"
 #include "script/iscope.h"
-#include "syntax/ipalette.h"
+#include "syntax/palette.h"
 #include "text/position.h"
 
 struct ListView::ListItem {
@@ -42,8 +42,8 @@ void ListView::draw(IScreen &screen) {
 
     //    fillRect(screen, ' ', *this);
 
-    FString fillStr{std::string(this->width(), ' '), IPalette::standard};
-    FString selFillStr{std::string(this->width(), ' '), IPalette::currentLine};
+    FString fillStr{std::string(this->width(), ' '), Palette::standard};
+    FString selFillStr{std::string(this->width(), ' '), Palette::currentLine};
 
     for (size_t ty = 0, i = yScroll(); ty < height() && i < _lines.size();
          ++i, ++ty) {
@@ -56,7 +56,7 @@ void ListView::draw(IScreen &screen) {
             ::draw(screen,
                    x(),
                    y() + ty,
-                   {std::string{l.text}, IPalette::currentLine});
+                   {std::string{l.text}, Palette::currentLine});
         }
         else {
             ::draw(screen, x(), y() + ty, fillStr);

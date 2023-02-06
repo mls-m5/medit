@@ -6,7 +6,7 @@
 #include "screen/draw.h"
 #include "screen/iscreen.h"
 #include "script/ienvironment.h"
-#include "syntax/ipalette.h"
+#include "syntax/palette.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
 #include "views/iwindow.h"
@@ -186,12 +186,12 @@ void Editor::updateCursor(IScreen &screen) const {
 }
 
 void Editor::draw(IScreen &screen) {
-    fillRect(screen, {' ', IPalette::standard}, x(), y(), width(), height());
+    fillRect(screen, {' ', Palette::standard}, x(), y(), width(), height());
 
     _bufferView.draw(screen);
 
     if (auto sel = selection(); !sel.empty()) {
-        _bufferView.drawSpecial(screen, sel, IPalette::selection);
+        _bufferView.drawSpecial(screen, sel, Palette::selection);
     }
 }
 

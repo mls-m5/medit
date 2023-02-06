@@ -55,7 +55,7 @@ TEST_CASE("format keyword") {
 
     hl.highlight(env);
 
-    ASSERT_EQ(editor.buffer().front().f, IPalette::statement);
+    ASSERT_EQ(editor.buffer().front().f, Palette::statement);
     ASSERT_EQ(editor.buffer().back().f, 1);
 }
 

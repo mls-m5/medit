@@ -5,7 +5,7 @@
 #include "files/extensions.h"
 #include "files/ifile.h"
 #include "getformat.h"
-#include "syntax/ipalette.h"
+#include "syntax/palette.h"
 #include "text/buffer.h"
 #include "text/cursorrangeops.h"
 #include "text/words.h"
@@ -41,7 +41,7 @@ void ClangHighlight::highlight(std::shared_ptr<IScope> env) {
             auto file =
                 clang_getFile(context.translationUnit, context.tmpPath.c_str());
 
-            format(buffer, IPalette::standard);
+            format(buffer, Palette::standard);
 
             for (auto word : Words(buffer)) {
                 auto location = clang_getLocation(context.translationUnit,
@@ -88,7 +88,7 @@ void ClangHighlight::highlight(std::shared_ptr<IScope> env) {
     }
 }
 
-void ClangHighlight::update(const IPalette &) {}
+void ClangHighlight::update(const Palette &) {}
 
 namespace {
 

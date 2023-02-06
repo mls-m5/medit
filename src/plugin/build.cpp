@@ -4,7 +4,7 @@
 #include "core/jobqueue.h"
 #include "files/popenstream.h"
 #include "files/project.h"
-#include "syntax/ipalette.h"
+#include "syntax/palette.h"
 #include "text/buffer.h"
 #include "views/editor.h"
 
@@ -48,7 +48,7 @@ void build(std::shared_ptr<IScope> scope) {
                 auto &consoleBuffer = scope->env().console().buffer();
                 if (returnCode) {
                     consoleBuffer.pushBack(
-                        FString("failed...", IPalette::error));
+                        FString("failed...", Palette::error));
                     //                    scope->env().context().redrawScreen();
                 }
                 else {

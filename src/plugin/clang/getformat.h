@@ -1,6 +1,6 @@
 #pragma once
 
-#include "syntax/ipalette.h"
+#include "syntax/palette.h"
 #include "clang-c/Index.h"
 
 namespace {
@@ -19,7 +19,7 @@ FormatType getFormat(CXCursorKind kind) {
     case CXCursor_ParmDecl:
     case CXCursor_TypedefDecl:
     case CXCursor_CXXMethod:
-        return IPalette::type;
+        return Palette::type;
     case CXCursor_Namespace:
     case CXCursor_LinkageSpec:
     case CXCursor_Constructor:
@@ -59,12 +59,12 @@ FormatType getFormat(CXCursorKind kind) {
     case CXCursor_CallExpr:
     case CXCursor_ObjCMessageExpr:
     case CXCursor_BlockExpr:
-        return IPalette::identifier;
+        return Palette::identifier;
     case CXCursor_IntegerLiteral:
     case CXCursor_FloatingLiteral:
     case CXCursor_ImaginaryLiteral:
     case CXCursor_StringLiteral:
-        return IPalette::string;
+        return Palette::string;
     case CXCursor_CharacterLiteral:
     case CXCursor_ParenExpr:
     case CXCursor_UnaryOperator:

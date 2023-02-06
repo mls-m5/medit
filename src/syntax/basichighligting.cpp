@@ -24,7 +24,7 @@ const auto wordList = std::array<std::string, 28>{
 void highlightWord(CursorRange word) {
     for (auto &w : wordList) {
         if (word == w) {
-            ::format(word, IPalette::statement);
+            ::format(word, Palette::statement);
             break;
         }
     }
@@ -51,7 +51,7 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
         return;
     }
 
-    format(all(buffer), IPalette::standard);
+    format(all(buffer), Palette::standard);
 
     for (auto word : Words(buffer)) {
         highlightWord(word);
@@ -66,7 +66,7 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
                 --x;
 
                 auto range = CursorRange{buffer, {x, y}, {10000, y}};
-                format(range, IPalette::comment);
+                format(range, Palette::comment);
                 break;
             }
         }
@@ -74,7 +74,7 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
         if (!line.empty()) {
             if (line.front().c == '#') {
                 auto range = CursorRange{buffer, {0, y}, {10000, y}};
-                format(range, IPalette::comment);
+                format(range, Palette::comment);
             }
         }
     }

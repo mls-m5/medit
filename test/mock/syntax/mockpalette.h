@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mls-unit-test/mock.h"
-#include "syntax/ipalette.h"
+#include "syntax/palette.h"
 
 // class MockPalette : public IPalette {
 // public:
