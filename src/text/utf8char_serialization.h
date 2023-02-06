@@ -4,10 +4,13 @@
 #include "text/utf8char.h"
 
 inline void to_json(nlohmann::json &j, const Utf8Char &c) {
-    j = std::string{c.begin(), c.end()};
+    auto data = std::array<int, 4>{};
+    std::copy(c.begin(), c.end(), data.begin());
+    j = data;
 }
 
 inline void from_json(const nlohmann::json &j, Utf8Char &c) {
-    auto s = std::string{j};
-    c.fromChar(s.data());
+    auto data = std::array<int, 4>{};
+    data = j;
+    std::copy(data.begin(), data.end(), c.begin());
 }

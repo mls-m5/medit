@@ -2,6 +2,7 @@
 #include "keys/event_serialization.h"
 #include "nlohmann/json.hpp"
 #include "syntax/palette.h"
+#include "text/fstring_serialization.h"
 #include <sstream>
 
 DeserializeScreen::DeserializeScreen(std::shared_ptr<IScreen> screen)
@@ -36,7 +37,7 @@ void DeserializeScreen::handle(const nlohmann::json &json) {
     }
 
     if (method == "draw") {
-        _screen->draw(json["x"], json["y"], std::string{json["text"]});
+        _screen->draw(json["x"], json["y"], FString(json["text"]));
         return;
     }
 

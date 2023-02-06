@@ -2,6 +2,7 @@
 #include "keys/event_serialization.h"
 #include "nlohmann/json.hpp"
 #include "syntax/palette.h"
+#include "text/fstring_serialization.h"
 #include <sstream>
 
 SerializeScreen::SerializeScreen(std::shared_ptr<IConnection> connection)

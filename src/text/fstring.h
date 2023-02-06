@@ -125,6 +125,22 @@ public:
         }
     }
 
+    auto *data() {
+        return _content.data();
+    }
+
+    auto *data() const {
+        return _content.data();
+    }
+
+    auto &content() {
+        return _content;
+    }
+
+    const auto &content() const {
+        return _content;
+    }
+
     FString substr(size_t start, size_t length = size_t(-1)) {
         if (start >= _content.size()) {
             return {};

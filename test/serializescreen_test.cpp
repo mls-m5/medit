@@ -36,11 +36,12 @@ TEST_CASE("draw(...)") {
 
     f.output->mock_draw_3.expectArgs(
         [](auto x, auto y, const FString &str) -> bool {
-            return x == 10 && y == 20 && str == FString{"hello"};
+            return x == 10 && y == 20 && str == FString{"hello"} &&
+                   str.front().f == 12;
         });
     f.output->mock_draw_3.expectNum(1);
 
-    f.ss.draw(10, 20, "hello");
+    f.ss.draw(10, 20, {"hello", 12});
 }
 
 TEST_CASE("clear()") {
@@ -191,5 +192,4 @@ TEST_CASE("key callback") {
         EXPECT(wasCalled);
     }
 }
-
 TEST_SUIT_END

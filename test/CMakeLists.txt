@@ -58,6 +58,7 @@ test(project)
 test(utf8char)
 test(wordsiterator)
 test(serializescreen)
+test(serialization)
 
 if (ENABLE_LEGACY_CLANG_PLUGIN)
     test(clang_autocomplete)
