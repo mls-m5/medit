@@ -1,10 +1,9 @@
 #pragma once
 
-#include "screen/iinput.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
 
-class LinuxTerminalScreen : public IScreen, public IInput {
+class LinuxTerminalScreen : public IScreen {
 public:
     LinuxTerminalScreen();
     ~LinuxTerminalScreen();
@@ -19,14 +18,6 @@ public:
     size_t width() const override;
     size_t height() const override;
     void title(std::string title) override;
-
-    //    const IPalette &palette() const override {
-    //        return _palette;
-    //    }
-
-    //    IPalette &palette() override {
-    //        return _palette;
-    //    }
 
     //! IInput
     Event getInput();

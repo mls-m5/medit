@@ -17,7 +17,6 @@ public:
     MOCK_METHOD0(size_t, width, (), const override);
     MOCK_METHOD0(size_t, height, (), const override);
     MOCK_METHOD1(void, title, (std::string title), override);
-    //    MOCK_METHOD0(const IPalette &, palette, (), const override);
     MOCK_METHOD1(void, palette, (const Palette &), override);
     MOCK_METHOD3(size_t,
                  addStyle,
@@ -26,4 +25,7 @@ public:
                   size_t index),
                  override);
     MOCK_METHOD1(void, cursorStyle, (CursorStyle), override);
+
+    MOCK_METHOD1(void, subscribe, (CallbackT f), override);
+    MOCK_METHOD0(void, unsubscribe, (), override);
 };

@@ -59,9 +59,8 @@ void BufferedScreen::forceThread() {
     }
 }
 
-BufferedScreen::BufferedScreen(IScreen *screen, IInput *input)
+BufferedScreen::BufferedScreen(IScreen *screen)
     : _backend(screen)
-    , _input(input)
     , _canvas(std::make_unique<Canvas>())
     , _threadId(std::this_thread::get_id()) {
     _canvas->resize(_backend->width(), _backend->height());
@@ -128,9 +127,9 @@ void BufferedScreen::cursorStyle(CursorStyle style) {
 }
 
 void BufferedScreen::subscribe(CallbackT f) {
-    _input->subscribe(f);
+    _backend->subscribe(f);
 }
 
 void BufferedScreen::unsubscribe() {
-    _input->unsubscribe();
+    _backend->unsubscribe();
 }

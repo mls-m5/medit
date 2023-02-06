@@ -29,6 +29,7 @@ using TimerType = JsTimer;
 
 #include "screen/guiscreen.h"
 #include "screen/ncursesscreen.h"
+#include "screen/serializescreen.h"
 using ScreenType = GuiScreen;
 using QueueType = JobQueue;
 using TimerType = Timer;
@@ -49,8 +50,6 @@ struct MainData {
     std::shared_ptr<Context> context;
     std::shared_ptr<MainWindow> mainWindow;
 
-    IInput *input = {};
-
     MainData() = default; // Static initialization
 
     void start(int argc, char **argv);
@@ -65,19 +64,16 @@ struct MainData {
 
     void createScreen(const Settings &settings) {
 #ifdef __EMSCRIPTEN__
-        auto ns = std::make_unique<ScreenType>();
-        input = ns.get();
-        nativeScreen = std::move(ns);
+        nativesScreen = std::make_unique<ScreenType>();
 #else
         if (settings.style == UiStyle::Terminal) {
-            auto ns = std::make_unique<NCursesScreen>();
-            input = ns.get();
-            nativeScreen = std::move(ns);
+            nativeScreen = std::make_unique<NCursesScreen>();
         }
+        //        if (settings.style == UiStyle::Remote) {
+        //            nativeScreen = std::make_unique<SerializeScreen>();
+        //        }
         else {
-            auto ns = std::make_unique<ScreenType>();
-            input = ns.get();
-            nativeScreen = std::move(ns);
+            nativeScreen = std::make_unique<ScreenType>();
         }
 #endif
     }
@@ -118,7 +114,7 @@ struct MainData {
         //        refreshScreen(mainWindow, screen);
     }
 
-    void handleEvent(const IInput::EventListT &list) {
+    void handleEvent(const IScreen::EventListT &list) {
 
         for (auto &c : list) {
             if (std::holds_alternative<NullEvent>(c)) {
@@ -153,7 +149,7 @@ void MainData::start(int argc, char **argv) {
 
     createScreen(settings);
 
-    screen = std::make_unique<BufferedScreen>(nativeScreen.get(), input);
+    screen = std::make_unique<BufferedScreen>(nativeScreen.get());
 
     queue = std::make_shared<QueueType>();
     guiQueue = std::make_shared<QueueType>();
@@ -187,7 +183,7 @@ void MainData::start(int argc, char **argv) {
     timer->start();
     queue->start();
 
-    input->subscribe([this](IInput::EventListT list) {
+    screen->subscribe([this](IScreen::EventListT list) {
         this->guiQueue->addTask([e = list, this] {
             handleEvent(e);
             if (medit::main::shouldQuit) {

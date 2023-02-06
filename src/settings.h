@@ -8,6 +8,7 @@
 enum class UiStyle {
     Terminal,
     Matgui,
+    Remote,
 };
 
 struct Settings {
@@ -43,6 +44,9 @@ flags:
             }
             else if (arg == "--cli") {
                 style = UiStyle::Terminal;
+            }
+            else if (arg == "--remote") {
+                style = UiStyle::Remote;
             }
             else if (arg == "--help") {
                 std::cout << helpStr << std::endl;

@@ -36,6 +36,11 @@ public:
                     size_t index) override;
     void cursorStyle(CursorStyle) override;
 
+    /// see @IInput
+    void subscribe(CallbackT f) override;
+    /// see @IInput
+    void unsubscribe() override;
+
 private:
     std::shared_ptr<IConnection> _connection;
     volatile std::atomic_long _currentRequest = 1;

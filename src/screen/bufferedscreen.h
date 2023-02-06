@@ -1,13 +1,11 @@
 #pragma once
 
-#include "screen/iinput.h"
 #include "screen/iscreen.h"
 #include <memory>
 #include <thread>
 
-class BufferedScreen : public IScreen, public IInput {
+class BufferedScreen : public IScreen {
     IScreen *_backend;
-    IInput *_input;
     struct Canvas;
     std::unique_ptr<Canvas> _canvas;
     std::thread::id _threadId;
@@ -15,7 +13,7 @@ class BufferedScreen : public IScreen, public IInput {
     void forceThread();
 
 public:
-    BufferedScreen(IScreen *backend, IInput *keysink);
+    BufferedScreen(IScreen *backend);
     ~BufferedScreen();
 
     //! @see IScreen

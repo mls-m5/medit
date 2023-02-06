@@ -108,6 +108,14 @@ void SerializeScreen::cursorStyle(CursorStyle style) {
     });
 }
 
+void SerializeScreen::subscribe(CallbackT f) {
+#warning "implement this";
+}
+
+void SerializeScreen::unsubscribe() {
+#warning "implement this";
+}
+
 void SerializeScreen::send(const nlohmann::json &json) {
     auto ss = std::stringstream{};
     ss << json;

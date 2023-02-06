@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     auto wasAlpha = false;
 
     bool isRunning = true;
-    screen.subscribe([&isRunning](IInput::EventListT list) {
+    screen.subscribe([&isRunning](IScreen::EventListT list) {
         for (auto e : list) {
             if (auto k = std::get_if<KeyEvent>(&e)) {
                 if (k->key == Key::Quit) {

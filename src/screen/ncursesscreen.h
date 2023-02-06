@@ -3,7 +3,6 @@
 #ifndef __EMSCRIPTEN__
 
 #include "core/threadvalidation.h"
-#include "screen/iinput.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
 #include <deque>
@@ -11,7 +10,7 @@
 #include <mutex>
 #include <thread>
 
-class NCursesScreen : public IScreen, public IInput {
+class NCursesScreen : public IScreen {
 public:
     void draw(size_t x, size_t y, const FString &str) override;
 

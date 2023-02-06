@@ -1,6 +1,5 @@
 #pragma once
 
-#include "screen/iinput.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
 #include <memory>
@@ -9,7 +8,7 @@
 
 #ifndef __EMSCRIPTEN__
 
-class GuiScreen : public IScreen, public IInput {
+class GuiScreen : public IScreen {
 public:
     void draw(size_t x, size_t y, const FString &str) override;
 

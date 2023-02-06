@@ -1,5 +1,6 @@
 #pragma once
 
+#include "keys/event.h"
 #include "meditfwd.h"
 #include "screen/cursorstyle.h"
 #include "text/fstring.h"
@@ -32,4 +33,12 @@ public:
     virtual void cursorStyle(CursorStyle) = 0;
 
     virtual ~IScreen() = default;
+
+    using EventListT = std::vector<Event>;
+    using CallbackT = std::function<void(EventListT)>;
+
+    //! Subscribe to user input
+    virtual void subscribe(CallbackT f) = 0;
+
+    virtual void unsubscribe() = 0;
 };
