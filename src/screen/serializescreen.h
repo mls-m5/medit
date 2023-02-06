@@ -41,6 +41,11 @@ public:
     /// see @IInput
     void unsubscribe() override;
 
+    std::string clipboardData() override;
+
+    //! Set clipboard data on clients computer
+    void clipboardData(std::string) override;
+
 private:
     std::shared_ptr<IConnection> _connection;
     volatile std::atomic_long _currentRequest = 1;

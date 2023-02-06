@@ -133,3 +133,11 @@ void BufferedScreen::subscribe(CallbackT f) {
 void BufferedScreen::unsubscribe() {
     _backend->unsubscribe();
 }
+
+std::string BufferedScreen::clipboardData() {
+    return _backend->clipboardData();
+}
+
+void BufferedScreen::clipboardData(std::string text) {
+    _backend->clipboardData(text);
+}

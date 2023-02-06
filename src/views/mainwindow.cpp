@@ -22,8 +22,9 @@
 
 MainWindow::MainWindow(IScreen &screen, Context &context)
     : View(screen.width(), screen.height())
+    , _screen{screen}
     , _editors{}
-    , _env(std::make_unique<LocalEnvironment>(context))
+    , _env(std::make_unique<LocalEnvironment>(*this, context))
     , _scope(std::make_shared<RootScope>(*_env))
     , _console(_env->core().create(_env))
     , _locator(_project)
@@ -39,7 +40,6 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
     _console.showLines(false);
     _env->console(&_console);
     _env->project(&_project);
-    //    screen.palette().load(findConfig("data/oblivion.json"));
 
     {
         auto palette = Palette{};
@@ -396,12 +396,13 @@ bool MainWindow::mouseDown(int x, int y) {
     return true;
 }
 
-std::string MainWindow::copy(bool shouldCut) {
+void MainWindow::copy(bool shouldCut) {
     auto text = content(currentEditor().selection());
     if (shouldCut) {
         erase(currentEditor().selection());
         // TODO: selection clearing should be handled by erase
         currentEditor().clearSelection();
     }
-    return text;
+
+    _screen.clipboardData(text);
 }

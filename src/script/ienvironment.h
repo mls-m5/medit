@@ -16,6 +16,8 @@ public:
 
     [[nodiscard]] virtual CoreEnvironment &core() = 0;
 
+    [[nodiscard]] virtual MainWindow &mainWindow() = 0;
+
     //! Return the editor active in the current context
     //    [[nodiscard]] virtual Editor &editor() = 0;
     [[nodiscard]] virtual Editor &console() = 0;

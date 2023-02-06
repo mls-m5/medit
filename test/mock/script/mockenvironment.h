@@ -14,4 +14,5 @@ public:
     MOCK_METHOD1(void, showConsole, (bool shown), override);
     MOCK_METHOD0(Editor &, console, (), override);
     MOCK_METHOD0(CoreEnvironment &, core, (), override);
+    MOCK_METHOD0(MainWindow &, mainWindow, (), override);
 };

@@ -7,6 +7,7 @@
 
 /// Environment data for a single user
 class LocalEnvironment : public IEnvironment {
+    MainWindow &_mainWindow;
     KeyEvent _lastKeyEvent;
     Editor *_console;
     Project *_project;
@@ -15,7 +16,9 @@ class LocalEnvironment : public IEnvironment {
     Registers _registers;
 
 public:
-    LocalEnvironment(Context &context) : _context{context} {}
+    LocalEnvironment(MainWindow &mw, Context &context)
+        : _mainWindow{mw}
+        , _context{context} {}
 
     void key(KeyEvent e) {
         _lastKeyEvent = e;
@@ -63,4 +66,8 @@ public:
     }
 
     CoreEnvironment &core() override;
+
+    MainWindow &mainWindow() override {
+        return _mainWindow;
+    }
 };

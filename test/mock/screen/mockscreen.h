@@ -28,4 +28,7 @@ public:
 
     MOCK_METHOD1(void, subscribe, (CallbackT f), override);
     MOCK_METHOD0(void, unsubscribe, (), override);
+
+    MOCK_METHOD0(std::string, clipboardData, (), override);
+    MOCK_METHOD1(void, clipboardData, (std::string), override);
 };

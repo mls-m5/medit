@@ -12,6 +12,7 @@
 #include <memory>
 
 struct MainWindow : public Window {
+    IScreen &_screen;
     std::vector<std::unique_ptr<Editor>> _editors;
     std::shared_ptr<LocalEnvironment> _env;
     std::shared_ptr<RootScope> _scope;
@@ -54,9 +55,6 @@ struct MainWindow : public Window {
               std::optional<int> x = {},
               std::optional<int> y = {});
 
-    //! Initialize palette colors
-    //    void updatePalette(IScreen &screen);
-
     //! Update editor with new highlighting
     void updateHighlighting(Editor &editor);
 
@@ -71,7 +69,7 @@ struct MainWindow : public Window {
     void paste(std::string text);
 
     bool mouseDown(int x, int y) override;
-    std::string copy(bool shouldCut);
+    void copy(bool shouldCut);
 
 private:
     void addCommands(IScreen &screen);

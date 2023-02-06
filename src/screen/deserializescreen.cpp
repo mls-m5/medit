@@ -101,6 +101,18 @@ void DeserializeScreen::handle(const nlohmann::json &json) {
         _screen->palette(json["value"]);
         return;
     }
+
+    if (method == "set/clipboard") {
+        _screen->clipboardData(json["value"]);
+    }
+
+    if (method == "get/clipboard") {
+        send(nlohmann::json{
+            {"id", id},
+            {"value", _screen->clipboardData()},
+        });
+        return;
+    }
 }
 
 void DeserializeScreen::send(const nlohmann::json &data) {

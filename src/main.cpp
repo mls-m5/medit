@@ -86,7 +86,6 @@ struct MainData {
     }
 
     void handleKey(Event e, MainWindow &mainWindow, IScreen &screen) {
-        //        debugOutput("handleKey start");
         // TODO: Consider moving this function to mainWindow
         if (auto c = std::get_if<KeyEvent>(&e)) {
             if (*c == Key::Resize) {
@@ -101,17 +100,9 @@ struct MainData {
         if (auto p = std::get_if<PasteEvent>(&e)) {
             mainWindow.paste(p->text);
         }
-        if (auto ce = std::get_if<CopyEvent>(&e)) {
-            auto text = mainWindow.copy(ce->shouldCut);
-            ce->callback(text);
-        }
         if (auto ce = std::get_if<MouseDownEvent>(&e)) {
             mainWindow.mouseDown(ce->x, ce->y);
         }
-
-        //        debugOutput("handleKey");
-        // TODO: Update when open buffers change instead
-        //        refreshScreen(mainWindow, screen);
     }
 
     void handleEvent(const IScreen::EventListT &list) {

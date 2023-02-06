@@ -99,16 +99,5 @@ struct PasteEvent {
     std::string text;
 };
 
-// Request the server to send back data to be copied
-struct CopyEvent {
-    std::function<void(std::string)> callback;
-
-    bool shouldCut = false;
-};
-
-using Event = std::variant<NullEvent,
-                           KeyEvent,
-                           MouseDownEvent,
-                           MouseMoveEvent,
-                           PasteEvent,
-                           CopyEvent>;
+using Event = std::
+    variant<NullEvent, KeyEvent, MouseDownEvent, MouseMoveEvent, PasteEvent>;

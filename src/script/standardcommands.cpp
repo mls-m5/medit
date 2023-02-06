@@ -12,6 +12,7 @@
 #include "text/cursorrangeops.h"
 #include "togglecomments.h"
 #include "views/editor.h"
+#include "views/mainwindow.h"
 #include <functional>
 #include <map>
 
@@ -250,6 +251,18 @@ CommandList editorCommands = {
         [](std::shared_ptr<IScope> scope) {
             auto &e = scope->editor();
             e.save();
+        },
+    },
+    {
+        "editor.copy",
+        [](std::shared_ptr<IScope> scope) {
+            scope->env().mainWindow().copy(false);
+        },
+    },
+    {
+        "editor.cut",
+        [](std::shared_ptr<IScope> scope) {
+            scope->env().mainWindow().copy(true);
         },
     },
     {

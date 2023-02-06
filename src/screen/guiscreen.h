@@ -37,6 +37,9 @@ public:
 
     size_t addStyle(const Color &fg, const Color &bg, size_t index) override;
 
+    std::string clipboardData() override;
+    void clipboardData(std::string) override;
+
 private:
     Palette _palette;
 

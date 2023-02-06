@@ -21,6 +21,13 @@ public:
     virtual void title(std::string title) = 0;
     virtual void palette(const Palette &) = 0;
 
+    //! Try to request clip board data from clients computer
+    //! Note that clipboard data also can be sent by a clip board paste event
+    virtual std::string clipboardData() = 0;
+
+    //! Set clipboard data on clients computer
+    virtual void clipboardData(std::string) = 0;
+
     //! @param index should be left default for most cases
     //! set index to place new style on, otherwise a new location is picked
     //! It's only used internally between screen and Palette

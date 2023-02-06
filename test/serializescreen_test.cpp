@@ -122,4 +122,26 @@ TEST_CASE("palette(...)") {
     f.ss.palette(palette);
 }
 
+TEST_CASE("clipboard(...)") {
+    {
+        auto f = Fixture{};
+
+        f.output->mock_clipboardData_1.expectNum(1);
+        f.output->mock_clipboardData_1.expectArgs([](auto x) -> bool {
+            return x == "hello"; //
+        });
+
+        f.ss.clipboardData("hello");
+    }
+    {
+        auto f = Fixture{};
+
+        f.output->mock_clipboardData_0.expectNum(1);
+        f.output->mock_clipboardData_0.onCall(
+            []() -> std::string { return "hello2"; });
+
+        EXPECT_EQ(f.ss.clipboardData(), "hello2");
+    }
+}
+
 TEST_SUIT_END

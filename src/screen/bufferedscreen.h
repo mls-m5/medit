@@ -50,4 +50,10 @@ public:
 
     //! @see IInput
     void unsubscribe() override;
+
+    //! @see IScreen
+    std::string clipboardData() override;
+
+    //! @see IScreen
+    void clipboardData(std::string) override;
 };

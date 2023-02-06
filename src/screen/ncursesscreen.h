@@ -39,6 +39,12 @@ public:
 
     void cursorStyle(CursorStyle) override;
 
+    std::string clipboardData() override {
+        return "";
+    }
+
+    void clipboardData(std::string) override {}
+
 private:
     Event getInput();
 

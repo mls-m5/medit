@@ -29,6 +29,8 @@ using IPalette = Palette;
 class IAnnotation;
 class Registers;
 
+class MainWindow;
+
 class CoreEnvironment;
 class BufferEvent;
 class IEnvironment;

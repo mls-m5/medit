@@ -116,6 +116,20 @@ void SerializeScreen::unsubscribe() {
 #warning "implement this";
 }
 
+std::string SerializeScreen::clipboardData() {
+    auto r = const_cast<SerializeScreen *>(this)->request({
+        {"method", "get/clipboard"},
+    });
+    return r["value"];
+}
+
+void SerializeScreen::clipboardData(std::string text) {
+    send({
+        {"method", "set/clipboard"},
+        {"value", text},
+    });
+}
+
 void SerializeScreen::send(const nlohmann::json &json) {
     auto ss = std::stringstream{};
     ss << json;

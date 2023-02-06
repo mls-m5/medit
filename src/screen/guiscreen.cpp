@@ -395,12 +395,12 @@ struct GuiScreen::Buffer {
                     }
                     return NullEvent{};
                 }
-                if (sym == 'c' || sym == 'x') {
-                    return CopyEvent{[](std::string text) {
-                                         SDL_SetClipboardText(text.c_str());
-                                     },
-                                     sym == 'x'};
-                }
+                //                if (sym == 'c' || sym == 'x') {
+                //                    return CopyEvent{[](std::string text) {
+                //                                         SDL_SetClipboardText(text.c_str());
+                //                                     },
+                //                                     sym == 'x'};
+                //                }
             }
 
             keyEvent.modifiers = getModState();
@@ -551,6 +551,14 @@ void GuiScreen::cursorStyle(CursorStyle style) {
 
 size_t GuiScreen::addStyle(const Color &fg, const Color &bg, size_t index) {
     return _buffer->addStyle(fg, bg, index);
+}
+
+std::string GuiScreen::clipboardData() {
+    return SDL_GetClipboardText();
+}
+
+void GuiScreen::clipboardData(std::string text) {
+    SDL_SetClipboardText(text.data());
 }
 
 #endif
