@@ -10,9 +10,6 @@
 #include "files/file.h"
 #include "registerdefaultplugins.h"
 #include "screen/bufferedscreen.h"
-#include "screen/guiscreen.h"
-#include "screen/htmlscreen.h"
-#include "screen/ncursesscreen.h"
 #include "settings.h"
 #include "views/mainwindow.h"
 #include <string>
@@ -21,6 +18,7 @@
 
 #ifdef __EMSCRIPTEN__
 
+#include "screen/htmlscreen.h"
 // #include <emscripten.h>
 
 using ScreenType = HtmlScreen;
@@ -29,6 +27,8 @@ using TimerType = JsTimer;
 
 #else
 
+#include "screen/guiscreen.h"
+#include "screen/ncursesscreen.h"
 using ScreenType = GuiScreen;
 using QueueType = JobQueue;
 using TimerType = Timer;

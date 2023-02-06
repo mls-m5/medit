@@ -6,13 +6,13 @@ endif()
 if (NOT EMSCRIPTEN)
     add_subdirectory(matrix-screen)
     add_subdirectory(lsp-client)
-else()
-    include(FetchContent)
-    FetchContent_Declare(
-        json
-        URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
-    FetchContent_MakeAvailable(json)
 endif()
+
+include(FetchContent)
+FetchContent_Declare(
+    json
+    URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+FetchContent_MakeAvailable(json)
 
 add_subdirectory(json.h)
 
