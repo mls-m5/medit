@@ -9,6 +9,10 @@ enum class UiStyle {
     Terminal,
     Matgui,
     Remote,
+    FifoClient,
+    FifoServer,
+    TcpClient,
+    TcpServer,
 };
 
 struct Settings {
@@ -27,6 +31,9 @@ flags:
 --gui                 force start with graphic interface
 --cli                 start in terminal
 --help                print this string
+--connect [fifo|tcp]  connect to server selected protocol
+--host [fifo|tcp]     start server on selected protocol
+--remote              test serialize screen
 
     )_";
 
@@ -47,6 +54,34 @@ flags:
             }
             else if (arg == "--remote") {
                 style = UiStyle::Remote;
+            }
+            else if (arg == "--connect") {
+                auto type = args.at(++i);
+                if (type == "fifo") {
+                    style = UiStyle::FifoClient;
+                }
+                else if (type == "tcp") {
+                    style = UiStyle::TcpClient;
+                }
+                else {
+                    std::cerr << "invalid connection type (use fifo or tcp) "
+                              << type << "\n";
+                    std::exit(1);
+                }
+            }
+            else if (arg == "--host") {
+                auto type = args.at(++i);
+                if (type == "fifo") {
+                    style = UiStyle::FifoServer;
+                }
+                else if (type == "tcp") {
+                    style = UiStyle::TcpServer;
+                }
+                else {
+                    std::cerr << "invalid connection type (use fifo or tcp) "
+                              << type << "\n";
+                    std::exit(1);
+                }
             }
             else if (arg == "--help") {
                 std::cout << helpStr << std::endl;

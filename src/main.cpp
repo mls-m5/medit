@@ -11,6 +11,7 @@
 #include "registerdefaultplugins.h"
 #include "screen/bufferedscreen.h"
 #include "settings.h"
+#include "thinmain.h"
 #include "views/mainwindow.h"
 #include <string>
 #include <thread>
@@ -27,6 +28,8 @@ using TimerType = JsTimer;
 
 #else
 
+#include "remote/fifofile.h"
+#include "remote/fiforeceiver.h"
 #include "screen/deserializescreen.h"
 #include "screen/guiscreen.h"
 #include "screen/ncursesscreen.h"
@@ -51,7 +54,7 @@ struct MainData {
 
     MainData() = default; // Static initialization
 
-    void start(int argc, char **argv);
+    void start(const Settings &settings);
 
     void loop();
 
@@ -71,7 +74,14 @@ struct MainData {
         else if (settings.style == UiStyle::Remote) {
             auto deserializeScreen = std::make_shared<DeserializeScreen>(
                 std::make_unique<ScreenType>());
+
             nativeScreen = std::make_unique<SerializeScreen>(deserializeScreen);
+        }
+        else if (settings.style == UiStyle::FifoServer) {
+            std::cout << "starting fifo server..." << std::endl;
+            auto fifo = std::make_shared<FifoConnection>(
+                FifoFile::standardClientOut(), FifoFile::standardClientIn());
+            nativeScreen = std::make_unique<SerializeScreen>(fifo);
         }
         else {
             nativeScreen = std::make_unique<ScreenType>();
@@ -86,13 +96,6 @@ struct MainData {
             });
         });
     }
-
-    //    void refreshScreen(IWindow &window, IScreen &screen) {
-    //        window.updateCursor(screen);
-    //        screen.clear();
-    //        window.draw(screen);
-    //        screen.refresh();
-    //    }
 
     void handleKey(Event e, MainWindow &mainWindow, IScreen &screen) {
         // TODO: Consider moving this function to mainWindow
@@ -142,9 +145,8 @@ struct MainData {
 
 MainData mainData;
 
-void MainData::start(int argc, char **argv) {
+void MainData::start(const Settings &settings) {
     registerDefaultPlugins();
-    const auto settings = Settings{argc, argv};
 
     queue = std::make_shared<QueueType>();
     guiQueue = std::make_shared<QueueType>();
@@ -198,7 +200,16 @@ void MainData::loop() {
 } // namespace
 
 int main(int argc, char **argv) {
-    mainData.start(argc, argv);
+    auto settings = Settings{argc, argv};
+
+#ifndef __EMSCRIPTEN__
+    if (settings.style == UiStyle::FifoClient ||
+        settings.style == UiStyle::TcpServer) {
+        return thinMain(settings);
+    }
+#endif
+
+    mainData.start(settings);
     mainData.loop();
 #ifndef __EMSCRIPTEN__
     mainData.stop();

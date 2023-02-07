@@ -4,6 +4,7 @@
 #include "syntax/palette.h"
 #include "text/fstring_serialization.h"
 #include <sstream>
+#include <thread>
 
 DeserializeScreen::DeserializeScreen(std::shared_ptr<IScreen> screen)
     : _screen{screen} {
@@ -23,6 +24,10 @@ void DeserializeScreen::close() {
 
 void DeserializeScreen::write(std::string_view data) {
     handle(nlohmann::json::parse(data));
+}
+
+void DeserializeScreen::unsubscribe() {
+    _callback = {};
 }
 
 void DeserializeScreen::handle(const nlohmann::json &json) {
@@ -124,7 +129,16 @@ void DeserializeScreen::handle(const nlohmann::json &json) {
 void DeserializeScreen::send(const nlohmann::json &data) {
     auto ss = std::stringstream{};
     ss << data;
-    _callback(ss.str());
+    if (!_callback) {
+        _unhandledQueue.push_back(ss.str());
+    }
+    else {
+        for (std::string_view item : _unhandledQueue) {
+            _callback(item);
+        }
+        _unhandledQueue.clear();
+        _callback(ss.str());
+    }
 }
 
 void DeserializeScreen::screenCallback(IScreen::EventListT list) {

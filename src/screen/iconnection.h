@@ -5,8 +5,12 @@
 
 class IConnection {
 public:
+    using CallbackT = std::function<void(std::string_view)>;
+
     //! Listen to received data
-    virtual void subscribe(std::function<void(std::string_view)> callback) = 0;
+    virtual void subscribe(CallbackT callback) = 0;
+
+    virtual void unsubscribe() = 0;
 
     //! stop listening
     virtual void close() = 0;

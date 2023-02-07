@@ -69,6 +69,9 @@ add_library(
     STATIC
     screen/serializescreen.cpp
     screen/deserializescreen.cpp
+    remote/fiforeceiver.cpp
+    remote/fifofile.cpp
+    thinmain.cpp
     )
 
 target_link_libraries(
@@ -140,6 +143,7 @@ if (NOT EMSCRIPTEN)
         PUBLIC
         medit_sdl_screen
         medit_terminal_screen
+        medit_remote_screen
         )
 endif()
 
