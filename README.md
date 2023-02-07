@@ -13,7 +13,7 @@ Todo:
   - [x] Multi-letter vim combinations
   - [x] Visual mode
   - [x] Registers
-  - [ ] Full row visual mode
+  - [x] Full row visual mode
   - [ ] Implement all navigation shortcuts for all modes (iw aw 'i{' etc)
 - [x] Undo/Redo
   - [x] Improve memory usage for undo/redo
@@ -34,7 +34,7 @@ Todo:
     - [x] Clang based autocomplete
   - [x] Basic syntax highlighting
     - [x] Clang-based syntax highlighting
-- [ ] Co-edit files with other people remotely
+- [x] Co-edit files with other people remotely
 - [ ] Mouse control
   - [x] Mouse wheel control
   - [ ] Move cursor with mouse
@@ -49,7 +49,9 @@ Todo:
 
 # Prioritized changes
 - [ ] Faster navigation
-- [ ] Highlighting 
+- [x] Highlighting 
+- [ ] Performance improvements for remote connections
+   - [ ] Serialize to binary
 
 
 ## Requirements
