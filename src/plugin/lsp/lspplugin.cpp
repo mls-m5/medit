@@ -253,15 +253,9 @@ void LspPlugin::handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
 
         format({cur, end},
                translate(static_cast<SemanticTokenTypes>(item.tokenType)));
-
-        //        std::cout << "dx: " << item.deltaStart << "\tdy:" <<
-        //        item.deltaLine
-        //                  << "\tx: " << cur.x() << "\ty: " << cur.y()
-        //                  << "\tl: " << item.length << "\t";
-        //        std::cout << content({cur, end}) << "\n";
     }
 
-    //    std::cout.flush();
+    buffer->emitChangeSignal();
 }
 
 void LspPlugin::requestSemanticsToken(std::shared_ptr<Buffer> buffer) {
