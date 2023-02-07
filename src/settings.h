@@ -18,6 +18,7 @@ enum class UiStyle {
 struct Settings {
     std::filesystem::path file;
     UiStyle style = UiStyle::Matgui;
+    int port = 4304;
 
     static constexpr auto helpStr = R"_(
 medit text editor
@@ -34,6 +35,7 @@ flags:
 --connect [fifo|tcp]  connect to server selected protocol
 --host [fifo|tcp]     start server on selected protocol
 --remote              test serialize screen
+--port -p <port>      set port number for tcp connection
 
     )_";
 
@@ -86,6 +88,9 @@ flags:
             else if (arg == "--help") {
                 std::cout << helpStr << std::endl;
                 std::exit(0);
+            }
+            else if (arg == "--port" || arg == "-p") {
+                port = std::stoi(args.at(++i));
             }
             else {
                 if (arg.rfind("-") != 0) {

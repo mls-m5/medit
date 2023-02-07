@@ -28,8 +28,9 @@ using TimerType = JsTimer;
 
 #else
 
+#include "remote/fifoconnection.h"
 #include "remote/fifofile.h"
-#include "remote/fiforeceiver.h"
+#include "remote/tcpserver.h"
 #include "screen/deserializescreen.h"
 #include "screen/guiscreen.h"
 #include "screen/ncursesscreen.h"
@@ -82,6 +83,26 @@ struct MainData {
             auto fifo = std::make_shared<FifoConnection>(
                 FifoFile::standardClientOut(), FifoFile::standardClientIn());
             nativeScreen = std::make_unique<SerializeScreen>(fifo);
+        }
+        else if (settings.style == UiStyle::TcpServer) {
+            std::cout << "starting tcp server..." << std::endl;
+
+            std::mutex m;
+
+            m.lock();
+
+            /// TODO: Generalize this uggly handling
+            auto server = std::make_unique<TcpServer>(settings.port);
+
+            server->callback([&m, this](auto conn) {
+                nativeScreen = std::make_unique<SerializeScreen>(conn);
+                std::cout << "client connectied..." << std::endl;
+                m.unlock();
+            });
+
+            server.release(); // :O omgomgomg!!!
+
+            m.lock();
         }
         else {
             nativeScreen = std::make_unique<ScreenType>();
@@ -204,7 +225,7 @@ int main(int argc, char **argv) {
 
 #ifndef __EMSCRIPTEN__
     if (settings.style == UiStyle::FifoClient ||
-        settings.style == UiStyle::TcpServer) {
+        settings.style == UiStyle::TcpClient) {
         return thinMain(settings);
     }
 #endif

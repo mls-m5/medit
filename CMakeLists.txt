@@ -111,3 +111,19 @@ target_link_libraries(
     medit_common
     lib_medit
     )
+
+# ==== standalone thin client ==============================================
+
+#if (NOT EMSCRIPTEN)
+#    add_executable(
+#        medit_thin
+#        src/thinmain.cpp
+#        )
+
+#    target_link_libraries(
+#        medit_thin
+#        PUBLIC
+#        medit_common
+#        medit_remote_screen
+#        )
+#endif()

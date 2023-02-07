@@ -1,4 +1,4 @@
-#include "fiforeceiver.h"
+#include "fifoconnection.h"
 
 FifoConnection::FifoConnection(std::filesystem::path inPath,
                                std::filesystem::path outPath) {

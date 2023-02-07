@@ -69,8 +69,10 @@ add_library(
     STATIC
     screen/serializescreen.cpp
     screen/deserializescreen.cpp
-    remote/fiforeceiver.cpp
+    remote/fifoconnection.cpp
     remote/fifofile.cpp
+    remote/tcpconnection.cpp
+    remote/tcpserver.cpp
     thinmain.cpp
     )
 
