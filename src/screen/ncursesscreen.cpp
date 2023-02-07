@@ -181,8 +181,6 @@ Event NCursesScreen::getInput() {
         r.width = ::COLS * 2; // TODO: Find out why * 2
         r.height = ::LINES;
         return r;
-
-        //        return KeyEvent{Key::Resize};
     }
 
     if (c == KEY_MOUSE) {
@@ -228,14 +226,6 @@ Event NCursesScreen::getInput() {
         return KeyEvent{Key::Text, static_cast<char>(c)};
     }
 }
-
-// size_t NCursesScreen::x() const {
-//     return 0;
-// }
-
-// size_t NCursesScreen::y() const {
-//     return 0;
-// }
 
 size_t NCursesScreen::width() const {
     return static_cast<size_t>(::COLS *
@@ -313,7 +303,7 @@ void NCursesScreen::loop() {
             _threadQueue.front()();
         }
 
-        std::this_thread::sleep_for(10ms);
+        std::this_thread::sleep_for(1ms);
     }
 }
 

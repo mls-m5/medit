@@ -21,7 +21,7 @@ void TcpConnection::inLoop() {
             read(_socket, buffer(_buffer));
 
             handleInput(_buffer);
-            debugOutput("got", _buffer);
+            //            debugOutput("got", _buffer);
         }
     }
 }
@@ -52,7 +52,7 @@ void TcpConnection::write(std::string_view str) {
     }
     _socket.write_some(buffer(b));
     _socket.write_some(buffer(str));
-    debugOutput("sent", str);
+    //    debugOutput("sent", str);
 }
 
 std::shared_ptr<TcpConnection> TcpConnection::connect(std::string address,

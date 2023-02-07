@@ -43,28 +43,18 @@ using TimerType = Timer;
 
 namespace {
 
-struct MainData {
+struct User {
     std::shared_ptr<IScreen> nativeScreen;
     std::shared_ptr<IScreen> screen;
-    std::shared_ptr<IJobQueue> guiQueue;
-    std::shared_ptr<IJobQueue> queue;
-    std::shared_ptr<ITimer> timer;
-    std::shared_ptr<ITimer> guiLoopTimer;
-    std::shared_ptr<Context> context;
     std::shared_ptr<MainWindow> mainWindow;
 
-    MainData() = default; // Static initialization
-
-    void start(const Settings &settings);
-
-    void loop();
-
-    void stop();
-
-    void createScreen(const Settings &settings) {
 #ifdef __EMSCRIPTEN__
+    User(const Settings &settings, Context &context) {
         nativesScreen = std::make_unique<ScreenType>();
+    }
 #else
+
+    User(const Settings &settings, Context &context) {
         if (settings.style == UiStyle::Terminal) {
             nativeScreen = std::make_unique<NCursesScreen>();
         }
@@ -81,38 +71,69 @@ struct MainData {
             nativeScreen = std::make_unique<SerializeScreen>(fifo);
         }
         else if (settings.style == UiStyle::TcpServer) {
-            std::cout << "starting tcp server..." << std::endl;
-
-            std::mutex m;
-
-            m.lock();
-
-            /// TODO: Generalize this uggly handling
-            auto server = std::make_unique<TcpServer>(settings.port);
-
-            server->callback([&m, this](auto conn) {
-                nativeScreen = std::make_unique<SerializeScreen>(conn);
-                std::cout << "client connectied..." << std::endl;
-                m.unlock();
-            });
-
-            server.release(); // :O omgomgomg!!!
-
-            m.lock();
+            throw std::runtime_error{"server should be handled differently"};
         }
         else {
             nativeScreen = std::make_unique<ScreenType>();
         }
-#endif
+        setup(settings, context);
+    }
+
+    User(std::shared_ptr<IConnection> conn,
+         const Settings &settings,
+         Context &context) {
+        nativeScreen = std::make_unique<SerializeScreen>(conn);
+        setup(settings, context);
+    }
+
+    void setup(const Settings &settings, Context &context) {
         screen = std::make_unique<BufferedScreen>(nativeScreen.get());
-        screen->subscribe([this](IScreen::EventListT list) {
-            this->guiQueue->addTask([e = list, this] {
+        screen->subscribe([this, &context](IScreen::EventListT list) {
+            context.guiQueue().addTask([e = list, this] {
                 handleEvents(e);
                 if (medit::main::shouldQuit) {
                     return;
                 }
             });
         });
+
+        mainWindow = std::make_shared<MainWindow>(*screen, context);
+
+        if (settings.file.empty()) {
+            mainWindow->updateLocatorBuffer();
+        }
+        else {
+            mainWindow->open(settings.file);
+        }
+
+        screen->refresh();
+    }
+
+#endif
+
+    void handleEvents(const IScreen::EventListT &list) {
+        for (auto &c : list) {
+            if (std::holds_alternative<NullEvent>(c)) {
+                return;
+            }
+
+            if (auto key = std::get_if<KeyEvent>(&c)) {
+                if (*key ==
+                        KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl} ||
+                    *key == Key::Quit) {
+                    medit::main::shouldQuit = true;
+                    mainWindow->env().context().guiQueue().stop();
+                }
+
+                if (*key != Key::Unknown) {
+                    handleKey(c, *mainWindow, *screen);
+                }
+            }
+            else {
+                handleKey(c, *mainWindow, *screen);
+            }
+            mainWindow->triggerRedraw();
+        }
     }
 
     void handleKey(Event e, MainWindow &mainWindow, IScreen &screen) {
@@ -132,33 +153,27 @@ struct MainData {
             mainWindow.mouseDown(ce->x, ce->y);
         }
     }
+};
 
-    void handleEvents(const IScreen::EventListT &list) {
-        for (auto &c : list) {
-            if (std::holds_alternative<NullEvent>(c)) {
-                return;
-            }
+struct MainData {
+    std::shared_ptr<IJobQueue> guiQueue;
+    std::shared_ptr<IJobQueue> jobQueue;
+    std::shared_ptr<ITimer> timer;
+    std::shared_ptr<ITimer> guiLoopTimer;
+    std::shared_ptr<Context> context;
+    std::unique_ptr<TcpServer> server;
 
-            if (auto key = std::get_if<KeyEvent>(&c)) {
-                if (*key ==
-                        KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl} ||
-                    *key == Key::Quit) {
-                    medit::main::shouldQuit = true;
-                    guiQueue->stop();
-                }
+    std::vector<std::unique_ptr<User>> users;
 
-                if (*key != Key::Unknown) {
-                    //                    callback(*key);
-                    handleKey(c, *mainWindow, *screen);
-                }
-            }
-            else {
-                //                callback(c);
-                handleKey(c, *mainWindow, *screen);
-            }
-            mainWindow->triggerRedraw();
-        }
-    }
+    MainData() = default; // Static initialization
+
+    void start(const Settings &settings);
+
+    void loop();
+
+    void stop();
+
+    void createScreen(const Settings &settings) {}
 };
 
 MainData mainData;
@@ -166,37 +181,39 @@ MainData mainData;
 void MainData::start(const Settings &settings) {
     registerDefaultPlugins();
 
-    queue = std::make_shared<QueueType>();
+    jobQueue = std::make_shared<QueueType>();
     guiQueue = std::make_shared<QueueType>();
     timer = std::make_shared<TimerType>();
 
     createScreen(settings);
 
-    context = std::make_shared<Context>(*queue, *guiQueue, *timer);
+    context = std::make_shared<Context>(*jobQueue, *guiQueue, *timer);
 
     // TODO: Core context should probably live in this file somewhere
     CoreEnvironment::instance().context(context.get());
 
-    mainWindow = std::make_shared<MainWindow>(*screen, *context);
+    timer->start();
+    jobQueue->start();
 
-    if (settings.file.empty()) {
-        mainWindow->updateLocatorBuffer();
+    if (settings.style == UiStyle::TcpServer) {
+        server = std::make_unique<TcpServer>(settings.port);
+
+        std::cout << "starting tcp server..." << std::endl;
+        server->callback([this, settings](std::shared_ptr<IConnection> conn) {
+            guiQueue->addTask([this, conn, settings] {
+                users.push_back(
+                    std::make_unique<User>(conn, settings, *context));
+            });
+            std::cout << "client connectied..." << std::endl;
+        });
     }
     else {
-        mainWindow->open(settings.file);
+        users.push_back(std::make_unique<User>(settings, *context));
     }
-
-    mainWindow->resize();
-    mainWindow->draw(*screen);
-    mainWindow->updateCursor(*screen);
-    screen->refresh();
-
-    timer->start();
-    queue->start();
 }
 
 void MainData::stop() {
-    queue->stop();
+    jobQueue->stop();
     timer->stop();
     guiQueue->stop();
 }
@@ -208,7 +225,9 @@ void MainData::loop() {
 #else
     while (!medit::main::shouldQuit) {
         guiQueue->work(true);
-        mainWindow->refreshScreen();
+        for (auto &user : users) {
+            user->mainWindow->refreshScreen();
+        }
     }
 #endif
 }

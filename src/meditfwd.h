@@ -46,3 +46,5 @@ class IFormat;
 class INavigation;
 
 class IConnection;
+class TcpServer;
+class TcpConnection;
