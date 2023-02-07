@@ -19,7 +19,7 @@ int thinMain(const Settings &settings) {
         receiver.waitForClose();
     }
     else if (settings.style == UiStyle::TcpClient) {
-        auto client = TcpConnection::connect("localhost", settings.port);
+        auto client = TcpConnection::connect(settings.address, settings.port);
 
         dscreen->subscribe([&client](auto data) { client->write(data); });
         client->subscribe([&dscreen](auto data) { dscreen->write(data); });

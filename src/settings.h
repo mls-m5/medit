@@ -19,6 +19,7 @@ struct Settings {
     std::filesystem::path file;
     UiStyle style = UiStyle::Matgui;
     int port = 4304;
+    std::string address = "localhost";
 
     static constexpr auto helpStr = R"_(
 medit text editor
@@ -36,6 +37,7 @@ flags:
 --host [fifo|tcp]     start server on selected protocol
 --remote              test serialize screen
 --port -p <port>      set port number for tcp connection
+--addr <address>      set the ip address to remote server
 
     )_";
 
@@ -85,12 +87,15 @@ flags:
                     std::exit(1);
                 }
             }
-            else if (arg == "--help") {
-                std::cout << helpStr << std::endl;
-                std::exit(0);
+            else if (arg == "--addr") {
+                address = args.at(++i);
             }
             else if (arg == "--port" || arg == "-p") {
                 port = std::stoi(args.at(++i));
+            }
+            else if (arg == "--help") {
+                std::cout << helpStr << std::endl;
+                std::exit(0);
             }
             else {
                 if (arg.rfind("-") != 0) {
