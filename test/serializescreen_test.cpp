@@ -69,44 +69,6 @@ TEST_CASE("cursor(...)") {
     f.ss.cursor(10, 20);
 }
 
-TEST_CASE("x(), y()") {
-    {
-        auto f = Fixture{};
-
-        auto future = std::async([&f] {
-            f.output->mock_x_0.returnValue(13);
-            EXPECT_EQ(f.ss.x(), 13);
-        });
-    }
-    {
-        auto f = Fixture{};
-
-        auto future = std::async([&f] {
-            f.output->mock_y_0.returnValue(14);
-            EXPECT_EQ(f.ss.y(), 14);
-        });
-    }
-}
-
-TEST_CASE("width(), height()") {
-    {
-        auto f = Fixture{};
-
-        auto future = std::async([&f] {
-            f.output->mock_width_0.returnValue(13);
-            EXPECT_EQ(f.ss.width(), 13);
-        });
-    }
-    {
-        auto f = Fixture{};
-
-        auto future = std::async([&f] {
-            f.output->mock_height_0.returnValue(14);
-            EXPECT_EQ(f.ss.height(), 14);
-        });
-    }
-}
-
 TEST_CASE("title(...)") {
     auto f = Fixture{};
 
@@ -188,6 +150,27 @@ TEST_CASE("key callback") {
         f.ss.subscribe(cb);
 
         f.sendEvent({PasteEvent{"hello there"}});
+
+        EXPECT(wasCalled);
+    }
+
+    {
+        auto f = Fixture{};
+
+        bool wasCalled = false;
+        auto cb = [&wasCalled](auto &&list) {
+            wasCalled = true;
+            if (list.empty()) {
+                return;
+            }
+            auto p = std::get_if<ResizeEvent>(&list.front());
+            EXPECT(p);
+            EXPECT_EQ(p->width, 100);
+            EXPECT_EQ(p->height, 120);
+        };
+        f.ss.subscribe(cb);
+
+        f.sendEvent({ResizeEvent{100, 120}});
 
         EXPECT(wasCalled);
     }

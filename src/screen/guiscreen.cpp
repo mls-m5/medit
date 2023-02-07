@@ -293,8 +293,6 @@ struct GuiScreen::Buffer {
         }
 
         renderer.present();
-
-        //        debugOutput("guiscreen refresh stop()");
     }
 
     size_t addStyle(const Color &fg, const Color &bg, size_t index) {
@@ -395,12 +393,6 @@ struct GuiScreen::Buffer {
                     }
                     return NullEvent{};
                 }
-                //                if (sym == 'c' || sym == 'x') {
-                //                    return CopyEvent{[](std::string text) {
-                //                                         SDL_SetClipboardText(text.c_str());
-                //                                     },
-                //                                     sym == 'x'};
-                //                }
             }
 
             keyEvent.modifiers = getModState();
@@ -416,7 +408,6 @@ struct GuiScreen::Buffer {
             if (keyEvent.key == Key::KeyCombination &&
                 keyEvent.modifiers == Modifiers::None) {
                 return NullEvent{};
-                //                return {Key::Unknown};
             }
 
             return keyEvent;
@@ -431,7 +422,6 @@ struct GuiScreen::Buffer {
 
             if (shouldIgnoreTextInput(ch[0])) {
                 return NullEvent{};
-                //                return KeyEvent{Key::Unknown};
             }
 
             return KeyEvent{Key::Text, ch};
@@ -442,12 +432,14 @@ struct GuiScreen::Buffer {
             case SDL_WINDOWEVENT_RESIZED: {
                 resizePixels(
                     sdlEvent.window.data1, sdlEvent.window.data2, false);
-                return KeyEvent{Key::Resize};
+                auto r = ResizeEvent{};
+                r.width = width;
+                r.height = height;
+                return r;
                 break;
             }
             default:
                 return NullEvent{};
-                //                return Key::Unknown;
                 break;
             }
             break;
@@ -524,13 +516,13 @@ void GuiScreen::unsubscribe() {
     _buffer->unsubscribe();
 }
 
-size_t GuiScreen::x() const {
-    return 0;
-}
+// size_t GuiScreen::x() const {
+//     return 0;
+// }
 
-size_t GuiScreen::y() const {
-    return 0;
-}
+// size_t GuiScreen::y() const {
+//     return 0;
+// }
 
 size_t GuiScreen::width() const {
     return static_cast<size_t>(_buffer->width);

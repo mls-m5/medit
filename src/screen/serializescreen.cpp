@@ -48,33 +48,33 @@ void SerializeScreen::cursor(size_t x, size_t y) {
     });
 }
 
-size_t SerializeScreen::x() const {
-    auto r = const_cast<SerializeScreen *>(this)->request({
-        {"method", "get/x"},
-    });
-    return r["value"];
-}
+// size_t SerializeScreen::x() const {
+//     auto r = const_cast<SerializeScreen *>(this)->request({
+//         {"method", "get/x"},
+//     });
+//     return r["value"];
+// }
 
-size_t SerializeScreen::y() const {
-    auto r = const_cast<SerializeScreen *>(this)->request({
-        {"method", "get/y"},
-    });
-    return r["value"];
-}
+// size_t SerializeScreen::y() const {
+//     auto r = const_cast<SerializeScreen *>(this)->request({
+//         {"method", "get/y"},
+//     });
+//     return r["value"];
+// }
 
-size_t SerializeScreen::width() const {
-    auto r = const_cast<SerializeScreen *>(this)->request({
-        {"method", "get/width"},
-    });
-    return r["value"];
-}
+// size_t SerializeScreen::width() const {
+//     auto r = const_cast<SerializeScreen *>(this)->request({
+//         {"method", "get/width"},
+//     });
+//     return r["value"];
+// }
 
-size_t SerializeScreen::height() const {
-    auto r = const_cast<SerializeScreen *>(this)->request({
-        {"method", "get/height"},
-    });
-    return r["value"];
-}
+// size_t SerializeScreen::height() const {
+//     auto r = const_cast<SerializeScreen *>(this)->request({
+//         {"method", "get/height"},
+//     });
+//     return r["value"];
+//}
 
 void SerializeScreen::title(std::string title) {
     send(nlohmann::json{

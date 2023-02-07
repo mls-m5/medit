@@ -63,7 +63,7 @@ BufferedScreen::BufferedScreen(IScreen *screen)
     : _backend(screen)
     , _canvas(std::make_unique<Canvas>())
     , _threadId(std::this_thread::get_id()) {
-    _canvas->resize(_backend->width(), _backend->height());
+    //    _canvas->resize(_backend->width(), _backend->height());
 }
 
 BufferedScreen::~BufferedScreen() = default;
@@ -89,21 +89,21 @@ void BufferedScreen::cursor(size_t x, size_t y) {
     _canvas->_cursorY = y;
 }
 
-size_t BufferedScreen::x() const {
-    return _backend->x();
-}
+// size_t BufferedScreen::x() const {
+//     return _backend->x();
+// }
 
-size_t BufferedScreen::y() const {
-    return _backend->y();
-}
+// size_t BufferedScreen::y() const {
+//     return _backend->y();
+// }
 
-size_t BufferedScreen::width() const {
-    return _canvas->width;
-}
+// size_t BufferedScreen::width() const {
+//     return _canvas->width;
+// }
 
-size_t BufferedScreen::height() const {
-    return _canvas->height;
-}
+// size_t BufferedScreen::height() const {
+//     return _canvas->height;
+// }
 
 void BufferedScreen::title(std::string title) {
     _backend->title(title);
@@ -128,10 +128,8 @@ void BufferedScreen::subscribe(CallbackT f) {
     _backend->subscribe([this, f](EventListT list) {
         // TODO: Just send a resize event with the size built in
         for (auto &event : list) {
-            if (auto k = std::get_if<KeyEvent>(&event)) {
-                if (k->key == Key::Resize) {
-                    _canvas->resize(_backend->x(), _backend->y());
-                }
+            if (auto k = std::get_if<ResizeEvent>(&event)) {
+                _canvas->resize(k->width, k->height);
             }
         }
         f(std::move(list)); //

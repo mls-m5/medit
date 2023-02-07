@@ -129,26 +129,26 @@ void LinuxTerminalScreen::cursor(size_t x, size_t y) {
     std::fflush(stdout);
 }
 
-size_t LinuxTerminalScreen::x() const {
-    return 0;
-}
+// size_t LinuxTerminalScreen::x() const {
+//     return 0;
+// }
 
-size_t LinuxTerminalScreen::y() const {
-    return 0;
-}
+// size_t LinuxTerminalScreen::y() const {
+//     return 0;
+// }
 
-size_t LinuxTerminalScreen::width() const {
-    size_t width;
-    POpenStream{"tput cols"} >> width;
-    return width;
-}
+// size_t LinuxTerminalScreen::width() const {
+//     size_t width;
+//     POpenStream{"tput cols"} >> width;
+//     return width;
+// }
 
-size_t LinuxTerminalScreen::height() const {
-    size_t height;
-    POpenStream{"tput lines"} >> height;
-    return height;
-    return 0;
-}
+// size_t LinuxTerminalScreen::height() const {
+//     size_t height;
+//     POpenStream{"tput lines"} >> height;
+//     return height;
+//     return 0;
+// }
 
 void LinuxTerminalScreen::title(std::string title) {}
 

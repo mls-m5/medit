@@ -95,8 +95,7 @@ void NCursesScreen::draw(size_t x, size_t y, const FString &rstr) {
     _threadQueue.push_back([str, this, x, y] {
         _tv();
         ::move(y, x);
-        for (size_t tx = 0, i = 0; i < str.size() && tx < width() - this->x();
-             ++tx, ++i) {
+        for (size_t tx = 0, i = 0; i < str.size() && tx < width(); ++tx, ++i) {
             auto c = str.at(i);
             attron(COLOR_PAIR(c.f));
             if (c.c == '\t') {
@@ -157,6 +156,15 @@ NCursesScreen::~NCursesScreen() {
     _ncursesThread.join();
 }
 
+void NCursesScreen::subscribe(CallbackT f) {
+    _callback = f;
+
+    auto r = ResizeEvent();
+    r.width = ::COLS * 2; // TODO: Find out why * 2
+    r.height = ::LINES;
+    _callback({r});
+}
+
 Event NCursesScreen::getInput() {
     _tv();
     const auto c = getch();
@@ -169,7 +177,12 @@ Event NCursesScreen::getInput() {
         ::refresh();
         ::clear();
         init();
-        return KeyEvent{Key::Resize};
+        auto r = ResizeEvent();
+        r.width = ::COLS * 2; // TODO: Find out why * 2
+        r.height = ::LINES;
+        return r;
+
+        //        return KeyEvent{Key::Resize};
     }
 
     if (c == KEY_MOUSE) {
@@ -216,13 +229,13 @@ Event NCursesScreen::getInput() {
     }
 }
 
-size_t NCursesScreen::x() const {
-    return 0;
-}
+// size_t NCursesScreen::x() const {
+//     return 0;
+// }
 
-size_t NCursesScreen::y() const {
-    return 0;
-}
+// size_t NCursesScreen::y() const {
+//     return 0;
+// }
 
 size_t NCursesScreen::width() const {
     return static_cast<size_t>(::COLS *

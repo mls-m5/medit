@@ -38,7 +38,6 @@ enum class Key {
     F10,
     F11,
     F12,
-    Resize, // Window resize event
     Quit,
 };
 
@@ -100,5 +99,14 @@ struct PasteEvent {
     std::string text;
 };
 
-using Event = std::
-    variant<NullEvent, KeyEvent, MouseDownEvent, MouseMoveEvent, PasteEvent>;
+struct ResizeEvent {
+    size_t width;
+    size_t height;
+};
+
+using Event = std::variant<NullEvent,
+                           KeyEvent,
+                           MouseDownEvent,
+                           MouseMoveEvent,
+                           PasteEvent,
+                           ResizeEvent>;

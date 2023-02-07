@@ -23,10 +23,10 @@ public:
 
     void unsubscribe() override;
 
-    size_t x() const override;
-    size_t y() const override;
-    size_t width() const override;
-    size_t height() const override;
+    //    size_t x() const override;
+    //    size_t y() const override;
+    size_t width() const;
+    size_t height() const;
     void title(std::string title) override;
 
     void palette(const Palette &palette) override {

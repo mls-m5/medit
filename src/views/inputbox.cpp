@@ -71,7 +71,8 @@ void InputBox::updateCursor(IScreen &screen) const {
 }
 
 void InputBox::draw(IScreen &screen) {
-    width(screen.width() - x());
+    auto w = window();
+    width(w->width() - x());
     ::fillRect(screen, {' ', Palette::standard}, *this);
     ::draw(screen, x() + 1, y() + 1, _title);
 

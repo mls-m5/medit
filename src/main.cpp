@@ -61,10 +61,6 @@ struct MainData {
 
     void stop();
 
-    void callback(Event c) {
-        handleKey(c, *mainWindow, *screen);
-    }
-
     void createScreen(const Settings &settings) {
 #ifdef __EMSCRIPTEN__
         nativesScreen = std::make_unique<ScreenType>();
@@ -108,9 +104,10 @@ struct MainData {
             nativeScreen = std::make_unique<ScreenType>();
         }
 #endif
-        nativeScreen->subscribe([this](IScreen::EventListT list) {
+        screen = std::make_unique<BufferedScreen>(nativeScreen.get());
+        screen->subscribe([this](IScreen::EventListT list) {
             this->guiQueue->addTask([e = list, this] {
-                handleEvent(e);
+                handleEvents(e);
                 if (medit::main::shouldQuit) {
                     return;
                 }
@@ -121,24 +118,22 @@ struct MainData {
     void handleKey(Event e, MainWindow &mainWindow, IScreen &screen) {
         // TODO: Consider moving this function to mainWindow
         if (auto c = std::get_if<KeyEvent>(&e)) {
-            if (*c == Key::Resize) {
-                mainWindow.resize(screen.width(), screen.height());
-            }
-            else {
-                mainWindow._env->key(*c);
-                mainWindow.keyPress(mainWindow._scope);
-                mainWindow.resize();
-            }
+            mainWindow._env->key(*c);
+            mainWindow.keyPress(mainWindow._scope);
+            mainWindow.resize();
         }
         if (auto p = std::get_if<PasteEvent>(&e)) {
             mainWindow.paste(p->text);
+        }
+        if (auto p = std::get_if<ResizeEvent>(&e)) {
+            mainWindow.resize(p->width, p->height);
         }
         if (auto ce = std::get_if<MouseDownEvent>(&e)) {
             mainWindow.mouseDown(ce->x, ce->y);
         }
     }
 
-    void handleEvent(const IScreen::EventListT &list) {
+    void handleEvents(const IScreen::EventListT &list) {
         for (auto &c : list) {
             if (std::holds_alternative<NullEvent>(c)) {
                 return;
@@ -153,11 +148,13 @@ struct MainData {
                 }
 
                 if (*key != Key::Unknown) {
-                    callback(*key);
+                    //                    callback(*key);
+                    handleKey(c, *mainWindow, *screen);
                 }
             }
             else {
-                callback(c);
+                //                callback(c);
+                handleKey(c, *mainWindow, *screen);
             }
             mainWindow->triggerRedraw();
         }
@@ -174,8 +171,6 @@ void MainData::start(const Settings &settings) {
     timer = std::make_shared<TimerType>();
 
     createScreen(settings);
-
-    screen = std::make_unique<BufferedScreen>(nativeScreen.get());
 
     context = std::make_shared<Context>(*queue, *guiQueue, *timer);
 

@@ -5,12 +5,10 @@
 #include "text/utf8char_serialization.h"
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(KeyEvent, key, symbol, modifiers, state);
-
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(MouseDownEvent, button, x, y);
-
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(MouseMoveEvent, button, x, y);
-
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PasteEvent, text);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ResizeEvent, width, height);
 
 inline void to_json(nlohmann::json &j, const Event &e) {
     j["event_type"] = e.index();
@@ -44,6 +42,12 @@ inline void from_json(const nlohmann::json &j, Event &e) {
     }
     case 4: {
         auto pe = PasteEvent{};
+        from_json(je, pe);
+        e = pe;
+        break;
+    }
+    case 5: {
+        auto pe = ResizeEvent{};
         from_json(je, pe);
         e = pe;
         break;

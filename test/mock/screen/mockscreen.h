@@ -12,10 +12,10 @@ public:
     MOCK_METHOD0(void, refresh, (), override);
     MOCK_METHOD0(void, clear, (), override);
     MOCK_METHOD2(void, cursor, (size_t x, size_t y), override);
-    MOCK_METHOD0(size_t, x, (), const override);
-    MOCK_METHOD0(size_t, y, (), const override);
-    MOCK_METHOD0(size_t, width, (), const override);
-    MOCK_METHOD0(size_t, height, (), const override);
+    //    MOCK_METHOD0(size_t, x, (), const override);
+    //    MOCK_METHOD0(size_t, y, (), const override);
+    //    MOCK_METHOD0(size_t, width, (), const override);
+    //    MOCK_METHOD0(size_t, height, (), const override);
     MOCK_METHOD1(void, title, (std::string title), override);
     MOCK_METHOD1(void, palette, (const Palette &), override);
     MOCK_METHOD3(size_t,

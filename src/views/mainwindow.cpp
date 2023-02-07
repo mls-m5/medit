@@ -22,7 +22,7 @@
 
 MainWindow::MainWindow(IScreen &screen, Context &context)
     : Window{nullptr}
-    , View(nullptr, screen.width(), screen.height())
+    , View(nullptr, 100, 100)
     , _screen{screen}
     , _editors{}
     , _env(std::make_unique<LocalEnvironment>(*this, context))

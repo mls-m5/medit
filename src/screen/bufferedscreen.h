@@ -24,14 +24,14 @@ public:
     void clear() override;
     //! @see IScreen
     void cursor(size_t x, size_t y) override;
-    //! @see IScreen
-    size_t x() const override;
-    //! @see IScreen
-    size_t y() const override;
-    //! @see IScreen
-    size_t width() const override;
-    //! @see IScreen
-    size_t height() const override;
+    //    //! @see IScreen
+    //    size_t x() const override;
+    //    //! @see IScreen
+    //    size_t y() const override;
+    //    //! @see IScreen
+    //    size_t width() const override;
+    //    //! @see IScreen
+    //    size_t height() const override;
     //! @see IScreen
     void title(std::string title) override;
     //    //! @see IScreen

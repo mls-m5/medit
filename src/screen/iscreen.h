@@ -14,10 +14,6 @@ public:
     virtual void clear() = 0;
     virtual void cursor(size_t x, size_t y) = 0;
 
-    virtual size_t x() const = 0;
-    virtual size_t y() const = 0;
-    virtual size_t width() const = 0;
-    virtual size_t height() const = 0;
     virtual void title(std::string title) = 0;
     virtual void palette(const Palette &) = 0;
 
