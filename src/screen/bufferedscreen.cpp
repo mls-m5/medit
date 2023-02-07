@@ -74,9 +74,7 @@ void BufferedScreen::draw(size_t x, size_t y, const FString &str) {
 }
 
 void BufferedScreen::refresh() {
-    //    debugOutput("buffered screen refresh");
     forceThread();
-    _canvas->resize(_backend->width(), _backend->height());
     _canvas->refresh(*_backend);
 }
 
@@ -100,11 +98,11 @@ size_t BufferedScreen::y() const {
 }
 
 size_t BufferedScreen::width() const {
-    return _backend->width();
+    return _canvas->width;
 }
 
 size_t BufferedScreen::height() const {
-    return _backend->height();
+    return _canvas->height;
 }
 
 void BufferedScreen::title(std::string title) {
@@ -127,7 +125,17 @@ void BufferedScreen::cursorStyle(CursorStyle style) {
 }
 
 void BufferedScreen::subscribe(CallbackT f) {
-    _backend->subscribe(f);
+    _backend->subscribe([this, f](EventListT list) {
+        // TODO: Just send a resize event with the size built in
+        for (auto &event : list) {
+            if (auto k = std::get_if<KeyEvent>(&event)) {
+                if (k->key == Key::Resize) {
+                    _canvas->resize(_backend->x(), _backend->y());
+                }
+            }
+        }
+        f(std::move(list)); //
+    });
 }
 
 void BufferedScreen::unsubscribe() {
