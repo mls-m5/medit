@@ -44,7 +44,7 @@ Todo:
   - [ ] Prompt if buffer contains unsaved changes, otherwise replace
 - [ ] Scripting
   - [ ] Use real scripting language
-- [ ] ctrl+backspace to erase whole word
+- [x] ctrl+backspace to erase whole word
 
 
 # Prioritized changes

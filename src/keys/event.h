@@ -73,6 +73,10 @@ public:
         return !(a == b);
     }
 
+    bool hasModifiers() const {
+        return modifiers != Modifiers::None;
+    }
+
     Key key = Key::Unknown;
     Utf8Char symbol = {};
     Modifiers modifiers = Modifiers::None;

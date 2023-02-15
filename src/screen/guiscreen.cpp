@@ -399,7 +399,12 @@ struct GuiScreen::Buffer {
 
             if (keyEvent.modifiers != Modifiers::None &&
                 (keyEvent.key == Key::Space || keyEvent.symbol == "\n" ||
-                 keyEvent.key == Key::Tab)) {
+                 keyEvent.key == Key::Tab || keyEvent.key == Key::Backspace)) {
+
+                if (keyEvent.key == Key::Backspace) {
+                    keyEvent.symbol = '\b';
+                }
+
                 keyEvent.key = Key::KeyCombination;
             }
 

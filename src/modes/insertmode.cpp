@@ -12,7 +12,8 @@ std::shared_ptr<IMode> createInsertMode() {
         {{Key::Backspace}, {"editor.erase"}},
         {{Key::Delete}, {"editor.right\neditor.erase"}},
         {{Key::Escape}, {"editor.normalmode"}},
-        {{Key::KeyCombination}, {}},
+        {KeyEvent{Key::KeyCombination, '\b', Modifiers::Ctrl},
+         {"editor.erase_before_word"}},
         {{"\n"}, {"editor.split\neditor.copyindentation"}},
     }};
     map.defaultAction({"editor.insert"});

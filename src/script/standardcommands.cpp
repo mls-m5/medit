@@ -199,6 +199,25 @@ CommandList editorCommands = {
         },
     },
     {
+        // Mostly for ctrl+backspace
+        "editor.erase_before_word",
+        [](std::shared_ptr<IScope> scope) {
+            auto &e = scope->editor();
+            auto selection = e.selection();
+            if (selection.empty()) {
+                //                scope->env().registers().save(standardRegister,
+                //                                              content(e.cursor()).toString());
+                auto begin = wordBegin(e.cursor());
+                e.cursor(erase(CursorRange{begin, e.cursor()}));
+            }
+            else {
+                //                scope->env().registers().save(standardRegister,
+                //                                              toString(selection));
+                e.cursor(erase(selection), true);
+            }
+        },
+    },
+    {
         "editor.paste_before",
         [](std::shared_ptr<IScope> scope) {
             auto str = scope->env().registers().load(standardRegister);

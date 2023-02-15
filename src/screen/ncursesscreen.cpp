@@ -202,6 +202,11 @@ Event NCursesScreen::getInput() {
         return KeyEvent{f->second.key, f->second.text};
     }
     else if (c < 27) { // ctrl-characters
+        // ctrl+backspace -> 8
+        if (c == 8) {
+            return KeyEvent{Key::KeyCombination, '\b', Modifiers::Ctrl};
+        }
+
         // Note that ctrl+space -> 0
         return KeyEvent{Key::KeyCombination,
                         c == 0 ? ' ' : static_cast<char>(c + 'A' - 1),
