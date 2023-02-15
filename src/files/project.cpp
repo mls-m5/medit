@@ -140,9 +140,12 @@ void Project::loadProjectFile() {
     catch (Json::ParsingError &) {
     }
 
-    auto it = json.find("build");
-    if (it != json.end()) {
+    if (auto it = json.find("build"); it != json.end()) {
         _settings.buildCommand = it->value;
+    }
+
+    if (auto it = json.find("run"); it != json.end()) {
+        _settings.runCommand = it->value;
     }
 
     if (auto it = json.find("flags"); it != json.end()) {

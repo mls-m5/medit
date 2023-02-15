@@ -6,6 +6,7 @@ add_library(
     STATIC
     jsonformat.cpp
     build.cpp
+    run.cpp
     windowcommands.cpp
     clangformat.cpp
     lsp/headerdetection.cpp

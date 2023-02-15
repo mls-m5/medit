@@ -13,7 +13,7 @@ bool ClangFormat::format(Editor &editor) {
 
     auto path = file->path();
 
-    if (!isCpp(path)) {
+    if (!isCpp(path) && !isCSource(path)) {
         return false;
     }
 
@@ -27,3 +27,4 @@ bool ClangFormat::format(Editor &editor) {
 void ClangFormat::registerPlugin() {
     registerFormat<ClangFormat>();
 }
+

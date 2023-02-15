@@ -7,6 +7,7 @@
 #include "modes/normalmode.h"
 #include "modes/visualmode.h"
 #include "plugin/build.h"
+#include "plugin/run.h"
 #include "script/parser.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
@@ -306,6 +307,10 @@ CommandList editorCommands = {
     {
         "editor.build",
         [](std::shared_ptr<IScope> scope) { build(scope); },
+    },
+    {
+        "editor.run",
+        [](std::shared_ptr<IScope> scope) { run(scope); },
     },
     {
         "editor.insertmode",

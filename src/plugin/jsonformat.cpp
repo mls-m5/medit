@@ -12,7 +12,7 @@ bool JsonFormat::format(Editor &editor) {
         try {
             auto text = editor.buffer().text();
 
-            auto json = Json(text);
+            auto json = Json::Parse(text);
 
             auto formatted = json.stringify();
 

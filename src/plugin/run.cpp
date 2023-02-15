@@ -1,5 +1,4 @@
-
-#include "plugin/build.h"
+#include "run.h"
 #include "core/context.h"
 #include "core/jobqueue.h"
 #include "files/popenstream.h"
@@ -8,21 +7,10 @@
 #include "text/buffer.h"
 #include "views/editor.h"
 
-namespace {
-
-bool isBuilding = false;
-}
-
-void build(std::shared_ptr<IScope> scope) {
+void run(std::shared_ptr<IScope> scope) {
 #ifndef __EMSCRIPTEN__
-    if (isBuilding) {
-        return;
-    }
-    isBuilding = true;
+
     scope->env().showConsole(true);
-    auto &consoleBuffer = scope->env().console().buffer();
-    consoleBuffer.clear();
-    consoleBuffer.pushBack(std::string{"trying to build..."});
 
     auto &project = scope->env().project();
 
@@ -32,8 +20,18 @@ void build(std::shared_ptr<IScope> scope) {
         filesystem::current_path(root);
     }
 
+    auto &consoleBuffer = scope->env().console().buffer();
+    consoleBuffer.clear();
+
+    if (project.settings().runCommand.empty()) {
+        consoleBuffer.pushBack(std::string{"no run command specified..."});
+        return;
+    }
+
+    consoleBuffer.pushBack(std::string{"running application..."});
+
     scope->env().context().jobQueue().addTask([&project, scope] {
-        POpenStream stream(project.settings().buildCommand, true, 100);
+        POpenStream stream(project.settings().runCommand, true, 100);
 
         for (std::string line; getline(stream, line);) {
             scope->env().context().guiQueue().addTask([line, scope] {
@@ -53,8 +51,7 @@ void build(std::shared_ptr<IScope> scope) {
                     consoleBuffer.pushBack(std::string{"finished..."});
                 }
             });
-
-        isBuilding = false;
     });
-#endif
+
+#endif // __EMSCRIPTEN__
 }
