@@ -29,7 +29,5 @@ public:
         return environment;
     }
 
-    MOCK_METHOD1(void, parseLua, (std::string_view code), override);
-
     MockEnvironment environment;
 };

@@ -4,6 +4,8 @@
 #include "ienvironment.h"
 #include "keys/event.h"
 #include "meditfwd.h"
+#include "sol/state.hpp"
+#include "views/editor.h"
 
 /// Environment data for a single user
 class LocalEnvironment : public IEnvironment {
@@ -14,11 +16,12 @@ class LocalEnvironment : public IEnvironment {
     bool _showConsole = false;
     Context &_context;
     Registers _registers;
+    sol::state _lua;
 
 public:
-    LocalEnvironment(MainWindow &mw, Context &context)
-        : _mainWindow{mw}
-        , _context{context} {}
+    LocalEnvironment(MainWindow &mw, Context &context);
+
+    void initLua(MainWindow &mw);
 
     void key(KeyEvent e) {
         _lastKeyEvent = e;
@@ -70,6 +73,8 @@ public:
     MainWindow &mainWindow() override {
         return _mainWindow;
     }
+
+    void parseLua(std::string_view code);
 
     //! Trigger redraw of winow
     void redrawScreen();

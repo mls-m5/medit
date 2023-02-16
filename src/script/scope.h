@@ -1,11 +1,8 @@
 #pragma once
 
 #include "ienvironment.h"
-#include "initlua.h"
 #include "iscope.h"
 #include "script/command.h"
-#include "sol/error.hpp"
-#include "sol/state.hpp"
 #include <functional>
 #include <map>
 #include <memory>
@@ -22,13 +19,12 @@ class Scope : public IScope {
 
     std::map<std::string, Variable> _variables;
 
-    sol::state _lua;
-
 public:
     Scope(std::shared_ptr<IScope> parent);
 
     // Used by handler
-    void editor(Editor *editor);
+    // TODO: Use environment editor instead
+    [[deprecated]] void editor(Editor *editor);
 
     // @see IEnvironment
     IScope &root() override {
@@ -57,7 +53,7 @@ public:
         return root().env();
     }
 
-    // @see IEnvironment
+    // @see IScope
     IScope &parent() override {
         if (!_parent) {
             throw std::runtime_error(
@@ -71,7 +67,7 @@ public:
         _context[name] = f;
     }
 
-    // @see IEnvironment
+    // @see IScope
     bool run(const Command &command) override {
         auto action = findAction(command.text);
         if (action) {
@@ -109,16 +105,6 @@ public:
                 return _parent->get(std::move(name));
             }
             return {};
-        }
-    }
-
-    void parseLua(std::string_view code) override {
-        try {
-            auto res = _lua.load(code);
-            res();
-        }
-        catch (sol::error &e) {
-            std::cerr << e.what() << "\n";
         }
     }
 };

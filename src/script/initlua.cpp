@@ -1,7 +1,11 @@
 #include "initlua.h"
+#include "sol/error.hpp"
 #include "text/cursor.h"
 #include "text/cursorops.h"
 #include "views/editor.h"
+#include "views/mainwindow.h"
+#include <memory>
+#include <stdexcept>
 #include <string>
 
 namespace {
@@ -17,28 +21,84 @@ constexpr auto standardLuaCommands = R"_(
 
 
 -- c = editor:get_cursor()
+
+
 print("hello")
 
+-- print(Cursor)
+  --c = Apa.new{}
+
+print(tostring(apa:get_x()))
+
+
+editor = window:get_editor()
+cursor = editor:get_cursor()
+
+print("cursor x")
+
+print(tostring(cursor:get_x()))
+
+print("hello2")
 
 )_";
 
 }
-void initLua(sol::state &lua) {
-    lua.new_usertype<Cursor>("Cursor");
 
-    lua.new_usertype<Editor>("Editor");
-    lua["Editor"]["get_cursor"] = [](Editor &e) {
-        return e.cursor(); //
-    };
-    lua["Editor"]["set_cursor"] = [](Editor &e, Cursor &c) {
-        return e.cursor(c);
-    };
+struct Apa {
+    int x = 10;
 
-    lua["Cursor"]["fix"] = [](Cursor &self) { return fix(self); };
+    int get_x() {
+        return x;
+    }
 
-    lua["print"] = [](std::string str) {
-        std::cout << str << std::endl; //
-    };
+    Apa() {
+        std::cout << "constructor" << std::endl;
+    }
 
-    lua.load(standardLuaCommands)();
+    ~Apa() {
+        std::cout << "destructor" << std::endl;
+    }
+};
+
+void initLua(sol::state &lua, MainWindow &mainWindow) {
+    lua.open_libraries(sol::lib::base); // Neaded for usertypes for some reason
+
+    lua.new_usertype<Buffer>("Buffer", "is_single_line", &Buffer::isSingleLine);
+
+    lua.new_usertype<Cursor>(
+        "Cursor",
+        "get_buffer",
+        [](Cursor &self) { return &self.buffer(); },
+        "get_x",
+        [](Cursor &self) { return self.x(); },
+        "get_y",
+        [](Cursor &self) { return self.y(); });
+
+    lua.new_usertype<Editor>(
+        "Editor", "get_cursor", [](Editor &self) { return self.cursor(); });
+
+    {
+        // Test
+        auto &editor = mainWindow.currentEditor();
+        editor.cursor(right(down(editor.cursor())));
+    }
+
+    lua.new_usertype<MainWindow>("Window", "get_editor", [](MainWindow &self) {
+        return &self.currentEditor();
+    });
+
+    lua["window"] = &mainWindow;
+
+    lua.new_usertype<Apa>("Apa", "get_x", &Apa::get_x);
+
+    lua["apa"] = Apa{};
+
+    lua["print"] = [](std::string str) { std::cout << str << std::endl; };
+
+    try {
+        lua.script(standardLuaCommands);
+    }
+    catch (sol::error &e) {
+        std::cerr << e.what() << std::endl;
+    }
 }

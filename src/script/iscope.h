@@ -47,8 +47,6 @@ public:
     virtual void set(std::string name, Variable variable) = 0;
     virtual std::optional<Variable> get(std::string name) const = 0;
 
-    virtual void parseLua(std::string_view code) = 0;
-
     IScope() = default;
     IScope(const IScope &) = delete;
     IScope &operator=(const IScope &) = delete;
