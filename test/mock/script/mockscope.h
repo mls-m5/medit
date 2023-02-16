@@ -4,6 +4,7 @@
 #include "mockenvironment.h"
 #include "script/ienvironment.h"
 #include "script/iscope.h"
+#include <string_view>
 
 class MockScope : public IScope {
 public:
@@ -27,6 +28,8 @@ public:
     IEnvironment &env() override {
         return environment;
     }
+
+    MOCK_METHOD1(void, parseLua, (std::string_view code), override);
 
     MockEnvironment environment;
 };

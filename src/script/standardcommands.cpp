@@ -363,6 +363,7 @@ CommandList selectionCommands = {
         },
     },
 };
+
 } // namespace
 
 void addStandardCommands(IScope &scope) {

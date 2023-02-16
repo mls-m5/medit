@@ -20,6 +20,8 @@ target_link_libraries(
     medit_core
     PUBLIC
     medit_common
+    lua
+    sol2
     )
 
 
@@ -123,6 +125,8 @@ add_library(
     script/command.cpp
     script/parser.cpp
     script/togglecomments.cpp
+    script/initlua.cpp
+    script/scope.cpp
     navigation/headernavigation.cpp
     completion/autocomplete.cpp
     screen/draw.cpp

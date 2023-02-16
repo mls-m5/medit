@@ -1,9 +1,11 @@
 #pragma once
 
 #include "ienvironment.h"
+#include "initlua.h"
 #include "iscope.h"
 #include "script/command.h"
-#include "script/standardcommands.h"
+#include "sol/error.hpp"
+#include "sol/state.hpp"
 #include <functional>
 #include <map>
 #include <memory>
@@ -20,15 +22,13 @@ class Scope : public IScope {
 
     std::map<std::string, Variable> _variables;
 
+    sol::state _lua;
+
 public:
-    Scope(std::shared_ptr<IScope> parent) : _parent(parent) {
-        addStandardCommands(*this);
-    }
+    Scope(std::shared_ptr<IScope> parent);
 
     // Used by handler
-    void editor(Editor *editor) {
-        _editor = editor;
-    }
+    void editor(Editor *editor);
 
     // @see IEnvironment
     IScope &root() override {
@@ -109,6 +109,16 @@ public:
                 return _parent->get(std::move(name));
             }
             return {};
+        }
+    }
+
+    void parseLua(std::string_view code) override {
+        try {
+            auto res = _lua.load(code);
+            res();
+        }
+        catch (sol::error &e) {
+            std::cerr << e.what() << "\n";
         }
     }
 };

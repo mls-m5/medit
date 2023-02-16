@@ -45,6 +45,9 @@ Todo:
 - [ ] Scripting
   - [ ] Use real scripting language
 - [x] ctrl+backspace to erase whole word
+- Editors
+  - [ ] Word wrapping
+  - [ ] Horizontal scroll
 
 
 # Prioritized changes

@@ -50,4 +50,8 @@ public:
     friend bool operator!=(const FChar &a, const FChar b) {
         return a.c != b.c;
     }
+
+    friend bool operator<(const FChar &a, const FChar b) {
+        return a.c < b.c;
+    }
 };
