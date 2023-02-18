@@ -81,6 +81,7 @@ file(
 file(
     COPY
     data/oblivion.json
+    data/init.lua
     data/UbuntuMono-Regular.ttf
     DESTINATION
     ${CMAKE_BINARY_DIR}/data

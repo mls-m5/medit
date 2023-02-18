@@ -42,8 +42,11 @@ Todo:
 - [ ] File synch
   - [ ] Detect when open buffer is changed on disk
   - [ ] Prompt if buffer contains unsaved changes, otherwise replace
-- [ ] Scripting
-  - [ ] Use real scripting language
+- [ ] Use Lua
+  - [ ] Make core functionality callable from lua
+  - [ ] Implement functions for keybindings in lua
+  - [ ] Replace mode logic with lua code
+  - [ ] Remove remainders of old scripting engine
 - [x] ctrl+backspace to erase whole word
 - Editors
   - [ ] Word wrapping

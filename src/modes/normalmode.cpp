@@ -29,7 +29,6 @@ std::shared_ptr<IMode> createNormalMode() {
             {{Key::Delete}, {"editor.right\neditor.erase"}},
             {{"x"}, {"editor.right\neditor.erase"}},
             {{Key::Escape}, {"escape"}},
-            //            {{Key::Return}, {"editor.down"}},
             {{"\n"}, {"editor.down"}},
             {{Key::Space}, {"editor.right"}},
             {{"i"}, {"editor.insertmode"}},
