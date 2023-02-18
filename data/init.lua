@@ -1,23 +1,7 @@
 
+require "mode"
 
-editor = window:get_editor()
-cursor = editor:get_cursor()
-
-print("cursor x")
-
-print(tostring(cursor:get_x()))
-
-function map(args)
-end
-
-function nmap(args)
-end
-
-function vmap(args)
-end
-
-function imap(args)
-end
+--- Default functions
 
 function Editor.left(e)
     local editor = e.get_editor()
@@ -33,10 +17,10 @@ end
 map{
     F2 = goto_definition,
     F4 = switch_header,
+    F5 = switch_header, -- test
 }
 
 --- Normal mode
-
 nmap{
     Left = Editor.left,
     Right = Editor.right,

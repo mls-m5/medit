@@ -3,9 +3,11 @@
 #include "visualmode.h"
 #include "modes/mode.h"
 #include "modes/parentmode.h"
+#include "script/ienvironment.h"
 #include "views/editor.h"
 
-std::shared_ptr<IMode> createVisualMode(bool blockSelection) {
+std::shared_ptr<IMode> createVisualMode(IEnvironment &env,
+                                        bool blockSelection) {
     auto map = KeyMap{
         {
             {{Key::Left}, {"editor.left"}},
@@ -43,7 +45,6 @@ std::shared_ptr<IMode> createVisualMode(bool blockSelection) {
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
         {{"iw"}, {"editor.select_inner_word"}},
         {{"aw"}, {"editor.select_inner_word"}},
-        //        {{"w"}, {"editor.select_word"}}, // Done automaticaly
     }};
 
     auto mode = std::make_shared<Mode>("visual",

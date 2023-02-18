@@ -4,7 +4,7 @@
 #include "ienvironment.h"
 #include "keys/event.h"
 #include "meditfwd.h"
-#include "sol/state.hpp"
+#include "script/luastate.h"
 #include "views/editor.h"
 
 /// Environment data for a single user
@@ -16,7 +16,7 @@ class LocalEnvironment : public IEnvironment {
     bool _showConsole = false;
     Context &_context;
     Registers _registers;
-    sol::state _lua;
+    LuaState _lua;
 
 public:
     LocalEnvironment(MainWindow &mw, Context &context);
@@ -74,7 +74,7 @@ public:
         return _mainWindow;
     }
 
-    void parseLua(std::string_view code);
+    //    void parseLua(std::string_view code);
 
     //! Trigger redraw of winow
     void redrawScreen();

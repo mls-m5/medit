@@ -66,7 +66,10 @@ public:
     }
 
     IWindow *window() override {
-        return _parent->window();
+        if (_parent) {
+            return _parent->window();
+        }
+        return nullptr;
     }
 
 private:

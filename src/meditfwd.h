@@ -34,6 +34,7 @@ class IWindow;
 class CoreEnvironment;
 class BufferEvent;
 class IEnvironment;
+class LuaState;
 
 class ITimer;
 class IJobQueue;

@@ -125,7 +125,7 @@ add_library(
     script/command.cpp
     script/parser.cpp
     script/togglecomments.cpp
-    script/initlua.cpp
+    script/luastate.cpp
     script/scope.cpp
     navigation/headernavigation.cpp
     completion/autocomplete.cpp

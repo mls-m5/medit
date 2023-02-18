@@ -82,6 +82,7 @@ file(
     COPY
     data/oblivion.json
     data/init.lua
+    data/mode.lua
     data/UbuntuMono-Regular.ttf
     DESTINATION
     ${CMAKE_BINARY_DIR}/data
@@ -113,18 +114,3 @@ target_link_libraries(
     lib_medit
     )
 
-# ==== standalone thin client ==============================================
-
-#if (NOT EMSCRIPTEN)
-#    add_executable(
-#        medit_thin
-#        src/thinmain.cpp
-#        )
-
-#    target_link_libraries(
-#        medit_thin
-#        PUBLIC
-#        medit_common
-#        medit_remote_screen
-#        )
-#endif()

@@ -64,3 +64,19 @@ if (ENABLE_LEGACY_CLANG_PLUGIN)
     test(clang_autocomplete)
     test(clanghighlighting)
 endif()
+
+# ------------------------------------
+
+function(lua_test testname)
+    add_test(
+        NAME lua_${testname}
+        COMMAND lua test/${testname}.lua
+    )
+    file(
+        COPY ${testname}.lua
+        DESTINATION test
+        )
+
+endfunction()
+
+lua_test(mode_test)

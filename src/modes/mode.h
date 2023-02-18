@@ -3,6 +3,7 @@
 #include "keys/bufferkeymap.h"
 #include "keys/keymap.h"
 #include "modes/imode.h"
+#include "sol/sol.hpp"
 #include <memory>
 #include <string>
 

@@ -327,13 +327,13 @@ CommandList editorCommands = {
     {
         "editor.visualmode",
         [](std::shared_ptr<IScope> scope) {
-            scope->editor().mode(createVisualMode());
+            scope->editor().mode(createVisualMode(scope->env()));
         },
     },
     {
         "editor.visualblockmode",
         [](std::shared_ptr<IScope> scope) {
-            scope->editor().mode(createVisualMode(true));
+            scope->editor().mode(createVisualMode(scope->env(), true));
         },
     },
     {
