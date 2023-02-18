@@ -12,17 +12,17 @@ function Mode:new(o, parent)
     return o
 end
 
-function Mode:map(arg)
-    for i,v in ipairs(args) do
-        self.key_map[i] = v
+function Mode:map(args)
+    for i,v in pairs(args) do
+        self.key_map[i] = createKeyEvent(i, v)
     end
 end
 
 function Mode:key_press(e)
-    print(e)
-    for i,v in ipairs(self.key_map) do
+    for i,v in pairs(self.key_map) do
         if (v:match(e.key)) then
             v:f(e)
+            break
         end
     end
 end
@@ -34,20 +34,19 @@ normal_mode = Mode:new{parent_mode}
 insert_mode = Mode:new{parent_mode}
 visual_mode = Mode:new{parent_mode}
 
-function map(arg)
-    parent_mode.map(args)
+function map(args)
+    parent_mode:map(args)
 end
 
 function nmap(args)
-    normal_mode.map(args)
+    normal_mode:map(args)
 end
 
 function vmap(args)
-    visual_mode.map(args)
+    visual_mode:map(args)
 end
 
 function imap(args)
-    insert_mode.map(args)
+    insert_mode:map(args)
 end
 
-print("mode init")
