@@ -4,7 +4,7 @@
 
 KeyEvent = {}
 
-function KeyEvent:new(o, parent)
+function KeyEvent:new(o)
     parent = parent or {}
     o = o or {}
     setmetatable(o, self)
@@ -17,10 +17,10 @@ function KeyEvent:match(e)
     return self.k == e
 end
 
-function createKeyEvent(k, f)
-    print("created event ", k)
-    return KeyEvent:new({k = k, f = f})
+function translateKeyEvent(k)
+    return KeyEvent:new{k = k}
 end
+
 
 -- -------------------------------------
 

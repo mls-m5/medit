@@ -69,17 +69,6 @@ void LuaState::registerTypes() {
 void LuaState::standardFunctions() {
     _lua["print"] = [](std::string str) { std::cout << str << std::endl; };
 
-    _lua["map"] = [](sol::table arg) {
-        for (auto &item : arg) {
-            std::cout << item.first.as<std::string>() << " item" << std::endl;
-        }
-    };
-
-    _lua["nmap"] = [](sol::table arg) {
-        for (auto &item : arg) {
-        }
-    };
-
     _lua["goto_definition"] = []() {
         std::cout << "goto_definition called" << std::endl;
     };

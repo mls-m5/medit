@@ -12,6 +12,13 @@ function Mode:new(o, parent)
     return o
 end
 
+function createKeyMap(name, f)
+    return {
+        key = translateKeyEvent(name),
+        f = f,
+    }
+end
+
 function Mode:map(args)
     for i,v in pairs(args) do
         self.key_map[i] = createKeyMap(i, v)
@@ -20,19 +27,12 @@ end
 
 function Mode:key_press(e)
     for i,v in pairs(self.key_map) do
-        if (v:match(e.key)) then
+        if (i:match(e.key)) then
             v:f(e)
             break
         end
     end
 end
-
-function createKeyMap(name, f) {
-    return {
-        key = translateKeyEvent(name),
-        f = f,
-    }
-}
 
 --- Standard modes
 

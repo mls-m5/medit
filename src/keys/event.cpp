@@ -12,10 +12,10 @@ KeyEvent KeyEvent::translate(std::string name) {
         return Key::x;                                                         \
     }
 
-    E(Unknown);
-    E(Any);
-    E(Text);
-    E(KeyCombination);
+    // E(Unknown);
+    // E(Any);
+    // E(Text);
+    // E(KeyCombination);
     E(Up);
     E(Down);
     E(Left);
