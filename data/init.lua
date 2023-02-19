@@ -1,5 +1,6 @@
 
-require "mode"
+-- require "data/mode"
+require(findScript("data/mode.lua"))
 
 --- Default functions
 

@@ -2,6 +2,7 @@
 
 #include "keys/ikeysink.h"
 #include "meditfwd.h"
+#include "sol/sol.hpp"
 #include "text/cursor.h"
 #include "text/cursorrange.h"
 #include "text/formattype.h"

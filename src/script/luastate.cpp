@@ -8,17 +8,24 @@
 #include "text/cursorops.h"
 #include "views/editor.h"
 #include "views/mainwindow.h"
+#include <filesystem>
 #include <memory>
 #include <stdexcept>
 #include <string>
 
 void LuaState::init(MainWindow &window) {
-    _lua.open_libraries(sol::lib::base);
+    _lua.open_libraries(sol::lib::base, sol::lib::package);
 
     registerTypes();
     standardFunctions();
 
     _lua["window"] = &window;
+
+    _lua["findScript"] = [this](std::string str) -> std::string {
+        return std::filesystem::relative(findConfig(str),
+                                         std::filesystem::current_path())
+            .replace_extension("");
+    };
 
     try {
         auto initFile = findConfig("data/init.lua");

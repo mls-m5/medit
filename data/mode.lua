@@ -57,3 +57,4 @@ function imap(args)
     insert_mode:map(args)
 end
 
+print("mode");
