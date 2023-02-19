@@ -96,6 +96,7 @@ add_library(
     files/file.cpp
     files/project.cpp
     keys/keymap.cpp
+    keys/event.cpp
     syntax/basichighligting.cpp
     text/fstring.cpp
     text/cursorrangeops.cpp

@@ -59,6 +59,8 @@ void LuaState::registerTypes() {
         "get_modifiers",
         [](KeyEvent &self) { return self.modifiers; });
 
+    _lua["translateKeyEvent"] = &KeyEvent::translate;
+
     _lua.new_usertype<MainWindow>("Window", "get_editor", [](MainWindow &self) {
         return &self.currentEditor();
     });

@@ -14,7 +14,7 @@ end
 
 function Mode:map(args)
     for i,v in pairs(args) do
-        self.key_map[i] = createKeyEvent(i, v)
+        self.key_map[i] = createKeyMap(i, v)
     end
 end
 
@@ -26,6 +26,13 @@ function Mode:key_press(e)
         end
     end
 end
+
+function createKeyMap(name, f) {
+    return {
+        key = translateKeyEvent(name),
+        f = f,
+    }
+}
 
 --- Standard modes
 
