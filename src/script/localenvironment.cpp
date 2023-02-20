@@ -16,6 +16,10 @@ CoreEnvironment &LocalEnvironment::core() {
     return CoreEnvironment::instance();
 }
 
+const StandardCommands &LocalEnvironment::standardCommands() const {
+    return StandardCommands::get();
+}
+
 // void LocalEnvironment::parseLua(std::string_view code) {
 //     try {
 //         auto res = _lua.load(code);

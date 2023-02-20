@@ -71,8 +71,12 @@ CommandList navigationCommands = {
             auto path =
                 scope->env().project().findSwitchHeader(scope->editor().path());
             if (!path.empty()) {
-                scope->set("path", path.string());
-                scope->run(parse("editor.open"));
+                //                scope->set("path", path.string());
+                //                scope->run(parse("editor.open"));
+                //                standardCommands::open(scope->env(),
+                //                path.string());
+                scope->env().standardCommands().open(
+                    scope->env(), path, std::nullopt, std::nullopt);
             }
         },
     },
@@ -376,4 +380,27 @@ void addStandardCommands(IScope &scope) {
     addCommands(navigationCommands);
     addCommands(editorCommands);
     addCommands(selectionCommands);
+}
+
+// void standardCommands::open(IEnvironment &env,
+//                             std::filesystem::path path,
+//                             std::optional<int> x,
+//                             std::optional<int> y) {
+//     if (path.empty()) {
+//         return;
+//     }
+//     env.mainWindow().open(path, x, y);
+// }
+
+StandardCommands &StandardCommands::get() {
+    static StandardCommands commands{.open = [](IEnvironment &env,
+                                                std::filesystem::path path,
+                                                std::optional<int> x,
+                                                std::optional<int> y) {
+        if (path.empty()) {
+            return;
+        }
+        env.mainWindow().open(path, x, y);
+    }};
+    return commands;
 }

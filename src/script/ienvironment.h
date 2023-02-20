@@ -25,6 +25,8 @@ public:
     //! In the future this can be multiple values depending on which console
     virtual void showConsole(bool shown) = 0;
 
+    virtual const StandardCommands &standardCommands() const = 0;
+
     IEnvironment() = default;
     IEnvironment(const IEnvironment &) = delete;
     IEnvironment &operator=(const IEnvironment &) = delete;

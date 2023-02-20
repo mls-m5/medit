@@ -12,6 +12,7 @@
 #include "script/ienvironment.h"
 #include "script/iscope.h"
 #include "script/scope.h"
+#include "script/standardcommands.h"
 #include "syntax/basichighligting.h"
 #include "syntax/palette.h"
 #include "text/cursorrangeops.h"
@@ -354,31 +355,29 @@ void LspHighlight::highlight(std::shared_ptr<IScope> scope) {
 
 // void LspHighlight::update(const IPalette &palette) {}
 
-bool LspNavigation::gotoSymbol(std::shared_ptr<IScope> env) {
-    if (!shouldProcessFileWithClang(env->editor().path())) {
+bool LspNavigation::gotoSymbol(std::shared_ptr<IScope> scope) {
+    if (!shouldProcessFileWithClang(scope->editor().path())) {
         return false;
     }
 
     auto params = TypeDefinitionParams{};
-    params.textDocument.uri = pathToUri(env->editor().buffer().path());
-    params.position = meditCursorToPosition(env->editor().cursor());
+    params.textDocument.uri = pathToUri(scope->editor().buffer().path());
+    params.position = meditCursorToPosition(scope->editor().cursor());
     LspPlugin::instance().client().request(
-        params, [env](const std::vector<Location> &locations) {
+        params, [scope](const std::vector<Location> &locations) {
             if (locations.empty()) {
                 return;
             }
 
-            env->env().context().guiQueue().addTask([env, locations] {
-                auto localEnvironment = std::make_shared<Scope>(env);
-                localEnvironment->set(
-                    "path", uriToPath(locations.front().uri).string());
-
+            scope->env().context().guiQueue().addTask([scope, locations] {
                 auto pos =
                     clangPositionToLspPosition(locations.front().range.start);
 
-                localEnvironment->set("x", std::to_string(pos.x()));
-                localEnvironment->set("y", std::to_string(pos.y()));
-                localEnvironment->run(Command{"editor.open"});
+                scope->env().standardCommands().open(
+                    scope->env(),
+                    uriToPath(locations.front().uri).string(),
+                    pos.x(),
+                    pos.y());
             });
         });
     return true;

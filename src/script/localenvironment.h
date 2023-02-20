@@ -5,6 +5,7 @@
 #include "keys/event.h"
 #include "meditfwd.h"
 #include "script/luastate.h"
+#include "script/standardcommands.h"
 #include "views/editor.h"
 
 /// Environment data for a single user
@@ -73,6 +74,8 @@ public:
     MainWindow &mainWindow() override {
         return _mainWindow;
     }
+
+    const StandardCommands &standardCommands() const override;
 
     //    void parseLua(std::string_view code);
 

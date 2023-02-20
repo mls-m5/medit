@@ -2,12 +2,13 @@
 #include "clangcontext.h"
 #include "core/plugins.h"
 #include "files/file.h"
-#include "script/scope.h"
 #include "script/iscope.h"
+#include "script/scope.h"
 #include "text/cursor.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
 #include "clang/clangmodel.h"
+#include <optional>
 
 using namespace std::literals;
 
@@ -94,9 +95,11 @@ bool ClangNavigation::gotoSymbol(std::shared_ptr<IScope> env) {
     auto path = env->editor().path();
 
     if (!filenameStr.empty() && path != filenameStr) {
-        auto localEnvironment = std::make_shared<Scope>(env);
-        localEnvironment->set("path", filenameStr);
-        localEnvironment->run(Command{"editor.open"});
+        //        auto localEnvironment = std::make_shared<Scope>(env);
+        //        localEnvironment->set("path", filenameStr);
+        //        localEnvironment->run(Command{"editor.open"});
+        env->standardCommands().open(
+            *env, filenameStr, std::nullopt, std::nullopt);
         return true;
     }
 

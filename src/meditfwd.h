@@ -35,6 +35,7 @@ class CoreEnvironment;
 class BufferEvent;
 class IEnvironment;
 class LuaState;
+class StandardCommands;
 
 class ITimer;
 class IJobQueue;

@@ -409,6 +409,17 @@ void MainWindow::refreshScreen() {
     if (_shouldRedraw) {
         _shouldRedraw = false;
 
+        {
+            //    if (debug) {
+            //            _screen.draw(1,
+            //                         height() - 1,
+            //                         std::to_string(_cursor.y() + 1) + ", " +
+            //                             std::to_string(_cursor.x() + 1));
+
+            //            _screen.draw(10, _screen.height() - 1, _mode->name());
+            //    }
+        }
+
         updateCursor(_screen);
         _screen.clear();
         draw(_screen);
