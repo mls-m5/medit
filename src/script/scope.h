@@ -69,6 +69,10 @@ public:
 
     // @see IScope
     bool run(const Command &command) override {
+        if (command.f) {
+            command.f(env().shared_from_this());
+            return true;
+        }
         auto action = findAction(command.text);
         if (action) {
             (*action)(shared_from_this());

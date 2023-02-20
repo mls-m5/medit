@@ -23,7 +23,7 @@ public:
     ~Command() = default;
 
     operator bool() const {
-        return !text.empty();
+        return !text.empty() || f;
     }
 };
 
@@ -34,10 +34,9 @@ public:
     std::vector<CommandBlock> list;
 
     CommandBlock(Command::FT f) {
-        auto command = Command{};
-        command.f = f;
-        list.push_back(f);
+        _command.f = f;
     }
+
     CommandBlock(std::string code);
     CommandBlock(Command command)
         : _command(std::move(command)) {}

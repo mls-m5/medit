@@ -374,7 +374,7 @@ bool LspNavigation::gotoSymbol(std::shared_ptr<IScope> scope) {
                     clangPositionToLspPosition(locations.front().range.start);
 
                 scope->env().standardCommands().open(
-                    scope->env(),
+                    scope->env().shared_from_this(),
                     uriToPath(locations.front().uri).string(),
                     pos.x(),
                     pos.y());

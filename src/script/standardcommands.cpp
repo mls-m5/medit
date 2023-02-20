@@ -22,14 +22,13 @@ using CommandList =
     std::map<std::string, std::function<void(std::shared_ptr<IScope>)>>;
 
 CommandList navigationCommands = {
-
-    {
-        "editor.left",
-        [](std::shared_ptr<IScope> scope) {
-            auto &e = scope->editor();
-            e.cursor(left(e.cursor()));
-        },
-    },
+    //    {
+    //        "editor.left",
+    //        [](std::shared_ptr<IScope> scope) {
+    //            auto &e = scope->editor();
+    //            e.cursor(left(e.cursor()));
+    //        },
+    //    },
     {
         "editor.right",
         [](std::shared_ptr<IScope> scope) {
@@ -387,6 +386,12 @@ void addStandardCommands(IScope &scope) {
 
 StandardCommands &StandardCommands::get() {
     static StandardCommands commands{
+        .left =
+            [](EnvPtrT env) {
+                auto &e = env->editor();
+                e.cursor(::left(e.cursor()));
+            },
+
         .open =
             [](EnvPtrT env,
                std::filesystem::path path,
@@ -406,5 +411,6 @@ StandardCommands &StandardCommands::get() {
                     CursorRange{wordBegin(cursor), right(wordEnd(cursor))};
                 e.selection(range);
             }};
+
     return commands;
 }

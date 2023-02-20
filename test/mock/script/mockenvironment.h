@@ -20,5 +20,4 @@ public:
                  standardCommands,
                  (),
                  const override);
-    ;
 };

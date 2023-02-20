@@ -3,15 +3,18 @@
 #include "normalmode.h"
 #include "modes/mode.h"
 #include "modes/parentmode.h"
+#include "script/standardcommands.h"
 
 std::shared_ptr<IMode> createNormalMode() {
+    auto &sc = StandardCommands::get();
+
     auto map = KeyMap{
         {
-            {{Key::Left}, {"editor.left"}},
+            {{Key::Left}, {sc.left}},
             {{Key::Right}, {"editor.right"}},
             {{Key::Down}, {"editor.down"}},
             {{Key::Up}, {"editor.up"}},
-            {{"h"}, {"editor.left"}},
+            {{"h"}, {sc.left}},
             {{"l"}, {"editor.right"}},
             {{"j"}, {"editor.down"}},
             {{"k"}, {"editor.up"}},
