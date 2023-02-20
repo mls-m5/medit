@@ -12,6 +12,7 @@ public:
     MOCK_METHOD0(Context &, context, (), override);
     MOCK_METHOD0(Registers &, registers, (), override);
     MOCK_METHOD1(void, showConsole, (bool shown), override);
+    MOCK_METHOD0(Editor &, editor, (), override);
     MOCK_METHOD0(Editor &, console, (), override);
     MOCK_METHOD0(CoreEnvironment &, core, (), override);
     MOCK_METHOD0(MainWindow &, mainWindow, (), override);

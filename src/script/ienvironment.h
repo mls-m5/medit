@@ -2,8 +2,10 @@
 
 #include "meditfwd.h"
 
+#include <memory>
+
 // Things common to the whole application
-class IEnvironment {
+class IEnvironment : public std::enable_shared_from_this<IEnvironment> {
 public:
     //! @returns last key pressed
     [[nodiscard]] virtual KeyEvent key() const = 0;
@@ -19,7 +21,7 @@ public:
     [[nodiscard]] virtual MainWindow &mainWindow() = 0;
 
     //! Return the editor active in the current context
-    //    [[nodiscard]] virtual Editor &editor() = 0;
+    [[nodiscard]] virtual Editor &editor() = 0;
     [[nodiscard]] virtual Editor &console() = 0;
 
     //! In the future this can be multiple values depending on which console

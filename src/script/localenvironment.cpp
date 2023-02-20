@@ -20,6 +20,10 @@ const StandardCommands &LocalEnvironment::standardCommands() const {
     return StandardCommands::get();
 }
 
+Editor &LocalEnvironment::editor() {
+    return _mainWindow.currentEditor();
+}
+
 // void LocalEnvironment::parseLua(std::string_view code) {
 //     try {
 //         auto res = _lua.load(code);

@@ -4,6 +4,7 @@
 #include "modes/mode.h"
 #include "modes/parentmode.h"
 #include "script/ienvironment.h"
+#include "script/standardcommands.h"
 #include "views/editor.h"
 
 std::shared_ptr<IMode> createVisualMode(IEnvironment &env,
@@ -42,9 +43,12 @@ std::shared_ptr<IMode> createVisualMode(IEnvironment &env,
     };
     map.defaultAction({});
 
+    auto &sc = env.standardCommands();
+
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
         {{"iw"}, {"editor.select_inner_word"}},
-        {{"aw"}, {"editor.select_inner_word"}},
+        //        {{"aw"}, {"editor.select_inner_word"}},
+        {{"aw"}, {sc.selectInnerWord}},
     }};
 
     auto mode = std::make_shared<Mode>("visual",

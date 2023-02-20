@@ -27,7 +27,7 @@ public:
     virtual void addCommand(std::string,
                             std::function<void(std::shared_ptr<IScope>)>) = 0;
 
-    //! Run a single command, returne true on success and false on fail
+    //! Run a single command, return true on success and false on fail
     virtual bool run(const Command &command) = 0;
 
     inline bool run(const CommandBlock &commands) {

@@ -1,11 +1,18 @@
 #pragma once
 
+#include "meditfwd.h"
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
+// TODO: Phase out this class
 class Command {
 public:
+    using FT = std::function<void(std::shared_ptr<IEnvironment>)>;
+
     std::string text;
+    FT f;
 
     Command() = default;
     Command(const Command &) = default;
@@ -20,13 +27,20 @@ public:
     }
 };
 
+// TODO: This whole class should go aswell and be replaced by std-function
 class CommandBlock {
 public:
     Command _command;
     std::vector<CommandBlock> list;
 
+    CommandBlock(Command::FT f) {
+        auto command = Command{};
+        command.f = f;
+        list.push_back(f);
+    }
     CommandBlock(std::string code);
-    CommandBlock(Command command) : _command(std::move(command)) {}
+    CommandBlock(Command command)
+        : _command(std::move(command)) {}
 
     CommandBlock() = default;
     CommandBlock(const CommandBlock &) = default;

@@ -76,7 +76,10 @@ CommandList navigationCommands = {
                 //                standardCommands::open(scope->env(),
                 //                path.string());
                 scope->env().standardCommands().open(
-                    scope->env(), path, std::nullopt, std::nullopt);
+                    scope->env().shared_from_this(),
+                    path,
+                    std::nullopt,
+                    std::nullopt);
             }
         },
     },
@@ -382,25 +385,26 @@ void addStandardCommands(IScope &scope) {
     addCommands(selectionCommands);
 }
 
-// void standardCommands::open(IEnvironment &env,
-//                             std::filesystem::path path,
-//                             std::optional<int> x,
-//                             std::optional<int> y) {
-//     if (path.empty()) {
-//         return;
-//     }
-//     env.mainWindow().open(path, x, y);
-// }
-
 StandardCommands &StandardCommands::get() {
-    static StandardCommands commands{.open = [](IEnvironment &env,
-                                                std::filesystem::path path,
-                                                std::optional<int> x,
-                                                std::optional<int> y) {
-        if (path.empty()) {
-            return;
-        }
-        env.mainWindow().open(path, x, y);
-    }};
+    static StandardCommands commands{
+        .open =
+            [](EnvPtrT env,
+               std::filesystem::path path,
+               std::optional<int> x,
+               std::optional<int> y) {
+                if (path.empty()) {
+                    return;
+                }
+                env->mainWindow().open(path, x, y);
+            },
+
+        .selectInnerWord =
+            [](EnvPtrT env) {
+                auto &e = env->editor();
+                auto cursor = e.cursor();
+                auto range =
+                    CursorRange{wordBegin(cursor), right(wordEnd(cursor))};
+                e.selection(range);
+            }};
     return commands;
 }

@@ -77,6 +77,8 @@ public:
 
     const StandardCommands &standardCommands() const override;
 
+    Editor &editor() override;
+
     //    void parseLua(std::string_view code);
 
     //! Trigger redraw of winow
