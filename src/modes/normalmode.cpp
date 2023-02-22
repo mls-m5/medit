@@ -11,11 +11,11 @@ std::shared_ptr<IMode> createNormalMode() {
     auto map = KeyMap{
         {
             {{Key::Left}, {sc.left}},
-            {{Key::Right}, {"editor.right"}},
+            {{Key::Right}, {sc.right}},
             {{Key::Down}, {"editor.down"}},
             {{Key::Up}, {"editor.up"}},
             {{"h"}, {sc.left}},
-            {{"l"}, {"editor.right"}},
+            {{"l"}, {sc.right}},
             {{"j"}, {"editor.down"}},
             {{"k"}, {"editor.up"}},
             {{"J"}, {"editor.join"}},

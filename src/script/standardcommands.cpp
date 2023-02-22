@@ -29,27 +29,27 @@ CommandList navigationCommands = {
     //            e.cursor(left(e.cursor()));
     //        },
     //    },
-    {
-        "editor.right",
-        [](std::shared_ptr<IScope> scope) {
-            auto &e = scope->editor();
-            e.cursor(right(e.cursor()));
-        },
-    },
-    {
-        "editor.up",
-        [](std::shared_ptr<IScope> scope) {
-            auto &e = scope->editor();
-            e.cursor(up(e.cursor()));
-        },
-    },
-    {
-        "editor.down",
-        [](std::shared_ptr<IScope> scope) {
-            auto &e = scope->editor();
-            e.cursor(down(e.cursor()));
-        },
-    },
+    //    {
+    //        "editor.right",
+    //        [](std::shared_ptr<IScope> scope) {
+    //            auto &e = scope->editor();
+    //            e.cursor(right(e.cursor()));
+    //        },
+    //    },
+    //    {
+    //        "editor.up",
+    //        [](std::shared_ptr<IScope> scope) {
+    //            auto &e = scope->editor();
+    //            e.cursor(up(e.cursor()));
+    //        },
+    //    },
+    //    {
+    //        "editor.down",
+    //        [](std::shared_ptr<IScope> scope) {
+    //            auto &e = scope->editor();
+    //            e.cursor(down(e.cursor()));
+    //        },
+    //    },
     {
         "editor.word_begin",
         [](std::shared_ptr<IScope> scope) {
@@ -70,10 +70,6 @@ CommandList navigationCommands = {
             auto path =
                 scope->env().project().findSwitchHeader(scope->editor().path());
             if (!path.empty()) {
-                //                scope->set("path", path.string());
-                //                scope->run(parse("editor.open"));
-                //                standardCommands::open(scope->env(),
-                //                path.string());
                 scope->env().standardCommands().open(
                     scope->env().shared_from_this(),
                     path,
@@ -82,43 +78,43 @@ CommandList navigationCommands = {
             }
         },
     },
-    {
-        "editor.home",
-        [](std::shared_ptr<IScope> scope) {
-            auto &e = scope->editor();
-            e.cursor(home(e.cursor()));
-        },
-    },
-    {
-        "editor.end",
-        [](std::shared_ptr<IScope> scope) {
-            auto &e = scope->editor();
-            e.cursor(end(e.cursor()));
-        },
-    },
-    {
-        "editor.page_up",
-        [](std::shared_ptr<IScope> scope) {
-            auto &e = scope->editor();
-            auto c = e.cursor();
+    //    {
+    //        "editor.home",
+    //        [](std::shared_ptr<IScope> scope) {
+    //            auto &e = scope->editor();
+    //            e.cursor(home(e.cursor()));
+    //        },
+    //    },
+    //    {
+    //        "editor.end",
+    //        [](std::shared_ptr<IScope> scope) {
+    //            auto &e = scope->editor();
+    //            e.cursor(end(e.cursor()));
+    //        },
+    //    },
+    //    {
+    //        "editor.page_up",
+    //        [](std::shared_ptr<IScope> scope) {
+    //            auto &e = scope->editor();
+    //            auto c = e.cursor();
 
-            for (size_t i = 0; i < 10; ++i) {
-                c = up(c);
-            }
-            e.cursor(c);
-        },
-    },
-    {
-        "editor.page_down",
-        [](std::shared_ptr<IScope> scope) {
-            auto &e = scope->editor();
-            auto c = e.cursor();
-            for (size_t i = 0; i < 10; ++i) {
-                c = down(c);
-            }
-            e.cursor(c);
-        },
-    },
+    //            for (size_t i = 0; i < 10; ++i) {
+    //                c = up(c);
+    //            }
+    //            e.cursor(c);
+    //        },
+    //    },
+    //    {
+    //        "editor.page_down",
+    //        [](std::shared_ptr<IScope> scope) {
+    //            auto &e = scope->editor();
+    //            auto c = e.cursor();
+    //            for (size_t i = 0; i < 10; ++i) {
+    //                c = down(c);
+    //            }
+    //            e.cursor(c);
+    //        },
+    //    },
 };
 
 CommandList editorCommands = {
@@ -212,14 +208,10 @@ CommandList editorCommands = {
             auto &e = scope->editor();
             auto selection = e.selection();
             if (selection.empty()) {
-                //                scope->env().registers().save(standardRegister,
-                //                                              content(e.cursor()).toString());
                 auto begin = wordBegin(e.cursor());
                 e.cursor(erase(CursorRange{begin, e.cursor()}));
             }
             else {
-                //                scope->env().registers().save(standardRegister,
-                //                                              toString(selection));
                 e.cursor(erase(selection), true);
             }
         },
@@ -250,8 +242,6 @@ CommandList editorCommands = {
             auto cursor = scope->editor().cursor();
             if (str.isLine) {
                 insert({cursor.buffer(), 0, cursor.y() + 1}, str.value + '\n');
-                //                scope->editor().buffer().insert(cursor.y() +
-                //                1, str.value);
                 cursor.y(cursor.y() + 1);
                 scope->editor().cursor(cursor);
             }
@@ -392,6 +382,55 @@ StandardCommands &StandardCommands::get() {
                 e.cursor(::left(e.cursor()));
             },
 
+        .right =
+            [](EnvPtrT env) {
+                auto &e = env->editor();
+                e.cursor(::right(e.cursor()));
+            },
+        .up =
+            [](EnvPtrT scope) {
+                auto &e = scope->editor();
+                e.cursor(::up(e.cursor()));
+            },
+        .down =
+            [](EnvPtrT scope) {
+                auto &e = scope->editor();
+                e.cursor(::down(e.cursor()));
+            },
+
+        .home =
+            [](EnvPtrT scope) {
+                auto &e = scope->editor();
+                e.cursor(::home(e.cursor()));
+            },
+        .end =
+            [](EnvPtrT scope) {
+                auto &e = scope->editor();
+                e.cursor(::end(e.cursor()));
+            },
+
+        .pageUp =
+            [](EnvPtrT scope) {
+                auto &e = scope->editor();
+                auto c = e.cursor();
+
+                for (size_t i = 0; i < 10; ++i) {
+                    c = ::up(c);
+                }
+                e.cursor(c);
+            },
+        .pageDown =
+            [](EnvPtrT scope) {
+                auto &e = scope->editor();
+                auto c = e.cursor();
+                for (size_t i = 0; i < 10; ++i) {
+                    c = ::down(c);
+                }
+                e.cursor(c);
+            },
+
+        // ------------------------
+
         .open =
             [](EnvPtrT env,
                std::filesystem::path path,
@@ -408,9 +447,10 @@ StandardCommands &StandardCommands::get() {
                 auto &e = env->editor();
                 auto cursor = e.cursor();
                 auto range =
-                    CursorRange{wordBegin(cursor), right(wordEnd(cursor))};
+                    CursorRange{wordBegin(cursor), ::right(wordEnd(cursor))};
                 e.selection(range);
-            }};
+            },
+    };
 
     return commands;
 }
