@@ -21,102 +21,6 @@ namespace {
 using CommandList =
     std::map<std::string, std::function<void(std::shared_ptr<IScope>)>>;
 
-CommandList navigationCommands = {
-    //    {
-    //        "editor.left",
-    //        [](std::shared_ptr<IScope> scope) {
-    //            auto &e = scope->editor();
-    //            e.cursor(left(e.cursor()));
-    //        },
-    //    },
-    //    {
-    //        "editor.right",
-    //        [](std::shared_ptr<IScope> scope) {
-    //            auto &e = scope->editor();
-    //            e.cursor(right(e.cursor()));
-    //        },
-    //    },
-    //    {
-    //        "editor.up",
-    //        [](std::shared_ptr<IScope> scope) {
-    //            auto &e = scope->editor();
-    //            e.cursor(up(e.cursor()));
-    //        },
-    //    },
-    //    {
-    //        "editor.down",
-    //        [](std::shared_ptr<IScope> scope) {
-    //            auto &e = scope->editor();
-    //            e.cursor(down(e.cursor()));
-    //        },
-    //    },
-    //    {
-    //        "editor.word_begin",
-    //        [](std::shared_ptr<IScope> scope) {
-    //            auto &e = scope->editor();
-    //            e.cursor(wordBegin(e.cursor()));
-    //        },
-    //    },
-    //    {
-    //        "editor.word_end",
-    //        [](std::shared_ptr<IScope> scope) {
-    //            auto &e = scope->editor();
-    //            e.cursor(wordEnd(e.cursor()));
-    //        },
-    //    },
-    //    {
-    //        "editor.switch_header",
-    //        [](std::shared_ptr<IScope> scope) {
-    //            auto path =
-    //                scope->env().project().findSwitchHeader(scope->editor().path());
-    //            if (!path.empty()) {
-    //                scope->env().standardCommands().open(
-    //                    scope->env().shared_from_this(),
-    //                    path,
-    //                    std::nullopt,
-    //                    std::nullopt);
-    //            }
-    //        },
-    //    },
-    //    {
-    //        "editor.home",
-    //        [](std::shared_ptr<IScope> scope) {
-    //            auto &e = scope->editor();
-    //            e.cursor(home(e.cursor()));
-    //        },
-    //    },
-    //    {
-    //        "editor.end",
-    //        [](std::shared_ptr<IScope> scope) {
-    //            auto &e = scope->editor();
-    //            e.cursor(end(e.cursor()));
-    //        },
-    //    },
-    //    {
-    //        "editor.page_up",
-    //        [](std::shared_ptr<IScope> scope) {
-    //            auto &e = scope->editor();
-    //            auto c = e.cursor();
-
-    //            for (size_t i = 0; i < 10; ++i) {
-    //                c = up(c);
-    //            }
-    //            e.cursor(c);
-    //        },
-    //    },
-    //    {
-    //        "editor.page_down",
-    //        [](std::shared_ptr<IScope> scope) {
-    //            auto &e = scope->editor();
-    //            auto c = e.cursor();
-    //            for (size_t i = 0; i < 10; ++i) {
-    //                c = down(c);
-    //            }
-    //            e.cursor(c);
-    //        },
-    //    },
-};
-
 CommandList editorCommands = {
     {
         "editor.yank_line",
@@ -369,110 +273,105 @@ void addStandardCommands(IScope &scope) {
         }
     };
 
-    addCommands(navigationCommands);
+    //    addCommands(navigationCommands);
     addCommands(editorCommands);
     addCommands(selectionCommands);
 }
 
-StandardCommands &StandardCommands::get() {
-    static StandardCommands commands{
-        .left =
-            [](EnvPtrT env) {
-                auto &e = env->editor();
-                e.cursor(::left(e.cursor()));
-            },
+namespace {
+StandardCommands create() {
+    using Ptr = StandardCommands::EnvPtrT;
 
-        .right =
-            [](EnvPtrT env) {
-                auto &e = env->editor();
-                e.cursor(::right(e.cursor()));
-            },
-        .up =
-            [](EnvPtrT scope) {
-                auto &e = scope->editor();
-                e.cursor(::up(e.cursor()));
-            },
-        .down =
-            [](EnvPtrT scope) {
-                auto &e = scope->editor();
-                e.cursor(::down(e.cursor()));
-            },
+#define DEF(name)                                                              \
+    commands.namedCommands[#name] = commands.name =                            \
+        [](StandardCommands::EnvPtrT env)
 
-        .home =
-            [](EnvPtrT scope) {
-                auto &e = scope->editor();
-                e.cursor(::home(e.cursor()));
-            },
-        .end =
-            [](EnvPtrT scope) {
-                auto &e = scope->editor();
-                e.cursor(::end(e.cursor()));
-            },
+    StandardCommands commands{};
+    DEF(left) {
+        auto &e = env->editor();
+        e.cursor(::left(e.cursor()));
+    };
+    DEF(right) {
+        auto &e = env->editor();
+        e.cursor(::right(e.cursor()));
+    };
+    DEF(up) {
+        auto &e = env->editor();
+        e.cursor(::up(e.cursor()));
+    };
+    DEF(down) {
+        auto &e = env->editor();
+        e.cursor(::down(e.cursor()));
+    };
+    DEF(home) {
+        auto &e = env->editor();
+        e.cursor(::home(e.cursor()));
+    };
+    DEF(end) {
+        auto &e = env->editor();
+        e.cursor(::end(e.cursor()));
+    };
 
-        .pageUp =
-            [](EnvPtrT scope) {
-                auto &e = scope->editor();
-                auto c = e.cursor();
+    DEF(pageUp) {
+        auto &e = env->editor();
+        auto c = e.cursor();
 
-                for (size_t i = 0; i < 10; ++i) {
-                    c = ::up(c);
-                }
-                e.cursor(c);
-            },
-        .pageDown =
-            [](EnvPtrT scope) {
-                auto &e = scope->editor();
-                auto c = e.cursor();
-                for (size_t i = 0; i < 10; ++i) {
-                    c = ::down(c);
-                }
-                e.cursor(c);
-            },
+        for (size_t i = 0; i < 10; ++i) {
+            c = ::up(c);
+        }
+        e.cursor(c);
+    };
+    DEF(pageDown) {
+        auto &e = env->editor();
+        auto c = e.cursor();
+        for (size_t i = 0; i < 10; ++i) {
+            c = ::down(c);
+        }
+        e.cursor(c);
+    };
 
-        .wordBegin =
-            [](EnvPtrT scope) {
-                auto &e = scope->editor();
-                e.cursor(::wordBegin(e.cursor()));
-            },
+    DEF(wordBegin) {
+        auto &e = env->editor();
+        e.cursor(::wordBegin(e.cursor()));
+    };
+    DEF(wordEnd) {
+        auto &e = env->editor();
+        e.cursor(::wordEnd(e.cursor()));
+    };
 
-        .wordEnd =
-            [](EnvPtrT scope) {
-                auto &e = scope->editor();
-                e.cursor(::wordEnd(e.cursor()));
-            },
+    DEF(switchHeader) {
+        auto path = env->project().findSwitchHeader(env->editor().path());
+        if (!path.empty()) {
+            env->standardCommands().open(env, path, std::nullopt, std::nullopt);
+        }
+    };
 
-        .switchHeader =
-            [](EnvPtrT env) {
-                auto path =
-                    env->project().findSwitchHeader(env->editor().path());
-                if (!path.empty()) {
-                    env->standardCommands().open(
-                        env, path, std::nullopt, std::nullopt);
-                }
-            },
+    // -----------------------
+    commands.selectInnerWord = [](StandardCommands::EnvPtrT env) {
+        auto &e = env->editor();
+        auto cursor = e.cursor();
+        auto range =
+            CursorRange{::wordBegin(cursor), ::right(::wordEnd(cursor))};
+        e.selection(range);
+    };
+    // ------------------------
 
-        // ------------------------
-
-        .open =
-            [](EnvPtrT env,
-               std::filesystem::path path,
-               std::optional<int> x,
-               std::optional<int> y) {
-                if (path.empty()) {
-                    return;
-                }
-                env->mainWindow().open(path, x, y);
-            },
-
-        .selectInnerWord =
-            [](EnvPtrT env) {
-                auto &e = env->editor();
-                auto cursor = e.cursor();
-                auto range = CursorRange{::wordBegin(cursor),
-                                         ::right(::wordEnd(cursor))};
-                e.selection(range);
-            },
+    commands.open = [](StandardCommands::EnvPtrT env,
+                       std::filesystem::path path,
+                       std::optional<int> x,
+                       std::optional<int> y) {
+        if (path.empty()) {
+            return;
+        }
+        env->mainWindow().open(path, x, y);
     };
 
     return commands;
+}
+
+} // namespace
+
+StandardCommands &StandardCommands::get() {
+    static auto sc = create();
+    return sc;
 }

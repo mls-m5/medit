@@ -8,6 +8,8 @@
 std::shared_ptr<IMode> createNormalMode() {
     auto &sc = StandardCommands::get();
 
+    using Ptr = StandardCommands::EnvPtrT;
+
     auto map = KeyMap{
         {
             {{Key::Left}, {sc.left}},
@@ -16,8 +18,8 @@ std::shared_ptr<IMode> createNormalMode() {
             {{Key::Up}, {"editor.up"}},
             {{"h"}, {sc.left}},
             {{"l"}, {sc.right}},
-            {{"j"}, {"editor.down"}},
-            {{"k"}, {"editor.up"}},
+            {{"j"}, {sc.down}},
+            {{"k"}, {sc.up}},
             {{"J"}, {"editor.join"}},
             {{"p"}, {"editor.paste"}},
             {{"P"}, {"editor.paste_before"}},
@@ -27,13 +29,13 @@ std::shared_ptr<IMode> createNormalMode() {
             {{"O"},
              {"editor.home\neditor.split\neditor.insertmode\neditor.up\neditor."
               "copyindentation"}},
-            {{Key::Backspace}, {"editor.left"}},
+            {{Key::Backspace}, {sc.left}},
             {{"X"}, {"editor.erase"}},
             {{Key::Delete}, {"editor.right\neditor.erase"}},
             {{"x"}, {"editor.right\neditor.erase"}},
             {{Key::Escape}, {"escape"}},
-            {{"\n"}, {"editor.down"}},
-            {{Key::Space}, {"editor.right"}},
+            {{"\n"}, {sc.down}},
+            {{Key::Space}, {sc.right}},
             {{"i"}, {"editor.insertmode"}},
             {{"v"}, {"editor.visualmode"}},
             {{"V"}, {"editor.visualblockmode"}},
@@ -43,8 +45,14 @@ std::shared_ptr<IMode> createNormalMode() {
             {{"a"}, {"editor.right\neditor.insertmode"}},
             {{"A"}, {"editor.end\neditor.insertmode"}},
 
-            {{"b"}, {"editor.left\neditor.word_begin"}},
-            {{"e"}, {"editor.right\neditor.word_end"}},
+            {{"b"}, {[&sc](Ptr e) {
+                 sc.left(e);
+                 sc.wordBegin(e);
+             }}},
+            {{"e"}, {[&sc](Ptr e) {
+                 sc.right(e);
+                 sc.wordEnd(e);
+             }}},
             {{"w"},
              {"editor.word_end\neditor.right\neditor.word_end\neditor.word_"
               "begin"}},

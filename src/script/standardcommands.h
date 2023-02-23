@@ -3,10 +3,12 @@
 #include "ienvironment.h"
 #include "iscope.h"
 #include <filesystem>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 void addStandardCommands(IScope &env);
@@ -22,9 +24,10 @@ void addStandardCommands(IScope &env);
     STD_DEF(pageDown);                                                         \
     STD_DEF(wordBegin);                                                        \
     STD_DEF(wordEnd);                                                          \
-    STD_DEF(switchHeader);
+    STD_DEF(switchHeader);                                                     \
+    STD_DEF(selectInnerWord);
 
-#define STD_DEF(name) void (*name)(EnvPtrT env) = nullptr
+#define STD_DEF(name) std::function<void(EnvPtrT env)> name
 
 /// A set of commands that can be bound to key presses and other events
 struct StandardCommands {
@@ -38,8 +41,8 @@ struct StandardCommands {
                  std::optional<int> x,
                  std::optional<int> y) = nullptr;
 
-    //    void (*selectInnerWord)(EnvPtrT env);
-    STD_DEF(selectInnerWord);
+    std::unordered_map<std::string, std::function<void(EnvPtrT env)>>
+        namedCommands;
 
     /// Get a instance of the StandardCommands struct
     /// This function is only available for the main lib,

@@ -2,16 +2,20 @@
 
 #include "parentmode.h"
 #include "mode.h"
+#include "script/standardcommands.h"
 
 std::shared_ptr<IMode> createParentMode() {
+    auto &sc = StandardCommands::get();
+    using Ptr = StandardCommands::EnvPtrT;
+
     auto map = KeyMap{{
         {KeyEvent{Key::F2}, {"editor.goto_definition"}},
         {KeyEvent{Key::F4}, {"editor.switch_header"}},
         {KeyEvent{Key::F5}, {"editor.run"}},
-        {KeyEvent{Key::Home}, {"editor.home"}},
-        {KeyEvent{Key::End}, {"editor.end"}},
-        {KeyEvent{Key::PageUp}, {"editor.page_up"}},
-        {KeyEvent{Key::PageDown}, {"editor.page_down"}},
+        {KeyEvent{Key::Home}, {sc.home}},
+        {KeyEvent{Key::End}, {sc.end}},
+        {KeyEvent{Key::PageUp}, {sc.pageUp}},
+        {KeyEvent{Key::PageDown}, {sc.pageDown}},
         {KeyEvent{Key::KeyCombination, 'T', Modifiers::Ctrl}, {"show_console"}},
         {KeyEvent{Key::KeyCombination, 'E', Modifiers::Ctrl},
          {"switch_editor"}},
