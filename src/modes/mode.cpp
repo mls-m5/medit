@@ -1,6 +1,6 @@
 #include "mode.h"
 
-#include "script/standardcommands.h"
+#include "script/ienvironment.h"
 
 Mode::Mode(std::string name,
            KeyMap map,
@@ -15,11 +15,11 @@ Mode::Mode(std::string name,
     , _cursorStyle(cursorStyle)
     , _isBlockSelection{isBlockSelection} {}
 
-bool Mode::keyPress(std::shared_ptr<IScope> scope) {
+bool Mode::keyPress(std::shared_ptr<IEnvironment> env) {
     auto lock = shared_from_this();
-    const auto key = scope->env().key();
+    const auto key = env->key();
     const auto &action = _keyMap.find(key);
-    if (_parent && _parent->keyPress(scope)) {
+    if (_parent && _parent->keyPress(env)) {
         return true;
     }
 
@@ -34,7 +34,8 @@ bool Mode::keyPress(std::shared_ptr<IScope> scope) {
         }
         else if (m.first == BufferKeyMap::Match) {
             const auto &block = *m.second;
-            scope->run(block);
+            block(env);
+            //            scope->run(block);
             _buffer.clear();
             return true;
         }
@@ -42,7 +43,8 @@ bool Mode::keyPress(std::shared_ptr<IScope> scope) {
     _buffer.clear();
 
     if (action) {
-        scope->run(action);
+        action(env);
+        //        scope->run(action);
         return true;
     }
     return false;

@@ -3,10 +3,9 @@
 #include "core/context.h"
 #include "core/coreenvironment.h"
 #include "core/ijobqueue.h"
+#include "core/itimer.h"
 #include "core/plugins.h"
-#include "core/timer.h"
 #include "files/config.h"
-#include "files/file.h"
 #include "modes/insertmode.h"
 #include "navigation/inavigation.h"
 #include "screen/iscreen.h"
@@ -26,7 +25,7 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
     , _screen{screen}
     , _editors{}
     , _env(std::make_unique<LocalEnvironment>(*this, context))
-    , _scope(std::make_shared<RootScope>(*_env))
+    //    , _scope(std::make_shared<RootScope>(*_env))
     , _console(this, _env->core().create(_env))
     , _locator(this, _project)
     , _completeView(this)
@@ -36,7 +35,7 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
         std::make_unique<Editor>(this, _env->core().create(_env)));
     _inputFocus = _editors.front().get();
 
-    _scope->editor(_editors.front().get());
+    //    _scope->editor(_editors.front().get());
     for (auto &editor : _editors) {
         editor->showLines(true);
     }
@@ -124,23 +123,24 @@ void MainWindow::addCommands(IScreen &screen) {
                            }
                        });
 
-    _scope->addCommand("editor.open", [this](std::shared_ptr<IScope> env) {
-        auto path = env->get("path");
-        if (path) {
+    //    _scope->addCommand("editor.open", [this](std::shared_ptr<IScope> env)
+    //    {
+    //        auto path = env->get("path");
+    //        if (path) {
 
-            std::optional<int> ox;
-            std::optional<int> oy;
+    //            std::optional<int> ox;
+    //            std::optional<int> oy;
 
-            if (auto x = env->get("x")) {
-                ox = std::stoi(x->value());
-            }
-            if (auto y = env->get("y")) {
-                oy = std::stoi(y->value());
-            }
+    //            if (auto x = env->get("x")) {
+    //                ox = std::stoi(x->value());
+    //            }
+    //            if (auto y = env->get("y")) {
+    //                oy = std::stoi(y->value());
+    //            }
 
-            open(path->value(), ox, oy);
-        }
-    });
+    //            open(path->value(), ox, oy);
+    //        }
+    //    });
 
     _scope->addCommand("messagebox", [this](auto &&) {
         showPopup(std::make_unique<MessageBox>(*this));
@@ -321,6 +321,8 @@ void MainWindow::updateHighlighting(Editor &editor) {
         timer.cancel(_updateTimeHandle);
         _updateTimeHandle = 0;
     }
+
+    using namespace std::literals;
 
     if (editor.buffer().isColorsOld()) {
         _updateTimeHandle =

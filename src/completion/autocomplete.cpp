@@ -30,21 +30,20 @@ AutoComplete::CompletionList AutoComplete::getMatching(std::string beginning) {
     return ret;
 }
 
-void AutoComplete::populate(std::shared_ptr<IScope> scope,
+void AutoComplete::populate(std::shared_ptr<IEnvironment> env,
                             std::function<void()> callback) {
     _items.clear();
 
     for (auto &source : _sources) {
-        if (source->shouldComplete(scope)) {
-            auto cb = [this, scope, callback](
-                          ICompletionSource::CompletionList list) {
-                scope->env().context().guiQueue().addTask(
-                    [this, list, callback] {
+        if (source->shouldComplete(env)) {
+            auto cb =
+                [this, env, callback](ICompletionSource::CompletionList list) {
+                    env->context().guiQueue().addTask([this, list, callback] {
                         this->_items = list;
                         callback();
                     });
-            };
-            source->list(scope, cb);
+                };
+            source->list(env, cb);
             break;
         }
     }

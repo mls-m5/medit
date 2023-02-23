@@ -11,7 +11,7 @@ public:
     ~InputBox();
 
     //! @see IKeySink interface
-    bool keyPress(std::shared_ptr<IScope>) override;
+    bool keyPress(std::shared_ptr<IEnvironment>) override;
     void updateCursor(IScreen &screen) const override;
 
     //! @see IView

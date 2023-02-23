@@ -9,7 +9,7 @@
 class IMode {
 public:
     /// @return true if handled by this mode
-    virtual bool keyPress(std::shared_ptr<IScope>) = 0;
+    virtual bool keyPress(std::shared_ptr<IEnvironment>) = 0;
     virtual std::string_view name() const = 0;
 
     virtual void start(Editor &) = 0;

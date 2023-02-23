@@ -16,7 +16,7 @@ public:
     ~Locator() override;
 
     // @see IKeySink
-    bool keyPress(std::shared_ptr<IScope>) override;
+    bool keyPress(std::shared_ptr<IEnvironment>) override;
 
     // @see IView
     void draw(IScreen &) override;

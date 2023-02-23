@@ -64,7 +64,7 @@ public:
 
     void showLines(bool value);
 
-    bool keyPress(std::shared_ptr<IScope>) override;
+    bool keyPress(std::shared_ptr<IEnvironment>) override;
 
     bool mouseDown(int x, int y) override;
 

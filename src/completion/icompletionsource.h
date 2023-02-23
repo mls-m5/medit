@@ -1,6 +1,7 @@
 #pragma once
 
 #include "meditfwd.h"
+#include "script/ienvironment.h"
 #include "text/cursorrange.h"
 #include "text/fstring.h"
 #include <functional>
@@ -32,9 +33,9 @@ public:
 
     virtual ~ICompletionSource() = default;
 
-    virtual void list(std::shared_ptr<IScope>, CompleteCallbackT) = 0;
+    virtual void list(std::shared_ptr<IEnvironment>, CompleteCallbackT) = 0;
 
-    virtual bool shouldComplete(std::shared_ptr<IScope>) = 0;
+    virtual bool shouldComplete(std::shared_ptr<IEnvironment>) = 0;
 
     //! High priority means that it should be selected first
     virtual int priority() = 0;

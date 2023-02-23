@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ienvironment.h"
 #include "meditfwd.h"
 #include <functional>
 #include <memory>
@@ -68,4 +69,10 @@ public:
     }
 
     ~CommandBlock() = default;
+
+    // This whole class will be deleted this is just to be able to use it as a
+    // funuction until then
+    void operator()(std::shared_ptr<IEnvironment> env) const {
+        _command.f(std::move(env));
+    }
 };

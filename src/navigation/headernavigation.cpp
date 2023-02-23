@@ -3,8 +3,8 @@
 #include "files/extensions.h"
 #include "files/file.h"
 #include "files/project.h"
-#include "script/iscope.h"
-#include "script/scope.h"
+// #include "script/iscope.h"
+// #include "script/scope.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
@@ -12,7 +12,7 @@
 
 namespace {
 
-std::optional<std::string> getIncludeName(IScope &env) {
+std::optional<std::string> getIncludeName(IEnvironment &env) {
     // TODO: This function has been broken
     auto cursor = env.editor().cursor();
     auto line = ::line(cursor);
@@ -44,7 +44,7 @@ std::optional<std::string> getIncludeName(IScope &env) {
     return includeName;
 }
 
-bool openIncludeByName(std::shared_ptr<IScope> scope, std::string name) {
+bool openIncludeByName(std::shared_ptr<IEnvironment> scope, std::string name) {
     //    auto files = scope->env().project().files();
 
     //    for (auto &path : files) {
@@ -61,7 +61,7 @@ bool openIncludeByName(std::shared_ptr<IScope> scope, std::string name) {
 
 } // namespace
 
-bool HeaderNavigation::gotoSymbol(std::shared_ptr<IScope> env) {
+bool HeaderNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     //    auto file = env->editor().file();
     //    if (!file) {
     //        return false;

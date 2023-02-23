@@ -13,7 +13,7 @@ CompleteView::CompleteView(IView *parent)
     _list.height(20);
 }
 
-void CompleteView::triggerShow(std::shared_ptr<IScope> env) {
+void CompleteView::triggerShow(std::shared_ptr<IEnvironment> env) {
     _list.visible(true);
     visible(true);
 
@@ -43,10 +43,9 @@ void CompleteView::updateCompletion(std::string str) {
     _list.current(selected);
 }
 
-bool CompleteView::keyPress(std::shared_ptr<IScope> env) {
-    if (env->env().key().key == Key::Text ||
-        env->env().key().key == Key::Backspace ||
-        env->env().key().key == Key::Delete) {
+bool CompleteView::keyPress(std::shared_ptr<IEnvironment> env) {
+    if (env->key().key == Key::Text || env->key().key == Key::Backspace ||
+        env->key().key == Key::Delete) {
         setCursor(env->editor().cursor(), env->editor().bufferView());
     }
     return _list.keyPress(env);

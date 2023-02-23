@@ -16,7 +16,7 @@ public:
     CompleteView(IView *parent);
 
     //! @param cursorPosition is the cursors position _on the screen_
-    void triggerShow(std::shared_ptr<IScope>);
+    void triggerShow(std::shared_ptr<IEnvironment>);
 
     void updateCompletion(std::string str);
 
@@ -26,7 +26,7 @@ public:
     }
 
     //! @see IKeySink
-    bool keyPress(std::shared_ptr<IScope>) override;
+    bool keyPress(std::shared_ptr<IEnvironment>) override;
 
     //! @see IKeySink
     void updateCursor(IScreen &screen) const override {
