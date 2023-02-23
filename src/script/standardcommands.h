@@ -25,7 +25,16 @@ void addStandardCommands(IScope &env);
     STD_DEF(wordBegin);                                                        \
     STD_DEF(wordEnd);                                                          \
     STD_DEF(switchHeader);                                                     \
-    STD_DEF(selectInnerWord);
+    STD_DEF(selectInnerWord);                                                  \
+    STD_DEF(yankLine);                                                         \
+    STD_DEF(deleteLine);                                                       \
+    STD_DEF(clearLine);                                                        \
+    STD_DEF(insert);                                                           \
+    STD_DEF(split);                                                            \
+    STD_DEF(yank);                                                             \
+    STD_DEF(erase);                                                            \
+    STD_DEF(eraseBeforeWord);                                                  \
+    STD_DEF(pasteBefore);
 
 #define STD_DEF(name) std::function<void(EnvPtrT env)> name
 
