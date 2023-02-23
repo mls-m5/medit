@@ -6,31 +6,40 @@
 #include "script/standardcommands.h"
 
 std::shared_ptr<IMode> createNormalMode() {
-    auto &sc = StandardCommands::get();
-
     using Ptr = StandardCommands::EnvPtrT;
+    auto &sc = StandardCommands::get();
 
     auto map = KeyMap{
         {
             {{Key::Left}, {sc.left}},
             {{Key::Right}, {sc.right}},
-            {{Key::Down}, {"editor.down"}},
-            {{Key::Up}, {"editor.up"}},
+            {{Key::Down}, {sc.down}},
+            {{Key::Up}, {sc.up}},
             {{"h"}, {sc.left}},
             {{"l"}, {sc.right}},
             {{"j"}, {sc.down}},
             {{"k"}, {sc.up}},
-            {{"J"}, {"editor.join"}},
-            {{"p"}, {"editor.paste"}},
-            {{"P"}, {"editor.paste_before"}},
+            {{"J"}, {sc.join}},
+            {{"p"}, {sc.paste}},
+            {{"P"}, {sc.pasteBefore}},
             {{"o"},
-             {"editor.end\neditor.split\neditor.copyindentation\neditor."
-              "insertmode"}},
+             {sc.combine(sc.end,
+                         sc.split,
+                         sc.copy,
+                         sc.copyIndentation,
+                         sc.insertMode)}},
             {{"O"},
-             {"editor.home\neditor.split\neditor.insertmode\neditor.up\neditor."
-              "copyindentation"}},
+             {
+                 sc.combine(sc.home,
+                            sc.split,
+                            sc.insertMode,
+                            sc.up,
+                            sc.copyIndentation)
+                 //            "editor.home\neditor.split\neditor.insertmode\neditor.up\neditor."
+                 //              "copyindentation"
+             }},
             {{Key::Backspace}, {sc.left}},
-            {{"X"}, {"editor.erase"}},
+            {{"X"}, {sc.erase}},
             {{Key::Delete}, {"editor.right\neditor.erase"}},
             {{"x"}, {"editor.right\neditor.erase"}},
             {{Key::Escape}, {"escape"}},

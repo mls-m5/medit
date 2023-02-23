@@ -79,7 +79,7 @@ struct StandardCommands {
     /// Combine several standard commands into one single function
     template <typename... Args>
     static std::function<void(EnvPtrT)> combine(Args... args) {
-        return [args...] { ((args), ...); };
+        return [args...](EnvPtrT e) { ((args(e)), ...); };
     }
 };
 
