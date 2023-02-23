@@ -75,6 +75,12 @@ struct StandardCommands {
     /// This function is only available for the main lib,
     /// A reference can be obtained from IEnvironment for plugins
     static StandardCommands &get();
+
+    /// Combine several standard commands into one single function
+    template <typename... Args>
+    static std::function<void(EnvPtrT)> combine(Args... args) {
+        return [args...] { ((args), ...); };
+    }
 };
 
 #undef STD_DEF
