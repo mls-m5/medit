@@ -19,7 +19,10 @@ void addStandardCommands(IScope &env);
     STD_DEF(home);                                                             \
     STD_DEF(end);                                                              \
     STD_DEF(pageUp);                                                           \
-    STD_DEF(pageDown);
+    STD_DEF(pageDown);                                                         \
+    STD_DEF(wordBegin);                                                        \
+    STD_DEF(wordEnd);                                                          \
+    STD_DEF(switchHeader);
 
 #define STD_DEF(name) void (*name)(EnvPtrT env) = nullptr
 

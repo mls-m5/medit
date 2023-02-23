@@ -50,34 +50,34 @@ CommandList navigationCommands = {
     //            e.cursor(down(e.cursor()));
     //        },
     //    },
-    {
-        "editor.word_begin",
-        [](std::shared_ptr<IScope> scope) {
-            auto &e = scope->editor();
-            e.cursor(wordBegin(e.cursor()));
-        },
-    },
-    {
-        "editor.word_end",
-        [](std::shared_ptr<IScope> scope) {
-            auto &e = scope->editor();
-            e.cursor(wordEnd(e.cursor()));
-        },
-    },
-    {
-        "editor.switch_header",
-        [](std::shared_ptr<IScope> scope) {
-            auto path =
-                scope->env().project().findSwitchHeader(scope->editor().path());
-            if (!path.empty()) {
-                scope->env().standardCommands().open(
-                    scope->env().shared_from_this(),
-                    path,
-                    std::nullopt,
-                    std::nullopt);
-            }
-        },
-    },
+    //    {
+    //        "editor.word_begin",
+    //        [](std::shared_ptr<IScope> scope) {
+    //            auto &e = scope->editor();
+    //            e.cursor(wordBegin(e.cursor()));
+    //        },
+    //    },
+    //    {
+    //        "editor.word_end",
+    //        [](std::shared_ptr<IScope> scope) {
+    //            auto &e = scope->editor();
+    //            e.cursor(wordEnd(e.cursor()));
+    //        },
+    //    },
+    //    {
+    //        "editor.switch_header",
+    //        [](std::shared_ptr<IScope> scope) {
+    //            auto path =
+    //                scope->env().project().findSwitchHeader(scope->editor().path());
+    //            if (!path.empty()) {
+    //                scope->env().standardCommands().open(
+    //                    scope->env().shared_from_this(),
+    //                    path,
+    //                    std::nullopt,
+    //                    std::nullopt);
+    //            }
+    //        },
+    //    },
     //    {
     //        "editor.home",
     //        [](std::shared_ptr<IScope> scope) {
@@ -429,6 +429,28 @@ StandardCommands &StandardCommands::get() {
                 e.cursor(c);
             },
 
+        .wordBegin =
+            [](EnvPtrT scope) {
+                auto &e = scope->editor();
+                e.cursor(::wordBegin(e.cursor()));
+            },
+
+        .wordEnd =
+            [](EnvPtrT scope) {
+                auto &e = scope->editor();
+                e.cursor(::wordEnd(e.cursor()));
+            },
+
+        .switchHeader =
+            [](EnvPtrT env) {
+                auto path =
+                    env->project().findSwitchHeader(env->editor().path());
+                if (!path.empty()) {
+                    env->standardCommands().open(
+                        env, path, std::nullopt, std::nullopt);
+                }
+            },
+
         // ------------------------
 
         .open =
@@ -446,8 +468,8 @@ StandardCommands &StandardCommands::get() {
             [](EnvPtrT env) {
                 auto &e = env->editor();
                 auto cursor = e.cursor();
-                auto range =
-                    CursorRange{wordBegin(cursor), ::right(wordEnd(cursor))};
+                auto range = CursorRange{::wordBegin(cursor),
+                                         ::right(::wordEnd(cursor))};
                 e.selection(range);
             },
     };
