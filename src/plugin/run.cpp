@@ -7,12 +7,12 @@
 #include "text/buffer.h"
 #include "views/editor.h"
 
-void run(std::shared_ptr<IScope> scope) {
+void run(std::shared_ptr<IEnvironment> env) {
 #ifndef __EMSCRIPTEN__
 
-    scope->env().showConsole(true);
+    env->showConsole(true);
 
-    auto &project = scope->env().project();
+    auto &project = env->project();
 
     auto root = project.settings().root;
 
@@ -20,7 +20,7 @@ void run(std::shared_ptr<IScope> scope) {
         filesystem::current_path(root);
     }
 
-    auto &consoleBuffer = scope->env().console().buffer();
+    auto &consoleBuffer = env->console().buffer();
     consoleBuffer.clear();
 
     if (project.settings().runCommand.empty()) {
@@ -30,27 +30,26 @@ void run(std::shared_ptr<IScope> scope) {
 
     consoleBuffer.pushBack(std::string{"running application..."});
 
-    scope->env().context().jobQueue().addTask([&project, scope] {
+    env->context().jobQueue().addTask([&project, env] {
         POpenStream stream(project.settings().runCommand, true, 100);
 
         for (std::string line; getline(stream, line);) {
-            scope->env().context().guiQueue().addTask([line, scope] {
-                scope->env().console().buffer().pushBack(line);
-                scope->env().console().cursor({0, 100000000});
+            env->context().guiQueue().addTask([line, env] {
+                env->console().buffer().pushBack(line);
+                env->console().cursor({0, 100000000});
             });
         }
 
-        scope->env().context().guiQueue().addTask(
-            [returnCode = stream.returnCode(), scope] {
-                auto &consoleBuffer = scope->env().console().buffer();
-                if (returnCode) {
-                    consoleBuffer.pushBack(
-                        FString("failed...", Palette::error));
-                }
-                else {
-                    consoleBuffer.pushBack(std::string{"finished..."});
-                }
-            });
+        env->context().guiQueue().addTask([returnCode = stream.returnCode(),
+                                           env] {
+            auto &consoleBuffer = env->console().buffer();
+            if (returnCode) {
+                consoleBuffer.pushBack(FString("failed...", Palette::error));
+            }
+            else {
+                consoleBuffer.pushBack(std::string{"finished..."});
+            }
+        });
     });
 
 #endif // __EMSCRIPTEN__
