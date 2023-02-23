@@ -77,8 +77,6 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
               _highlighting.end(),
               [](auto &&a, auto &&b) { return a->priority() > b->priority(); });
 
-    //    updatePalette(screen);
-
     _formatting = createFormat();
 
     _annotation = createAnnotations();

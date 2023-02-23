@@ -26,25 +26,25 @@ find_package (Threads)
 
 # --- lua -------------------------------
 
-file(
-    GLOB
-    LUA_FILES
-    "lua/*.c"
-    )
+#file(
+#    GLOB
+#    LUA_FILES
+#    "lua/*.c"
+#    )
 
-add_library(
-    lua
-    ${LUA_FILES}
-    )
+#add_library(
+#    lua
+#    ${LUA_FILES}
+#    )
 
-target_include_directories(
-    lua
-    PUBLIC
-    lua
-    )
+#target_include_directories(
+#    lua
+#    PUBLIC
+#    lua
+#    )
 
 # --- sol2 ---------------------------
 
-add_subdirectory(sol2)
+#add_subdirectory(sol2)
 
 

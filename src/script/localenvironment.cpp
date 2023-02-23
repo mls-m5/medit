@@ -1,7 +1,7 @@
 
 #include "localenvironment.h"
 #include "core/coreenvironment.h"
-#include "script/luastate.h"
+// #include "script/luastate.h"
 #include "views/mainwindow.h"
 
 LocalEnvironment::LocalEnvironment(MainWindow &mw, Context &context)
@@ -9,7 +9,7 @@ LocalEnvironment::LocalEnvironment(MainWindow &mw, Context &context)
     , _context{context} {}
 
 void LocalEnvironment::initLua(MainWindow &mw) {
-    _lua.init(mw);
+    //    _lua.init(mw);
 }
 
 CoreEnvironment &LocalEnvironment::core() {

@@ -20,8 +20,8 @@ target_link_libraries(
     medit_core
     PUBLIC
     medit_common
-    lua
-    sol2
+#    lua
+#    sol2
     )
 
 

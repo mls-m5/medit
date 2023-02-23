@@ -4,7 +4,7 @@
 #include "ienvironment.h"
 #include "keys/event.h"
 #include "meditfwd.h"
-#include "script/luastate.h"
+// #include "script/luastate.h"
 #include "script/standardcommands.h"
 #include "views/editor.h"
 
@@ -17,7 +17,7 @@ class LocalEnvironment : public IEnvironment {
     bool _showConsole = false;
     Context &_context;
     Registers _registers;
-    LuaState _lua;
+    //    LuaState _lua;
 
 public:
     LocalEnvironment(MainWindow &mw, Context &context);

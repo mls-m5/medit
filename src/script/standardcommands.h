@@ -11,8 +11,6 @@
 #include <unordered_map>
 #include <vector>
 
-void addStandardCommands(IScope &env);
-
 #define STANDARD_COMMAND_LIST                                                  \
     STD_DEF(left);                                                             \
     STD_DEF(right);                                                            \
