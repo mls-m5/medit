@@ -4,6 +4,7 @@
 #include "modes/mode.h"
 #include "modes/parentmode.h"
 #include "script/standardcommands.h"
+#include "views/mainwindow.h"
 
 std::shared_ptr<IMode> createNormalMode() {
     using Ptr = StandardCommands::EnvPtrT;
@@ -32,7 +33,7 @@ std::shared_ptr<IMode> createNormalMode() {
             {{"X"}, {sc.erase}},
             {{Key::Delete}, sc.combine(sc.right, sc.erase)},
             {{"x"}, sc.combine(sc.right, sc.erase)},
-            {{Key::Escape}, {"escape"}},
+            {{Key::Escape}, {[](Ptr env) { env->mainWindow().escape(); }}},
             {{"\n"}, {sc.down}},
             {{Key::Space}, {sc.right}},
             {{"i"}, sc.insertMode},

@@ -87,6 +87,24 @@ struct MainWindow : public Window {
         return this;
     }
 
-private:
-    void addCommands(IScreen &screen);
+    // Commands --------------------
+    void updateTitle();
+    void escape();
+    void showConsole();
+
+    /// Show open dialogue
+    void showOpen();
+
+    void gotoDefinition();
+
+    /// User request to format file
+    void format();
+
+    /// User want to auto complete
+    void autoComplete();
+
+    void showLocator();
+
+    // private:
+    //     void addCommands(IScreen &screen);
 };

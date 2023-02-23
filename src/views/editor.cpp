@@ -166,7 +166,6 @@ bool Editor::mouseDown(int x, int y) {
 }
 
 void Editor::updateCursor(IScreen &screen) const {
-    constexpr auto debug = true;
 
     // Make the cursor appear as it is on the line but can stay on same x
     // position between longer lines
