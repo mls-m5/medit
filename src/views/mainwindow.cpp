@@ -266,9 +266,9 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
     "make sure that this stuff with getting the right editor works as  intended"
     auto &editor = currentEditor();
     //    _scope->editor(&editor);
-    auto scopeEnvironment = std::make_shared<Scope>(env);
-    scopeEnvironment->editor(&editor);
-    if (_inputFocus->keyPress(scopeEnvironment)) {
+    //    auto scopeEnvironment = std::make_shared<Scope>(env);
+    //    scopeEnvironment->editor(&editor);
+    if (_inputFocus->keyPress(env)) {
         // Todo: Handle this for reallz in the future
         if (_inputFocus == &editor) {
             //            _scope->editor(&editor);
@@ -284,9 +284,8 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
         }
         return true;
     }
-    else {
-        return false;
-    }
+
+    return false;
 }
 
 void MainWindow::updateLocatorBuffer() {
@@ -336,34 +335,32 @@ void MainWindow::updateHighlighting(Editor &editor) {
     using namespace std::literals;
 
     if (editor.buffer().isColorsOld()) {
-        _updateTimeHandle =
-            timer.setTimeout(1s, [this, env = _env, scope = _scope] {
-                auto &queue = _env->context().guiQueue();
-                auto &editor = _scope->editor();
+        _updateTimeHandle = timer.setTimeout(1s, [this] {
+            auto &queue = _env->context().guiQueue();
+            auto &editor = _env->editor();
 
-                queue.addTask(
-                    [this, scope = _scope, &buffer = editor.buffer()] {
-                        if (buffer.isColorsOld()) {
-                            auto &editor = scope->editor();
-                            for (auto &highlight : _highlighting) {
-                                if (highlight->shouldEnable(editor.path())) {
-                                    highlight->highlight(scope);
+            queue.addTask([this, &buffer = editor.buffer()] {
+                if (buffer.isColorsOld()) {
+                    auto &editor = _env->editor();
+                    for (auto &highlight : _highlighting) {
+                        if (highlight->shouldEnable(editor.path())) {
+                            highlight->highlight(_env);
 
-                                    editor.buffer().isColorsOld(false);
-                                    break;
-                                }
-                            }
-
-                            for (auto &annotation : _annotation) {
-                                if (annotation->shouldEnable(editor.path())) {
-                                    annotation->annotate(scope);
-                                    break;
-                                }
-                            }
-                            triggerRedraw();
+                            editor.buffer().isColorsOld(false);
+                            break;
                         }
-                    });
+                    }
+
+                    for (auto &annotation : _annotation) {
+                        if (annotation->shouldEnable(editor.path())) {
+                            annotation->annotate(_env);
+                            break;
+                        }
+                    }
+                    triggerRedraw();
+                }
             });
+        });
     }
 }
 

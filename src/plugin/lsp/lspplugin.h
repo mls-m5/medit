@@ -44,8 +44,8 @@ private:
 
 class LspComplete : public ICompletionSource {
 public:
-    void list(std::shared_ptr<IScope>, CompleteCallbackT) override;
-    bool shouldComplete(std::shared_ptr<IScope> env) override;
+    void list(std::shared_ptr<IEnvironment>, CompleteCallbackT) override;
+    bool shouldComplete(std::shared_ptr<IEnvironment> env) override;
     int priority() override {
         return 100;
     }
@@ -53,13 +53,13 @@ public:
 
 class LspNavigation : public INavigation {
 public:
-    bool gotoSymbol(std::shared_ptr<IScope> scope) override;
+    bool gotoSymbol(std::shared_ptr<IEnvironment> scope) override;
 };
 
 class LspHighlight : public IHighlight {
 public:
     bool shouldEnable(filesystem::path) override;
-    void highlight(std::shared_ptr<IScope> env) override;
+    void highlight(std::shared_ptr<IEnvironment> env) override;
     //    void update(const IPalette &palette) override;
     int priority() override {
         return 100;

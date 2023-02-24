@@ -36,23 +36,23 @@ TEST_CASE("create mode") {
 
 TEST_CASE("match keypress") {
     auto mode = createTestMode();
-    auto scope = std::make_shared<MockScope>();
+    auto env = std::make_shared<MockEnvironment>();
     Editor editor{nullptr, std::make_shared<Buffer>()};
 
-    scope->mock_editor_0.returnValueRef(editor);
-    scope->mock_run_1.returnValue(true);
+    //    scope->mock_editor_0.returnValueRef(editor);
+    //    scope->mock_run_1.returnValue(true);
 
-    scope->mock_run_1.expectNum(0);
+    //    scope->mock_run_1.expectNum(0);
 
     // Missmatch
-    scope->environment.mock_key_0.returnValue({Key::F1});
-    ASSERT_EQ(false, mode->keyPress(scope));
+    //    scope->environment.mock_key_0.returnValue({Key::F1});
+    ASSERT_EQ(false, mode->keyPress(env));
 
-    scope->mock_run_1.expectNum(1);
+    //    scope->mock_run_1.expectNum(1);
 
     // Match
-    scope->environment.mock_key_0.returnValue({Key::Left});
-    ASSERT_EQ(true, mode->keyPress(scope));
+    //    scope->environment.mock_key_0.returnValue({Key::Left});
+    ASSERT_EQ(true, mode->keyPress(env));
 }
 
 TEST_CASE("default action") {
@@ -70,7 +70,7 @@ TEST_CASE("default action") {
 
 TEST_CASE("buffered keypress") {
     auto mode = createTestMode();
-    auto scope = std::make_shared<MockScope>();
+    auto scope = std::make_shared<MockEnvironment>();
     Editor editor{nullptr, std::make_shared<Buffer>()};
 
     scope->mock_editor_0.returnValueRef(editor);

@@ -297,7 +297,7 @@ void LspPlugin::updateBuffer(Buffer &buffer) {
     requestSemanticsToken(buffer.shared_from_this());
 }
 
-void LspComplete::list(std::shared_ptr<IScope> scope,
+void LspComplete::list(std::shared_ptr<IEnvironment> scope,
                        CompleteCallbackT callback) {
 
     if (!shouldProcessFileWithClang(scope->editor().buffer().path())) {
@@ -341,7 +341,7 @@ void LspComplete::list(std::shared_ptr<IScope> scope,
         });
 }
 
-bool LspComplete::shouldComplete(std::shared_ptr<IScope> env) {
+bool LspComplete::shouldComplete(std::shared_ptr<IEnvironment> env) {
     return shouldProcessFileWithClang(env->editor().path());
 }
 
@@ -349,32 +349,32 @@ bool LspHighlight::shouldEnable(filesystem::path path) {
     return shouldProcessFileWithClang(path);
 }
 
-void LspHighlight::highlight(std::shared_ptr<IScope> scope) {
+void LspHighlight::highlight(std::shared_ptr<IEnvironment> scope) {
     LspPlugin::instance().updateBuffer(scope->editor().buffer());
 }
 
 // void LspHighlight::update(const IPalette &palette) {}
 
-bool LspNavigation::gotoSymbol(std::shared_ptr<IScope> scope) {
-    if (!shouldProcessFileWithClang(scope->editor().path())) {
+bool LspNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
+    if (!shouldProcessFileWithClang(env->editor().path())) {
         return false;
     }
 
     auto params = TypeDefinitionParams{};
-    params.textDocument.uri = pathToUri(scope->editor().buffer().path());
-    params.position = meditCursorToPosition(scope->editor().cursor());
+    params.textDocument.uri = pathToUri(env->editor().buffer().path());
+    params.position = meditCursorToPosition(env->editor().cursor());
     LspPlugin::instance().client().request(
-        params, [scope](const std::vector<Location> &locations) {
+        params, [env](const std::vector<Location> &locations) {
             if (locations.empty()) {
                 return;
             }
 
-            scope->env().context().guiQueue().addTask([scope, locations] {
+            env->context().guiQueue().addTask([env, locations] {
                 auto pos =
                     clangPositionToLspPosition(locations.front().range.start);
 
-                scope->env().standardCommands().open(
-                    scope->env().shared_from_this(),
+                env->standardCommands().open(
+                    env->shared_from_this(),
                     uriToPath(locations.front().uri).string(),
                     pos.x(),
                     pos.y());
