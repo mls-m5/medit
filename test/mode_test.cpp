@@ -1,7 +1,6 @@
 #include "keys/bufferkeymap.h"
 #include "mls-unit-test/unittest.h"
 #include "mock/script/mockenvironment.h"
-#include "mock/script/mockscope.h"
 #include "mock/views/mockwindow.h"
 #include "modes/mode.h"
 #include "text/buffer.h"
@@ -39,8 +38,8 @@ TEST_CASE("match keypress") {
     auto env = std::make_shared<MockEnvironment>();
     Editor editor{nullptr, std::make_shared<Buffer>()};
 
-    //    scope->mock_editor_0.returnValueRef(editor);
-    //    scope->mock_run_1.returnValue(true);
+    env->mock_editor_0.returnValueRef(editor);
+    //        scope->mock_run_1.returnValue(true);
 
     //    scope->mock_run_1.expectNum(0);
 
