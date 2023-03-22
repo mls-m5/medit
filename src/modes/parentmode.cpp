@@ -3,6 +3,7 @@
 #include "parentmode.h"
 #include "mode.h"
 #include "script/standardcommands.h"
+#include "views/mainwindow.h"
 
 std::shared_ptr<IMode> createParentMode() {
     auto &sc = StandardCommands::get();
@@ -16,9 +17,10 @@ std::shared_ptr<IMode> createParentMode() {
         {KeyEvent{Key::End}, {sc.end}},
         {KeyEvent{Key::PageUp}, {sc.pageUp}},
         {KeyEvent{Key::PageDown}, {sc.pageDown}},
-        {KeyEvent{Key::KeyCombination, 'T', Modifiers::Ctrl}, {"show_console"}},
+        {KeyEvent{Key::KeyCombination, 'T', Modifiers::Ctrl},
+         {[](Ptr env) { env->mainWindow().showConsole(); }}},
         {KeyEvent{Key::KeyCombination, 'E', Modifiers::Ctrl},
-         {"switch_editor"}},
+         {"switch_editor"}}, // handle this
         {KeyEvent{Key::KeyCombination, '7', Modifiers::Ctrl},
          {"editor.toggle_comment"}},
         {KeyEvent{Key::KeyCombination, 'O', Modifiers::Ctrl},
@@ -29,15 +31,15 @@ std::shared_ptr<IMode> createParentMode() {
          {"editor.format\neditor.copy"}},
         {KeyEvent{Key::KeyCombination, 'X', Modifiers::Ctrl},
          {"editor.format\neditor.cut"}},
-        {KeyEvent{Key::KeyCombination, 'Z', Modifiers::Ctrl}, {"editor.undo"}},
-        {KeyEvent{Key::KeyCombination, 'Y', Modifiers::Ctrl}, {"editor.redo"}},
+        {KeyEvent{Key::KeyCombination, 'Z', Modifiers::Ctrl}, sc.undo},
+        {KeyEvent{Key::KeyCombination, 'Y', Modifiers::Ctrl}, sc.redo},
         {KeyEvent{Key::KeyCombination, 'B', Modifiers::Ctrl},
          {"editor.save\neditor.build"}},
-        {KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}, {"quit"}},
+        {KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}, sc.quit},
         {KeyEvent{Key::KeyCombination, 'K', Modifiers::Ctrl},
          {"window.show_locator"}},
         {KeyEvent{Key::KeyCombination, ' ', Modifiers::Ctrl},
-         {"editor.auto_complete"}},
+         {[](Ptr env) { env->mainWindow().showConsole(); }}},
 
     }};
 

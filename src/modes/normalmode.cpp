@@ -68,7 +68,7 @@ std::shared_ptr<IMode> createNormalMode() {
         {{"cw"}, sc.combine(sc.selectWord, sc.erase, sc.insertMode)},
         {{"ciw"}, sc.combine(sc.selectInnerWord, sc.erase, sc.insertMode)},
 
-        {{"gd"}, {"editor.goto_definition"}},
+        {{"gd"}, {[](Ptr env) { env->mainWindow().gotoDefinition(); }}},
     }};
 
     return std::make_shared<Mode>("normal",

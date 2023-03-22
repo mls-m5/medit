@@ -38,7 +38,7 @@ public:
         _command.f = f;
     }
 
-    CommandBlock(std::string code);
+    //    CommandBlock(std::string code);
     CommandBlock(Command command)
         : _command(std::move(command)) {}
 
