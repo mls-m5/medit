@@ -140,7 +140,7 @@ struct User {
         // TODO: Consider moving this function to mainWindow
         if (auto c = std::get_if<KeyEvent>(&e)) {
             mainWindow._env->key(*c);
-            mainWindow.keyPress(mainWindow._scope);
+            mainWindow.keyPress(mainWindow.env().shared_from_this());
             mainWindow.resize();
         }
         if (auto p = std::get_if<PasteEvent>(&e)) {
@@ -252,4 +252,3 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-

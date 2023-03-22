@@ -1,7 +1,8 @@
 
 #include "mls-unit-test/unittest.h"
-#include "mock/script/mockscope.h"
-// #include "mock/syntax/mockpalette.h"
+// #include "mock/script/mockscope.h"
+//  #include "mock/syntax/mockpalette.h"
+#include "mock/script/mockenvironment.h"
 #include "syntax/basichighligting.h"
 #include "syntax/palette.h"
 #include "views/editor.h"
@@ -25,7 +26,7 @@ TEST_CASE("create") {
 TEST_CASE("format all to default") {
     BasicHighlighting hl;
     Editor editor{nullptr, std::make_shared<Buffer>()};
-    auto env = std::make_shared<MockScope>();
+    auto env = std::make_shared<MockEnvironment>();
     env->mock_editor_0.returnValueRef(editor);
 
     editor.buffer().text("hello"s);
@@ -44,7 +45,7 @@ TEST_CASE("format all to default") {
 TEST_CASE("format keyword") {
     BasicHighlighting hl;
     Editor editor{nullptr, std::make_shared<Buffer>()};
-    auto env = std::make_shared<MockScope>();
+    auto env = std::make_shared<MockEnvironment>();
     env->mock_editor_0.returnValueRef(editor);
 
     editor.buffer().text("int hello"s);
@@ -63,7 +64,7 @@ TEST_CASE("partial match") {
 
     BasicHighlighting hl;
     Editor editor{nullptr, std::make_shared<Buffer>()};
-    auto env = std::make_shared<MockScope>();
+    auto env = std::make_shared<MockEnvironment>();
     env->mock_editor_0.returnValueRef(editor);
 
     editor.buffer().text("inte automatic"s);
