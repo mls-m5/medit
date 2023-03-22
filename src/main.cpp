@@ -123,6 +123,7 @@ struct User {
                     *key == Key::Quit) {
                     medit::main::shouldQuit = true;
                     mainWindow->env().context().guiQueue().stop();
+                    return;
                 }
 
                 if (*key != Key::Unknown) {
