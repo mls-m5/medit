@@ -8,7 +8,6 @@
 #include "modes/visualmode.h"
 #include "plugin/build.h"
 #include "plugin/run.h"
-#include "script/parser.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "togglecomments.h"
@@ -205,6 +204,11 @@ StandardCommands create() {
         e.cursor(join(e.cursor()));
     };
 
+    DEF(format) {
+        env->mainWindow().format();
+        auto &e = env->editor();
+        e.save();
+    };
     DEF(save) {
         auto &e = env->editor();
         e.save();

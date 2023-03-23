@@ -10,9 +10,11 @@ std::shared_ptr<IMode> createParentMode() {
     using Ptr = StandardCommands::EnvPtrT;
 
     auto map = KeyMap{{
-        {KeyEvent{Key::F2}, {"editor.goto_definition"}},
-        {KeyEvent{Key::F4}, {"editor.switch_header"}},
-        {KeyEvent{Key::F5}, {"editor.run"}},
+        {KeyEvent{Key::F2},
+         {[](Ptr env) { env->mainWindow().gotoDefinition(); }}},
+        {KeyEvent{Key::F4}, sc.switchHeader},
+        {KeyEvent{Key::F5}, sc.run},
+        //    {"editor.run"}},
         {KeyEvent{Key::Home}, {sc.home}},
         {KeyEvent{Key::End}, {sc.end}},
         {KeyEvent{Key::PageUp}, {sc.pageUp}},
@@ -20,27 +22,26 @@ std::shared_ptr<IMode> createParentMode() {
         {KeyEvent{Key::KeyCombination, 'T', Modifiers::Ctrl},
          {[](Ptr env) { env->mainWindow().showConsole(); }}},
         {KeyEvent{Key::KeyCombination, 'E', Modifiers::Ctrl},
-         {"switch_editor"}}, // handle this
-        {KeyEvent{Key::KeyCombination, '7', Modifiers::Ctrl},
-         {"editor.toggle_comment"}},
+         {[](Ptr env) { env->mainWindow().switchEditor(); }}},
+        {KeyEvent{Key::KeyCombination, '7', Modifiers::Ctrl}, sc.toggleComment},
         {KeyEvent{Key::KeyCombination, 'O', Modifiers::Ctrl},
-         {"editor.show_open"}},
+         {[](Ptr env) { env->mainWindow().showOpen(); }}},
         {KeyEvent{Key::KeyCombination, 'S', Modifiers::Ctrl},
-         {"editor.format\neditor.save"}},
-        {KeyEvent{Key::KeyCombination, 'C', Modifiers::Ctrl},
-         {"editor.format\neditor.copy"}},
-        {KeyEvent{Key::KeyCombination, 'X', Modifiers::Ctrl},
-         {"editor.format\neditor.cut"}},
+         sc.combine(sc.format, sc.save)},
+        //         {"editor.format\neditor.save"}},
+        {KeyEvent{Key::KeyCombination, 'C', Modifiers::Ctrl}, sc.copy},
+        //         {"editor.format\neditor.copy"}},
+        {KeyEvent{Key::KeyCombination, 'X', Modifiers::Ctrl}, sc.cut},
+        //         {"editor.format\neditor.cut"}},
         {KeyEvent{Key::KeyCombination, 'Z', Modifiers::Ctrl}, sc.undo},
         {KeyEvent{Key::KeyCombination, 'Y', Modifiers::Ctrl}, sc.redo},
         {KeyEvent{Key::KeyCombination, 'B', Modifiers::Ctrl},
-         {"editor.save\neditor.build"}},
+         sc.combine(sc.save, sc.build)},
         {KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}, sc.quit},
         {KeyEvent{Key::KeyCombination, 'K', Modifiers::Ctrl},
-         {"window.show_locator"}},
+         {[](Ptr env) { env->mainWindow().showLocator(); }}},
         {KeyEvent{Key::KeyCombination, ' ', Modifiers::Ctrl},
          {[](Ptr env) { env->mainWindow().showConsole(); }}},
-
     }};
 
     map.defaultAction({});

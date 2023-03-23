@@ -124,7 +124,6 @@ add_library(
     script/localenvironment.cpp
     script/standardcommands.cpp
     script/command.cpp
-    script/parser.cpp
     script/togglecomments.cpp
     script/luastate.cpp
     script/scope.cpp

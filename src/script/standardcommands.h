@@ -34,6 +34,7 @@
     STD_DEF(pasteBefore);                                                      \
     STD_DEF(paste);                                                            \
     STD_DEF(join);                                                             \
+    STD_DEF(format);                                                           \
     STD_DEF(save);                                                             \
     STD_DEF(copy);                                                             \
     STD_DEF(cut);                                                              \
