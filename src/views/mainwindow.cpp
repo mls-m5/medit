@@ -24,7 +24,6 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
     , _screen{screen}
     , _editors{}
     , _env(std::make_unique<LocalEnvironment>(*this, context))
-    //    , _scope(std::make_shared<RootScope>(*_env))
     , _console(this, _env->core().create(_env))
     , _locator(this, _project)
     , _completeView(this)
@@ -34,7 +33,6 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
         std::make_unique<Editor>(this, _env->core().create(_env)));
     _inputFocus = _editors.front().get();
 
-    //    _scope->editor(_editors.front().get());
     for (auto &editor : _editors) {
         editor->showLines(true);
     }
@@ -69,8 +67,6 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
         _inputFocus = editor;
     });
 
-    //    addCommands(screen);
-
     _highlighting = createHighlightings();
     std::sort(_highlighting.begin(),
               _highlighting.end(),
@@ -88,106 +84,6 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
 }
 
 MainWindow::~MainWindow() = default;
-
-// void MainWindow::addCommands(IScreen &screen) {
-//     _scope->addCommand("window.show_locator", [this](auto &&) {
-//         _locator.visible(true);
-//         _inputFocus = &_locator;
-//     });
-
-//    _scope->addCommand("editor.auto_complete",
-//                       [this](std::shared_ptr<IEnvironment> env) {
-//                           auto &editor = env->editor();
-//                           editor.cursor(fix(editor.cursor()));
-
-//                           Cursor cursor = editor.cursor();
-//                           _completeView.setCursor(cursor,
-//                           editor.bufferView());
-//                           _completeView.triggerShow(_scope);
-//                       });
-
-//    _scope->addCommand("editor.format",
-//                       [this](std::shared_ptr<IEnvironment> env) {
-//                           auto &editor = env->editor();
-//                           for (auto &format : _formatting) {
-//                               if (format->format(editor)) {
-//                                   break;
-//                               }
-//                           }
-//                       });
-
-//    _scope->addCommand("editor.goto_definition",
-//                       [this](std::shared_ptr<IEnvironment> env) {
-//                           for (auto &navigation : _navigation) {
-//                               if (navigation->gotoSymbol(env)) {
-//                                   break;
-//                               }
-//                           }
-//                       });
-
-//    _scope->addCommand("editor.open", [this](std::shared_ptr<IEnvironment>
-//    env)
-//    {
-//        auto path = env->get("path");
-//        if (path) {
-
-//            std::optional<int> ox;
-//            std::optional<int> oy;
-
-//            if (auto x = env->get("x")) {
-//                ox = std::stoi(x->value());
-//            }
-//            if (auto y = env->get("y")) {
-//                oy = std::stoi(y->value());
-//            }
-
-//            open(path->value(), ox, oy);
-//        }
-//    });
-
-//    _scope->addCommand("messagebox", [this](auto &&) {
-//        showPopup(std::make_unique<MessageBox>(*this));
-//    });
-
-//    _scope->addCommand(
-//        "editor.show_open", [this](std::shared_ptr<IEnvironment> env) {
-//            auto &editor = env->editor();
-//            auto path = editor.path();
-//            if (path.empty()) {
-//                path = filesystem::current_path();
-//            }
-//            auto input = std::make_unique<InputBox>(
-//                this, "Path to open: ", path.string());
-//            input->callback([this](std::string value) { open(value); });
-//            showPopup(std::move(input));
-//        });
-
-//    _scope->addCommand("window.title",
-//                       [&screen, this](std::shared_ptr<IEnvironment> env)
-//                       {
-//                           if (auto title = env->get("title")) {
-//                               screen.title(title->value());
-//                           }
-//                           if (auto file = currentEditor().file()) {
-//                               screen.title(file->path().string() + " -
-//                               medit");
-//                           }
-//                       });
-
-//    _scope->addCommand("show_console", [this](auto scope) {
-//        _env->showConsole(true);
-//        _inputFocus = &_console;
-//    });
-
-//    _scope->addCommand("escape", [this](std::shared_ptr<IEnvironment>
-//    scope) {
-//        _env->showConsole(false);
-//        _inputFocus = &currentEditor();
-//    });
-
-//    _scope->addCommand("switch_editor", [this](auto &&) { switchEditor();
-//    });
-//}
 
 void MainWindow::resize(size_t w, size_t h) {
     //! Todo: Handle layouts better in the future
@@ -446,9 +342,6 @@ void MainWindow::refreshScreen() {
                                  height() - 1,
                                  std::to_string(cursor.y() + 1) + ", " +
                                      std::to_string(cursor.x() + 1));
-
-                    //                _screen.draw(10, height() - 1,
-                    //                _mode->name());
                 }
             }
         }
