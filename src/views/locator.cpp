@@ -15,9 +15,6 @@ Locator::Locator(IView *parent, Project &projectFiles)
 }
 
 bool Locator::keyPress(std::shared_ptr<IEnvironment> env) {
-//    auto localEnvironment = std::make_shared<Scope>(env);
-//    localEnvironment->editor(this);
-#warning "make this work again"
     if (_list.keyPress(env)) {
         return true;
     }
@@ -57,6 +54,10 @@ void Locator::visible(bool value) {
     if (value) {
         updateList();
     }
+}
+
+bool Locator::visible() const {
+    return _list.visible();
 }
 
 void Locator::updateList() {

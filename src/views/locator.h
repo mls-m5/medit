@@ -25,5 +25,7 @@ public:
 
     void visible(bool value);
 
+    bool visible() const;
+
     void updateList();
 };

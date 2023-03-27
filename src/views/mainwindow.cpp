@@ -48,13 +48,14 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
         screen.palette(palette);
     }
 
+    _locator.visible(false);
     _locator.mode(createInsertMode());
     _locator.showLines(false);
 
     _locator.callback([this](auto &&path) {
+        _locator.visible(false);
         open(path);
         _inputFocus = currentEditor();
-        _locator.visible(false);
     });
 
     _completeView.visible(false);
@@ -267,25 +268,8 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
         }
     }
 
-    //    if (_activePopup) {
-    //        if (_activePopup->keyPress(env)) {
-    //            return true;
-    //        }
-    //    }
-
     auto editor = currentEditor();
-    //    _scope->editor(&editor);
-    //    auto scopeEnvironment = std::make_shared<Scope>(env);
-    //    scopeEnvironment->editor(&editor);
     if (_inputFocus->keyPress(env)) {
-        // Todo: Handle this for reallz in the future
-        if (_inputFocus == editor) {
-            //            _scope->editor(&editor);
-        }
-        if (_inputFocus == &_console) {
-            //            _scope->editor(&editor);
-        }
-
         if (auto e = currentEditor()) {
             updateHighlighting(*e);
         }
@@ -395,6 +379,9 @@ Editor *MainWindow::currentEditor() {
             return e;
         }
     }
+    if (_locator.visible()) {
+        return &_locator;
+    }
     if (_currentEditor >= _editors.size()) {
         _currentEditor = _editors.size() - 1;
     }
@@ -474,9 +461,6 @@ void MainWindow::refreshScreen() {
 }
 
 void MainWindow::updateTitle() {
-    //    if (auto title = env->get("title")) {
-    //        screen.title(title->value());
-    //    }
     auto editor = currentEditor();
     if (!currentEditor()) {
         return;
