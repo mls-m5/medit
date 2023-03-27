@@ -16,7 +16,6 @@
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "views/inputbox.h"
-#include "views/messagebox.h"
 #include <memory>
 
 MainWindow::MainWindow(IScreen &screen, Context &context)
@@ -54,19 +53,19 @@ MainWindow::MainWindow(IScreen &screen, Context &context)
 
     _locator.callback([this](auto &&path) {
         open(path);
-        _inputFocus = &currentEditor();
+        _inputFocus = currentEditor();
         _locator.visible(false);
     });
 
     _completeView.visible(false);
     _completeView.callback([this](auto &&result) {
-        auto &editor = currentEditor();
-        auto cursor = editor.cursor();
+        auto editor = currentEditor();
+        auto cursor = editor->cursor();
         for (auto c : result.value) {
             cursor = insert(c, cursor);
         }
-        editor.cursor(cursor);
-        _inputFocus = &editor;
+        editor->cursor(cursor);
+        _inputFocus = editor;
     });
 
     //    addCommands(screen);
@@ -229,7 +228,9 @@ void MainWindow::resize(size_t w, size_t h) {
 }
 
 void MainWindow::draw(IScreen &screen) {
-    screen.cursorStyle(currentEditor().mode().cursorStyle());
+    if (auto e = currentEditor()) {
+        screen.cursorStyle(e->mode().cursorStyle());
+    }
 
     for (auto &editor : _editors) {
         editor->draw(screen);
@@ -255,29 +256,39 @@ void MainWindow::updateCursor(IScreen &screen) const {
 }
 
 bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
-    if (_inputFocus == &currentEditor() && _completeView.visible()) {
+#warning "i should really clean up input handling"
+
+    if (_inputFocus == currentEditor() && _completeView.visible()) {
         if (_completeView.keyPress(env)) {
-            updateHighlighting(currentEditor());
+            if (auto e = currentEditor()) {
+                updateHighlighting(*e);
+            }
             return true; // Otherwise give key events to editor
         }
     }
 
-#warning                                                                       \
-    "make sure that this stuff with getting the right editor works as  intended"
-    auto &editor = currentEditor();
+    //    if (_activePopup) {
+    //        if (_activePopup->keyPress(env)) {
+    //            return true;
+    //        }
+    //    }
+
+    auto editor = currentEditor();
     //    _scope->editor(&editor);
     //    auto scopeEnvironment = std::make_shared<Scope>(env);
     //    scopeEnvironment->editor(&editor);
     if (_inputFocus->keyPress(env)) {
         // Todo: Handle this for reallz in the future
-        if (_inputFocus == &editor) {
+        if (_inputFocus == editor) {
             //            _scope->editor(&editor);
         }
         if (_inputFocus == &_console) {
             //            _scope->editor(&editor);
         }
 
-        updateHighlighting(currentEditor());
+        if (auto e = currentEditor()) {
+            updateHighlighting(*e);
+        }
         if (_activePopup && _activePopup->isClosed()) {
             _activePopup = nullptr;
             resetFocus();
@@ -289,7 +300,7 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
 }
 
 void MainWindow::updateLocatorBuffer() {
-    auto &editor = currentEditor();
+    //    auto &editor = currentEditor();
     _project.updateCache(filesystem::current_path());
 }
 
@@ -299,24 +310,33 @@ void MainWindow::open(filesystem::path path,
     if (path.empty()) {
         return;
     }
-    auto &editor = currentEditor();
+
+    if (_activePopup) {
+        return;
+    }
+
+    auto editor = currentEditor();
+    if (!editor) {
+        return;
+    }
+
     path = filesystem::absolute(path);
 
-    editor.buffer(_env->core().open(path, _env));
-    editor.bufferView().yScroll(0);
+    editor->buffer(_env->core().open(path, _env));
+    editor->bufferView().yScroll(0);
 
     {
-        auto cur = editor.cursor();
+        auto cur = editor->cursor();
         if (x) {
             cur.x(*x);
         }
         if (y) {
             cur.y(*y);
         }
-        editor.cursor(cur);
+        editor->cursor(cur);
     }
 
-    updateHighlighting(editor);
+    updateHighlighting(*editor);
 
     updateTitle();
     //    _scope->run({"window.title"});
@@ -369,11 +389,16 @@ void MainWindow::showPopup(std::unique_ptr<IWindow> popup) {
     _inputFocus = _activePopup.get();
 }
 
-Editor &MainWindow::currentEditor() {
+Editor *MainWindow::currentEditor() {
+    if (_activePopup) {
+        if (auto e = _activePopup->currentEditor()) {
+            return e;
+        }
+    }
     if (_currentEditor >= _editors.size()) {
         _currentEditor = _editors.size() - 1;
     }
-    return *_editors.at(_currentEditor);
+    return _editors.at(_currentEditor).get();
 
     throw std::runtime_error("could not get the right editor");
 }
@@ -384,28 +409,36 @@ void MainWindow::resetFocus() {
 
 void MainWindow::switchEditor() {
     _currentEditor = (_currentEditor + 1) % _editors.size();
-    _inputFocus = &currentEditor();
+    _inputFocus = currentEditor();
 }
 
 void MainWindow::paste(std::string text) {
-    currentEditor().cursor(insert(currentEditor().cursor(), text));
+    if (auto e = currentEditor()) {
+        e->cursor(insert(e->cursor(), text));
+    }
 }
 
 bool MainWindow::mouseDown(int x, int y) {
-    currentEditor().mouseDown(x, y);
-
-    return true;
+    if (auto e = currentEditor()) {
+        e->mouseDown(x, y);
+        return true;
+    }
+    return false;
 }
 
 void MainWindow::copy(bool shouldCut) {
-    auto text = content(currentEditor().selection());
-    if (shouldCut) {
-        erase(currentEditor().selection());
-        // TODO: selection clearing should be handled by erase
-        currentEditor().clearSelection();
-    }
+    if (auto e = currentEditor()) {
+        auto text = content(e->selection());
+        if (shouldCut) {
+            erase(e->selection());
+            // TODO: selection clearing should be handled by erase
+            e->clearSelection();
+        }
 
-    _screen.clipboardData(text);
+        _screen.clipboardData(text);
+        return;
+    }
+    _screen.clipboardData("");
 }
 
 void MainWindow::triggerRedraw() {
@@ -420,13 +453,16 @@ void MainWindow::refreshScreen() {
         {
             constexpr auto debug = true;
             if (debug) {
-                auto cursor = currentEditor().cursor();
-                _screen.draw(1,
-                             height() - 1,
-                             std::to_string(cursor.y() + 1) + ", " +
-                                 std::to_string(cursor.x() + 1));
+                if (auto e = currentEditor()) {
+                    auto cursor = e->cursor();
+                    _screen.draw(1,
+                                 height() - 1,
+                                 std::to_string(cursor.y() + 1) + ", " +
+                                     std::to_string(cursor.x() + 1));
 
-                //                _screen.draw(10, height() - 1, _mode->name());
+                    //                _screen.draw(10, height() - 1,
+                    //                _mode->name());
+                }
             }
         }
 
@@ -441,14 +477,19 @@ void MainWindow::updateTitle() {
     //    if (auto title = env->get("title")) {
     //        screen.title(title->value());
     //    }
-    if (auto file = currentEditor().file()) {
+    auto editor = currentEditor();
+    if (!currentEditor()) {
+        return;
+    }
+
+    if (auto file = editor->file()) {
         _screen.title(file->path().string() + " - medit");
     }
 }
 
 void MainWindow::escape() {
     _env->showConsole(false);
-    _inputFocus = &currentEditor();
+    _inputFocus = currentEditor();
 }
 
 void MainWindow::showConsole() {
@@ -457,8 +498,11 @@ void MainWindow::showConsole() {
 }
 
 void MainWindow::showOpen() {
-    auto &editor = currentEditor();
-    auto path = editor.path();
+    auto editor = currentEditor();
+    if (!editor) {
+        return;
+    }
+    auto path = editor->path();
     if (path.empty()) {
         path = filesystem::current_path();
     }
@@ -486,12 +530,17 @@ void MainWindow::format() {
 }
 
 void MainWindow::autoComplete() {
-    auto &editor = currentEditor();
-    editor.cursor(fix(editor.cursor()));
+    if (_activePopup) {
+        return;
+    }
 
-    Cursor cursor = editor.cursor();
-    _completeView.setCursor(cursor, editor.bufferView());
-    _completeView.triggerShow(_env);
+    if (auto editor = currentEditor()) {
+        editor->cursor(fix(editor->cursor()));
+
+        Cursor cursor = editor->cursor();
+        _completeView.setCursor(cursor, editor->bufferView());
+        _completeView.triggerShow(_env);
+    }
 }
 
 void MainWindow::showLocator() {

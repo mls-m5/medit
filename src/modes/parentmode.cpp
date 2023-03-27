@@ -41,7 +41,7 @@ std::shared_ptr<IMode> createParentMode() {
         {KeyEvent{Key::KeyCombination, 'K', Modifiers::Ctrl},
          {[](Ptr env) { env->mainWindow().showLocator(); }}},
         {KeyEvent{Key::KeyCombination, ' ', Modifiers::Ctrl},
-         {[](Ptr env) { env->mainWindow().showConsole(); }}},
+         {[](Ptr env) { env->mainWindow().autoComplete(); }}},
     }};
 
     map.defaultAction({});

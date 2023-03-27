@@ -61,7 +61,7 @@ struct MainWindow : public Window {
 
     void showPopup(std::unique_ptr<IWindow> popup);
 
-    Editor &currentEditor();
+    Editor *currentEditor() override;
 
     void resetFocus();
 

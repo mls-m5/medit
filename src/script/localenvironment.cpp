@@ -3,6 +3,7 @@
 #include "core/coreenvironment.h"
 // #include "script/luastate.h"
 #include "views/mainwindow.h"
+#include <stdexcept>
 
 LocalEnvironment::LocalEnvironment(MainWindow &mw, Context &context)
     : _mainWindow{mw}
@@ -21,7 +22,12 @@ const StandardCommands &LocalEnvironment::standardCommands() const {
 }
 
 Editor &LocalEnvironment::editor() {
-    return _mainWindow.currentEditor();
+    auto e = _mainWindow.currentEditor();
+    if (e) {
+        return *e;
+    }
+
+    throw std::runtime_error{"no active editor in environment"};
 }
 
 // void LocalEnvironment::parseLua(std::string_view code) {

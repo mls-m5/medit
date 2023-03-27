@@ -26,6 +26,10 @@ public:
         return false;
     }
 
+    Editor *currentEditor() override {
+        return &_entry;
+    }
+
 private:
     Editor _entry;
     std::function<void(std::string)> _callback;
