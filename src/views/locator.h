@@ -16,7 +16,7 @@ public:
     ~Locator() override;
 
     // @see IKeySink
-    bool keyPress(std::shared_ptr<IScope>) override;
+    bool keyPress(std::shared_ptr<IEnvironment>) override;
 
     // @see IView
     void draw(IScreen &) override;
@@ -24,6 +24,8 @@ public:
     void callback(std::function<void(filesystem::path)> f);
 
     void visible(bool value);
+
+    bool visible() const;
 
     void updateList();
 };

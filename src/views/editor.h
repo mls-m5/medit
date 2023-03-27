@@ -2,6 +2,7 @@
 
 #include "keys/ikeysink.h"
 #include "meditfwd.h"
+// #include "sol/sol.hpp"
 #include "text/cursor.h"
 #include "text/cursorrange.h"
 #include "text/formattype.h"
@@ -63,7 +64,7 @@ public:
 
     void showLines(bool value);
 
-    bool keyPress(std::shared_ptr<IScope>) override;
+    bool keyPress(std::shared_ptr<IEnvironment>) override;
 
     bool mouseDown(int x, int y) override;
 
@@ -97,4 +98,6 @@ private:
     std::optional<Cursor> _selectionAnchor;
     std::shared_ptr<IMode> _mode;
     FormatType _background = 1;
+
+    //    sol::table _luaMode;
 };

@@ -7,7 +7,7 @@ TEST_CASE("create") {
     auto map = BufferKeyMap{BufferKeyMap::MapType{
         {
             {"hello"},
-            {""},
+            {},
         },
     }};
 }
@@ -16,7 +16,7 @@ TEST_CASE("no match") {
     auto map = BufferKeyMap{BufferKeyMap::MapType{
         {
             {"hello"},
-            {""},
+            {},
         },
     }};
 
@@ -30,7 +30,7 @@ TEST_CASE("partial match") {
     auto map = BufferKeyMap{BufferKeyMap::MapType{
         {
             {"hello"},
-            {""},
+            {},
         },
     }};
 
@@ -44,7 +44,7 @@ TEST_CASE("match") {
     auto map = BufferKeyMap{BufferKeyMap::MapType{
         {
             {"hello"},
-            {""},
+            {},
         },
     }};
 

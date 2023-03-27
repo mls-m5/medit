@@ -15,7 +15,7 @@ struct MainWindow : public Window {
     IScreen &_screen;
     std::vector<std::unique_ptr<Editor>> _editors;
     std::shared_ptr<LocalEnvironment> _env;
-    std::shared_ptr<RootScope> _scope;
+    //    std::shared_ptr<RootScope> _scope;
     Editor _console;
     Locator _locator;
     CompleteView _completeView;
@@ -48,7 +48,7 @@ struct MainWindow : public Window {
     void updateCursor(IScreen &screen) const override;
 
     //! @see IKeySink
-    bool keyPress(std::shared_ptr<IScope>) override;
+    bool keyPress(std::shared_ptr<IEnvironment>) override;
 
     void updateLocatorBuffer();
 
@@ -61,7 +61,7 @@ struct MainWindow : public Window {
 
     void showPopup(std::unique_ptr<IWindow> popup);
 
-    Editor &currentEditor();
+    Editor *currentEditor() override;
 
     void resetFocus();
 
@@ -87,6 +87,24 @@ struct MainWindow : public Window {
         return this;
     }
 
-private:
-    void addCommands(IScreen &screen);
+    // Commands --------------------
+    void updateTitle();
+    void escape();
+    void showConsole();
+
+    /// Show open dialogue
+    void showOpen();
+
+    void gotoDefinition();
+
+    /// User request to format file
+    void format();
+
+    /// User want to auto complete
+    void autoComplete();
+
+    void showLocator();
+
+    // private:
+    //     void addCommands(IScreen &screen);
 };

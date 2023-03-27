@@ -1,5 +1,6 @@
 #pragma once
 
+#include "meditfwd.h"
 #include "window.h"
 
 class MessageBox : public Window {
@@ -10,7 +11,7 @@ public:
     void draw(IScreen &) override;
 
     //! @see IKeySink interface
-    bool keyPress(std::shared_ptr<IScope> env) override;
+    bool keyPress(std::shared_ptr<IEnvironment> env) override;
 
     //! @see IKeySink interface
     void updateCursor(IScreen &screen) const override;

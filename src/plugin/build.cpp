@@ -4,6 +4,7 @@
 #include "core/jobqueue.h"
 #include "files/popenstream.h"
 #include "files/project.h"
+#include "script/ienvironment.h"
 #include "syntax/palette.h"
 #include "text/buffer.h"
 #include "views/editor.h"
@@ -13,18 +14,18 @@ namespace {
 bool isBuilding = false;
 }
 
-void build(std::shared_ptr<IScope> scope) {
+void build(std::shared_ptr<IEnvironment> env) {
 #ifndef __EMSCRIPTEN__
     if (isBuilding) {
         return;
     }
     isBuilding = true;
-    scope->env().showConsole(true);
-    auto &consoleBuffer = scope->env().console().buffer();
+    env->showConsole(true);
+    auto &consoleBuffer = env->console().buffer();
     consoleBuffer.clear();
     consoleBuffer.pushBack(std::string{"trying to build..."});
 
-    auto &project = scope->env().project();
+    auto &project = env->project();
 
     auto root = project.settings().root;
 
@@ -32,27 +33,26 @@ void build(std::shared_ptr<IScope> scope) {
         filesystem::current_path(root);
     }
 
-    scope->env().context().jobQueue().addTask([&project, scope] {
+    env->context().jobQueue().addTask([&project, env] {
         POpenStream stream(project.settings().buildCommand, true, 100);
 
         for (std::string line; getline(stream, line);) {
-            scope->env().context().guiQueue().addTask([line, scope] {
-                scope->env().console().buffer().pushBack(line);
-                scope->env().console().cursor({0, 100000000});
+            env->context().guiQueue().addTask([line, env] {
+                env->console().buffer().pushBack(line);
+                env->console().cursor({0, 100000000});
             });
         }
 
-        scope->env().context().guiQueue().addTask(
-            [returnCode = stream.returnCode(), scope] {
-                auto &consoleBuffer = scope->env().console().buffer();
-                if (returnCode) {
-                    consoleBuffer.pushBack(
-                        FString("failed...", Palette::error));
-                }
-                else {
-                    consoleBuffer.pushBack(std::string{"finished..."});
-                }
-            });
+        env->context().guiQueue().addTask([returnCode = stream.returnCode(),
+                                           env] {
+            auto &consoleBuffer = env->console().buffer();
+            if (returnCode) {
+                consoleBuffer.pushBack(FString("failed...", Palette::error));
+            }
+            else {
+                consoleBuffer.pushBack(std::string{"finished..."});
+            }
+        });
 
         isBuilding = false;
     });

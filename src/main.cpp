@@ -123,6 +123,7 @@ struct User {
                     *key == Key::Quit) {
                     medit::main::shouldQuit = true;
                     mainWindow->env().context().guiQueue().stop();
+                    return;
                 }
 
                 if (*key != Key::Unknown) {
@@ -140,7 +141,7 @@ struct User {
         // TODO: Consider moving this function to mainWindow
         if (auto c = std::get_if<KeyEvent>(&e)) {
             mainWindow._env->key(*c);
-            mainWindow.keyPress(mainWindow._scope);
+            mainWindow.keyPress(mainWindow.env().shared_from_this());
             mainWindow.resize();
         }
         if (auto p = std::get_if<PasteEvent>(&e)) {

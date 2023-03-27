@@ -1,6 +1,7 @@
 
 #include "basichighligting.h"
 #include "core/plugins.h"
+#include "script/ienvironment.h"
 #include "script/iscope.h"
 #include "span.h"
 #include "syntax/palette.h"
@@ -40,7 +41,7 @@ bool BasicHighlighting::shouldEnable(filesystem::path) {
     return true;
 }
 
-void BasicHighlighting::highlight(std::shared_ptr<IScope> scope) {
+void BasicHighlighting::highlight(std::shared_ptr<IEnvironment> scope) {
     auto &editor = scope->editor();
     auto &buffer = editor.buffer();
     highlightStatic(buffer);

@@ -1,9 +1,9 @@
 #include "togglecomments.h"
-#include "script/iscope.h"
+#include "ienvironment.h"
 #include "text/buffer.h"
 #include "views/editor.h"
 
-void toggleComments(std::shared_ptr<IScope> env) {
+void toggleComments(std::shared_ptr<IEnvironment> env) {
     auto &e = env->editor();
     auto &buffer = e.buffer();
 

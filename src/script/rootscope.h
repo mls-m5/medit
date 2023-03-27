@@ -1,27 +1,28 @@
 #pragma once
 
-#include "ienvironment.h"
-#include "scope.h"
+// #include "ienvironment.h"
+// #include "scope.h"
 
-class RootScope : public Scope {
-    IEnvironment &_environment;
+// class RootScope : public Scope {
+//     IEnvironment &_environment;
 
-public:
-    RootScope(IEnvironment &env) : Scope{nullptr}, _environment{env} {}
+// public:
+//     RootScope(IEnvironment &env) : Scope{nullptr}, _environment{env} {}
 
-    IScope &root() override {
-        return *this;
-    }
+//    IScope &root() override {
+//        return *this;
+//    }
 
-    IEnvironment &env() override {
-        return _environment;
-    }
+//    IEnvironment &env() override {
+//        return _environment;
+//    }
 
-    const IScope &root() const override {
-        return *this;
-    }
+//    const IScope &root() const override {
+//        return *this;
+//    }
 
-    IScope &parent() override {
-        throw std::runtime_error("trying to access parent of root environment");
-    }
-};
+//    IScope &parent() override {
+//        throw std::runtime_error("trying to access parent of root
+//        environment");
+//    }
+//};

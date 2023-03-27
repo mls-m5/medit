@@ -7,7 +7,6 @@
 
 enum class Key {
     Unknown,
-    //    None,
     Any,
     Text,
     KeyCombination,
@@ -21,7 +20,6 @@ enum class Key {
     PageDown,
     Backspace,
     Delete,
-    //    Return, never used
     Space,
     Escape,
     Cancel,
@@ -76,6 +74,9 @@ public:
     bool hasModifiers() const {
         return modifiers != Modifiers::None;
     }
+
+    /// Create a key event from string representation
+    static KeyEvent translate(std::string name);
 
     Key key = Key::Unknown;
     Utf8Char symbol = {};

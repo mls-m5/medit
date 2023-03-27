@@ -3,75 +3,72 @@
 #include "normalmode.h"
 #include "modes/mode.h"
 #include "modes/parentmode.h"
+#include "script/standardcommands.h"
+#include "views/mainwindow.h"
 
 std::shared_ptr<IMode> createNormalMode() {
+    using Ptr = StandardCommands::EnvPtrT;
+    auto &sc = StandardCommands::get();
+
     auto map = KeyMap{
         {
-            {{Key::Left}, {"editor.left"}},
-            {{Key::Right}, {"editor.right"}},
-            {{Key::Down}, {"editor.down"}},
-            {{Key::Up}, {"editor.up"}},
-            {{"h"}, {"editor.left"}},
-            {{"l"}, {"editor.right"}},
-            {{"j"}, {"editor.down"}},
-            {{"k"}, {"editor.up"}},
-            {{"J"}, {"editor.join"}},
-            {{"p"}, {"editor.paste"}},
-            {{"P"}, {"editor.paste_before"}},
+            {{Key::Left}, sc.left},
+            {{Key::Right}, sc.right},
+            {{Key::Down}, sc.down},
+            {{Key::Up}, sc.up},
+            {{"h"}, sc.left},
+            {{"l"}, sc.right},
+            {{"j"}, sc.down},
+            {{"k"}, sc.up},
+            {{"J"}, sc.join},
+            {{"p"}, sc.paste},
+            {{"P"}, sc.pasteBefore},
             {{"o"},
-             {"editor.end\neditor.split\neditor.copyindentation\neditor."
-              "insertmode"}},
+             sc.combine(
+                 sc.end, sc.split, sc.copy, sc.copyIndentation, sc.insertMode)},
             {{"O"},
-             {"editor.home\neditor.split\neditor.insertmode\neditor.up\neditor."
-              "copyindentation"}},
-            {{Key::Backspace}, {"editor.left"}},
-            {{"X"}, {"editor.erase"}},
-            {{Key::Delete}, {"editor.right\neditor.erase"}},
-            {{"x"}, {"editor.right\neditor.erase"}},
-            {{Key::Escape}, {"escape"}},
-            //            {{Key::Return}, {"editor.down"}},
-            {{"\n"}, {"editor.down"}},
-            {{Key::Space}, {"editor.right"}},
-            {{"i"}, {"editor.insertmode"}},
-            {{"v"}, {"editor.visualmode"}},
-            {{"V"}, {"editor.visualblockmode"}},
-            {{"u"}, {"editor.undo_major"}},
-            {{"U"}, {"editor.redo"}},
-            {{"I"}, {"editor.home\neditor.insertmode"}},
-            {{"a"}, {"editor.right\neditor.insertmode"}},
-            {{"A"}, {"editor.end\neditor.insertmode"}},
-
-            {{"b"}, {"editor.left\neditor.word_begin"}},
-            {{"e"}, {"editor.right\neditor.word_end"}},
-            {{"w"},
-             {"editor.word_end\neditor.right\neditor.word_end\neditor.word_"
-              "begin"}},
-
+             {sc.combine(
+                 sc.home, sc.split, sc.insertMode, sc.up, sc.copyIndentation)}},
+            {{Key::Backspace}, {sc.left}},
+            {{"X"}, {sc.erase}},
+            {{Key::Delete}, sc.combine(sc.right, sc.erase)},
+            {{"x"}, sc.combine(sc.right, sc.erase)},
+            {{Key::Escape}, {[](Ptr env) { env->mainWindow().escape(); }}},
+            {{"\n"}, {sc.down}},
+            {{Key::Space}, {sc.right}},
+            {{"i"}, sc.insertMode},
+            {{"v"}, sc.visualMode},
+            {{"V"}, sc.visualBlockMode},
+            {{"u"}, sc.undoMajor},
+            {{"U"}, sc.redo},
+            {{"I"}, sc.combine(sc.home, sc.insertMode)},
+            {{"a"}, sc.combine(sc.right, sc.insertMode)},
+            {{"A"}, sc.combine(sc.end, sc.insertMode)},
+            {{"b"}, sc.combine(sc.left, sc.wordBegin)},
+            {{"e"}, sc.combine(sc.right, sc.wordEnd)},
+            {{"w"}, sc.combine(sc.wordEnd, sc.right, sc.wordEnd, sc.wordBegin)},
         },
     };
     map.defaultAction({});
 
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
-        {{"dd"}, {"editor.delete_line"}},
-        {{"dw"}, {"editor.select_word\neditor.erase"}},
-        {{"diw"}, {"editor.select_inner_word\neditor.erase"}},
+        {{"dd"}, sc.deleteLine},
+        {{"dw"}, sc.combine(sc.selectWord, sc.erase)},
+        {{"diw"}, sc.combine(sc.selectInnerWord, sc.erase)},
 
-        {{"cc"}, {"editor.clear_line\neditor.copyindentation"}},
-        {{"cw"}, {"editor.select_word\neditor.erase\neditor.insertmode"}},
-        {{"ciw"},
-         {"editor.select_inner_word\neditor.erase\neditor.insertmode"}},
+        {{"cc"}, sc.combine(sc.clearLine, sc.copy, sc.copyIndentation)},
+        {{"cw"}, sc.combine(sc.selectWord, sc.erase, sc.insertMode)},
+        {{"ciw"}, sc.combine(sc.selectInnerWord, sc.erase, sc.insertMode)},
 
-        {{"yy"}, {"editor.yank_line\neditor.normalmode"}},
-        {{"yw"}, {"editor.select_word\neditor.yank\neditor.normalmode"}},
-        {{"yiw"}, {"editor.select_inner_word\neditor.yank\neditor.normalmode"}},
+        {{"yy"}, sc.combine(sc.yankLine, sc.normalMode)},
+        {{"yw"}, sc.combine(sc.selectWord, sc.yank, sc.normalMode)},
+        {{"yiw"}, sc.combine(sc.selectInnerWord, sc.yank, sc.normalMode)},
 
-        {{"cc"},
-         {"editor.delete_line\neditor.split\neditor.left\neditor.insertmode"}},
-        {{"cw"}, {"editor.select_word\neditor.erase\neditor.insertmode"}},
-        {{"ciw"},
-         {"editor.select_inner_word\neditor.erase\neditor.insertmode"}},
+        {{"cc"}, sc.combine(sc.deleteLine, sc.split, sc.left, sc.insertMode)},
+        {{"cw"}, sc.combine(sc.selectWord, sc.erase, sc.insertMode)},
+        {{"ciw"}, sc.combine(sc.selectInnerWord, sc.erase, sc.insertMode)},
 
-        {{"gd"}, {"editor.goto_definition"}},
+        {{"gd"}, {[](Ptr env) { env->mainWindow().gotoDefinition(); }}},
     }};
 
     return std::make_shared<Mode>("normal",

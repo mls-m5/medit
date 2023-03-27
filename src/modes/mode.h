@@ -2,7 +2,9 @@
 
 #include "keys/bufferkeymap.h"
 #include "keys/keymap.h"
+#include "meditfwd.h"
 #include "modes/imode.h"
+// #include "sol/sol.hpp"
 #include <memory>
 #include <string>
 
@@ -26,7 +28,7 @@ public:
          BufferKeyMap bufferMap = {},
          bool isBlockSelection = false);
 
-    bool keyPress(std::shared_ptr<IScope>) override;
+    bool keyPress(std::shared_ptr<IEnvironment>) override;
 
     void startCallback(std::function<void(Editor &)> f) {
         _start = f;

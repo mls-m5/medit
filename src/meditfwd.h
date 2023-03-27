@@ -17,7 +17,7 @@ class IView;
 class IMode;
 class Editor;
 class IFile;
-class IScope;
+// class IScope;
 class BufferView;
 class Command;
 class CommandBlock;
@@ -34,6 +34,8 @@ class IWindow;
 class CoreEnvironment;
 class BufferEvent;
 class IEnvironment;
+class LuaState;
+class StandardCommands;
 
 class ITimer;
 class IJobQueue;

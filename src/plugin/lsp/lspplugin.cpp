@@ -12,6 +12,7 @@
 #include "script/ienvironment.h"
 #include "script/iscope.h"
 #include "script/scope.h"
+#include "script/standardcommands.h"
 #include "syntax/basichighligting.h"
 #include "syntax/palette.h"
 #include "text/cursorrangeops.h"
@@ -296,7 +297,7 @@ void LspPlugin::updateBuffer(Buffer &buffer) {
     requestSemanticsToken(buffer.shared_from_this());
 }
 
-void LspComplete::list(std::shared_ptr<IScope> scope,
+void LspComplete::list(std::shared_ptr<IEnvironment> scope,
                        CompleteCallbackT callback) {
 
     if (!shouldProcessFileWithClang(scope->editor().buffer().path())) {
@@ -340,7 +341,7 @@ void LspComplete::list(std::shared_ptr<IScope> scope,
         });
 }
 
-bool LspComplete::shouldComplete(std::shared_ptr<IScope> env) {
+bool LspComplete::shouldComplete(std::shared_ptr<IEnvironment> env) {
     return shouldProcessFileWithClang(env->editor().path());
 }
 
@@ -348,13 +349,13 @@ bool LspHighlight::shouldEnable(filesystem::path path) {
     return shouldProcessFileWithClang(path);
 }
 
-void LspHighlight::highlight(std::shared_ptr<IScope> scope) {
+void LspHighlight::highlight(std::shared_ptr<IEnvironment> scope) {
     LspPlugin::instance().updateBuffer(scope->editor().buffer());
 }
 
 // void LspHighlight::update(const IPalette &palette) {}
 
-bool LspNavigation::gotoSymbol(std::shared_ptr<IScope> env) {
+bool LspNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     if (!shouldProcessFileWithClang(env->editor().path())) {
         return false;
     }
@@ -368,17 +369,15 @@ bool LspNavigation::gotoSymbol(std::shared_ptr<IScope> env) {
                 return;
             }
 
-            env->env().context().guiQueue().addTask([env, locations] {
-                auto localEnvironment = std::make_shared<Scope>(env);
-                localEnvironment->set(
-                    "path", uriToPath(locations.front().uri).string());
-
+            env->context().guiQueue().addTask([env, locations] {
                 auto pos =
                     clangPositionToLspPosition(locations.front().range.start);
 
-                localEnvironment->set("x", std::to_string(pos.x()));
-                localEnvironment->set("y", std::to_string(pos.y()));
-                localEnvironment->run(Command{"editor.open"});
+                env->standardCommands().open(
+                    env->shared_from_this(),
+                    uriToPath(locations.front().uri).string(),
+                    pos.x(),
+                    pos.y());
             });
         });
     return true;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "script/iscope.h"
+#include "script/ienvironment.h"
 
-void run(std::shared_ptr<IScope> scope);
-
+void run(std::shared_ptr<IEnvironment> scope);

@@ -3,7 +3,7 @@
 #include "keys/event.h"
 #include "screen/draw.h"
 #include "screen/iscreen.h"
-#include "script/iscope.h"
+#include "script/ienvironment.h"
 #include "syntax/palette.h"
 #include "text/position.h"
 
@@ -65,8 +65,8 @@ void ListView::draw(IScreen &screen) {
     }
 }
 
-bool ListView::keyPress(std::shared_ptr<IScope> scope) {
-    switch (scope->env().key().key) {
+bool ListView::keyPress(std::shared_ptr<IEnvironment> env) {
+    switch (env->key().key) {
     case Key::Up:
         if (_current > 0) {
             current(_current - 1);
@@ -84,7 +84,7 @@ bool ListView::keyPress(std::shared_ptr<IScope> scope) {
         }
         return false;
     case Key::Text:
-        if (scope->env().key().symbol == '\n') {
+        if (env->key().symbol == '\n') {
             if (!_lines.empty()) {
                 auto &line = _lines.at(_current);
                 if (_callback) {

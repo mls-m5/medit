@@ -20,6 +20,8 @@ target_link_libraries(
     medit_core
     PUBLIC
     medit_common
+#    lua
+#    sol2
     )
 
 
@@ -94,6 +96,7 @@ add_library(
     files/file.cpp
     files/project.cpp
     keys/keymap.cpp
+    keys/event.cpp
     syntax/basichighligting.cpp
     text/fstring.cpp
     text/cursorrangeops.cpp
@@ -121,8 +124,9 @@ add_library(
     script/localenvironment.cpp
     script/standardcommands.cpp
     script/command.cpp
-    script/parser.cpp
     script/togglecomments.cpp
+    script/luastate.cpp
+    script/scope.cpp
     navigation/headernavigation.cpp
     completion/autocomplete.cpp
     screen/draw.cpp

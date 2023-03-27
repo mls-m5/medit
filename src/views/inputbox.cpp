@@ -3,6 +3,7 @@
 #include "modes/insertmode.h"
 #include "screen/draw.h"
 #include "screen/iscreen.h"
+#include "script/ienvironment.h"
 #include "script/iscope.h"
 #include "script/scope.h"
 #include "syntax/palette.h"
@@ -29,16 +30,18 @@ InputBox::InputBox(IWindow *parent, FString title, std::string defaultValue)
 
 InputBox::~InputBox() = default;
 
-bool InputBox::keyPress(std::shared_ptr<IScope> scope) {
-    auto key = scope->env().key();
+bool InputBox::keyPress(std::shared_ptr<IEnvironment> env) {
+    auto key = env->key();
 
-    auto context = std::make_shared<Scope>(scope);
+    //    auto context = std::make_shared<Scope>(scope);
 
-    context->editor(&_entry);
+    //    context->editor(&_entry);
+
+#warning "make sure that this works after removing scope"
 
     switch (key.key) {
     case Key::Escape:
-        scope->set("return", {});
+        //        scope->set("return", {});
         close();
         break;
     case Key::Text:
@@ -53,12 +56,12 @@ bool InputBox::keyPress(std::shared_ptr<IScope> scope) {
             //            }
             _callback(_entry.buffer().text());
         }
-        if (_entry.keyPress(context)) {
+        if (_entry.keyPress(env)) {
             return true;
         }
         break;
     default:
-        if (_entry.keyPress(context)) {
+        if (_entry.keyPress(env)) {
             return true;
         }
     }

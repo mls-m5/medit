@@ -64,3 +64,20 @@ if (ENABLE_LEGACY_CLANG_PLUGIN)
     test(clang_autocomplete)
     test(clanghighlighting)
 endif()
+
+# ------------------------------------
+
+function(lua_test testname)
+    add_test(
+        NAME lua_${testname}
+        COMMAND lua test/${testname}.lua
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+    file(
+        COPY ${testname}.lua
+        DESTINATION .
+        )
+
+endfunction()
+
+lua_test(mode_test)

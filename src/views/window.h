@@ -28,4 +28,8 @@ public:
     IEnvironment &env() override {
         return _parent->env();
     }
+
+    Editor *currentEditor() override {
+        return nullptr;
+    }
 };

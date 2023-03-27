@@ -138,7 +138,7 @@ void Editor::showLines(bool value) {
     _bufferView.showLines(value);
 }
 
-bool Editor::keyPress(std::shared_ptr<IScope> env) {
+bool Editor::keyPress(std::shared_ptr<IEnvironment> env) {
     if (_mode) {
         if (_mode->keyPress(env)) {
             return true;
@@ -166,18 +166,6 @@ bool Editor::mouseDown(int x, int y) {
 }
 
 void Editor::updateCursor(IScreen &screen) const {
-    constexpr auto debug = true;
-
-    //    if (debug) {
-    //        if (auto w = window()) {
-    //            screen.draw(1,
-    //                        screen.height() - 1,
-    //                        std::to_string(_cursor.y() + 1) + ", " +
-    //                            std::to_string(_cursor.x() + 1));
-
-    //            screen.draw(10, screen.height() - 1, _mode->name());
-    //        }
-    //    }
 
     // Make the cursor appear as it is on the line but can stay on same x
     // position between longer lines

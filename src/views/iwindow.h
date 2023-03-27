@@ -11,4 +11,7 @@ public:
     virtual void triggerRedraw() = 0;
 
     virtual IEnvironment &env() = 0;
+
+    //! @return Focused editor if present or nullptr if window does not have one
+    virtual Editor *currentEditor() = 0;
 };

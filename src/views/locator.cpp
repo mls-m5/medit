@@ -1,6 +1,6 @@
 
 #include "locator.h"
-#include "modes/parentmode.h"
+#include "script/ienvironment.h"
 #include "text/buffer.h"
 
 Locator::Locator(IView *parent, Project &projectFiles)
@@ -14,15 +14,12 @@ Locator::Locator(IView *parent, Project &projectFiles)
     _list.height(20);
 }
 
-bool Locator::keyPress(std::shared_ptr<IScope> env) {
-    auto localEnvironment = std::make_shared<Scope>(env);
-    localEnvironment->editor(this);
-    ;
-    if (_list.keyPress(localEnvironment)) {
+bool Locator::keyPress(std::shared_ptr<IEnvironment> env) {
+    if (_list.keyPress(env)) {
         return true;
     }
     else {
-        auto ret = Editor::keyPress(localEnvironment);
+        auto ret = Editor::keyPress(env);
 
         updateList();
         return ret;
@@ -57,6 +54,10 @@ void Locator::visible(bool value) {
     if (value) {
         updateList();
     }
+}
+
+bool Locator::visible() const {
+    return _list.visible();
 }
 
 void Locator::updateList() {

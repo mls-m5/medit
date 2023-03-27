@@ -1,13 +1,4 @@
 {
-    "build": "cd build/default ; cmake ../.. ; cmake --build .",
-    "flags": [
-        "-std=c++2a",
-        "-Isrc",
-        "-Iinclude",
-        "-Iplugin/include",
-        "-Iplugin/clang/include",
-        "-Iplugin/clang",
-        "-Ilib/json.h/include",
-        "-Itest"
-    ]
+    "build": "cd build/default ; cmake ../..  -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ; cmake --build .",
+    "run": "cd build/default ; ./medit"
 }
