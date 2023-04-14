@@ -88,3 +88,21 @@ Medit could pick the wrong one.
 
 
 
+## Build with docker or podman
+
+Install podman
+
+```
+sudo apt install podman
+pip install podman-compose
+```
+
+build with 
+
+```
+./containerized_build.sh
+```
+
+
+
+

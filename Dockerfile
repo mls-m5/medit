@@ -36,9 +36,6 @@ RUN apt-get clean && \
 # Install CMake 3.26
 RUN wget -qO- "https://cmake.org/files/v3.26/cmake-3.26.0-linux-x86_64.tar.gz" | tar --strip-components=1 -xz -C /usr/local
 
-# Copy the project files into the container
-COPY . .
-
 # Set working directory for ctest
 WORKDIR /app/build/docker
 

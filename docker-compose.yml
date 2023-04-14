@@ -4,5 +4,5 @@ services:
   cmake_project:
     build: .
     volumes:
-      - ./build/docker:/app/build/docker
+      - .:/app
     command: /bin/bash -c "cd /app/build/docker && cmake ../.. && make && ctest ."
