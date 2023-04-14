@@ -53,11 +53,11 @@ public:
                             std::string source,
                             std::vector<Diagnostics::Diagnostic>);
 
-    Context &context() {
+    ThreadContext &context() {
         return *_context;
     }
 
-    void context(Context *c) {
+    void context(ThreadContext *c) {
         _context = c;
     }
 
@@ -75,6 +75,6 @@ private:
 
     std::vector<BufferSubscription> _bufferSubscriptions;
 
-    Context *_context =
+    ThreadContext *_context =
         nullptr; // TODO: Handle lifetime of CoreEnvironment better
 };

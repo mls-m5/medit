@@ -18,7 +18,7 @@
 #include "views/inputbox.h"
 #include <memory>
 
-MainWindow::MainWindow(IScreen &screen, Context &context)
+MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
     : Window{nullptr}
     , View(nullptr, 100, 100)
     , _screen{screen}
@@ -153,8 +153,6 @@ void MainWindow::updateCursor(IScreen &screen) const {
 }
 
 bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
-#warning "i should really clean up input handling"
-
     if (_inputFocus == currentEditor() && _completeView.visible()) {
         if (_completeView.keyPress(env)) {
             if (auto e = currentEditor()) {
@@ -164,7 +162,6 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
         }
     }
 
-    auto editor = currentEditor();
     if (_inputFocus->keyPress(env)) {
         if (auto e = currentEditor()) {
             updateHighlighting(*e);

@@ -15,12 +15,12 @@ class LocalEnvironment : public IEnvironment {
     Editor *_console;
     Project *_project;
     bool _showConsole = false;
-    Context &_context;
+    ThreadContext &_context;
     Registers _registers;
     //    LuaState _lua;
 
 public:
-    LocalEnvironment(MainWindow &mw, Context &context);
+    LocalEnvironment(MainWindow &mw, ThreadContext &context);
 
     void initLua(MainWindow &mw);
 
@@ -54,7 +54,7 @@ public:
         _project = project;
     }
 
-    Context &context() override {
+    ThreadContext &context() override {
         return _context;
     }
 

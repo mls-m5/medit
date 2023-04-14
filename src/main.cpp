@@ -1,13 +1,8 @@
 #include "main.h"
 #include "core/context.h"
 #include "core/coreenvironment.h"
-#include "core/debugoutput.h"
 #include "core/jobqueue.h"
-#include "core/jsjobqueue.h"
-#include "core/jstimer.h"
-#include "core/os.h"
 #include "core/timer.h"
-#include "files/file.h"
 #include "registerdefaultplugins.h"
 #include "screen/bufferedscreen.h"
 #include "settings.h"
@@ -19,6 +14,8 @@
 
 #ifdef __EMSCRIPTEN__
 
+#include "core/jsjobqueue.h"
+#include "core/jstimer.h"
 #include "screen/htmlscreen.h"
 // #include <emscripten.h>
 
@@ -54,7 +51,7 @@ struct User {
     }
 #else
 
-    User(const Settings &settings, Context &context) {
+    User(const Settings &settings, ThreadContext &context) {
         if (settings.style == UiStyle::Terminal) {
             nativeScreen = std::make_unique<NCursesScreen>();
         }
@@ -81,12 +78,12 @@ struct User {
 
     User(std::shared_ptr<IConnection> conn,
          const Settings &settings,
-         Context &context) {
+         ThreadContext &context) {
         nativeScreen = std::make_unique<SerializeScreen>(conn);
         setup(settings, context);
     }
 
-    void setup(const Settings &settings, Context &context) {
+    void setup(const Settings &settings, ThreadContext &context) {
         screen = std::make_unique<BufferedScreen>(nativeScreen.get());
         screen->subscribe([this, &context](IScreen::EventListT list) {
             context.guiQueue().addTask([e = list, this] {
@@ -161,7 +158,7 @@ struct MainData {
     std::shared_ptr<IJobQueue> jobQueue;
     std::shared_ptr<ITimer> timer;
     std::shared_ptr<ITimer> guiLoopTimer;
-    std::shared_ptr<Context> context;
+    std::shared_ptr<ThreadContext> context;
     std::unique_ptr<TcpServer> server;
 
     std::vector<std::unique_ptr<User>> users;
@@ -177,6 +174,8 @@ struct MainData {
     void createScreen(const Settings &settings) {}
 };
 
+// Its defined publicly so that emscripten can keep it after the main function
+// exits
 MainData mainData;
 
 void MainData::start(const Settings &settings) {
@@ -188,7 +187,7 @@ void MainData::start(const Settings &settings) {
 
     createScreen(settings);
 
-    context = std::make_shared<Context>(*jobQueue, *guiQueue, *timer);
+    context = std::make_shared<ThreadContext>(*jobQueue, *guiQueue, *timer);
 
     // TODO: Core context should probably live in this file somewhere
     CoreEnvironment::instance().context(context.get());

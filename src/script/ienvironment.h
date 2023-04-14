@@ -14,7 +14,7 @@ public:
 
     [[nodiscard]] virtual Project &project() = 0;
 
-    [[nodiscard]] virtual Context &context() = 0;
+    [[nodiscard]] virtual ThreadContext &context() = 0;
 
     [[nodiscard]] virtual CoreEnvironment &core() = 0;
 

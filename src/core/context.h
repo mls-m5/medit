@@ -4,13 +4,14 @@
 #include <functional>
 
 //! Keeps information of threads and timer
-class Context {
+//! Shared for all users connected to the same server
+class ThreadContext {
     IJobQueue &_jobQueue;
     IJobQueue &_guiQueue;
     ITimer &_timer;
 
 public:
-    Context(IJobQueue &jobQueue, IJobQueue &guiQueue, ITimer &timer)
+    ThreadContext(IJobQueue &jobQueue, IJobQueue &guiQueue, ITimer &timer)
         : _jobQueue(jobQueue)
         , _guiQueue(guiQueue)
         , _timer(timer) {}

@@ -15,7 +15,6 @@ struct MainWindow : public Window {
     IScreen &_screen;
     std::vector<std::unique_ptr<Editor>> _editors;
     std::shared_ptr<LocalEnvironment> _env;
-    //    std::shared_ptr<RootScope> _scope;
     Editor _console;
     Locator _locator;
     CompleteView _completeView;
@@ -34,7 +33,7 @@ struct MainWindow : public Window {
     std::vector<std::unique_ptr<IAnnotation>> _annotation;
     std::vector<std::unique_ptr<INavigation>> _navigation;
 
-    MainWindow(IScreen &screen, Context &context);
+    MainWindow(IScreen &screen, ThreadContext &context);
 
     ~MainWindow() override;
 
@@ -104,7 +103,4 @@ struct MainWindow : public Window {
     void autoComplete();
 
     void showLocator();
-
-    // private:
-    //     void addCommands(IScreen &screen);
 };

@@ -5,7 +5,7 @@
 #include "views/mainwindow.h"
 #include <stdexcept>
 
-LocalEnvironment::LocalEnvironment(MainWindow &mw, Context &context)
+LocalEnvironment::LocalEnvironment(MainWindow &mw, ThreadContext &context)
     : _mainWindow{mw}
     , _context{context} {}
 

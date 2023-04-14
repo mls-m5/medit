@@ -39,7 +39,7 @@ class StandardCommands;
 
 class ITimer;
 class IJobQueue;
-class Context;
+class ThreadContext;
 
 class IHighlight;
 class ICompletionSource;
