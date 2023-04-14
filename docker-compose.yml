@@ -5,4 +5,4 @@ services:
     build: .
     volumes:
       - .:/app
-    command: /bin/bash -c "cd /app/build/docker && cmake ../.. && make && ctest ."
+    command: /bin/bash -c "cd /app/build/docker && cmake ../.. && make -j && ctest ."
