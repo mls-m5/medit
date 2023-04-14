@@ -1,0 +1,8 @@
+version: "3.9"
+
+services:
+  cmake_project:
+    build: .
+    volumes:
+      - ./build/docker:/app/build/docker
+    command: /bin/bash -c "cd /app/build/docker && cmake ../.. && make && ctest ."

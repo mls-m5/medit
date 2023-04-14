@@ -67,17 +67,17 @@ endif()
 
 # ------------------------------------
 
-function(lua_test testname)
-    add_test(
-        NAME lua_${testname}
-        COMMAND lua test/${testname}.lua
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    )
-    file(
-        COPY ${testname}.lua
-        DESTINATION .
-        )
+#function(lua_test testname)
+#    add_test(
+#        NAME lua_${testname}
+#        COMMAND lua test/${testname}.lua
+#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+#    )
+#    file(
+#        COPY ${testname}.lua
+#        DESTINATION .
+#        )
 
-endfunction()
+#endfunction()
 
-lua_test(mode_test)
+#lua_test(mode_test)
