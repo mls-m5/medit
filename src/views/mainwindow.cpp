@@ -16,6 +16,7 @@
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "views/inputbox.h"
+#include <filesystem>
 #include <memory>
 
 MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
@@ -216,7 +217,6 @@ void MainWindow::open(filesystem::path path,
     updateHighlighting(*editor);
 
     updateTitle();
-    //    _scope->run({"window.title"});
 }
 
 void MainWindow::updateHighlighting(Editor &editor) {
@@ -343,6 +343,7 @@ void MainWindow::refreshScreen() {
             }
         }
 
+        updateTitle();
         updateCursor(_screen);
         _screen.clear();
         draw(_screen);
@@ -357,7 +358,13 @@ void MainWindow::updateTitle() {
     }
 
     if (auto file = editor->file()) {
-        _screen.title(file->path().string() + " - medit");
+        auto path =
+            std::filesystem::relative(file->path(), _project.settings().root);
+        auto title = path.string() + " - medit";
+        if (editor->buffer().isChanged()) {
+            title += "*";
+        }
+        _screen.title(title);
     }
 }
 

@@ -1,13 +1,14 @@
 
 #include "screen/bufferedscreen.h"
-#include "core/debugoutput.h"
 #include "screen/iscreen.h"
+#include <string>
 
 struct BufferedScreen::Canvas {
     std::vector<FString> lines;
     size_t width = 0;
     size_t height = 0;
     size_t _cursorX = 0, _cursorY = 0;
+    std::string title;
 
     void resize(size_t width, size_t height) {
         if (width == this->width && height == this->height) {
@@ -89,24 +90,11 @@ void BufferedScreen::cursor(size_t x, size_t y) {
     _canvas->_cursorY = y;
 }
 
-// size_t BufferedScreen::x() const {
-//     return _backend->x();
-// }
-
-// size_t BufferedScreen::y() const {
-//     return _backend->y();
-// }
-
-// size_t BufferedScreen::width() const {
-//     return _canvas->width;
-// }
-
-// size_t BufferedScreen::height() const {
-//     return _canvas->height;
-// }
-
 void BufferedScreen::title(std::string title) {
-    _backend->title(title);
+    if (_canvas->title != title) {
+        _canvas->title = title;
+        _backend->title(title);
+    }
 }
 
 void BufferedScreen::palette(const Palette &palette) {

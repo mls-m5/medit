@@ -34,11 +34,6 @@ filesystem::path Project::root(filesystem::path path) const {
             return path;
         }
 
-        //        auto newPath = filesystem::path("");
-        //        for (auto it = path.begin(); it != --path.end(); ++it) {
-        //            newPath /= it->string();
-        //        }
-
         path = path.parent_path();
 
     } while (!path.empty());
