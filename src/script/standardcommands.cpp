@@ -248,7 +248,7 @@ StandardCommands create() {
         env->editor().mode(createVisualMode(*env));
     };
     DEF(visualBlockMode) {
-        env->editor().mode(createVisualMode(*env));
+        env->editor().mode(createVisualMode(*env, true));
     };
     DEF(toggleComment) {
         ::toggleComments(env);
