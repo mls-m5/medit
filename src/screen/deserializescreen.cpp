@@ -42,7 +42,7 @@ void DeserializeScreen::handle(const nlohmann::json &json) {
     }
 
     if (method == "draw") {
-        _screen->draw(json["x"], json["y"], FString(json["text"]));
+        _screen->draw(json["x"], json["y"], FString{json["text"]});
         return;
     }
 
@@ -60,38 +60,6 @@ void DeserializeScreen::handle(const nlohmann::json &json) {
         _screen->title(json["value"]);
         return;
     }
-
-    //    if (method == "get/x") {
-    //        send(nlohmann::json{
-    //            {"id", id},
-    //            {"value", _screen->x()},
-    //        });
-    //        return;
-    //    }
-
-    //    if (method == "get/y") {
-    //        send(nlohmann::json{
-    //            {"id", id},
-    //            {"value", _screen->y()},
-    //        });
-    //        return;
-    //    }
-
-    //    if (method == "get/width") {
-    //        send(nlohmann::json{
-    //            {"id", id},
-    //            {"value", _screen->width()},
-    //        });
-    //        return;
-    //    }
-
-    //    if (method == "get/height") {
-    //        send(nlohmann::json{
-    //            {"id", id},
-    //            {"value", _screen->height()},
-    //        });
-    //        return;
-    //    }
 
     if (method == "clear") {
         _screen->clear();

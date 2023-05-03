@@ -4,12 +4,13 @@
 #include "meditfwd.h"
 #include "screen/cursorstyle.h"
 #include "text/fstring.h"
+#include "text/fstringview.h"
 #include <limits>
 #include <string>
 
 class IScreen {
 public:
-    virtual void draw(size_t x, size_t y, const FString &str) = 0;
+    virtual void draw(size_t x, size_t y, FStringView str) = 0;
     virtual void refresh() = 0;
     virtual void clear() = 0;
     virtual void cursor(size_t x, size_t y) = 0;

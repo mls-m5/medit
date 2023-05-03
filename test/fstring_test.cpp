@@ -3,6 +3,7 @@
 
 #include "mls-unit-test/unittest.h"
 #include "text/fstring.h"
+#include "text/fstringview.h"
 
 TEST_SUIT_BEGIN
 
@@ -28,6 +29,21 @@ TEST_CASE("split") {
     ASSERT_EQ(split.size(), 3);
 
     ASSERT_EQ(split.at(0), FString{"hello"});
+}
+
+TEST_CASE("fstring view") {
+    auto f = FString{"hello\nthere\n"};
+    auto f2 = FString{"hello\nthere\nyou"};
+
+    auto fsv = FStringView{f};
+    auto fsv2 = FStringView{f2};
+
+    ASSERT_EQ(f, fsv);
+    ASSERT_EQ(fsv, f);
+    ASSERT_EQ(fsv, fsv);
+    ASSERT_NE(fsv, fsv2);
+    ASSERT_NE(fsv, f2);
+    ASSERT_NE(f, fsv2);
 }
 
 TEST_SUIT_END

@@ -339,8 +339,8 @@ void MainWindow::refreshScreen() {
                     auto cursor = e->cursor();
                     _screen.draw(1,
                                  height() - 1,
-                                 std::to_string(cursor.y() + 1) + ", " +
-                                     std::to_string(cursor.x() + 1));
+                                 FString{std::to_string(cursor.y() + 1) + ", " +
+                                         std::to_string(cursor.x() + 1)});
                 }
             }
         }

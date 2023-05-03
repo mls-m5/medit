@@ -12,7 +12,7 @@
 
 class NCursesScreen : public IScreen {
 public:
-    void draw(size_t x, size_t y, const FString &str) override;
+    void draw(size_t x, size_t y, FStringView str) override;
 
     void refresh() override;
     void clear() override;

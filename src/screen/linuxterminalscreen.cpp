@@ -77,7 +77,7 @@ LinuxTerminalScreen::~LinuxTerminalScreen() {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &originalTermiosSettings);
 }
 
-void LinuxTerminalScreen::draw(size_t x, size_t y, const FString &str) {
+void LinuxTerminalScreen::draw(size_t x, size_t y, FStringView str) {
     // https://stackoverflow.com/questions/5947742/how-to-change-the-output-color-of-echo-in-linux/20983251#20983251
     //    system(("tput cup " + std::to_string(y) + " " +
     //    std::to_string(x)).c_str()); std::cout << std::string{str};

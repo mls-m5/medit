@@ -2,6 +2,7 @@
 
 #include "script/command.h"
 #include "text/fstring.h"
+#include "text/fstringview.h"
 #include <optional>
 
 class BufferKeyMap {
@@ -16,7 +17,7 @@ public:
 
     //! @returns second = CommandBlock pointing to matching commandblock if
     //! match else second = nullptr, first = kind of match
-    std::pair<MatchType, CommandBlock *> match(const FString &str) {
+    std::pair<MatchType, CommandBlock *> match(FStringView str) {
         auto best = NoMatch;
         for (auto &item : _map) {
             auto m = match(item.first, str);
@@ -30,7 +31,8 @@ public:
         return {best, nullptr};
     }
 
-    BufferKeyMap(MapType map) : _map(std::move(map)) {}
+    BufferKeyMap(MapType map)
+        : _map(std::move(map)) {}
 
     BufferKeyMap() = default;
     BufferKeyMap(const BufferKeyMap &) = default;
@@ -39,7 +41,7 @@ public:
     BufferKeyMap &operator=(BufferKeyMap &&) = default;
 
 private:
-    static MatchType match(const FString mapped, const FString &test) {
+    static MatchType match(const FString mapped, FStringView test) {
         if (mapped.size() < test.size()) {
             // The typed command is longer than the one tested against
             return NoMatch;

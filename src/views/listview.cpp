@@ -53,10 +53,8 @@ void ListView::draw(IScreen &screen) {
         }
         if (i == _current) {
             ::draw(screen, x(), y() + ty, selFillStr);
-            ::draw(screen,
-                   x(),
-                   y() + ty,
-                   {std::string{l.text}, Palette::currentLine});
+            ::draw(
+                screen, x(), y() + ty, FString{l.text, Palette::currentLine});
         }
         else {
             ::draw(screen, x(), y() + ty, fillStr);

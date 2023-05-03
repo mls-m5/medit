@@ -19,6 +19,6 @@ void fillRect(IScreen &screen, const FChar &c, const IView &view) {
     fillRect(screen, c, view.x(), view.y(), view.width(), view.height());
 }
 
-void draw(IScreen &screen, size_t x, size_t y, const FString &str) {
+void draw(IScreen &screen, size_t x, size_t y, FStringView str) {
     screen.draw(x, y, str);
 }

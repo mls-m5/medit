@@ -24,7 +24,7 @@ struct BufferedScreen::Canvas {
         this->height = height;
     }
 
-    void draw(size_t x, size_t y, const FString &str) {
+    void draw(size_t x, size_t y, FStringView str) {
         if (y >= lines.size()) {
             return;
         }
@@ -69,7 +69,7 @@ BufferedScreen::BufferedScreen(IScreen *screen)
 
 BufferedScreen::~BufferedScreen() = default;
 
-void BufferedScreen::draw(size_t x, size_t y, const FString &str) {
+void BufferedScreen::draw(size_t x, size_t y, FStringView str) {
     forceThread();
     _canvas->draw(x, y, str);
 }

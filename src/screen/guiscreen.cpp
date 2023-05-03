@@ -149,7 +149,7 @@ struct GuiScreen::Buffer {
     }
 
     // Save data to be drawn
-    void draw(size_t x, size_t y, const FString &str) {
+    void draw(size_t x, size_t y, FStringView str) {
         if (y >= lines.size()) {
             return;
         }
@@ -222,7 +222,7 @@ struct GuiScreen::Buffer {
         }
     }
 
-    void renderLine(size_t y, const FString &str) {
+    void renderLine(size_t y, FStringView str) {
         for (size_t x = 0; x < str.size(); ++x) {
             auto c = str.at(x);
             auto &s = screen.canvas.at(x, y);
@@ -465,7 +465,7 @@ struct GuiScreen::Buffer {
     }
 };
 
-void GuiScreen::draw(size_t x, size_t y, const FString &str) {
+void GuiScreen::draw(size_t x, size_t y, FStringView str) {
     _buffer->draw(x, y, str);
 }
 

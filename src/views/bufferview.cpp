@@ -35,8 +35,7 @@ void BufferView::draw(IScreen &screen) {
     auto fillStr =
         FString{std::string(_numberWidth, ' '), Palette::lineNumbers};
 
-    auto fillStrError =
-        FString{std::string(_numberWidth, ' '), Palette::error};
+    auto fillStrError = FString{std::string(_numberWidth, ' '), Palette::error};
     for (size_t ty = 0; ty < height(); ++ty) {
         auto l = ty + yScroll();
         if (l < buffer().lines().size()) {
@@ -66,8 +65,8 @@ void BufferView::draw(IScreen &screen) {
                 screen.draw(
                     x() + offset,
                     y() + ty,
-                    {std::to_string(lineNum),
-                     hasLineDiagnostics ? Palette::error : lineFormat});
+                    FString{std::to_string(lineNum),
+                            hasLineDiagnostics ? Palette::error : lineFormat});
 
                 ++l;
             }

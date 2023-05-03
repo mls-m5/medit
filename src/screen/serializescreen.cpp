@@ -3,6 +3,7 @@
 #include "nlohmann/json.hpp"
 #include "syntax/palette.h"
 #include "text/fstring_serialization.h"
+#include "text/fstringview_serialization.h"
 #include <sstream>
 
 SerializeScreen::SerializeScreen(std::shared_ptr<IConnection> connection)
@@ -19,7 +20,7 @@ SerializeScreen::~SerializeScreen() {
     _connection->close();
 }
 
-void SerializeScreen::draw(size_t x, size_t y, const FString &str) {
+void SerializeScreen::draw(size_t x, size_t y, FStringView str) {
     send(nlohmann::json{
         {"method", "draw"},
         {"x", static_cast<double>(x)},

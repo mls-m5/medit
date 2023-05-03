@@ -25,6 +25,9 @@ FString::FString(size_t len, FChar value) {
     }
 }
 
+FString::FString(const FChar *begin, const FChar *end)
+    : _content(begin, end) {}
+
 FString FString::operator+(const FString &other) {
     FString str;
     str.reserve(size() + other.size());

@@ -17,7 +17,7 @@ public:
     ~BufferedScreen();
 
     //! @see IScreen
-    void draw(size_t x, size_t y, const FString &str) override;
+    void draw(size_t x, size_t y, FStringView str) override;
     //! @see IScreen
     void refresh() override;
     //! @see IScreen

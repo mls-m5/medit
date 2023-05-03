@@ -2,6 +2,7 @@
 
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
+#include "text/fstringview.h"
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -10,7 +11,7 @@
 
 class GuiScreen : public IScreen {
 public:
-    void draw(size_t x, size_t y, const FString &str) override;
+    void draw(size_t x, size_t y, FStringView str) override;
 
     void refresh() override;
     void clear() override;

@@ -35,13 +35,13 @@ TEST_CASE("draw(...)") {
     auto f = Fixture{};
 
     f.output->mock_draw_3.expectArgs(
-        [](auto x, auto y, const FString &str) -> bool {
+        [](auto x, auto y, FStringView str) -> bool {
             return x == 10 && y == 20 && str == FString{"hello"} &&
                    str.front().f == 12;
         });
     f.output->mock_draw_3.expectNum(1);
 
-    f.ss.draw(10, 20, {"hello", 12});
+    f.ss.draw(10, 20, FString{"hello", 12});
 }
 
 TEST_CASE("clear()") {

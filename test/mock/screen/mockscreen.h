@@ -5,10 +5,7 @@
 
 class MockScreen : public IScreen {
 public:
-    MOCK_METHOD3(void,
-                 draw,
-                 (size_t x, size_t y, const FString &str),
-                 override);
+    MOCK_METHOD3(void, draw, (size_t x, size_t y, FStringView str), override);
     MOCK_METHOD0(void, refresh, (), override);
     MOCK_METHOD0(void, clear, (), override);
     MOCK_METHOD2(void, cursor, (size_t x, size_t y), override);

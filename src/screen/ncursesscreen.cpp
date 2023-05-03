@@ -90,7 +90,7 @@ void NCursesScreen::init() {
     ::timeout(10);
 }
 
-void NCursesScreen::draw(size_t x, size_t y, const FString &rstr) {
+void NCursesScreen::draw(size_t x, size_t y, FStringView rstr) {
     auto str = rstr;
     _threadQueue.push_back([str, this, x, y] {
         _tv();

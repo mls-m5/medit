@@ -139,7 +139,7 @@ HtmlScreen::HtmlScreen()
 
 HtmlScreen::~HtmlScreen() = default;
 
-void HtmlScreen::draw(size_t x, size_t y, const FString &str) {
+void HtmlScreen::draw(size_t x, size_t y, FStringView str) {
     for (auto c : str) {
         _grid->draw(x, y, c);
         ++x;

@@ -2,6 +2,7 @@
 
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
+#include "text/fstringview.h"
 
 class LinuxTerminalScreen : public IScreen {
 public:
@@ -9,7 +10,7 @@ public:
     ~LinuxTerminalScreen();
 
     //! IScreen
-    void draw(size_t x, size_t y, const FString &str) override;
+    void draw(size_t x, size_t y, FStringView) override;
     void refresh() override;
     void clear() override;
     void cursor(size_t x, size_t y) override;

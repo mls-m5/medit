@@ -20,7 +20,7 @@ public:
     SerializeScreen &operator=(SerializeScreen &&) = delete;
 
     // IScreen interface
-    void draw(size_t x, size_t y, const FString &str) override;
+    void draw(size_t x, size_t y, FStringView str) override;
     void refresh() override;
     void clear() override;
     void cursor(size_t x, size_t y) override;

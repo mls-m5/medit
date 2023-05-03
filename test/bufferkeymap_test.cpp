@@ -20,7 +20,7 @@ TEST_CASE("no match") {
         },
     }};
 
-    auto m = map.match("apa");
+    auto m = map.match(FString{"apa"});
 
     ASSERT_EQ(m.first, map.NoMatch);
     EXPECT(!m.second);
@@ -34,7 +34,7 @@ TEST_CASE("partial match") {
         },
     }};
 
-    auto m = map.match("hel");
+    auto m = map.match(FString{"hel"});
 
     ASSERT_EQ(m.first, map.PartialMatch);
     EXPECT(!m.second);
@@ -48,7 +48,7 @@ TEST_CASE("match") {
         },
     }};
 
-    auto m = map.match("hello");
+    auto m = map.match(FString{"hello"});
 
     ASSERT_EQ(m.first, map.Match);
     EXPECT(m.second);

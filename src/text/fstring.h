@@ -23,6 +23,7 @@ public:
     FString(const char *str, FormatType f = 1)
         : FString(std::string_view(str), f) {}
     FString(size_t len, FChar c);
+    FString(const FChar *begin, const FChar *end);
     operator std::string() const;
 
     [[nodiscard]] auto size() const {
