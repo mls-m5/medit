@@ -5,7 +5,6 @@
 #include "core/jobqueue.h"
 #include "core/plugins.h"
 #include "script/ienvironment.h"
-#include "script/iscope.h"
 #include <algorithm>
 
 AutoComplete::AutoComplete() {

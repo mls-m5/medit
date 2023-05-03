@@ -2,7 +2,6 @@
 
 #include "files/filesystem.h"
 #include "files/project.h"
-#include "script/scope.h"
 #include "views/editor.h"
 #include "views/listview.h"
 

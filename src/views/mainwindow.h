@@ -71,6 +71,8 @@ struct MainWindow : public Window {
     bool mouseDown(int x, int y) override;
     void copy(bool shouldCut);
 
+    // Window management ----------
+
     //! Queue up that the window should be redrawn
     //! Sets _shouldRedraw = true and force guithread to work
     void triggerRedraw() override;
@@ -86,8 +88,9 @@ struct MainWindow : public Window {
         return this;
     }
 
-    // Commands --------------------
     void updateTitle();
+
+    // Commands --------------------
     void escape();
     void showConsole();
 

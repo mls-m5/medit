@@ -1,6 +1,7 @@
 
 #include "text/cursorops.h"
 #include "views/editor.h"
+#include "views/window.h"
 #include <iostream>
 #include <thread>
 
@@ -31,7 +32,9 @@ int main(int argc, char *argv[]) {
 
     std::cout << "hello\n";
 
-    //    auto editor = Editor{window, std::make_shared<Buffer>()};
+    //    auto window = Window{};
+
+    //    auto editor = Editor{std::make_shared<Buffer>()};
 
     //    auto &buffer = editor.buffer();
     //    insert(buffer.begin(), "hello");

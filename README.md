@@ -42,11 +42,14 @@ Todo:
 - [ ] File synch
   - [ ] Detect when open buffer is changed on disk
   - [ ] Prompt if buffer contains unsaved changes, otherwise replace
-- [ ] Use Lua
+- User interface
+  - [ ] Save unnamed buffers with popup with ctrl+s
+  - [ ] Rename current document
+- [ ] ~~Use Lua~~
   - [x] Remove remainders of old scripting engine
-  - [ ] Make core functionality callable from lua
-  - [ ] Implement functions for keybindings in lua
-  - [ ] Replace mode logic with lua code
+  - [ ] ~~Make core functionality callable from lua~~
+  - [ ] ~~Implement functions for keybindings in lua~~
+  - [ ] ~~Replace mode logic with lua code~~
 - [x] ctrl+backspace to erase whole word
 - Editors
   - [ ] Word wrapping

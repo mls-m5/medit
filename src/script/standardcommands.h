@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ienvironment.h"
-#include "iscope.h"
 #include <filesystem>
 #include <functional>
 #include <memory>

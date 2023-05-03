@@ -4,8 +4,6 @@
 #include "screen/draw.h"
 #include "screen/iscreen.h"
 #include "script/ienvironment.h"
-#include "script/iscope.h"
-#include "script/scope.h"
 #include "syntax/palette.h"
 #include "text/buffer.h"
 
@@ -32,10 +30,6 @@ InputBox::~InputBox() = default;
 
 bool InputBox::keyPress(std::shared_ptr<IEnvironment> env) {
     auto key = env->key();
-
-    //    auto context = std::make_shared<Scope>(scope);
-
-    //    context->editor(&_entry);
 
 #warning "make sure that this works after removing scope"
 

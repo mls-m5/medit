@@ -126,7 +126,6 @@ add_library(
     script/command.cpp
     script/togglecomments.cpp
     script/luastate.cpp
-    script/scope.cpp
     navigation/headernavigation.cpp
     completion/autocomplete.cpp
     screen/draw.cpp

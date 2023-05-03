@@ -1,3 +1,0 @@
-
-
-#include "plugin/windowcommands.h"

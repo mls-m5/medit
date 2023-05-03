@@ -3,38 +3,23 @@
 #include "text/buffer.h"
 
 bool History::commit(BufferEdit edit) {
-    // TODO: Only commit the part that change
-    //    auto text = _buffer.ftext();
-
-    //    auto edit = BufferEdit{
-    //        .from = _currentState,
-    //        .to = text,
-    //        .position = _buffer.cursor({0, 0}),
-    //    };
-
     edit.trim();
 
     if (edit.empty()) {
         return false;
     }
 
-    //    if (text != _currentState) {
     _history.push_back({
         .edit = std::move(edit),
         .revision = ++_revision,
     });
-    //        _currentState = _buffer.text();
 
     _redo.clear();
-    //    }
 
     return true;
 }
 
 void History::markMajor() {
-    //    if (_history.empty()) {
-    //        commit();
-    //    }
     if (_history.empty()) {
         return;
     }
@@ -61,8 +46,6 @@ void History::undo() {
     _redo.push_back(std::move(_history.back()));
     _history.pop_back();
 
-    //    _currentState = _buffer.text();
-
     ++_revision;
 }
 
@@ -78,8 +61,6 @@ void History::redo() {
     _history.push_back(std::move(_redo.back()));
 
     _redo.pop_back();
-
-    //    _currentState = _buffer.text();
 
     ++_revision;
 }

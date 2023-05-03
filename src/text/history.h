@@ -43,7 +43,6 @@ public:
 private:
     long _revision = 1;
 
-    //    FString _currentState; // TODO: Remove this variable
     Buffer &_buffer;
 
     std::vector<Item> _history;

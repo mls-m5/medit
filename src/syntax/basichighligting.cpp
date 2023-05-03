@@ -2,7 +2,6 @@
 #include "basichighligting.h"
 #include "core/plugins.h"
 #include "script/ienvironment.h"
-#include "script/iscope.h"
 #include "span.h"
 #include "syntax/palette.h"
 #include "text/cursorops.h"
