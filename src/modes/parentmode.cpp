@@ -14,7 +14,6 @@ std::shared_ptr<IMode> createParentMode() {
          {[](Ptr env) { env->mainWindow().gotoDefinition(); }}},
         {KeyEvent{Key::F4}, sc.switchHeader},
         {KeyEvent{Key::F5}, sc.run},
-        //    {"editor.run"}},
         {KeyEvent{Key::Home}, {sc.home}},
         {KeyEvent{Key::End}, {sc.end}},
         {KeyEvent{Key::PageUp}, {sc.pageUp}},
@@ -28,11 +27,8 @@ std::shared_ptr<IMode> createParentMode() {
          {[](Ptr env) { env->mainWindow().showOpen(); }}},
         {KeyEvent{Key::KeyCombination, 'S', Modifiers::Ctrl},
          sc.combine(sc.format, sc.save)},
-        //         {"editor.format\neditor.save"}},
         {KeyEvent{Key::KeyCombination, 'C', Modifiers::Ctrl}, sc.copy},
-        //         {"editor.format\neditor.copy"}},
         {KeyEvent{Key::KeyCombination, 'X', Modifiers::Ctrl}, sc.cut},
-        //         {"editor.format\neditor.cut"}},
         {KeyEvent{Key::KeyCombination, 'Z', Modifiers::Ctrl}, sc.undo},
         {KeyEvent{Key::KeyCombination, 'Y', Modifiers::Ctrl}, sc.redo},
         {KeyEvent{Key::KeyCombination, 'B', Modifiers::Ctrl},
@@ -42,6 +38,7 @@ std::shared_ptr<IMode> createParentMode() {
          {[](Ptr env) { env->mainWindow().showLocator(); }}},
         {KeyEvent{Key::KeyCombination, ' ', Modifiers::Ctrl},
          {[](Ptr env) { env->mainWindow().autoComplete(); }}},
+        {KeyEvent{Key::KeyCombination, 'R', Modifiers::Ctrl}, sc.renameSymbol},
     }};
 
     map.defaultAction({});

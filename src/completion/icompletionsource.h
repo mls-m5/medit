@@ -1,9 +1,8 @@
 #pragma once
 
-#include "meditfwd.h"
 #include "script/ienvironment.h"
-#include "text/cursorrange.h"
 #include "text/fstring.h"
+#include "text/position.h"
 #include <functional>
 #include <memory>
 #include <string>

@@ -25,7 +25,7 @@ public:
     [[nodiscard]] virtual Editor &console() = 0;
 
     //! In the future this can be multiple values depending on which console
-    virtual void showConsole(bool shown) = 0;
+    virtual void showConsole(bool shown = true) = 0;
 
     virtual const StandardCommands &standardCommands() const = 0;
 

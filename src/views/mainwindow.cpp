@@ -30,8 +30,10 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
     , _completeView(this)
     , _currentEditor(0) {
 
+    //    for (int i = 0; i < 2; ++i) {
     _editors.push_back(
         std::make_unique<Editor>(this, _env->core().create(_env)));
+    //    }
     _inputFocus = _editors.front().get();
 
     for (auto &editor : _editors) {

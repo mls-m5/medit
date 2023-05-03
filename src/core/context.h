@@ -16,11 +16,15 @@ public:
         , _guiQueue(guiQueue)
         , _timer(timer) {}
 
+    /// Jobs that can be done in the background without risking to mess with
+    /// Any of the internal state of the program
+    /// For example fetching stuff from other places, read from disk
     IJobQueue &jobQueue() {
         return _jobQueue;
     }
 
-    //! Work tok do on gui thread
+    /// Jobs that is done that changes the internal state of the program, such
+    /// as editing buffers, changing views
     IJobQueue &guiQueue() {
         return _guiQueue;
     }

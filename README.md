@@ -45,6 +45,10 @@ Todo:
 - User interface
   - [ ] Save unnamed buffers with popup with ctrl+s
   - [ ] Rename current document
+  - [ ] File view
+  - [ ] File name above buffers
+  - [ ] Ctrl+tab switch between opened buffers
+  - [ ] Layouts that handle splits
 - [ ] ~~Use Lua~~
   - [x] Remove remainders of old scripting engine
   - [ ] ~~Make core functionality callable from lua~~

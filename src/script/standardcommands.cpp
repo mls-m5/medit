@@ -265,6 +265,13 @@ StandardCommands create() {
         e.selection(range);
     };
 
+    DEF(renameSymbol) {
+        insert(env->console().buffer().end(),
+               "\nrename symbol is not implemented yet...");
+        env->console().cursor(env->console().buffer().end());
+        env->showConsole(true);
+    };
+
     commands.selectInnerWord = [](StandardCommands::EnvPtrT env) {
         auto &e = env->editor();
         auto cursor = e.cursor();

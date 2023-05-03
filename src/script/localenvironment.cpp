@@ -30,16 +30,6 @@ Editor &LocalEnvironment::editor() {
     throw std::runtime_error{"no active editor in environment"};
 }
 
-// void LocalEnvironment::parseLua(std::string_view code) {
-//     try {
-//         auto res = _lua.load(code);
-//         res();
-//     }
-//     catch (sol::error &e) {
-//         std::cerr << e.what() << "\n";
-//     }
-// }
-
 void LocalEnvironment::redrawScreen() {
     mainWindow().triggerRedraw();
 }

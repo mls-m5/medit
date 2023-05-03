@@ -50,7 +50,8 @@
     STD_DEF(visualBlockMode);                                                  \
     STD_DEF(toggleComment);                                                    \
     STD_DEF(selectWord);                                                       \
-    STD_DEF(selectInnerWord);
+    STD_DEF(selectInnerWord);                                                  \
+    STD_DEF(renameSymbol);
 
 #define STD_DEF(name) std::function<void(EnvPtrT env)> name
 
@@ -58,6 +59,7 @@
 struct StandardCommands {
     using EnvPtrT = std::shared_ptr<IEnvironment>;
 
+    /// Define standard commands
     STANDARD_COMMAND_LIST
 
     /// Open a file in the current active text editor

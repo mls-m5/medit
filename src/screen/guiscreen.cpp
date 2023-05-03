@@ -121,14 +121,14 @@ struct GuiScreen::Buffer {
         sdl::Color bg;
     };
 
-    std::vector<Style> styles;
+    std::vector<Style> _styles;
 
     std::thread _screenThread;
 
     bool _isRunning = true;
-    bool shouldRefresh = true;
+    bool _shouldRefresh = true;
 
-    ThreadValidation tv{"gui screen"};
+    ThreadValidation _tv{"gui screen"};
 
     Buffer(int width, int height)
         : window{"medit",
@@ -140,7 +140,7 @@ struct GuiScreen::Buffer {
         , renderer{window, SDL_RENDERER_ACCELERATED, SDL_RENDERER_PRESENTVSYNC}
         , screen{width, height, fontPath(), 14} {
         sdl::startTextInput();
-        styles.resize(16);
+        _styles.resize(16);
         resize(width, height);
     }
 
@@ -232,10 +232,10 @@ struct GuiScreen::Buffer {
                 screen.cache.getCharacter(renderer, std::string_view{c.c});
 
             auto style = [&]() -> Style & {
-                if (c.f < styles.size()) {
-                    return styles.at(c.f);
+                if (c.f < _styles.size()) {
+                    return _styles.at(c.f);
                 }
-                return styles.front();
+                return _styles.front();
             }();
 
             s.bg = style.bg;
@@ -253,13 +253,12 @@ struct GuiScreen::Buffer {
 
     // Update the screen
     void refresh() {
-        tv();
-        //        debugOutput("guiscreen refresh start()");
+        _tv();
         for (size_t y = 0; y < lines.size(); ++y) {
             renderLine(y, lines.at(y));
         }
 
-        renderer.drawColor(styles.front().bg);
+        renderer.drawColor(_styles.front().bg);
         renderer.fillRect();
 
         screen.render(renderer,
@@ -295,14 +294,14 @@ struct GuiScreen::Buffer {
 
     size_t addStyle(const Color &fg, const Color &bg, size_t index) {
         if (index != std::numeric_limits<size_t>::max() &&
-            index < styles.size()) {
+            index < _styles.size()) {
         }
         else {
-            index = styles.size();
-            styles.emplace_back();
+            index = _styles.size();
+            _styles.emplace_back();
         }
 
-        auto &style = styles.at(index);
+        auto &style = _styles.at(index);
 
         style = {
             {fg.r(), fg.g(), fg.b(), 255},
@@ -321,17 +320,15 @@ struct GuiScreen::Buffer {
     }
 
     void loop() {
-        tv();
+        _tv();
         // TODO: Refactor this to use sdls wating functions
         using namespace std::literals;
         for (; _isRunning;) {
             auto list = EventListT{};
 
-            {
-                Event e = getInput(true);
-                if (!std::holds_alternative<NullEvent>(e)) {
-                    list.push_back(std::move(e));
-                }
+            if (auto e = getInput(true);
+                !std::holds_alternative<NullEvent>(e)) {
+                list.push_back(std::move(e));
             }
             for (Event e;
                  e = getInput(false), !std::holds_alternative<NullEvent>(e);) {
@@ -342,15 +339,15 @@ struct GuiScreen::Buffer {
                 _callback(std::move(list));
             }
 
-            if (shouldRefresh) {
+            if (_shouldRefresh) {
                 refresh(); // TODO: Only refresh when changes
-                shouldRefresh = false;
+                _shouldRefresh = false;
             }
         }
     }
 
     Event getInput(bool wait) {
-        tv();
+        _tv();
         auto e = [wait] {
             if (getOs() == Os::Emscripten) {
                 return sdl::pollEvent();
@@ -465,7 +462,6 @@ struct GuiScreen::Buffer {
         }
 
         return NullEvent{};
-        //        return KeyEvent{Key::Unknown};
     }
 };
 
@@ -477,7 +473,7 @@ void GuiScreen::refresh() {
     if (_palette.isChanged()) {
         _palette.update(*this);
     }
-    _buffer->shouldRefresh = true;
+    _buffer->_shouldRefresh = true;
     auto event = SDL_Event{};
     event.type = SDL_USEREVENT;
     sdl::pushEvent(event);
@@ -518,14 +514,6 @@ void GuiScreen::subscribe(CallbackT f) {
 void GuiScreen::unsubscribe() {
     _buffer->unsubscribe();
 }
-
-// size_t GuiScreen::x() const {
-//     return 0;
-// }
-
-// size_t GuiScreen::y() const {
-//     return 0;
-// }
 
 size_t GuiScreen::width() const {
     return static_cast<size_t>(_buffer->width);

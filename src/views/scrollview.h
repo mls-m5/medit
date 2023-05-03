@@ -14,11 +14,20 @@ public:
         return _yScroll;
     }
 
-    void fitPosition(Position localPosition);
+    void xScroll(size_t value) {
+        _xScroll = value;
+    }
 
-    void contentHeight(size_t value);
+    size_t xScroll() const {
+        return _xScroll;
+    }
+
+    void fitPosition(Position localPosition);
 
 private:
     size_t _yScroll = 0;
     size_t _contentHeight = 0;
+
+    size_t _xScroll = 0;
+    size_t _contentWidth = 0;
 };
