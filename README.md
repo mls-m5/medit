@@ -67,6 +67,15 @@ Todo:
    - [ ] Serialize to binary
 
 
+## Feedback
+- [ ] Ways to check if the lsp-plugin has the right plugin
+- [ ] Make sure build command works properly, add settings
+- [ ] Ways to handle settings
+- [ ] Add searchable command pallette to make commands runnable (ctrl-p)
+- [ ] CMakeLists.txt html and xml-file formatting
+- [x] Select all (ctrl-a)
+- [ ] Case insensitive matching in file list and command palette.
+
 ## Requirements
 
 clangd for c++ parsing

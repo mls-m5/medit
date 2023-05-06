@@ -265,6 +265,14 @@ StandardCommands create() {
         e.selection(range);
     };
 
+    DEF(selectAll) {
+        auto &e = env->editor();
+        e.mode(createVisualMode(*env, true));
+        auto begin = e.buffer().begin();
+        auto end = e.buffer().end();
+        e.selection({begin, end});
+    };
+
     DEF(renameSymbol) {
         insert(env->console().buffer().end(),
                "\nrename symbol is not implemented yet...");
