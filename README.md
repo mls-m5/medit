@@ -75,8 +75,9 @@ Todo:
 - [ ] CMakeLists.txt html and xml-file formatting
 - [x] Select all (ctrl-a)
 - [ ] Case insensitive matching in file list and command palette.
-- [ ] Exit to normal mode when saving (maybe not if in visual mode)
+- [x] Exit to normal mode when saving.
 - [ ] When alt+tab into editor, prevent from typing tab
+- [ ] Option to restore selection (gv)
 
 ## Requirements
 

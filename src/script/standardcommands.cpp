@@ -210,6 +210,7 @@ StandardCommands create() {
         e.save();
     };
     DEF(save) {
+        env->editor().mode(createNormalMode());
         auto &e = env->editor();
         e.save();
     };
