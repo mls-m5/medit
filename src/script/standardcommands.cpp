@@ -8,6 +8,7 @@
 #include "modes/visualmode.h"
 #include "plugin/build.h"
 #include "plugin/run.h"
+#include "renameinteraction.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "togglecomments.h"
@@ -15,6 +16,7 @@
 #include "views/mainwindow.h"
 #include <functional>
 #include <map>
+#include <string>
 
 namespace {
 StandardCommands create() {
@@ -275,13 +277,11 @@ StandardCommands create() {
     };
 
     DEF(renameSymbol) {
-        insert(env->console().buffer().end(),
-               "\nrename symbol is not implemented yet...");
-        env->console().cursor(env->console().buffer().end());
-        env->showConsole(true);
+        renameInteraction(env);
     };
 
-    commands.selectInnerWord = [](StandardCommands::EnvPtrT env) {
+    DEF(selectInnerWord) {
+        //    commands.selectInnerWord = [](StandardCommands::EnvPtrT env) {
         auto &e = env->editor();
         auto cursor = e.cursor();
         auto range =

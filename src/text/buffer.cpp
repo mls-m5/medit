@@ -2,6 +2,7 @@
 #include "cursorops.h"
 #include "cursorrange.h"
 #include "cursorrangeops.h"
+#include "files/file.h"
 #include <sstream>
 
 std::unique_ptr<Buffer> Buffer::open(std::filesystem::path path) {

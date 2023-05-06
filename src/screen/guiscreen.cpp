@@ -394,10 +394,11 @@ struct GuiScreen::Buffer {
 
             // Sometimes the alt-tab (switching windows) goes through to the
             // window. This is to ignore that event
-            if (keyEvent.modifiers == Modifiers::Alt &&
-                keyEvent.key == Key::Tab) {
-                return NullEvent{};
-            }
+            // This the logic needs to be more advanced than this though
+            //            if (keyEvent.modifiers == Modifiers::Alt &&
+            //                keyEvent.key == Key::Tab) {
+            //                return NullEvent{};
+            //            }
 
             if (keyEvent.modifiers != Modifiers::None &&
                 (keyEvent.key == Key::Space || keyEvent.symbol == "\n" ||

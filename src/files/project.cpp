@@ -63,8 +63,6 @@ filesystem::path Project::findSwitchHeader(filesystem::path path) {
 
     auto stem = path.stem();
 
-    //    std::vector<filesystem::path> candidates;
-
     for (auto &file : _fileCache) {
         if (file.stem() == stem) {
             if (file == path) {
@@ -106,7 +104,7 @@ std::vector<filesystem::path> Project::findProjectFiles(
     std::vector<filesystem::path> paths;
 
     size_t i = 0;
-    for (auto path : filesystem::recursive_directory_iterator{
+    for (auto &path : filesystem::recursive_directory_iterator{
              root,
              std::filesystem::directory_options::skip_permission_denied}) {
         if (!isKnownExtension(path)) {

@@ -73,11 +73,13 @@ Todo:
 - [ ] Ways to handle settings
 - [ ] Add searchable command pallette to make commands runnable (ctrl-p)
 - [ ] CMakeLists.txt html and xml-file formatting
+- [ ] CMakeLists.txt html and xml-file code highlighting
 - [x] Select all (ctrl-a)
 - [ ] Case insensitive matching in file list and command palette.
 - [x] Exit to normal mode when saving.
 - [ ] When alt+tab into editor, prevent from typing tab
 - [ ] Option to restore selection (gv)
+- [ ] Status line for common operations (for example saving, changing mode)
 
 ## Requirements
 

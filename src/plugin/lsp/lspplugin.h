@@ -4,6 +4,7 @@
 #include "script/ienvironment.h"
 #include "syntax/ihighlight.h"
 #include "text/buffer.h"
+#include <memory>
 #include <unordered_map>
 
 namespace lsp {
@@ -63,4 +64,17 @@ public:
     int priority() override {
         return 100;
     }
+};
+
+class LspRename {
+    bool shouldEnable(filesystem::path);
+
+    /// Check if a rename is somewhat valid
+    /// When
+    //    bool prepare(std::shared_ptr<IEnvironment> env,
+    //                 std::function<void(bool)> callback);
+
+    /// If the current buffer is a operation buffer
+    /// Use the contents to perform a rename
+    void rename(std::shared_ptr<IEnvironment> env);
 };

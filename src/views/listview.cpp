@@ -40,8 +40,6 @@ void ListView::draw(IScreen &screen) {
     }
     this->width(width);
 
-    //    fillRect(screen, ' ', *this);
-
     FString fillStr{std::string(this->width(), ' '), Palette::standard};
     FString selFillStr{std::string(this->width(), ' '), Palette::currentLine};
 

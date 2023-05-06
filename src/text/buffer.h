@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/threadvalidation.h"
-#include "files/file.h"
+#include "files/ifile.h"
 #include "files/path.h"
 #include "rawbuffer.h"
 #include "text/diagnostics.h"
@@ -205,7 +205,7 @@ public:
     }
 
 private:
-    // Function history class uses
+    // The function history class uses with undo/redo
     void applyWithoutHistory(BufferEdit edit) {
         _tv();
         _raw.apply(std::move(edit));
