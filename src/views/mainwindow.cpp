@@ -24,6 +24,7 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
     , View(nullptr, 100, 100)
     , _screen{screen}
     , _editors{}
+    , _interactions{*this}
     , _env(std::make_unique<LocalEnvironment>(*this, context))
     , _console(this, _env->core().create(_env))
     , _locator(this, _project)
@@ -163,6 +164,11 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
         }
     }
 
+    /// In practice only check if the key if return or escape
+    if (_interactions.keyPress(env)) {
+        return true;
+    }
+
     if (_inputFocus->keyPress(env)) {
         if (auto e = currentEditor()) {
             updateHighlighting(*e);
@@ -178,7 +184,6 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
 }
 
 void MainWindow::updateLocatorBuffer() {
-    //    auto &editor = currentEditor();
     _project.updateCache(filesystem::current_path());
 }
 

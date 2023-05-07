@@ -271,9 +271,7 @@ StandardCommands create() {
     DEF(selectAll) {
         auto &e = env->editor();
         e.mode(createVisualMode(*env, true));
-        auto begin = e.buffer().begin();
-        auto end = e.buffer().end();
-        e.selection({begin, end});
+        e.selection(all(e.buffer()));
     };
 
     DEF(renameSymbol) {

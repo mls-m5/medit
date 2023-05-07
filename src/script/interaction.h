@@ -1,11 +1,11 @@
 #pragma once
 
-#include "meditfwd.h"
 #include <algorithm>
 #include <istream>
 #include <memory>
 #include <ostream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 struct Interaction {
@@ -20,11 +20,13 @@ struct Interaction {
     /// Parse text form
     void deserialize(std::istream &is);
 
-    using InteractionCallback =
-        std::function<void(std::shared_ptr<IEnvironment>, Interaction &)>;
+    std::string_view at(std::string_view name) const {
+        for (auto &it : values) {
+            if (it.first == name) {
+                return it.second;
+            }
+        }
 
-    //! Create interaction buffer and provide function to be called when
-    //! the interaction is accepted, also let the editor handling waiting for
-    //! the user to provide feedback
-    void handle(std::shared_ptr<IEnvironment> env, InteractionCallback);
+        return {};
+    }
 };

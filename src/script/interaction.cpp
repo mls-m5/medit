@@ -60,17 +60,3 @@ void Interaction::deserialize(std::istream &is) {
 
     valid = !op.empty() && !values.empty();
 }
-
-void Interaction::handle(std::shared_ptr<IEnvironment> env,
-                         InteractionCallback callback) {
-    auto ss = std::ostringstream{};
-    serialize(ss);
-
-#warning                                                                       \
-    "TODO: this should be done in a separate buffer that is created/reused and handled"
-    insert(env->console().buffer().end(), ss.str());
-    insert(env->console().buffer().end(),
-           "\n#rename symbol is not implemented yet...");
-    env->console().cursor(console().buffer().end());
-    env->showConsole(true);
-}

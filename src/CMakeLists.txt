@@ -116,6 +116,7 @@ add_library(
     views/completeview.cpp
     views/listview.cpp
     views/bufferview.cpp
+    views/interactionhandling.cpp
     modes/normalmode.cpp
     modes/insertmode.cpp
     modes/parentmode.cpp
@@ -127,6 +128,7 @@ add_library(
     script/togglecomments.cpp
     script/luastate.cpp
     script/renameinteraction.cpp
+    script/interaction.cpp
     navigation/headernavigation.cpp
     completion/autocomplete.cpp
     screen/draw.cpp

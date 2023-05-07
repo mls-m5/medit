@@ -22,6 +22,11 @@ public:
         return _xScroll;
     }
 
+    void scroll(size_t x, size_t y) {
+        xScroll(y);
+        yScroll(y);
+    }
+
     void fitPosition(Position localPosition);
 
 private:

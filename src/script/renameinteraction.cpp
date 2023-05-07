@@ -4,6 +4,9 @@
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
+#include "views/interactionhandling.h"
+#include "views/mainwindow.h"
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <vector>
@@ -12,7 +15,9 @@ namespace {
 
 /// When the user has selected the new name, handle what happends then
 void handleUserRenameResponse(std::shared_ptr<IEnvironment> env,
-                              const Interaction &) {}
+                              const Interaction &i) {
+    std::cout << "response " << i.at("to") << std::endl;
+}
 
 } // namespace
 
@@ -37,5 +42,6 @@ void beginRenameInteraction(std::shared_ptr<IEnvironment> env) {
                              {"to", fileStr},
                          }};
 
-    env->handleInteraction(i, handleUserRenameResponse);
+    env->mainWindow().interactions().newInteraction(i,
+                                                    handleUserRenameResponse);
 }

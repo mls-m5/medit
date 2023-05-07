@@ -123,11 +123,7 @@ public:
         return lines.back().back();
     }
 
-    void clear() {
-        _tv();
-        // TODO: create applystatement
-        _raw.clear();
-    }
+    void clear();
 
     [[nodiscard]] const std::vector<FString> &lines() const {
         _tv();

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "files/project.h"
+#include "interactionhandling.h"
 #include "meditfwd.h"
 #include "script/localenvironment.h"
-#include "script/rootscope.h"
 #include "syntax/iformat.h"
 #include "views/completeview.h"
 #include "views/editor.h"
@@ -14,6 +14,7 @@
 struct MainWindow : public Window {
     IScreen &_screen;
     std::vector<std::unique_ptr<Editor>> _editors;
+    InteractionHandling _interactions;
     std::shared_ptr<LocalEnvironment> _env;
     Editor _console;
     Locator _locator;
@@ -86,6 +87,10 @@ struct MainWindow : public Window {
 
     IWindow *window() override {
         return this;
+    }
+
+    InteractionHandling &interactions() {
+        return _interactions;
     }
 
     void updateTitle();

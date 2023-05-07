@@ -41,6 +41,10 @@ std::string Buffer::text() const {
     return ss.str();
 }
 
+void Buffer::clear() {
+    replace(all(*this), "");
+}
+
 Cursor Buffer::apply(BufferEdit edit) {
     _tv();
     _history.commit(edit);
