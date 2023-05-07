@@ -11,6 +11,7 @@ namespace lsp {
 class LspClient;
 }
 
+/// TODO: Make more generic to handle other languages language servers
 class LspPlugin {
 public:
     LspPlugin();
@@ -67,14 +68,14 @@ public:
 };
 
 class LspRename {
-    bool shouldEnable(filesystem::path);
+    bool shouldEnable(std::shared_ptr<IEnvironment> env) const;
+
+    /// If the current buffer is a operation buffer
+    /// Use the contents to perform a rename
+    void rename(std::shared_ptr<IEnvironment> env);
 
     /// Check if a rename is somewhat valid
     /// When
     //    bool prepare(std::shared_ptr<IEnvironment> env,
     //                 std::function<void(bool)> callback);
-
-    /// If the current buffer is a operation buffer
-    /// Use the contents to perform a rename
-    void rename(std::shared_ptr<IEnvironment> env);
 };

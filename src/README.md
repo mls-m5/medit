@@ -5,8 +5,9 @@
 ## Rename interaction 2023-05-07
 
 - [x] Create rename standard command
+- [x] Interaction serialization
 - [ ] Create new operation buffers
-   - [ ] (should it support multiple users interacitons?)
+   - [x] (should it support multiple users interacitons?) - no not in the beginning
       - It could mean that multiple users could do renaming in multiple files at
         the same time causing conflicts (this kind of operation should probably
         not be permitted

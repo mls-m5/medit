@@ -1,17 +1,12 @@
 
 #include "localenvironment.h"
 #include "core/coreenvironment.h"
-// #include "script/luastate.h"
 #include "views/mainwindow.h"
 #include <stdexcept>
 
 LocalEnvironment::LocalEnvironment(MainWindow &mw, ThreadContext &context)
     : _mainWindow{mw}
     , _context{context} {}
-
-void LocalEnvironment::initLua(MainWindow &mw) {
-    //    _lua.init(mw);
-}
 
 CoreEnvironment &LocalEnvironment::core() {
     return CoreEnvironment::instance();

@@ -82,8 +82,6 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
     _navigation = createNavigation();
 
     updateLocatorBuffer();
-
-    _env->initLua(*this);
 }
 
 MainWindow::~MainWindow() = default;

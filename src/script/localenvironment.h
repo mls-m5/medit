@@ -17,12 +17,9 @@ class LocalEnvironment : public IEnvironment {
     bool _showConsole = false;
     ThreadContext &_context;
     Registers _registers;
-    //    LuaState _lua;
 
 public:
     LocalEnvironment(MainWindow &mw, ThreadContext &context);
-
-    void initLua(MainWindow &mw);
 
     void key(KeyEvent e) {
         _lastKeyEvent = e;
@@ -78,8 +75,6 @@ public:
     const StandardCommands &standardCommands() const override;
 
     Editor &editor() override;
-
-    //    void parseLua(std::string_view code);
 
     //! Trigger redraw of winow
     void redrawScreen();

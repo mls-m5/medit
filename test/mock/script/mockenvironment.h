@@ -20,4 +20,8 @@ public:
                  standardCommands,
                  (),
                  const override);
+    MOCK_METHOD2(void,
+                 handleInteraction,
+                 (const Interaction &, InteractionCallback),
+                 override);
 };

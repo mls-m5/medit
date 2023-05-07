@@ -27,6 +27,7 @@ class Color;
 class Palette;
 class IAnnotation;
 class Registers;
+class Interaction;
 
 class MainWindow;
 class IWindow;
