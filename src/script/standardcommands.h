@@ -44,6 +44,7 @@
     STD_DEF(build);                                                            \
     STD_DEF(run);                                                              \
     STD_DEF(quit);                                                             \
+    STD_DEF(closeBuffer);                                                      \
     STD_DEF(insertMode);                                                       \
     STD_DEF(normalMode);                                                       \
     STD_DEF(visualMode);                                                       \

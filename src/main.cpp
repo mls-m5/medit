@@ -115,11 +115,8 @@ struct User {
             }
 
             if (auto key = std::get_if<KeyEvent>(&c)) {
-                if (*key ==
-                        KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl} ||
-                    *key == Key::Quit) {
-                    medit::main::shouldQuit = true;
-                    mainWindow->env().context().guiQueue().stop();
+                if (*key == Key::Quit) {
+                    quitMedit(mainWindow->env().context());
                     return;
                 }
 

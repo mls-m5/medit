@@ -12,6 +12,7 @@ struct InteractionHandling {
     MainWindow &_window;
     std::weak_ptr<Buffer> _operationBuffer;
     InteractionCallback _callback;
+    Editor *_editor = nullptr;
 
     //! Create interaction buffer and provide function to be called when
     //! the interaction is accepted, also let the editor handling waiting for

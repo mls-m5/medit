@@ -33,7 +33,7 @@ std::shared_ptr<IMode> createParentMode() {
         {KeyEvent{Key::KeyCombination, 'Y', Modifiers::Ctrl}, sc.redo},
         {KeyEvent{Key::KeyCombination, 'B', Modifiers::Ctrl},
          sc.combine(sc.save, sc.build)},
-        {KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}, sc.quit},
+        {KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}, sc.closeBuffer},
         {KeyEvent{Key::KeyCombination, 'K', Modifiers::Ctrl},
          {[](Ptr env) { env->mainWindow().showLocator(); }}},
         {KeyEvent{Key::KeyCombination, ' ', Modifiers::Ctrl},

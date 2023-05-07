@@ -10,6 +10,7 @@
 #include "text/buffer.h"
 #include "text/cursorops.h"
 #include "views/iwindow.h"
+#include <stdexcept>
 
 Editor::~Editor() = default;
 
@@ -56,6 +57,9 @@ Buffer &Editor::buffer() {
 }
 
 void Editor::buffer(std::shared_ptr<Buffer> buffer) {
+    if (!buffer) {
+        throw std::runtime_error{"Trying to set editor buffer to null"};
+    }
     _cursor = Cursor{*buffer};
     _bufferView.buffer(std::move(buffer));
 }
@@ -223,4 +227,10 @@ size_t Editor::y() const {
 
 void Editor::fitCursor() {
     bufferView().fitPosition(_cursor);
+}
+
+bool Editor::closeBuffer() {
+    auto res = _bufferView.closeBuffer();
+    _cursor = {_bufferView.buffer()};
+    return res;
 }

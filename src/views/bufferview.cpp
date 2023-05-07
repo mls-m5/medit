@@ -141,6 +141,17 @@ const Buffer &BufferView::buffer() const {
 
 void BufferView::buffer(std::shared_ptr<Buffer> buffer) {
     unsubscribe();
+
+    for (auto it = _openedBuffers.begin(); it != _openedBuffers.end();) {
+        if (auto ptr = it->lock(); !ptr || ptr == buffer) {
+            it = _openedBuffers.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+
+    _openedBuffers.push_back(std::move(_buffer));
     _buffer = std::move(buffer);
     subscribeToBuffer();
 }
@@ -166,4 +177,23 @@ void BufferView::subscribeToBuffer() {
 
 void BufferView::unsubscribe() {
     _buffer->unsubscribe(this);
+}
+
+bool BufferView::closeBuffer() {
+    for (; !_openedBuffers.empty();) {
+        auto buffer = _openedBuffers.back().lock();
+        if (!buffer) {
+            _openedBuffers.pop_back();
+            continue;
+        }
+        if (buffer) {
+            unsubscribe();
+            _buffer = std::move(buffer);
+            _openedBuffers.pop_back();
+            subscribeToBuffer();
+            return true;
+        }
+    }
+
+    return false;
 }

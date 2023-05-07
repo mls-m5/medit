@@ -1,11 +1,12 @@
 #include "interactionhandling.h"
-#include "core/coreenvironment.h"
+#include "core/context.h"
 #include "core/ijobqueue.h"
 #include "keys/event.h"
 #include "script/ienvironment.h"
 #include "script/interaction.h"
 #include "text/cursorrangeops.h"
 #include "views/mainwindow.h"
+#include <memory>
 #include <sstream>
 
 void InteractionHandling::newInteraction(const Interaction &i,
@@ -15,14 +16,16 @@ void InteractionHandling::newInteraction(const Interaction &i,
     auto ss = std::ostringstream{};
     i.serialize(ss);
 
-    auto editor = _window.currentEditor();
+    _editor = _window.currentEditor();
     auto env = _window.env().shared_from_this();
 
-    auto newBuffer = _window.env().core().create(env);
+    // We do not create with the core create function because we do not want
+    // to add it to the tracked buffers
+    auto newBuffer = std::make_shared<Buffer>();
     _operationBuffer = newBuffer;
 
-    editor->buffer(newBuffer);
-    editor->bufferView().scroll(0, 0);
+    _editor->buffer(newBuffer);
+    _editor->bufferView().scroll(0, 0);
 
     replace(all(*newBuffer), ss.str());
 }
@@ -62,4 +65,8 @@ bool InteractionHandling::keyPress(std::shared_ptr<IEnvironment> env) {
 void InteractionHandling::close() {
     _operationBuffer = {};
     _callback = {};
+    if (_editor) {
+        _editor->closeBuffer();
+        _editor = nullptr;
+    }
 }

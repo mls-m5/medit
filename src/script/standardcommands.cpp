@@ -257,7 +257,14 @@ StandardCommands create() {
         ::toggleComments(env);
     };
     DEF(quit) {
-        quitMedit();
+        quitMedit(env->context());
+    };
+
+    DEF(closeBuffer) {
+        auto &buffer = env->editor();
+        if (!buffer.closeBuffer()) {
+            quitMedit(env->context());
+        }
     };
 
     // -----------------------

@@ -2,7 +2,6 @@
 
 #include "keys/ikeysink.h"
 #include "meditfwd.h"
-// #include "sol/sol.hpp"
 #include "text/cursor.h"
 #include "text/cursorrange.h"
 #include "text/formattype.h"
@@ -92,12 +91,12 @@ public:
     //! is visible
     void fitCursor();
 
+    bool closeBuffer();
+
 private:
     BufferView _bufferView;
     Cursor _cursor;
     std::optional<Cursor> _selectionAnchor;
     std::shared_ptr<IMode> _mode;
     FormatType _background = 1;
-
-    //    sol::table _luaMode;
 };
