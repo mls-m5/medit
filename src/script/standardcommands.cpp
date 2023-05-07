@@ -264,7 +264,9 @@ StandardCommands create() {
         auto &buffer = env->editor();
         if (!buffer.closeBuffer()) {
             quitMedit(env->context());
+            return;
         }
+        env->mainWindow().updateTitle();
     };
 
     // -----------------------

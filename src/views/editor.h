@@ -100,10 +100,19 @@ public:
     bool closeBuffer();
 
 private:
+    struct SavedState {
+        std::weak_ptr<Buffer> buffer;
+        Position pos;
+        Position scroll;
+    };
+
+    void restoreState(SavedState state);
+
     BufferView _bufferView;
     Cursor _cursor;
     std::optional<Cursor> _selectionAnchor;
     std::shared_ptr<IMode> _mode;
     FormatType _background = 1;
-    std::vector<std::pair<std::weak_ptr<Buffer>, Position>> _openedBuffers;
+
+    std::vector<SavedState> _openedBuffers;
 };

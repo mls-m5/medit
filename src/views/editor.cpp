@@ -10,6 +10,7 @@
 #include "text/buffer.h"
 #include "text/cursorops.h"
 #include "views/iwindow.h"
+#include <optional>
 #include <stdexcept>
 
 Editor::~Editor() = default;
@@ -61,8 +62,10 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
         throw std::runtime_error{"Trying to set editor buffer to null"};
     }
 
+    std::optional<SavedState> foundState;
     for (auto it = _openedBuffers.begin(); it != _openedBuffers.end();) {
-        if (auto ptr = it->first.lock(); !ptr || ptr == buffer) {
+        if (auto ptr = it->buffer.lock(); !ptr || ptr == buffer) {
+            foundState = std::move(*it);
             it = _openedBuffers.erase(it);
         }
         else {
@@ -70,10 +73,16 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
         }
     }
 
-    _openedBuffers.push_back({_bufferView.buffer().weak_from_this(), _cursor});
+    _openedBuffers.push_back({_bufferView.buffer().weak_from_this(),
+                              _cursor,
+                              {_bufferView.xScroll(), _bufferView.yScroll()}});
 
     _cursor = Cursor{*buffer};
     _bufferView.buffer(std::move(buffer));
+
+    if (foundState) {
+        restoreState(*foundState);
+    }
 }
 
 Cursor Editor::cursor() const {
@@ -243,19 +252,25 @@ void Editor::fitCursor() {
 
 bool Editor::closeBuffer() {
     for (; !_openedBuffers.empty();) {
-        auto buffer = _openedBuffers.back().first.lock();
+        auto buffer = _openedBuffers.back().buffer.lock();
         if (!buffer) {
             _openedBuffers.pop_back();
             continue;
         }
         if (buffer) {
-            cursor({*buffer, _openedBuffers.back().second});
-            _bufferView.buffer(std::move(buffer));
-            fitCursor();
+            restoreState(std::move(_openedBuffers.back()));
             _openedBuffers.pop_back();
             return true;
         }
     }
 
     return false;
+}
+
+void Editor::restoreState(SavedState state) {
+    _bufferView.buffer(state.buffer.lock());
+    auto scroll = state.scroll;
+    _bufferView.scroll(scroll.x(), scroll.y());
+    cursor({buffer(), state.pos});
+    fitCursor();
 }
