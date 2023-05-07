@@ -30,11 +30,11 @@ void InteractionHandling::newInteraction(const Interaction &i,
     _operationBuffer = newBuffer;
 
     editor->buffer(newBuffer);
-    //    editor->bufferView().scroll(0, 0);
 
     _editor = editor->weak_from_this();
 
     replace(all(*newBuffer), ss.str());
+    editor->cursor(i.cursorPosition);
 }
 
 bool InteractionHandling::keyPress(std::shared_ptr<IEnvironment> env) {

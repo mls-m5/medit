@@ -29,18 +29,19 @@ void beginRenameInteraction(std::shared_ptr<IEnvironment> env) {
 
     auto fileStr = std::string{};
 
-    if (auto f = e.file()) {
-        // TODO: Handle for buffers that is not saved
-        fileStr = e.file()->path().string() + ":" + std::to_string(cursor.y()) +
-                  "," + std::to_string(cursor.x());
+    if (!e.file()) {
+        return;
     }
 
     auto i = Interaction{"rename",
                          {
                              {"from", old},
                              {"to", old},
-                             {"to", fileStr},
-                         }};
+                             {"file", e.file()->path().string()},
+                             {"l", std::to_string(cursor.y() + 1)},
+                             {"c", std::to_string(cursor.x() + 1)},
+                         },
+                         {4, 2}};
 
     env->mainWindow().interactions().newInteraction(i,
                                                     handleUserRenameResponse);

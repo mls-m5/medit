@@ -1,5 +1,6 @@
 #pragma once
 
+#include "text/position.h"
 #include <algorithm>
 #include <istream>
 #include <memory>
@@ -11,6 +12,7 @@
 struct Interaction {
     std::string op;
     std::vector<std::pair<std::string, std::string>> values;
+    Position cursorPosition;
 
     bool valid = true;
 

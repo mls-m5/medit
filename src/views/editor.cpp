@@ -77,12 +77,14 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
                               _cursor,
                               {_bufferView.xScroll(), _bufferView.yScroll()}});
 
-    _cursor = Cursor{*buffer};
-    _bufferView.buffer(std::move(buffer));
-
     if (foundState) {
         restoreState(*foundState);
+        return;
     }
+
+    _cursor = Cursor{*buffer};
+    _bufferView.scroll(0, 0);
+    _bufferView.buffer(std::move(buffer));
 }
 
 Cursor Editor::cursor() const {
