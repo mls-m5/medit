@@ -73,9 +73,13 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
         }
     }
 
-    _openedBuffers.push_back({_bufferView.buffer().weak_from_this(),
-                              _cursor,
-                              {_bufferView.xScroll(), _bufferView.yScroll()}});
+    /// If it is only a empty buffer. Nobody will miss it
+    if (!_bufferView.buffer().empty() || _bufferView.buffer().file()) {
+        _openedBuffers.push_back(
+            {_bufferView.buffer().weak_from_this(),
+             _cursor,
+             {_bufferView.xScroll(), _bufferView.yScroll()}});
+    }
 
     if (foundState) {
         restoreState(*foundState);

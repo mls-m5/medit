@@ -1,5 +1,4 @@
 #include "text/rawbuffer.h"
-#include "cursorops.h"
 #include "cursorrange.h"
 #include "cursorrangeops.h"
 #include "text/cursor.h"
@@ -10,7 +9,7 @@ const std::vector<FString> &RawBuffer::lines() const {
 }
 
 bool RawBuffer::empty() const {
-    return _lines.empty() || (_lines.size() == 0 && _lines.front().empty());
+    return _lines.empty() || (_lines.size() == 1 && _lines.front().empty());
 }
 
 const FString &RawBuffer::lineAt(size_t index) const {
