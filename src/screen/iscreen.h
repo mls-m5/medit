@@ -3,7 +3,6 @@
 #include "keys/event.h"
 #include "meditfwd.h"
 #include "screen/cursorstyle.h"
-#include "text/fstring.h"
 #include "text/fstringview.h"
 #include <limits>
 #include <string>

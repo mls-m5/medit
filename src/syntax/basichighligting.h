@@ -1,7 +1,6 @@
 #pragma once
 
 #include "syntax/ihighlight.h"
-#include "syntax/palette.h"
 #include "text/buffer.h"
 #include <memory>
 

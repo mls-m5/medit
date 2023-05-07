@@ -124,7 +124,6 @@ add_library(
     modes/mode.cpp
     script/localenvironment.cpp
     script/standardcommands.cpp
-    script/command.cpp
     script/togglecomments.cpp
     script/luastate.cpp
     script/renameinteraction.cpp

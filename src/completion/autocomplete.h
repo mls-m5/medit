@@ -2,7 +2,6 @@
 
 #include "completion/icompletionsource.h"
 #include "icompletionsource.h"
-#include "text/fstring.h"
 #include <memory>
 #include <string>
 

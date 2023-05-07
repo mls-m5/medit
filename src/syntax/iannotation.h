@@ -1,7 +1,8 @@
 #pragma once
 
-#include "files/filesystem.h"
 #include "meditfwd.h"
+#include <filesystem>
+#include <memory>
 
 class IAnnotation {
 public:
@@ -10,5 +11,5 @@ public:
     //! Returns 0 if there is a error or true else
     virtual bool annotate(std::shared_ptr<IEnvironment> env) = 0;
 
-    virtual bool shouldEnable(filesystem::path) = 0;
+    virtual bool shouldEnable(std::filesystem::path) = 0;
 };

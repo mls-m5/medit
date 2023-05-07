@@ -1,7 +1,6 @@
 #pragma once
 
 #include "meditfwd.h"
-#include "script/ienvironment.h"
 #include <memory>
 
 class INavigation {

@@ -1,7 +1,5 @@
 
 #include "mls-unit-test/unittest.h"
-// #include "mock/script/mockscope.h"
-//  #include "mock/syntax/mockpalette.h"
 #include "mock/script/mockenvironment.h"
 #include "syntax/basichighligting.h"
 #include "syntax/palette.h"

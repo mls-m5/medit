@@ -36,13 +36,6 @@ public:
         return std::string{std::string_view{*this}};
     }
 
-    //    friend bool operator==(const FChar &a, const FChar b) {
-    //        return a.c == b.c && a.f == b.f;
-    //    }
-
-    //    friend bool operator!=(const FChar &a, const FChar b) {
-    //        return a.c != b.c || a.f != b.f;
-    //    }
     friend bool operator==(const FChar &a, const FChar b) {
         return a.c == b.c;
     }

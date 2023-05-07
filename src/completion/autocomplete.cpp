@@ -2,7 +2,7 @@
 
 #include "completion/autocomplete.h"
 #include "core/context.h"
-#include "core/jobqueue.h"
+#include "core/ijobqueue.h"
 #include "core/plugins.h"
 #include "script/ienvironment.h"
 #include <algorithm>
