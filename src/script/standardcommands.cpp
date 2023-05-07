@@ -277,7 +277,7 @@ StandardCommands create() {
     };
 
     DEF(renameSymbol) {
-        renameInteraction(env);
+        beginRenameInteraction(env);
     };
 
     DEF(selectInnerWord) {
