@@ -94,6 +94,9 @@ public:
     //! is visible
     void fitCursor();
 
+    /// Close the buffer and open another buffer previously opened in editor
+    /// @return true if another buffer was found and false if no other buffer
+    /// existed
     bool closeBuffer();
 
 private:
@@ -102,4 +105,5 @@ private:
     std::optional<Cursor> _selectionAnchor;
     std::shared_ptr<IMode> _mode;
     FormatType _background = 1;
+    std::vector<std::pair<std::weak_ptr<Buffer>, Position>> _openedBuffers;
 };

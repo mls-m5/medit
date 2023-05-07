@@ -27,13 +27,6 @@ public:
 
     Position cursorPosition(Position cursor) const;
 
-    /// Close the buffer and open another buffer previously opened in editor
-    /// @return true if another buffer was found and false if no other buffer
-    /// existed
-    /// Note that if the bufferview resides in a Editor use the editors
-    /// closeBuffer() function instead to avoid messing up the cursor pointer
-    bool closeBuffer();
-
 private:
     void subscribeToBuffer();
 
@@ -43,6 +36,4 @@ private:
 
     bool _showLines = false;
     size_t _numberWidth = 3;
-
-    std::vector<std::weak_ptr<Buffer>> _openedBuffers;
 };

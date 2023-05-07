@@ -60,6 +60,18 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
     if (!buffer) {
         throw std::runtime_error{"Trying to set editor buffer to null"};
     }
+
+    for (auto it = _openedBuffers.begin(); it != _openedBuffers.end();) {
+        if (auto ptr = it->first.lock(); !ptr || ptr == buffer) {
+            it = _openedBuffers.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+
+    _openedBuffers.push_back({_bufferView.buffer().weak_from_this(), _cursor});
+
     _cursor = Cursor{*buffer};
     _bufferView.buffer(std::move(buffer));
 }
@@ -230,7 +242,20 @@ void Editor::fitCursor() {
 }
 
 bool Editor::closeBuffer() {
-    auto res = _bufferView.closeBuffer();
-    _cursor = {_bufferView.buffer()};
-    return res;
+    for (; !_openedBuffers.empty();) {
+        auto buffer = _openedBuffers.back().first.lock();
+        if (!buffer) {
+            _openedBuffers.pop_back();
+            continue;
+        }
+        if (buffer) {
+            cursor({*buffer, _openedBuffers.back().second});
+            _bufferView.buffer(std::move(buffer));
+            fitCursor();
+            _openedBuffers.pop_back();
+            return true;
+        }
+    }
+
+    return false;
 }
