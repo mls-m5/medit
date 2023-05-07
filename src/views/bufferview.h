@@ -25,7 +25,7 @@ public:
 
     void showLines(bool value);
 
-    Position cursorPosition(Cursor cursor) const;
+    Position cursorPosition(Position cursor) const;
 
     /// Close the buffer and open another buffer previously opened in editor
     /// @return true if another buffer was found and false if no other buffer

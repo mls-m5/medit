@@ -165,7 +165,7 @@ void BufferView::showLines(bool value) {
     _numberWidth = value * 3;
 }
 
-Position BufferView::cursorPosition(Cursor cursor) const {
+Position BufferView::cursorPosition(Position cursor) const {
     return {x() + cursor.x() + _numberWidth, y() + cursor.y() - yScroll()};
 }
 

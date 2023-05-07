@@ -45,7 +45,7 @@ void CompleteView::updateCompletion(std::string str) {
 bool CompleteView::keyPress(std::shared_ptr<IEnvironment> env) {
     if (env->key().key == Key::Text || env->key().key == Key::Backspace ||
         env->key().key == Key::Delete) {
-        setCursor(env->editor().cursor(), env->editor().bufferView());
+        setCursor(env->editor().cursor(), env->editor());
     }
     return _list.keyPress(env);
 }
@@ -70,8 +70,7 @@ void CompleteView::callback(
     });
 }
 
-void CompleteView::setCursor(const Cursor cursor,
-                             const BufferView &bufferView) {
+void CompleteView::setCursor(const Cursor cursor, const Editor &bufferView) {
     auto begin = autocompleteWordBegin(cursor);
     auto range = CursorRange{begin, cursor};
     currentText(content(range));

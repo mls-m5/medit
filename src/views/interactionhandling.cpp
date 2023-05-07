@@ -16,7 +16,12 @@ void InteractionHandling::newInteraction(const Interaction &i,
     auto ss = std::ostringstream{};
     i.serialize(ss);
 
-    _editor = _window.currentEditor();
+    // TODO: Open in some special window
+    auto editor = _window.currentEditor();
+    if (!editor) {
+        return;
+    }
+
     auto env = _window.env().shared_from_this();
 
     // We do not create with the core create function because we do not want
@@ -24,8 +29,10 @@ void InteractionHandling::newInteraction(const Interaction &i,
     auto newBuffer = std::make_shared<Buffer>();
     _operationBuffer = newBuffer;
 
-    _editor->buffer(newBuffer);
-    _editor->bufferView().scroll(0, 0);
+    editor->buffer(newBuffer);
+    //    editor->bufferView().scroll(0, 0);
+
+    _editor = editor->weak_from_this();
 
     replace(all(*newBuffer), ss.str());
 }
@@ -65,8 +72,8 @@ bool InteractionHandling::keyPress(std::shared_ptr<IEnvironment> env) {
 void InteractionHandling::close() {
     _operationBuffer = {};
     _callback = {};
-    if (_editor) {
-        _editor->closeBuffer();
-        _editor = nullptr;
+    if (auto editor = _editor.lock()) {
+        editor->closeBuffer();
+        editor.reset();
     }
 }

@@ -2,7 +2,6 @@
 
 #include "completion/autocomplete.h"
 #include "text/cursor.h"
-#include "views/bufferview.h"
 #include "views/listview.h"
 #include "views/view.h"
 
@@ -35,7 +34,7 @@ public:
 
     void callback(std::function<void(CompletionResult)> f);
 
-    void setCursor(Cursor cursor, const BufferView &bufferView);
+    void setCursor(Cursor cursor, const Editor &bufferView);
 
     bool mouseDown(int x, int ty) override {
         return false;

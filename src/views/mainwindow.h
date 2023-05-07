@@ -13,7 +13,8 @@
 
 struct MainWindow : public Window {
     IScreen &_screen;
-    std::vector<std::unique_ptr<Editor>> _editors;
+    std::vector<std::shared_ptr<Editor>>
+        _editors; // Shared ptr to allow for weak ptr
     InteractionHandling _interactions;
     std::shared_ptr<LocalEnvironment> _env;
     Editor _console;

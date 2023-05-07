@@ -206,7 +206,7 @@ void MainWindow::open(filesystem::path path,
     path = filesystem::absolute(path);
 
     editor->buffer(_env->core().open(path, _env));
-    editor->bufferView().yScroll(0);
+    //    editor->bufferView().yScroll(0);
 
     {
         auto cur = editor->cursor();
@@ -424,7 +424,7 @@ void MainWindow::autoComplete() {
         editor->cursor(fix(editor->cursor()));
 
         Cursor cursor = editor->cursor();
-        _completeView.setCursor(cursor, editor->bufferView());
+        _completeView.setCursor(cursor, *editor);
         _completeView.triggerShow(_env);
     }
 }

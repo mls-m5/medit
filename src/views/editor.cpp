@@ -64,12 +64,12 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
     _bufferView.buffer(std::move(buffer));
 }
 
-BufferView &Editor::bufferView() {
-    return _bufferView;
-}
-
 Cursor Editor::cursor() const {
     return _cursor;
+}
+
+Position Editor::cursorPosition(Position editorPos) const {
+    return _bufferView.cursorPosition(editorPos);
 }
 
 Cursor Editor::cursor(Cursor c, bool deselect) {
@@ -160,7 +160,7 @@ bool Editor::mouseDown(int x, int y) {
         return false;
     }
 
-    int relX = x - this->x() - bufferView().numberWidth();
+    int relX = x - this->x() - _bufferView.numberWidth();
     int relY = y - this->y();
 
     // TODO: It does not seem to select when clicking where there is no text
@@ -226,7 +226,7 @@ size_t Editor::y() const {
 }
 
 void Editor::fitCursor() {
-    bufferView().fitPosition(_cursor);
+    _bufferView.fitPosition(_cursor);
 }
 
 bool Editor::closeBuffer() {
