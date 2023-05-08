@@ -17,6 +17,7 @@ namespace {
 void handleUserRenameResponse(std::shared_ptr<IEnvironment> env,
                               const Interaction &i) {
     std::cout << "response " << i.at("to") << std::endl;
+#warning "continue here"
 }
 
 } // namespace

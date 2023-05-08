@@ -40,6 +40,7 @@ class ITimer;
 class IJobQueue;
 class ThreadContext;
 
+struct Plugins;
 class IHighlight;
 class ICompletionSource;
 class IAnnotation;

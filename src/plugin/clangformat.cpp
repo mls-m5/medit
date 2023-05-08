@@ -24,7 +24,6 @@ bool ClangFormat::format(Editor &editor) {
     return true;
 }
 
-void ClangFormat::registerPlugin() {
-    registerFormat<ClangFormat>();
-}
-
+// void ClangFormat::registerPlugin() {
+//     registerFormat<ClangFormat>();
+// }

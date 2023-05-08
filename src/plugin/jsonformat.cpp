@@ -34,6 +34,6 @@ bool JsonFormat::format(Editor &editor) {
     }
 }
 
-void JsonFormat::registerPlugin() {
-    registerFormat<JsonFormat>();
-}
+// void JsonFormat::registerPlugin() {
+//     registerFormat<JsonFormat>();
+// }

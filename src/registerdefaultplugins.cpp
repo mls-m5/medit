@@ -1,4 +1,5 @@
 #include "registerdefaultplugins.h"
+#include "core/plugins.h"
 #include "navigation/headernavigation.h"
 #include "plugin/clangformat.h"
 #include "plugin/jsonformat.h"
@@ -11,11 +12,11 @@
 #include "clang/clangnavigation.h"
 #endif
 
-void registerDefaultPlugins() {
-    ClangFormat::registerPlugin();
-    BasicHighlighting::registerPlugin();
-    JsonFormat::registerPlugin();
-    HeaderNavigation::registerPlugin();
+void registerDefaultPlugins(Plugins &container) {
+    container.loadPlugin<ClangFormat>();
+    container.loadPlugin<BasicHighlighting>();
+    container.loadPlugin<JsonFormat>();
+    container.loadPlugin<HeaderNavigation>();
 
 #ifdef ENABLE_LEGACY_CLANG_PLUGIN
     ClangCompletion::registerPlugin();
@@ -25,6 +26,6 @@ void registerDefaultPlugins() {
 #endif
 
 #ifndef __EMSCRIPTEN__
-    LspPlugin::registerPlugin();
+    LspPlugin::registerPlugin(container);
 #endif
 }

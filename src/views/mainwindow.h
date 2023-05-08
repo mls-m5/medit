@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/plugins.h"
 #include "files/project.h"
 #include "interactionhandling.h"
 #include "meditfwd.h"
@@ -13,6 +14,7 @@
 
 struct MainWindow : public Window {
     IScreen &_screen;
+    Plugins _plugins;
     std::vector<std::shared_ptr<Editor>>
         _editors; // Shared ptr to allow for weak ptr
     InteractionHandling _interactions;
@@ -30,10 +32,10 @@ struct MainWindow : public Window {
     bool _shouldRedraw = true;
 
     //! Move these somewhere else
-    std::vector<std::unique_ptr<IHighlight>> _highlighting;
-    std::vector<std::unique_ptr<IFormat>> _formatting;
-    std::vector<std::unique_ptr<IAnnotation>> _annotation;
-    std::vector<std::unique_ptr<INavigation>> _navigation;
+    //    std::vector<std::unique_ptr<IHighlight>> _highlighting;
+    //    std::vector<std::unique_ptr<IFormat>> _formatting;
+    //    std::vector<std::unique_ptr<IAnnotation>> _annotation;
+    //    std::vector<std::unique_ptr<INavigation>> _navigation;
 
     MainWindow(IScreen &screen, ThreadContext &context);
 

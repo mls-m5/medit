@@ -19,7 +19,7 @@ public:
 
     void bufferEvent(BufferEvent &event);
 
-    static void registerPlugin();
+    static void registerPlugin(Plugins &);
 
     void handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
                                std::vector<long>);

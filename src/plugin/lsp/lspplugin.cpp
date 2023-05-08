@@ -152,11 +152,11 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
     }
 }
 
-void LspPlugin::registerPlugin() {
+void LspPlugin::registerPlugin(Plugins &plugins) {
     LspPlugin::instance();
-    registerNavigation<LspNavigation>();
-    registerHighlighting<LspHighlight>();
-    registerCompletion<LspComplete>();
+    plugins.loadPlugin<LspNavigation>();
+    plugins.loadPlugin<LspHighlight>();
+    plugins.loadPlugin<LspComplete>();
 }
 
 void LspPlugin::handleSemanticsTokens(std::shared_ptr<Buffer> buffer,

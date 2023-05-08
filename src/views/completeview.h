@@ -1,6 +1,9 @@
 #pragma once
 
 #include "completion/autocomplete.h"
+#include "completion/icompletionsource.h"
+#include "core/plugins.h"
+#include "meditfwd.h"
 #include "text/cursor.h"
 #include "views/listview.h"
 #include "views/view.h"
@@ -12,7 +15,7 @@ public:
         std::string postfix;
     };
 
-    CompleteView(IView *parent);
+    CompleteView(IView *parent, Plugins::ListT<ICompletionSource>);
 
     //! @param cursorPosition is the cursors position _on the screen_
     void triggerShow(std::shared_ptr<IEnvironment>);

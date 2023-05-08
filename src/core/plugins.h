@@ -1,71 +1,67 @@
 #pragma once
 
+#include "syntax/iannotation.h"
+#include <algorithm>
 #include <meditfwd.h>
 #include <memory>
+#include <tuple>
+#include <type_traits>
 #include <vector>
 
-//! The register functions is used by the plugin to register a function that can
-//! be used to create a unique_ptr of the plugin
-//!
-//! The factory functions is the type of function that the register function
-//! expects
-//!
-//! When a plugin is loaded dynamically it is supposed to receive a pointer to a
-//! PluginRegisterFunctions struct and use any of the function to add itself to
-//! the main application
-class PluginRegisterFunctions {
+struct Plugins {
 public:
     template <typename T>
-    struct Func {
-        using createT = std::unique_ptr<T> (*)();
-        using registerT = void (*)(createT);
-    };
+    using ListT = std::vector<std::shared_ptr<T>>;
 
-    Func<IHighlight>::registerT registerHighlighting;
-    Func<ICompletionSource>::registerT registerCompletion;
-    Func<IAnnotation>::registerT registerAnnotation;
-    Func<IFormat>::registerT registerFormat;
-    Func<INavigation>::registerT registerNavigation;
+private:
+    std::tuple<ListT<IHighlight>,
+               ListT<IFormat>,
+               ListT<IAnnotation>,
+               ListT<INavigation>,
+               ListT<ICompletionSource>>
+        lists;
+
+    template <typename T, typename V>
+    void addSingle(std::shared_ptr<V> ptr) {
+        if constexpr (std::is_base_of_v<T, V>) {
+            if (ptr) {
+                get<T>().push_back(ptr);
+            }
+        }
+    }
+
+    template <typename... T, typename V>
+    void addMultiple(std::shared_ptr<V> ptr) {
+        (addSingle<T, V>(ptr), ...);
+    }
+
+    template <std::size_t i = 0>
+    void sortTuple() {
+        if constexpr (i < std::tuple_size_v<decltype(lists)>) {
+            auto &list = std::get<i>(lists);
+            std::sort(list.begin(), list.end());
+        }
+    }
+
+public:
+    template <typename T>
+    void loadPlugin() {
+        auto ptr = std::make_shared<T>();
+
+        addMultiple<IAnnotation,
+                    IFormat,
+                    IAnnotation,
+                    INavigation,
+                    ICompletionSource,
+                    IHighlight>(ptr);
+    }
+
+    template <typename T>
+    ListT<T> &get() {
+        return std::get<ListT<T>>(lists);
+    }
+
+    void sort() {
+        sortTuple();
+    }
 };
-
-// Get a handles to the register functions
-PluginRegisterFunctions pluginRegisterFunctions();
-
-// Functions used by the application to create the plugins
-std::vector<std::unique_ptr<IHighlight>> createHighlightings();
-std::vector<std::unique_ptr<ICompletionSource>> createCompletionSources();
-std::vector<std::unique_ptr<IAnnotation>> createAnnotations();
-std::vector<std::unique_ptr<IFormat>> createFormat();
-std::vector<std::unique_ptr<INavigation>> createNavigation();
-
-template <typename T>
-void registerHighlighting() {
-    pluginRegisterFunctions().registerHighlighting(
-        []() -> std::unique_ptr<IHighlight> { return std::make_unique<T>(); });
-}
-
-template <typename T>
-void registerCompletion() {
-    pluginRegisterFunctions().registerCompletion(
-        []() -> std::unique_ptr<ICompletionSource> {
-            return std::make_unique<T>();
-        });
-}
-
-template <typename T>
-void registerAnnotation() {
-    pluginRegisterFunctions().registerAnnotation(
-        []() -> std::unique_ptr<IAnnotation> { return std::make_unique<T>(); });
-}
-
-template <typename T>
-void registerFormat() {
-    pluginRegisterFunctions().registerFormat(
-        []() -> std::unique_ptr<IFormat> { return std::make_unique<T>(); });
-}
-
-template <typename T>
-void registerNavigation() {
-    pluginRegisterFunctions().registerNavigation(
-        []() -> std::unique_ptr<INavigation> { return std::make_unique<T>(); });
-}

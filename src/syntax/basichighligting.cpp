@@ -82,6 +82,6 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
 
 // void BasicHighlighting::update(const IPalette &palette) {}
 
-void BasicHighlighting::registerPlugin() {
-    registerHighlighting<BasicHighlighting>();
-}
+// void BasicHighlighting::registerPlugin() {
+//     registerHighlighting<BasicHighlighting>();
+// }

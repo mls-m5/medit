@@ -12,7 +12,6 @@ add_library(
     core/threadvalidation.cpp
     core/registers.cpp
     core/jstimer.cpp
-    core/plugins.cpp
     syntax/palette.cpp
     )
 

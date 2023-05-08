@@ -22,7 +22,7 @@ public:
         return -1;
     }
 
-    static void registerPlugin();
+    //    static void registerPlugin();
 
 private:
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/context.h"
+#include "core/plugins.h"
 #include "meditfwd.h"
 #include "text/diagnostics.h"
 #include "threadvalidation.h"
@@ -61,9 +62,14 @@ public:
         _context = c;
     }
 
+    Plugins &plugins() {
+        return _plugins;
+    }
+
 private:
     std::vector<std::shared_ptr<Buffer>> _buffers;
     std::mutex _fileMutex;
+    Plugins _plugins;
 
     ThreadValidation _tv{"core thread (gui thread)"};
 

@@ -1,7 +1,12 @@
 #include "coreenvironment.h"
+#include "registerdefaultplugins.h"
 #include "text/buffer.h"
 
-CoreEnvironment::CoreEnvironment() = default;
+CoreEnvironment::CoreEnvironment() {
+    //    registerDefaultPlugins(_plugins);
+
+    _plugins.sort();
+}
 
 std::shared_ptr<Buffer> CoreEnvironment::open(
     std::filesystem::path path, std::shared_ptr<IEnvironment> env) {

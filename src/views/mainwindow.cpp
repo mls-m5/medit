@@ -1,5 +1,6 @@
 
 #include "views/mainwindow.h"
+#include "completion/icompletionsource.h"
 #include "core/context.h"
 #include "core/coreenvironment.h"
 #include "core/ijobqueue.h"
@@ -11,6 +12,7 @@
 #include "screen/iscreen.h"
 #include "script/localenvironment.h"
 #include "syntax/iannotation.h"
+#include "syntax/iformat.h"
 #include "syntax/ihighlight.h"
 #include "syntax/palette.h"
 #include "text/cursorops.h"
@@ -28,7 +30,7 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
     , _env(std::make_unique<LocalEnvironment>(*this, context))
     , _console(this, _env->core().create(_env))
     , _locator(this, _project)
-    , _completeView(this)
+    , _completeView(this, _plugins.get<ICompletionSource>())
     , _currentEditor(0) {
 
     //    for (int i = 0; i < 2; ++i) {
@@ -71,16 +73,17 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
         _inputFocus = editor;
     });
 
-    _highlighting = createHighlightings();
-    std::sort(_highlighting.begin(),
-              _highlighting.end(),
-              [](auto &&a, auto &&b) { return a->priority() > b->priority(); });
+    //    _highlighting = createHighlightings();
+    //    std::sort(_highlighting.begin(),
+    //              _highlighting.end(),
+    //              [](auto &&a, auto &&b) { return a->priority() >
+    //              b->priority(); });
 
-    _formatting = createFormat();
+    //    _formatting = createFormat();
 
-    _annotation = createAnnotations();
+    //    _annotation = createAnnotations();
 
-    _navigation = createNavigation();
+    //    _navigation = createNavigation();
 
     updateLocatorBuffer();
 }
@@ -241,10 +244,12 @@ void MainWindow::updateHighlighting(Editor &editor) {
             auto &queue = _env->context().guiQueue();
             auto &editor = _env->editor();
 
-            queue.addTask([this, &buffer = editor.buffer()] {
+            auto &plugins = _env->core().plugins();
+
+            queue.addTask([this, &buffer = editor.buffer(), &plugins] {
                 if (buffer.isColorsOld()) {
                     auto &editor = _env->editor();
-                    for (auto &highlight : _highlighting) {
+                    for (auto &highlight : plugins.get<IHighlight>()) {
                         if (highlight->shouldEnable(editor.path())) {
                             highlight->highlight(_env);
 
@@ -253,7 +258,7 @@ void MainWindow::updateHighlighting(Editor &editor) {
                         }
                     }
 
-                    for (auto &annotation : _annotation) {
+                    for (auto &annotation : plugins.get<IAnnotation>()) {
                         if (annotation->shouldEnable(editor.path())) {
                             annotation->annotate(_env);
                             break;
@@ -402,7 +407,7 @@ void MainWindow::showOpen() {
 }
 
 void MainWindow::gotoDefinition() {
-    for (auto &navigation : _navigation) {
+    for (auto &navigation : _env->core().plugins().get<INavigation>()) {
         if (navigation->gotoSymbol(_env)) {
             break;
         }
@@ -411,7 +416,7 @@ void MainWindow::gotoDefinition() {
 
 void MainWindow::format() {
     auto &editor = _env->editor();
-    for (auto &format : _formatting) {
+    for (auto &format : _env->core().plugins().get<IFormat>()) {
         if (format->format(editor)) {
             break;
         }

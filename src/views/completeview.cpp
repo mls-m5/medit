@@ -5,9 +5,11 @@
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
 
-CompleteView::CompleteView(IView *parent)
+CompleteView::CompleteView(IView *parent,
+                           Plugins::ListT<ICompletionSource> completion)
     : View{parent}
-    , _list{parent} {
+    , _list{parent}
+    , _autoComplete(std::move(completion)) {
     _list.width(20);
     _list.height(20);
 }

@@ -49,6 +49,7 @@ Todo:
   - [ ] File name above buffers
   - [ ] Ctrl+tab switch between opened buffers
   - [ ] Layouts that handle splits
+  - [ ] Use formatting (palette) to handle grouping ({}) or hyperlink marking
 - [ ] ~~Use Lua~~
   - [x] Remove remainders of old scripting engine
   - [ ] ~~Make core functionality callable from lua~~

@@ -18,3 +18,10 @@
    - [ ] Get plugin action related to current buffer from environment instead of window
 - [ ] Generate text file with the changes to be made into operation buffer
 - [ ] Apply the changes in the operation buffer with return, abort with esc
+- [ ] Make the operation buffers specify special characters that can be used to 
+      accept or reject so that any keys kan be assigned.
+      This way the interactions can be used for even save-prompts and other stuff
+
+
+Considerations:
+  Where to put the new plugin

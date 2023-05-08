@@ -1,5 +1,4 @@
 #include "views/editor.h"
-#include "core/coreenvironment.h"
 #include "files/ifile.h"
 #include "modes/imode.h"
 #include "modes/normalmode.h"

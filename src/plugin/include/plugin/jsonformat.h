@@ -7,5 +7,5 @@ public:
     //! @see IFormat
     bool format(Editor &);
 
-    static void registerPlugin();
+    //    static void registerPlugin();
 };

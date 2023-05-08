@@ -78,6 +78,6 @@ bool HeaderNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     return false;
 }
 
-void HeaderNavigation::registerPlugin() {
-    registerNavigation<HeaderNavigation>();
-}
+// void HeaderNavigation::registerPlugin() {
+//     registerNavigation<HeaderNavigation>();
+// }

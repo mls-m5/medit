@@ -176,8 +176,7 @@ struct MainData {
 MainData mainData;
 
 void MainData::start(const Settings &settings) {
-    registerDefaultPlugins();
-
+    registerDefaultPlugins(CoreEnvironment::instance().plugins());
     jobQueue = std::make_shared<QueueType>();
     guiQueue = std::make_shared<QueueType>();
     timer = std::make_shared<TimerType>();
