@@ -8,14 +8,15 @@
 #include "lsp/lspclient.h"
 #include "lsp/requests.h"
 #include "lsp/servernotifications.h"
-#include "registerdefaultplugins.h"
 #include "script/ienvironment.h"
 #include "script/standardcommands.h"
 #include "syntax/basichighligting.h"
 #include "syntax/palette.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
+#include <filesystem>
 #include <iostream>
+#include <stdexcept>
 
 // TODO: Tidy up this file
 
@@ -157,6 +158,7 @@ void LspPlugin::registerPlugin(Plugins &plugins) {
     plugins.loadPlugin<LspNavigation>();
     plugins.loadPlugin<LspHighlight>();
     plugins.loadPlugin<LspComplete>();
+    plugins.loadPlugin<LspRename>();
 }
 
 void LspPlugin::handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
@@ -364,6 +366,44 @@ bool LspNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
                     uriToPath(locations.front().uri).string(),
                     pos.x(),
                     pos.y());
+            });
+        });
+    return true;
+}
+
+bool LspRename::shouldEnable(std::filesystem::path path) const {
+    return (shouldProcessFileWithClang(path));
+}
+
+bool LspRename::rename(std::shared_ptr<IEnvironment> env,
+                       RenameArgs args,
+                       std::function<void(Changes)> callback) {
+    if (!shouldProcessFileWithClang(env->editor().path())) {
+        return false;
+    }
+
+    auto params = RenameParams{};
+    params.textDocument.uri = pathToUri(env->editor().buffer().path());
+    params.position = meditCursorToPosition(env->editor().cursor());
+    params.newName = args.newName;
+
+    LspPlugin::instance().client().request(
+        params, [env, callback](const WorkspaceEdit &edits) {
+            if (edits.changes.empty()) {
+                return;
+            }
+
+            env->context().guiQueue().addTask([env, edits, callback] {
+                std::cout << "response" << std::endl;
+                std::cout << edits.changes.size() << std::endl;
+                //                auto pos =
+                //                    clangPositionToLspPosition(locations.front().range.start);
+
+                //                env->standardCommands().open(
+                //                    env->shared_from_this(),
+                //                    uriToPath(locations.front().uri).string(),
+                //                    pos.x(),
+                //                    pos.y());
             });
         });
     return true;

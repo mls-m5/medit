@@ -1,6 +1,8 @@
 #include "renameinteraction.h"
+#include "core/coreenvironment.h"
 #include "ienvironment.h"
 #include "interaction.h"
+#include "syntax/irename.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
@@ -13,11 +15,25 @@
 
 namespace {
 
+void handleRenameChanges(std::shared_ptr<IEnvironment> env, Changes changes) {
+    std::cout << "got response from rename lsp" << std::endl;
+}
+
 /// When the user has selected the new name, handle what happends then
 void handleUserRenameResponse(std::shared_ptr<IEnvironment> env,
                               const Interaction &i) {
-    std::cout << "response " << i.at("to") << std::endl;
-#warning "continue here"
+    std::cout << "user input " << i.at("to") << std::endl;
+
+    auto &renamePlugins = env->core().plugins().get<IRename>();
+
+    for (auto &rename : renamePlugins) {
+        auto args = IRename::RenameArgs{std::string{i.at("to")}};
+        if (rename->rename(env, args, [env](Changes changes) {
+                handleRenameChanges(env, std::move(changes));
+            })) {
+            break;
+        }
+    }
 }
 
 } // namespace

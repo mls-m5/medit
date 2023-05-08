@@ -3,7 +3,9 @@
 #include "navigation/inavigation.h"
 #include "script/ienvironment.h"
 #include "syntax/ihighlight.h"
+#include "syntax/irename.h"
 #include "text/buffer.h"
+#include <filesystem>
 #include <memory>
 #include <unordered_map>
 
@@ -26,6 +28,7 @@ public:
 
     void requestSemanticsToken(std::shared_ptr<Buffer> buffer);
 
+    /// TODO: Should probably be owned by the sub-plugins via shared_ptrs
     static LspPlugin &instance() {
         static LspPlugin plugin;
         return plugin;
@@ -67,15 +70,16 @@ public:
     }
 };
 
-class LspRename {
-    bool shouldEnable(std::shared_ptr<IEnvironment> env) const;
+class LspRename : public IRename {
+    bool shouldEnable(std::filesystem::path path) const override;
 
     /// If the current buffer is a operation buffer
     /// Use the contents to perform a rename
-    void rename(std::shared_ptr<IEnvironment> env);
+    bool rename(std::shared_ptr<IEnvironment>,
+                RenameArgs,
+                std::function<void(Changes)> callback) override;
 
-    /// Check if a rename is somewhat valid
-    /// When
-    //    bool prepare(std::shared_ptr<IEnvironment> env,
-    //                 std::function<void(bool)> callback);
+    int priority() const override {
+        return 100;
+    }
 };

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "syntax/iannotation.h"
+#include "syntax/ihighlight.h"
+#include "syntax/irename.h"
 #include <algorithm>
 #include <meditfwd.h>
 #include <memory>
@@ -18,7 +20,8 @@ private:
                ListT<IFormat>,
                ListT<IAnnotation>,
                ListT<INavigation>,
-               ListT<ICompletionSource>>
+               ListT<ICompletionSource>,
+               ListT<IRename>>
         lists;
 
     template <typename T, typename V>
@@ -39,7 +42,10 @@ private:
     void sortTuple() {
         if constexpr (i < std::tuple_size_v<decltype(lists)>) {
             auto &list = std::get<i>(lists);
-            std::sort(list.begin(), list.end());
+            std::sort(list.begin(), list.end(), [](auto &a, auto &b) {
+                return a->priority() >
+                       b->priority(); // note that it is inverted
+            });
         }
     }
 
@@ -50,10 +56,10 @@ public:
 
         addMultiple<IAnnotation,
                     IFormat,
-                    IAnnotation,
                     INavigation,
                     ICompletionSource,
-                    IHighlight>(ptr);
+                    IHighlight,
+                    IRename>(ptr);
     }
 
     template <typename T>
