@@ -143,6 +143,10 @@ void BufferView::buffer(std::shared_ptr<Buffer> buffer) {
     unsubscribe();
     _buffer = std::move(buffer);
     subscribeToBuffer();
+
+    //    if (auto w = window()) { // Why does this not work?
+    //        w->triggerRedraw();
+    //    }
 }
 
 size_t BufferView::numberWidth() const {

@@ -5,6 +5,7 @@
 #include "script/ienvironment.h"
 #include "script/interaction.h"
 #include "text/cursorrangeops.h"
+#include "text/fstring.h"
 #include "views/mainwindow.h"
 #include <memory>
 #include <sstream>
@@ -12,9 +13,6 @@
 void InteractionHandling::newInteraction(const Interaction &i,
                                          InteractionCallback callback) {
     _callback = callback;
-
-    auto ss = std::ostringstream{};
-    i.serialize(ss);
 
     // TODO: Open in some special window
     auto editor = _window.currentEditor();
@@ -33,7 +31,7 @@ void InteractionHandling::newInteraction(const Interaction &i,
 
     _editor = editor->weak_from_this();
 
-    replace(all(*newBuffer), ss.str());
+    replace(all(*newBuffer), i.text);
     editor->cursor(i.cursorPosition);
 }
 
@@ -45,27 +43,27 @@ bool InteractionHandling::keyPress(std::shared_ptr<IEnvironment> env) {
 
     /// This is when the user has edited the response and wants to accept it
     if (env->key().symbol == "\n") {
-        auto ss = std::istringstream{content(*buffer)};
-        auto interaction = Interaction{};
-        interaction.deserialize(ss);
+        //        auto ss = std::istringstream{content(*buffer)};
+        auto interaction = Interaction{.text = content(*buffer)};
+        //        interaction.deserialize(ss);
 
-        if (interaction.valid) {
-            env->context().guiQueue().addTask(
-                [callback = _callback, interaction, env]() {
-                    callback(env, interaction);
-                });
-        }
-        else {
-            // TODO: Print failing message here
-        }
+        //        if (interaction.valid) {
+        env->context().guiQueue().addTask(
+            [callback = _callback, interaction, env]() {
+                callback(env, interaction);
+            });
+        //        }
+        //        else {
+        //            // TODO: Print failing message here
+        //        }
 
         close();
         return true;
     }
-    if (env->key().key == Key::Escape) {
-        close();
-        return true;
-    }
+    //    if (env->key().key == Key::Escape) {
+    //        close(); Use ctrl+w instead
+    //        return true;
+    //    }
     return false;
 }
 

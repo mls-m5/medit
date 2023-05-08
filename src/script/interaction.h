@@ -1,5 +1,6 @@
 #pragma once
 
+#include "text/fstring.h"
 #include "text/position.h"
 #include <algorithm>
 #include <istream>
@@ -9,11 +10,10 @@
 #include <string_view>
 #include <vector>
 
-struct Interaction {
+/// Simple interaciton variant with colon separated keys etc
+struct SimpleInteraction {
     std::string op;
     std::vector<std::pair<std::string, std::string>> values;
-    Position cursorPosition;
-
     bool valid = true;
 
     /// Create text form
@@ -21,6 +21,8 @@ struct Interaction {
 
     /// Parse text form
     void deserialize(std::istream &is);
+
+    void deserialize(const std::string &in);
 
     std::string_view at(std::string_view name) const {
         for (auto &it : values) {
@@ -31,4 +33,9 @@ struct Interaction {
 
         return {};
     }
+};
+
+struct Interaction {
+    FString text;
+    Position cursorPosition;
 };

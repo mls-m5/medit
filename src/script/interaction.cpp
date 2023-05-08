@@ -1,10 +1,9 @@
 #include "interaction.h"
-#include "ienvironment.h"
 #include <functional>
 #include <memory>
 #include <sstream>
 
-void Interaction::serialize(std::ostream &os) const {
+void SimpleInteraction::serialize(std::ostream &os) const {
     if (!valid) {
         return;
     }
@@ -15,7 +14,7 @@ void Interaction::serialize(std::ostream &os) const {
     }
 }
 
-void Interaction::deserialize(std::istream &is) {
+void SimpleInteraction::deserialize(std::istream &is) {
     valid = false;
     values.clear();
 
@@ -59,4 +58,9 @@ void Interaction::deserialize(std::istream &is) {
     }
 
     valid = !op.empty() && !values.empty();
+}
+
+void SimpleInteraction::deserialize(const std::string &in) {
+    auto ss = std::istringstream{in};
+    deserialize(ss);
 }

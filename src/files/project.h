@@ -14,6 +14,7 @@ public:
         std::string formatCommand;
     };
 
+    /// Set the current root
     filesystem::path root(filesystem::path) const;
 
     void updateCache(const filesystem::path &pathInProject,

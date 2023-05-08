@@ -21,6 +21,8 @@
 - [ ] Make the operation buffers specify special characters that can be used to 
       accept or reject so that any keys kan be assigned.
       This way the interactions can be used for even save-prompts and other stuff
+- [ ] Handle errors when renaming is not possible
+- [ ] Redraw screen when buffer is opened or closed
 
 
 Considerations:

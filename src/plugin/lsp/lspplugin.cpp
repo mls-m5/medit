@@ -4,6 +4,7 @@
 #include "core/ijobqueue.h"
 #include "core/plugins.h"
 #include "files/extensions.h"
+#include "files/project.h"
 #include "lsp/clientnotifications.h"
 #include "lsp/lspclient.h"
 #include "lsp/requests.h"
@@ -392,7 +393,8 @@ bool LspRename::prepare(std::shared_ptr<IEnvironment> env,
     params.position = meditCursorToPosition(env->editor().cursor());
 
     LspPlugin::instance().client().request(
-        params, [env, callback](const Range &range) {
+        params,
+        [env, callback](const Range &range) {
             //            if (edits.changes.empty()) {
             //                return;
             //            }
@@ -411,7 +413,8 @@ bool LspRename::prepare(std::shared_ptr<IEnvironment> env,
                 //                    pos.x(),
                 //                    pos.y());
             });
-        });
+        },
+        [](const auto &j) { std::cout << "error: " << j << std::endl; });
 
     return true;
 }
@@ -448,7 +451,8 @@ bool LspRename::rename(std::shared_ptr<IEnvironment> env,
                     fileChanges.push_back(change);
                 }
                 changes.changes.emplace_back(Changes::FileChanges{
-                    .file = file.first,
+                    .file = std::filesystem::relative(
+                        uriToPath(file.first), env->project().settings().root),
                     .changes = std::move(fileChanges),
                 });
             }

@@ -14,21 +14,50 @@
 
 namespace {
 
-void handleRenameChanges(std::shared_ptr<IEnvironment> env, Changes changes) {
+void applyRenameChanges(std::shared_ptr<IEnvironment> env,
+                        const Interaction &i) {
     std::cout << "got response from rename lsp" << std::endl;
+
+    auto changes = Changes{};
+
+    auto ss = std::istringstream{i.text};
+    changes.deserialize(ss);
+
+    changes.sort();
+
+    changes.serialize(std::cout);
+    std::cout.flush();
+}
+
+void lspRenameResponse(std::shared_ptr<IEnvironment> env, Changes changes) {
+
+    auto i = Interaction{"apply rename"};
+
+    if (changes.changes.empty()) {
+        return;
+    }
+
+    auto ss = std::ostringstream{};
+    changes.serialize(ss);
+
+    i.text = ss.str();
+    env->mainWindow().interactions().newInteraction(i, applyRenameChanges);
 }
 
 /// When the user has selected the new name, handle what happends then
 void handleUserRenameResponse(std::shared_ptr<IEnvironment> env,
                               const Interaction &i) {
-    std::cout << "user input " << i.at("to") << std::endl;
+    //    std::cout << "user input " << i.at("to") << std::endl;
 
     auto &renamePlugins = env->core().plugins().get<IRename>();
 
     for (auto &rename : renamePlugins) {
-        auto args = IRename::RenameArgs{std::string{i.at("to")}};
+        auto si = SimpleInteraction{};
+        si.deserialize(i.text);
+
+        auto args = IRename::RenameArgs{std::string{si.at("to")}};
         if (rename->rename(env, args, [env](Changes changes) {
-                handleRenameChanges(env, std::move(changes));
+                lspRenameResponse(env, std::move(changes));
             })) {
             break;
         }
@@ -37,9 +66,6 @@ void handleUserRenameResponse(std::shared_ptr<IEnvironment> env,
 
 void renameVerifiedCallback(std::shared_ptr<IEnvironment> env,
                             IRename::PrepareCallbackArgs args) {
-    //    auto range = CursorRange{::wordBegin(cursor),
-    //    ::right(::wordEnd(cursor))}; auto old = content(range);
-
     auto fileStr = std::string{};
 
     auto &e = env->editor();
@@ -49,15 +75,21 @@ void renameVerifiedCallback(std::shared_ptr<IEnvironment> env,
     auto range = CursorRange{buffer, args.start, args.end};
     auto old = content(range);
 
-    auto i = Interaction{"rename",
-                         {
-                             {"from", old},
-                             {"to", old},
-                             {"file", e.file()->path().string()},
-                             {"l", std::to_string(args.start.y())},
-                             {"c", std::to_string(args.start.x())},
-                         },
-                         {4, 2}};
+    auto si = SimpleInteraction{"rename",
+                                {
+                                    {"from", old},
+                                    {"to", old},
+                                    {"file", e.file()->path().string()},
+                                    {"l", std::to_string(args.start.y())},
+                                    {"c", std::to_string(args.start.x())},
+                                }};
+    auto ss = std::ostringstream{};
+    si.serialize(ss);
+
+    auto i = Interaction{
+        ss.str(),
+        {4, 2},
+    };
 
     env->mainWindow().interactions().newInteraction(i,
                                                     handleUserRenameResponse);
@@ -67,17 +99,11 @@ void renameVerifiedCallback(std::shared_ptr<IEnvironment> env,
 
 void beginRenameInteraction(std::shared_ptr<IEnvironment> env) {
     auto &e = env->editor();
-    //    auto cursor = e.cursor();
-
     auto &renamePlugins = env->core().plugins().get<IRename>();
 
     for (auto &rename : renamePlugins) {
-        //        auto args =
-        //        IRename::PrepareCallbackArgs{std::string{i.at("to")}};
         if (rename->prepare(env, [env](IRename::PrepareCallbackArgs args) {
                 renameVerifiedCallback(env, std::move(args));
-                //                handleRenameChanges(env,
-                //                std::move(changes));
             })) {
             break;
         }

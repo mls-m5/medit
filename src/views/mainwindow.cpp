@@ -332,8 +332,10 @@ void MainWindow::copy(bool shouldCut) {
 }
 
 void MainWindow::triggerRedraw() {
-    _shouldRedraw = true;
-    _env->context().guiQueue().addTask([this] { /*refreshScreen();*/ });
+    if (!_shouldRedraw) {
+        _shouldRedraw = true;
+        _env->context().guiQueue().addTask([this] { /*refreshScreen();*/ });
+    }
 }
 
 void MainWindow::refreshScreen() {
