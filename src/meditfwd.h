@@ -46,6 +46,7 @@ class ICompletionSource;
 class IAnnotation;
 class IFormat;
 class INavigation;
+struct Changes;
 
 class IConnection;
 class TcpServer;

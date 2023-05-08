@@ -13,6 +13,7 @@
 #include "script/standardcommands.h"
 #include "syntax/basichighligting.h"
 #include "syntax/palette.h"
+#include "text/changes.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
 #include <filesystem>
@@ -408,7 +409,7 @@ bool LspRename::prepare(std::shared_ptr<IEnvironment> env,
 
 bool LspRename::rename(std::shared_ptr<IEnvironment> env,
                        RenameArgs args,
-                       std::function<void(Changes)> callback) {
+                       std::function<void(const Changes &)> callback) {
     if (!shouldProcessFileWithClang(env->editor().path())) {
         return false;
     }

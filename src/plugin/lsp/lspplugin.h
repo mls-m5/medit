@@ -82,7 +82,7 @@ class LspRename : public IRename {
     /// Use the contents to perform a rename
     bool rename(std::shared_ptr<IEnvironment>,
                 RenameArgs,
-                std::function<void(Changes)> callback) override;
+                std::function<void(const Changes &)> callback) override;
 
     int priority() const override {
         return 100;

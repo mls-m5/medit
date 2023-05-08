@@ -3,6 +3,7 @@
 #include "ienvironment.h"
 #include "interaction.h"
 #include "syntax/irename.h"
+#include "text/changes.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
 #include "views/interactionhandling.h"

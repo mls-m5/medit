@@ -106,6 +106,7 @@ add_library(
     text/history.cpp
     text/diagnostics.cpp
     text/bufferedit.cpp
+    text/changes.cpp
     views/messagebox.cpp
     views/editor.cpp
     views/locator.cpp
