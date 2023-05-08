@@ -13,7 +13,6 @@
 
 struct BufferEvent {
     std::shared_ptr<Buffer> buffer;
-    //    std::shared_ptr<IEnvironment> env;
     enum {
         Open,
         Close,
@@ -22,6 +21,7 @@ struct BufferEvent {
     } type = Open;
 };
 
+// TODO: Break out file handling functionality
 /// Environment shared with all user of the program/server
 class CoreEnvironment {
 public:
@@ -65,6 +65,9 @@ public:
     Plugins &plugins() {
         return _plugins;
     }
+
+    // Return a buffer only if it is loaded
+    std::shared_ptr<Buffer> find(std::filesystem::path path);
 
 private:
     std::vector<std::shared_ptr<Buffer>> _buffers;

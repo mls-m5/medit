@@ -177,6 +177,8 @@ MainData mainData;
 
 void MainData::start(const Settings &settings) {
     registerDefaultPlugins(CoreEnvironment::instance().plugins());
+    CoreEnvironment::instance().plugins().sort();
+
     jobQueue = std::make_shared<QueueType>();
     guiQueue = std::make_shared<QueueType>();
     timer = std::make_shared<TimerType>();

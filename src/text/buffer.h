@@ -18,6 +18,7 @@ public:
     Buffer(Buffer &&) = delete;
     Buffer &operator=(const Buffer &) = delete;
     Buffer &operator=(Buffer &&) = delete;
+    ~Buffer() = default;
 
     Buffer(bool isSingleLine) {
         _raw.isSingleLine(isSingleLine);

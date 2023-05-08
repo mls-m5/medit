@@ -1,22 +1,17 @@
 #include "coreenvironment.h"
-#include "registerdefaultplugins.h"
 #include "text/buffer.h"
+#include <filesystem>
 
-CoreEnvironment::CoreEnvironment() {
-    //    registerDefaultPlugins(_plugins);
-
-    _plugins.sort();
-}
+CoreEnvironment::CoreEnvironment() {}
 
 std::shared_ptr<Buffer> CoreEnvironment::open(
     std::filesystem::path path, std::shared_ptr<IEnvironment> env) {
     _tv();
     std::scoped_lock g{_fileMutex};
-    for (auto &buffer : _buffers) {
-        if (buffer->path() == path) {
-            emitBufferSubscriptionEvent({buffer, BufferEvent::Open});
-            return buffer;
-        }
+
+    if (auto buffer = find(path)) {
+        emitBufferSubscriptionEvent({buffer, BufferEvent::Open});
+        return buffer;
     }
 
     _buffers.push_back(Buffer::open(path));
@@ -81,4 +76,15 @@ void CoreEnvironment::publishDiagnostics(
             return;
         }
     }
+}
+
+std::shared_ptr<Buffer> CoreEnvironment::find(std::filesystem::path path) {
+    _tv();
+    path = std::filesystem::absolute(path);
+    for (auto &buffer : _buffers) {
+        if (path == buffer->path()) {
+            return buffer;
+        }
+    }
+    return nullptr;
 }

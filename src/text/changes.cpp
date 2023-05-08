@@ -1,4 +1,9 @@
 #include "changes.h"
+#include "core/coreenvironment.h"
+#include "files/project.h"
+#include "script/ienvironment.h"
+#include "text/cursorrange.h"
+#include "text/cursorrangeops.h"
 #include <regex>
 
 void Changes::serialize(std::ostream &out) const {
@@ -62,4 +67,36 @@ void Changes::sort() {
                       }
                   });
     }
+}
+
+void Changes::apply(IEnvironment &env) {
+    // Handle open buffers
+
+    auto &core = env.core();
+
+    sort();
+
+    for (auto it = changes.begin(); it != changes.end();) {
+        auto &change = *it;
+
+        if (auto buffer =
+                core.find(env.project().settings().root / change.file)) {
+            for (auto &c : change.changes) {
+                c.apply(*buffer);
+            }
+            it = changes.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+
+#warning "this needs to be implemented"
+    // Handle files that is not opens
+}
+
+void Changes::Change::apply(Buffer &buffer) const {
+    auto range = CursorRange{buffer, begin, end};
+
+    replace(range, newText);
 }
