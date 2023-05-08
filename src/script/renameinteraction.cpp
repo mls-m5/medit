@@ -16,7 +16,6 @@ namespace {
 
 void applyRenameChanges(std::shared_ptr<IEnvironment> env,
                         const Interaction &i) {
-    std::cout << "got response from rename lsp" << std::endl;
 
     auto changes = Changes{};
 
@@ -25,6 +24,8 @@ void applyRenameChanges(std::shared_ptr<IEnvironment> env,
 
     changes.sort();
 
+    // TODO: Apply changes
+    std::cout << "got response from rename lsp" << std::endl;
     changes.serialize(std::cout);
     std::cout.flush();
 }

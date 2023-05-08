@@ -395,23 +395,10 @@ bool LspRename::prepare(std::shared_ptr<IEnvironment> env,
     LspPlugin::instance().client().request(
         params,
         [env, callback](const Range &range) {
-            //            if (edits.changes.empty()) {
-            //                return;
-            //            }
-
             env->context().guiQueue().addTask([env, range, callback] {
-                std::cout << "response" << std::endl;
-                std::cout << "range " << range.start.line << ", "
-                          << range.start.character << std::endl;
                 auto args = IRename::PrepareCallbackArgs{
                     toMeditPosition(range.start), toMeditPosition(range.end)};
                 callback(args);
-
-                //                env->standardCommands().open(
-                //                    env->shared_from_this(),
-                //                    uriToPath(locations.front().uri).string(),
-                //                    pos.x(),
-                //                    pos.y());
             });
         },
         [](const auto &j) { std::cout << "error: " << j << std::endl; });
@@ -459,7 +446,6 @@ bool LspRename::rename(std::shared_ptr<IEnvironment> env,
 
             env->context().guiQueue().addTask(
                 [env, changes = std::move(changes), callback] {
-                    std::cout << "response" << std::endl;
                     callback(std::move(changes));
                 });
         });

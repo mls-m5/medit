@@ -101,10 +101,11 @@ void MainWindow::resize(size_t w, size_t h) {
 
     {
         size_t index = 0;
+        auto w = width() / _editors.size();
         for (auto &editor : _editors) {
-            editor->x(index * width() / 2);
+            editor->x(index * w);
             editor->y(0);
-            editor->width(width() / 2);
+            editor->width(w);
             if (_env->showConsole()) {
                 editor->height(height() - _split);
             }
