@@ -15,6 +15,7 @@
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
 #include <filesystem>
+#include <iomanip>
 #include <iostream>
 #include <stdexcept>
 
@@ -73,7 +74,7 @@ lsp::Position meditCursorToPosition(Cursor cursor) {
     return pos;
 }
 
-Position clangPositionToLspPosition(lsp::Position pos) {
+Position clangPositionToMeditPosition(lsp::Position pos) {
     return Position(pos.character, pos.line);
 }
 
@@ -359,7 +360,7 @@ bool LspNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
 
             env->context().guiQueue().addTask([env, locations] {
                 auto pos =
-                    clangPositionToLspPosition(locations.front().range.start);
+                    clangPositionToMeditPosition(locations.front().range.start);
 
                 env->standardCommands().open(
                     env->shared_from_this(),
@@ -373,6 +374,46 @@ bool LspNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
 
 bool LspRename::shouldEnable(std::filesystem::path path) const {
     return (shouldProcessFileWithClang(path));
+}
+
+bool LspRename::doesSupportPrepapre() {
+    // TODO: Depend on servercapabilities in the future
+    return true;
+}
+
+bool LspRename::prepare(std::shared_ptr<IEnvironment> env,
+                        std::function<void(PrepareCallbackArgs)> callback) {
+    if (!shouldProcessFileWithClang(env->editor().path())) {
+        return false;
+    }
+
+    auto params = PrepareRenameParams{};
+    params.textDocument.uri = pathToUri(env->editor().buffer().path());
+    params.position = meditCursorToPosition(env->editor().cursor());
+
+    LspPlugin::instance().client().request(
+        params, [env, callback](const Range &range) {
+            //            if (edits.changes.empty()) {
+            //                return;
+            //            }
+
+            env->context().guiQueue().addTask([env, range, callback] {
+                std::cout << "response" << std::endl;
+                std::cout << "range " << range.start.line << ", "
+                          << range.start.character << std::endl;
+                auto args = IRename::PrepareCallbackArgs{
+                    toMeditPosition(range.start), toMeditPosition(range.end)};
+                callback(args);
+
+                //                env->standardCommands().open(
+                //                    env->shared_from_this(),
+                //                    uriToPath(locations.front().uri).string(),
+                //                    pos.x(),
+                //                    pos.y());
+            });
+        });
+
+    return true;
 }
 
 bool LspRename::rename(std::shared_ptr<IEnvironment> env,
@@ -393,18 +434,30 @@ bool LspRename::rename(std::shared_ptr<IEnvironment> env,
                 return;
             }
 
-            env->context().guiQueue().addTask([env, edits, callback] {
-                std::cout << "response" << std::endl;
-                std::cout << edits.changes.size() << std::endl;
-                //                auto pos =
-                //                    clangPositionToLspPosition(locations.front().range.start);
+            auto changes = Changes{};
 
-                //                env->standardCommands().open(
-                //                    env->shared_from_this(),
-                //                    uriToPath(locations.front().uri).string(),
-                //                    pos.x(),
-                //                    pos.y());
-            });
+            for (auto &file : edits.changes) {
+                auto fileChanges = decltype(Changes::FileChanges::changes){};
+
+                for (auto &lspChange : file.second) {
+                    auto change = Changes::Change{};
+                    change.begin = toMeditPosition(lspChange.range.start);
+                    change.end = toMeditPosition(lspChange.range.end);
+                    change.newText = lspChange.newText;
+
+                    fileChanges.push_back(change);
+                }
+                changes.changes.emplace_back(Changes::FileChanges{
+                    .file = file.first,
+                    .changes = std::move(fileChanges),
+                });
+            }
+
+            env->context().guiQueue().addTask(
+                [env, changes = std::move(changes), callback] {
+                    std::cout << "response" << std::endl;
+                    callback(std::move(changes));
+                });
         });
     return true;
 }

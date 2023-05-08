@@ -73,6 +73,11 @@ public:
 class LspRename : public IRename {
     bool shouldEnable(std::filesystem::path path) const override;
 
+    bool doesSupportPrepapre() override;
+
+    bool prepare(std::shared_ptr<IEnvironment> env,
+                 std::function<void(PrepareCallbackArgs)>) override;
+
     /// If the current buffer is a operation buffer
     /// Use the contents to perform a rename
     bool rename(std::shared_ptr<IEnvironment>,

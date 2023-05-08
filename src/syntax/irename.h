@@ -1,6 +1,7 @@
 #pragma once
 
 #include "script/ienvironment.h"
+#include "text/position.h"
 #include <filesystem>
 #include <functional>
 #include <memory>
@@ -10,8 +11,8 @@
 // TODO: Reuse for other refactorizations
 struct Changes {
     struct Change {
-        int line = 0;
-        int row = 0;
+        Position begin;
+        Position end;
         std::string newText;
     };
 
@@ -28,6 +29,16 @@ public:
     struct RenameArgs {
         std::string newName;
     };
+
+    struct PrepareCallbackArgs {
+        Position start;
+        Position end;
+    };
+
+    virtual bool doesSupportPrepapre() = 0;
+
+    virtual bool prepare(std::shared_ptr<IEnvironment> env,
+                         std::function<void(PrepareCallbackArgs)>) = 0;
 
     virtual bool rename(std::shared_ptr<IEnvironment>,
                         RenameArgs,
