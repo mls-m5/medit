@@ -74,18 +74,6 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
         _inputFocus = editor;
     });
 
-    //    _highlighting = createHighlightings();
-    //    std::sort(_highlighting.begin(),
-    //              _highlighting.end(),
-    //              [](auto &&a, auto &&b) { return a->priority() >
-    //              b->priority(); });
-
-    //    _formatting = createFormat();
-
-    //    _annotation = createAnnotations();
-
-    //    _navigation = createNavigation();
-
     updateLocatorBuffer();
 }
 
@@ -163,7 +151,8 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
     if (_inputFocus == currentEditor() && _completeView.visible()) {
         if (_completeView.keyPress(env)) {
             if (auto e = currentEditor()) {
-                updateHighlighting(*e);
+                env->core().updateHighlighting(env->context());
+                //                updateHighlighting(e->buffer());
             }
             return true; // Otherwise give key events to editor
         }
@@ -176,7 +165,8 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
 
     if (_inputFocus->keyPress(env)) {
         if (auto e = currentEditor()) {
-            updateHighlighting(*e);
+            env->core().updateHighlighting(env->core().context());
+            //            updateHighlighting(e->buffer());
         }
         if (_activePopup && _activePopup->isClosed()) {
             _activePopup = nullptr;
@@ -223,54 +213,10 @@ void MainWindow::open(filesystem::path path,
         editor->cursor(cur);
     }
 
-    updateHighlighting(*editor);
+    _env->core().updateHighlighting(_env->context());
+    //    updateHighlighting(editor->buffer());
 
     updateTitle();
-}
-
-void MainWindow::updateHighlighting(Editor &editor) {
-#ifdef __EMSCRIPTEN__
-    return; // Todo: find reason for crash
-#endif      //__EMSCRIPTEN__
-    auto &timer = _env->context().timer();
-    if (_updateTimeHandle) {
-        timer.cancel(_updateTimeHandle);
-        _updateTimeHandle = 0;
-    }
-
-    using namespace std::literals;
-
-    // Move this logic to core environment and listen for buffer changes
-    if (editor.buffer().isColorsOld()) {
-        _updateTimeHandle = timer.setTimeout(1s, [this] {
-            auto &queue = _env->context().guiQueue();
-            auto &editor = _env->editor();
-
-            auto &plugins = _env->core().plugins();
-
-            queue.addTask([this, &buffer = editor.buffer(), &plugins] {
-                if (buffer.isColorsOld()) {
-                    auto &editor = _env->editor();
-                    for (auto &highlight : plugins.get<IHighlight>()) {
-                        if (highlight->shouldEnable(editor.path())) {
-                            highlight->highlight(_env);
-
-                            editor.buffer().isColorsOld(false);
-                            break;
-                        }
-                    }
-
-                    for (auto &annotation : plugins.get<IAnnotation>()) {
-                        if (annotation->shouldEnable(editor.path())) {
-                            annotation->annotate(_env);
-                            break;
-                        }
-                    }
-                    triggerRedraw();
-                }
-            });
-        });
-    }
 }
 
 void MainWindow::showPopup(std::unique_ptr<IWindow> popup) {

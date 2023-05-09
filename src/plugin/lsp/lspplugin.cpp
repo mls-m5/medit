@@ -357,8 +357,8 @@ bool LspHighlight::shouldEnable(filesystem::path path) {
     return shouldProcessFileWithClang(path);
 }
 
-void LspHighlight::highlight(std::shared_ptr<IEnvironment> scope) {
-    LspPlugin::instance().updateBuffer(scope->editor().buffer());
+void LspHighlight::highlight(Buffer &buffer) {
+    LspPlugin::instance().updateBuffer(buffer);
 }
 
 bool LspNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {

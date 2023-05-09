@@ -57,6 +57,8 @@ public:
                             std::string source,
                             std::vector<Diagnostics::Diagnostic>);
 
+    void updateHighlighting(ThreadContext &timer);
+
     ThreadContext &context() {
         return *_context;
     }
@@ -76,6 +78,7 @@ private:
     std::vector<std::shared_ptr<Buffer>> _buffers;
     std::mutex _fileMutex;
     Plugins _plugins;
+    size_t _updateTimeHandle = 0;
 
     ThreadValidation _tv{"core thread (gui thread)"};
 

@@ -26,11 +26,6 @@ void applyRenameChanges(std::shared_ptr<IEnvironment> env,
     changes.sort();
 
     changes.apply(*env);
-
-    //    // TODO: Apply changes
-    //    std::cout << "got response from rename lsp" << std::endl;
-    //    changes.serialize(std::cout);
-    //    std::cout.flush();
 }
 
 void lspRenameResponse(std::shared_ptr<IEnvironment> env, Changes changes) {

@@ -33,7 +33,7 @@ using TimerType = JsTimer;
 #include "screen/ncursesscreen.h"
 #include "screen/serializescreen.h"
 using ScreenType = GuiScreen;
-using QueueType = JobQueue;
+using QueueType = JobQueue11;
 using TimerType = Timer;
 
 #endif
@@ -250,4 +250,12 @@ int main(int argc, char **argv) {
 
     return 0;
 }
+
+
+
+
+
+
+
+
 

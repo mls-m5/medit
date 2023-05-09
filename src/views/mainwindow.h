@@ -24,7 +24,7 @@ struct MainWindow : public Window {
     FString _splitString;
     IKeySink *_inputFocus = nullptr;
     std::unique_ptr<IWindow> _activePopup;
-    size_t _updateTimeHandle = 0;
+    std::vector<std::weak_ptr<Buffer>> _buffersToUpdate;
     size_t _currentEditor = 0;
     bool _shouldRedraw = true;
 
@@ -49,9 +49,6 @@ struct MainWindow : public Window {
     void open(filesystem::path path,
               std::optional<int> x = {},
               std::optional<int> y = {});
-
-    //! Update editor with new highlighting
-    void updateHighlighting(Editor &editor);
 
     void showPopup(std::unique_ptr<IWindow> popup);
 

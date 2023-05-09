@@ -14,15 +14,12 @@ public:
     //! @see IHighlight
     bool shouldEnable(filesystem::path) override;
     static void highlightStatic(Buffer &buffer);
-    void highlight(std::shared_ptr<IEnvironment>) override;
-    //    void update(const IPalette &palette) override;
+    void highlight(Buffer &buffer) override;
 
     //! @see IHighlight
     int priority() override {
         return -1;
     }
-
-    //    static void registerPlugin();
 
 private:
 };

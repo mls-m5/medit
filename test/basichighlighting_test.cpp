@@ -33,7 +33,7 @@ TEST_CASE("format all to default") {
 
     //    hl.update(palette);
 
-    hl.highlight(env);
+    hl.highlight(editor.buffer());
 
     for (auto c : editor.buffer()) {
         ASSERT_EQ(c.f, 1);
@@ -52,7 +52,7 @@ TEST_CASE("format keyword") {
 
     //    hl.update(palette);
 
-    hl.highlight(env);
+    hl.highlight(editor.buffer());
 
     ASSERT_EQ(editor.buffer().front().f, Palette::statement);
     ASSERT_EQ(editor.buffer().back().f, 1);
@@ -71,7 +71,7 @@ TEST_CASE("partial match") {
 
     //    hl.update(palette);
 
-    hl.highlight(env);
+    hl.highlight(editor.buffer());
 
     ASSERT_EQ(editor.buffer().front().f, 1);
     ASSERT_EQ(editor.buffer().back().f, 1);

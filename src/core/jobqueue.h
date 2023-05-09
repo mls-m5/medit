@@ -6,14 +6,14 @@
 #include <queue>
 #include <thread>
 
-class JobQueue : public IJobQueue {
+class JobQueue11 : public IJobQueue {
 
 public:
-    JobQueue() = default;
-    JobQueue(const JobQueue &) = delete;
-    JobQueue &operator=(const JobQueue &) = delete;
+    JobQueue11() = default;
+    JobQueue11(const JobQueue11 &) = delete;
+    JobQueue11 &operator=(const JobQueue11 &) = delete;
 
-    ~JobQueue() {
+    ~JobQueue11() {
         if (_thread.joinable()) {
             _thread.join();
         }
@@ -86,4 +86,12 @@ private:
     std::thread::id _threadId = {};
     std::thread _thread;
 };
+
+
+
+
+
+
+
+
 

@@ -1,6 +1,5 @@
 
 #include "basichighligting.h"
-#include "core/plugins.h"
 #include "script/ienvironment.h"
 #include "syntax/palette.h"
 #include "text/cursorrangeops.h"
@@ -38,9 +37,7 @@ bool BasicHighlighting::shouldEnable(filesystem::path) {
     return true;
 }
 
-void BasicHighlighting::highlight(std::shared_ptr<IEnvironment> scope) {
-    auto &editor = scope->editor();
-    auto &buffer = editor.buffer();
+void BasicHighlighting::highlight(Buffer &buffer) {
     highlightStatic(buffer);
 }
 
@@ -79,9 +76,3 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
 
     buffer.isColorsOld(false);
 }
-
-// void BasicHighlighting::update(const IPalette &palette) {}
-
-// void BasicHighlighting::registerPlugin() {
-//     registerHighlighting<BasicHighlighting>();
-// }

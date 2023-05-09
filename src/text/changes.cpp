@@ -1,10 +1,10 @@
 #include "changes.h"
 #include "core/coreenvironment.h"
-#include "files/file.h"
 #include "files/project.h"
 #include "script/ienvironment.h"
 #include "text/cursorrange.h"
 #include "text/cursorrangeops.h"
+#include "views/mainwindow.h"
 #include <regex>
 
 void Changes::serialize(std::ostream &out) const {
@@ -86,6 +86,7 @@ void Changes::apply(IEnvironment &env) {
                 c.apply(*buffer);
             }
             it = changes.erase(it);
+            buffer->save();
         }
         else {
             ++it;
@@ -96,21 +97,19 @@ void Changes::apply(IEnvironment &env) {
     for (auto it = changes.begin(); it != changes.end(); ++it) {
         auto buffer = env.core().open(env.project().settings().root / it->file,
                                       env.shared_from_this());
-        //        auto file = File{e};
-
-        //        auto buffer = Buffer{};
-        //      file.load(buffer);
 
         for (auto &c : it->changes) {
             c.apply(*buffer);
         }
 
+        buffer->save();
+
+        // TODO: Make handling update highlighting be handled by some other
+        // class than mainwindow
+
         // TODO: Close files after changes has been made
-
-        //        buffer->close();
-
-        //        file.save(buffer);
     }
+    env.core().updateHighlighting(env.context());
 }
 
 void Changes::Change::apply(Buffer &buffer) const {
@@ -118,4 +117,3 @@ void Changes::Change::apply(Buffer &buffer) const {
 
     replace(range, newText);
 }
-

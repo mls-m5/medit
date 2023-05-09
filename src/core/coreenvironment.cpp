@@ -1,4 +1,7 @@
 #include "coreenvironment.h"
+#include "core/context.h"
+#include "core/ijobqueue.h"
+#include "core/itimer.h"
 #include "files/file.h"
 #include "text/buffer.h"
 #include <filesystem>
@@ -81,13 +84,54 @@ void CoreEnvironment::publishDiagnostics(
     for (auto &buffer : _buffers) {
         if (buffer->path() == file) {
             buffer->diagnostics().publish(source, std::move(data));
-            //            emitBufferSubscriptionEvent({buffer,
-            //            BufferEvent::Redraw});
             buffer->emitChangeSignal();
-            //            _context->redrawScreen();
             return;
         }
     }
+}
+
+void CoreEnvironment::updateHighlighting(ThreadContext &context) {
+    auto updateFunction = [this]() {
+        for (auto &buffer : _buffers) {
+            if (!buffer->isColorsOld()) {
+                continue;
+            }
+            for (auto &highlight : plugins().get<IHighlight>()) {
+                if (highlight->shouldEnable(buffer->path())) {
+                    highlight->highlight(*buffer);
+
+                    buffer->isColorsOld(false);
+                    break;
+                }
+            }
+            for (auto &annotation : plugins().get<IAnnotation>()) {
+                if (annotation->shouldEnable(buffer->path())) {
+                    annotation->annotate(*buffer);
+                    break;
+                }
+            }
+        }
+    };
+
+#ifdef __EMSCRIPTEN__
+    return; // Todo: find reason for crash
+#endif      //__EMSCRIPTEN__
+
+    auto &timer = _context->timer();
+
+    //    auto &timer = _env->context().timer();
+    if (_updateTimeHandle) {
+        timer.cancel(_updateTimeHandle);
+        _updateTimeHandle = 0;
+    }
+
+    using namespace std::literals;
+
+    _updateTimeHandle = timer.setTimeout(1s, [this, updateFunction, &context] {
+        auto &queue = context.guiQueue();
+
+        queue.addTask([this, updateFunction] { updateFunction(); });
+    });
 }
 
 std::shared_ptr<Buffer> CoreEnvironment::find(std::filesystem::path path) {
