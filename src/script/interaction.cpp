@@ -14,6 +14,12 @@ void SimpleInteraction::serialize(std::ostream &os) const {
     }
 }
 
+std::string SimpleInteraction::serialize() const {
+    auto ss = std::ostringstream{};
+    serialize(ss);
+    return ss.str();
+}
+
 void SimpleInteraction::deserialize(std::istream &is) {
     valid = false;
     values.clear();

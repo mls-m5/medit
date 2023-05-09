@@ -75,3 +75,12 @@ void InteractionHandling::close() {
         editor.reset();
     }
 }
+
+bool InteractionHandling::isOperationBuffer(const Buffer *buffer) {
+    if (auto opBuffer = _operationBuffer.lock()) {
+        if (buffer == opBuffer.get()) {
+            return true;
+        }
+    }
+    return false;
+}

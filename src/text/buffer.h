@@ -43,6 +43,8 @@ public:
 
     void save();
 
+    void saveAs(std::filesystem::path);
+
     /// Reload from buffers used file
     void load();
 

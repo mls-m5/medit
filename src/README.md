@@ -25,4 +25,9 @@
 - [ ] Redraw screen when buffer is opened or closed
 - [ ] Update highlighting on emitted changes instead of keypress
     - [ ] Move highlighting handling into core environment
+- [ ] Unload files after applying changes to closed files
+
+## Save interaction 2023-05-09
+- [ ] Send message to lsp server when buffer is saved
+
 

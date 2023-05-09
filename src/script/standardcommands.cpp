@@ -9,6 +9,7 @@
 #include "plugin/build.h"
 #include "plugin/run.h"
 #include "renameinteraction.h"
+#include "saveinteraction.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "togglecomments.h"
@@ -213,8 +214,7 @@ StandardCommands create() {
     };
     DEF(save) {
         env->editor().mode(createNormalMode());
-        auto &e = env->editor();
-        e.save();
+        saveInteraction(env);
     };
     DEF(copy) {
         env->mainWindow().copy(false);

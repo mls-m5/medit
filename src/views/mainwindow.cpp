@@ -30,7 +30,8 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
     , _env(std::make_unique<LocalEnvironment>(*this, context))
     , _console(this, _env->core().create(_env))
     , _locator(this, _project)
-    , _completeView(this, _plugins.get<ICompletionSource>())
+    , _completeView(
+          this, CoreEnvironment::instance().plugins().get<ICompletionSource>())
     , _currentEditor(0) {
 
     //    for (int i = 0; i < 2; ++i) {
@@ -210,7 +211,6 @@ void MainWindow::open(filesystem::path path,
     path = filesystem::absolute(path);
 
     editor->buffer(_env->core().open(path, _env));
-    //    editor->bufferView().yScroll(0);
 
     {
         auto cur = editor->cursor();

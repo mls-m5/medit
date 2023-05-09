@@ -25,6 +25,12 @@ void Buffer::save() {
     }
 }
 
+void Buffer::saveAs(std::filesystem::path path) {
+    // TODO: Send message to lsp server
+    _file = std::make_unique<File>(std::filesystem::absolute(path));
+    save();
+}
+
 void Buffer::load() {
     _tv();
     if (_file) {

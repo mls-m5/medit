@@ -94,16 +94,22 @@ void Changes::apply(IEnvironment &env) {
 
     // Handle files that is not opens
     for (auto it = changes.begin(); it != changes.end(); ++it) {
-        auto file = File{env.project().settings().root / it->file};
+        auto buffer = env.core().open(env.project().settings().root / it->file,
+                                      env.shared_from_this());
+        //        auto file = File{e};
 
-        auto buffer = Buffer{};
-        file.load(buffer);
+        //        auto buffer = Buffer{};
+        //      file.load(buffer);
 
         for (auto &c : it->changes) {
-            c.apply(buffer);
+            c.apply(*buffer);
         }
 
-        file.save(buffer);
+        // TODO: Close files after changes has been made
+
+        //        buffer->close();
+
+        //        file.save(buffer);
     }
 }
 
@@ -112,3 +118,4 @@ void Changes::Change::apply(Buffer &buffer) const {
 
     replace(range, newText);
 }
+

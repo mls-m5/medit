@@ -23,4 +23,6 @@ struct InteractionHandling {
 
     /// Reset interaction and close buffer
     void close();
+
+    bool isOperationBuffer(const Buffer *buffer);
 };

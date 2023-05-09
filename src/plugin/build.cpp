@@ -1,7 +1,7 @@
 
 #include "plugin/build.h"
 #include "core/context.h"
-#include "core/jobqueue.h"
+#include "core/ijobqueue.h"
 #include "files/popenstream.h"
 #include "files/project.h"
 #include "script/ienvironment.h"
@@ -58,3 +58,4 @@ void build(std::shared_ptr<IEnvironment> env) {
     });
 #endif
 }
+

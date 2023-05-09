@@ -127,6 +127,7 @@ add_library(
     script/togglecomments.cpp
     script/luastate.cpp
     script/renameinteraction.cpp
+    script/saveinteraction.cpp
     script/interaction.cpp
     navigation/headernavigation.cpp
     completion/autocomplete.cpp
@@ -159,5 +160,6 @@ target_link_libraries(
     PRIVATE
     medit_common
     )
+
 
 

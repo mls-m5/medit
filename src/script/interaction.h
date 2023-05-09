@@ -19,6 +19,8 @@ struct SimpleInteraction {
     /// Create text form
     void serialize(std::ostream &os) const;
 
+    std::string serialize() const;
+
     /// Parse text form
     void deserialize(std::istream &is);
 

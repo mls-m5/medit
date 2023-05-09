@@ -86,3 +86,4 @@ private:
     std::thread::id _threadId = {};
     std::thread _thread;
 };
+
