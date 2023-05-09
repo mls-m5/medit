@@ -3,17 +3,19 @@
 #include "cursorrange.h"
 #include "cursorrangeops.h"
 #include "files/file.h"
+#include <filesystem>
 #include <sstream>
+#include <stdexcept>
 
 std::unique_ptr<Buffer> Buffer::open(std::filesystem::path path) {
     auto buffer = std::make_unique<Buffer>();
 
     auto file = std::make_unique<File>(path);
-    if (std::filesystem::exists(file->path())) {
+    if (std::filesystem::is_regular_file(file->path())) {
         file->load(*buffer);
+        buffer->_file = std::move(file);
+        buffer->_history.clear();
     }
-    buffer->_file = std::move(file);
-    buffer->_history.clear();
     return buffer;
 }
 
@@ -25,10 +27,13 @@ void Buffer::save() {
     }
 }
 
-void Buffer::saveAs(std::filesystem::path path) {
-    // TODO: Send message to lsp server
-    _file = std::make_unique<File>(std::filesystem::absolute(path));
-    save();
+void Buffer::assignFile(std::unique_ptr<IFile> file) {
+    _tv();
+    if (_file) {
+        throw std::runtime_error{
+            "trying to assign file to buffer that already has file"};
+    }
+    _file = std::move(file);
 }
 
 void Buffer::load() {

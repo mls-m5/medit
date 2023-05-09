@@ -36,6 +36,9 @@ public:
                                  std::shared_ptr<IEnvironment> env);
     std::shared_ptr<Buffer> create(std::shared_ptr<IEnvironment> env);
 
+    /// Use this when saving a buffer that does not have a file
+    void save(Buffer &, std::filesystem::path);
+
     static CoreEnvironment &instance();
 
     using BufferSubscriptionCallbackT = std::function<void(BufferEvent)>;

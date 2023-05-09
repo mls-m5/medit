@@ -43,7 +43,9 @@ public:
 
     void save();
 
-    void saveAs(std::filesystem::path);
+    /// Used when saving a buffer that is not saved yet. Check usage in the
+    /// project to se how it is used
+    void assignFile(std::unique_ptr<IFile> file);
 
     /// Reload from buffers used file
     void load();

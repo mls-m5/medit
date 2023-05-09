@@ -1,4 +1,5 @@
 #include "coreenvironment.h"
+#include "files/file.h"
 #include "text/buffer.h"
 #include <filesystem>
 
@@ -25,6 +26,17 @@ std::shared_ptr<Buffer> CoreEnvironment::create(
     _buffers.push_back(std::make_shared<Buffer>());
     emitBufferSubscriptionEvent({_buffers.back(), BufferEvent::Open});
     return _buffers.back();
+}
+
+void CoreEnvironment::save(Buffer &buffer, std::filesystem::path path) {
+    _tv();
+    std::scoped_lock g{_fileMutex};
+
+    buffer.assignFile(std::make_unique<File>(std::filesystem::absolute(path)));
+    buffer.save();
+
+    _buffers.push_back(buffer.shared_from_this());
+    emitBufferSubscriptionEvent({_buffers.back(), BufferEvent::Open});
 }
 
 CoreEnvironment &CoreEnvironment::instance() {

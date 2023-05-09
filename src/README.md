@@ -28,6 +28,9 @@
 - [ ] Unload files after applying changes to closed files
 
 ## Save interaction 2023-05-09
-- [ ] Send message to lsp server when buffer is saved
+- [x] Ask user if it want to save files without names
+- [x] Ask if user is about to overwrite file
+- [x] Send message to lsp server when buffer is saved
+- [ ] Ask where to put new files
 
 

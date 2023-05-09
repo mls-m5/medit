@@ -1,4 +1,5 @@
 #include "saveinteraction.h"
+#include "core/coreenvironment.h"
 #include "interaction.h"
 #include "script/ienvironment.h"
 #include "views/mainwindow.h"
@@ -20,19 +21,22 @@ void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
         return;
     }
 
-    if (std::filesystem::exists(path)) {
+    if (si.at("overwrite") != "yes" && std::filesystem::exists(path)) {
         auto si = SimpleInteraction{
-            "File exists, do you want to save to another file?",
+            "File exists, submit again if you want to save to this file?",
             {
                 {"file", std::string{path}},
+                {"overwrite", "yes"},
             }};
 
+        auto ni = Interaction{si.serialize(), {100000, 1}};
+
         env->mainWindow().interactions().newInteraction(
-            i, handleUserFileNameResponse);
+            ni, handleUserFileNameResponse);
         return;
     }
 
-    env->editor().buffer().saveAs(path);
+    env->core().save(env->editor().buffer(), path);
 }
 
 } // namespace
@@ -49,12 +53,13 @@ void saveInteraction(std::shared_ptr<IEnvironment> env) {
     }
 
     auto i = Interaction{};
-    i.cursorPosition = {1, 100000};
+    i.cursorPosition = {100000, 1};
 
     auto si = SimpleInteraction{
         "save?",
         {
             {"file", env->project().settings().root / "unnamed.txt"},
+            {"overwrite", "ask"},
         }};
 
     i.text = si.serialize();
