@@ -32,6 +32,8 @@ private:
 
     void unsubscribe();
 
+    void bufferChangedEvent();
+
     std::shared_ptr<Buffer> _buffer;
 
     bool _showLines = false;

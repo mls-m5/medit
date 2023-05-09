@@ -1,5 +1,6 @@
 #include "changes.h"
 #include "core/coreenvironment.h"
+#include "files/file.h"
 #include "files/project.h"
 #include "script/ienvironment.h"
 #include "text/cursorrange.h"
@@ -91,8 +92,19 @@ void Changes::apply(IEnvironment &env) {
         }
     }
 
-#warning "this needs to be implemented"
     // Handle files that is not opens
+    for (auto it = changes.begin(); it != changes.end(); ++it) {
+        auto file = File{env.project().settings().root / it->file};
+
+        auto buffer = Buffer{};
+        file.load(buffer);
+
+        for (auto &c : it->changes) {
+            c.apply(buffer);
+        }
+
+        file.save(buffer);
+    }
 }
 
 void Changes::Change::apply(Buffer &buffer) const {

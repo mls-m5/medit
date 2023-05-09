@@ -163,11 +163,15 @@ Position BufferView::cursorPosition(Position cursor) const {
 }
 
 void BufferView::subscribeToBuffer() {
-    if (auto w = window()) {
-        _buffer->subscribe([w]() { w->triggerRedraw(); }, this);
-    }
+    _buffer->subscribe([this]() { bufferChangedEvent(); }, this);
 }
 
 void BufferView::unsubscribe() {
     _buffer->unsubscribe(this);
+}
+
+void BufferView::bufferChangedEvent() {
+    if (auto w = window()) {
+        w->triggerRedraw();
+    }
 }

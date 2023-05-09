@@ -154,6 +154,21 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
         _client->notify(params);
         requestSemanticsToken(event.buffer);
     }
+    if (event.type == BufferEvent::Close) {
+        if (!shouldProcessFileWithClang(event.buffer->path())) {
+            return;
+        }
+
+        auto params = DidCloseTextDocumentParams{
+            .textDocument =
+                {
+                    .uri = pathToUri(event.buffer->path()),
+                },
+        };
+
+        _client->notify(params);
+        requestSemanticsToken(event.buffer);
+    }
 }
 
 void LspPlugin::registerPlugin(Plugins &plugins) {

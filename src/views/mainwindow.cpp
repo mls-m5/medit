@@ -240,6 +240,7 @@ void MainWindow::updateHighlighting(Editor &editor) {
 
     using namespace std::literals;
 
+    // Move this logic to core environment and listen for buffer changes
     if (editor.buffer().isColorsOld()) {
         _updateTimeHandle = timer.setTimeout(1s, [this] {
             auto &queue = _env->context().guiQueue();
