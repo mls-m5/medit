@@ -108,8 +108,9 @@ public:
         _content.resize(size, fill);
     }
 
-    auto operator+=(const FString &other) {
+    FString &operator+=(const FString &other) {
         _content.insert(_content.end(), other.begin(), other.end());
+        return *this;
     }
 
     void reserve(size_t size) {

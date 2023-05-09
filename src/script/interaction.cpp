@@ -1,23 +1,24 @@
 #include "interaction.h"
+#include "syntax/palette.h"
+#include "text/fstring.h"
 #include <functional>
 #include <memory>
 #include <sstream>
 
-void SimpleInteraction::serialize(std::ostream &os) const {
+FString SimpleInteraction::serialize() const {
     if (!valid) {
-        return;
+        return {};
     }
 
-    os << op << "\n";
+    auto text = FString{op};
+    text += "\n";
+
     for (const auto &[key, value] : values) {
-        os << key << ": " << value << "\n";
+        text += FString{key, Palette::identifier} += ": ";
+        text += FString{value} += "\n";
     }
-}
 
-std::string SimpleInteraction::serialize() const {
-    auto ss = std::ostringstream{};
-    serialize(ss);
-    return ss.str();
+    return text;
 }
 
 void SimpleInteraction::deserialize(std::istream &is) {

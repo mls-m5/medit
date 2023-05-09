@@ -87,11 +87,9 @@ void renameVerifiedCallback(std::shared_ptr<IEnvironment> env,
                                     {"l", std::to_string(args.start.y())},
                                     {"c", std::to_string(args.start.x())},
                                 }};
-    auto ss = std::ostringstream{};
-    si.serialize(ss);
 
     auto i = Interaction{
-        ss.str(),
+        si.serialize(),
         {4, 2},
     };
 

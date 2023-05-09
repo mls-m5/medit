@@ -17,9 +17,7 @@ struct SimpleInteraction {
     bool valid = true;
 
     /// Create text form
-    void serialize(std::ostream &os) const;
-
-    std::string serialize() const;
+    FString serialize() const;
 
     /// Parse text form
     void deserialize(std::istream &is);
