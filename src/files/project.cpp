@@ -3,7 +3,9 @@
 #include "files/extensions.h"
 #include "text/startswith.h"
 #include "json/json.h"
+#include <filesystem>
 #include <fstream>
+#include <sstream>
 #include <string_view>
 
 namespace {
@@ -48,6 +50,9 @@ filesystem::path Project::root(filesystem::path path) const {
 void Project::updateCache(const filesystem::path &pathInProject, size_t max) {
     _fileCache = findProjectFiles(pathInProject, max);
     loadProjectFile();
+    if (_settings.buildCommand.empty()) {
+        _settings.buildCommand = guessBuildCommand();
+    }
 }
 
 filesystem::path Project::findSwitchHeader(filesystem::path path) {
@@ -83,6 +88,20 @@ filesystem::path Project::findSwitchHeader(filesystem::path path) {
         }
     }
 
+    return {};
+}
+
+std::string Project::guessBuildCommand() {
+    if (std::filesystem::exists(_settings.root / "CMakeLists.txt")) {
+        auto ss = std::ostringstream{};
+        ss << "cd " << _settings.root << " ; "
+           << " mkdir build/default ; "
+           << "cd build/default ; "
+              "cmake ../..  -DCMAKE_BUILD_TYPE=Debug "
+              "-DCMAKE_EXPORT_COMPILE_COMMANDS=1 ;"
+              " cmake --build .";
+        return ss.str();
+    }
     return {};
 }
 

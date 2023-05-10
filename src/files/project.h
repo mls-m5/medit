@@ -33,6 +33,10 @@ public:
     filesystem::path findSwitchHeader(filesystem::path);
 
 private:
+    /// When there is no build command provided. Try to guess what it could be
+    /// based on what files are in the project
+    std::string guessBuildCommand();
+
     std::vector<filesystem::path> _fileCache;
 
     std::vector<filesystem::path> findProjectFiles(
@@ -42,4 +46,3 @@ private:
 
     Settings _settings;
 };
-
