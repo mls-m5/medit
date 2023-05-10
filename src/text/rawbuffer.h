@@ -27,7 +27,6 @@ public:
 
     [[nodiscard]] bool empty() const;
 
-    //! Get a line without trigger changed
     [[nodiscard]] const FString &lineAt(size_t index) const;
 
     [[nodiscard]] bool isChanged() const;

@@ -1,21 +1,20 @@
 
 #include "basichighligting.h"
-#include "script/ienvironment.h"
 #include "syntax/palette.h"
 #include "text/cursorrangeops.h"
 #include "text/words.h"
-#include "views/editor.h"
 #include <array>
 #include <string>
 
 namespace {
 //! Todo: Extract this so it can be customized
-const auto wordList = std::array<std::string, 28>{
-    "int",          "double",    "char",     "signed",   "long",    "unsigned",
-    "void",         "short",     "bool",     "auto",     "include", "struct",
-    "class",        "if",        "else",     "switch",   "case",    "public",
-    "private",      "namespace", "typename", "template", "enum",    "default",
-    "thread_local", "true",      "false",    "this",
+const auto wordList = std::array<std::string_view, 29>{
+    "int",      "double",   "char",   "signed",    "long",
+    "unsigned", "void",     "short",  "bool",      "auto",
+    "include",  "struct",   "class",  "if",        "else",
+    "switch",   "case",     "public", "private",   "namespace",
+    "typename", "template", "enum",   "default",   "thread_local",
+    "true",     "false",    "this",   "constexpr",
 };
 
 void highlightWord(CursorRange word) {

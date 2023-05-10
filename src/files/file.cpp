@@ -1,5 +1,6 @@
 #include "file.h"
 #include "text/buffer.h"
+#include <filesystem>
 #include <fstream>
 
 File::File(filesystem::path path)
@@ -14,6 +15,9 @@ void File::load(Buffer &buffer) {
 }
 
 void File::save(const Buffer &buffer) {
+    if (std::filesystem::is_directory(_path)) {
+        return;
+    }
     std::ofstream{_path} << buffer << "\n";
 }
 
