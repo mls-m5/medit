@@ -151,6 +151,7 @@ struct User {
 };
 
 struct MainData {
+    std::unique_ptr<CoreEnvironment> core;
     std::shared_ptr<IJobQueue> guiQueue;
     std::shared_ptr<IJobQueue> jobQueue;
     std::shared_ptr<ITimer> timer;
@@ -168,7 +169,7 @@ struct MainData {
 
     void stop();
 
-    void createScreen(const Settings &settings) {}
+    //    void createScreen(const Settings &settings) {}
 };
 
 // Its defined publicly so that emscripten can keep it after the main function
@@ -176,19 +177,21 @@ struct MainData {
 MainData mainData;
 
 void MainData::start(const Settings &settings) {
-    registerDefaultPlugins(CoreEnvironment::instance().plugins());
-    CoreEnvironment::instance().plugins().sort();
-
     jobQueue = std::make_shared<QueueType>();
     guiQueue = std::make_shared<QueueType>();
     timer = std::make_shared<TimerType>();
 
-    createScreen(settings);
-
     context = std::make_shared<ThreadContext>(*jobQueue, *guiQueue, *timer);
 
+    mainData.core = std::make_unique<CoreEnvironment>(*context);
+
+    registerDefaultPlugins(CoreEnvironment::instance().plugins());
+    CoreEnvironment::instance().plugins().sort();
+
+    //    createScreen(settings);
+
     // TODO: Core context should probably live in this file somewhere
-    CoreEnvironment::instance().context(context.get());
+    //    CoreEnvironment::instance().context(context.get());
 
     timer->start();
     jobQueue->start();
@@ -250,13 +253,4 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-
-
-
-
-
-
-
-
-
 

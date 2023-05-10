@@ -1,13 +1,13 @@
 #pragma once
 
-#include "filesystem.h"
+#include <filesystem>
 #include <vector>
 
 class Project {
 
 public:
     struct Settings {
-        filesystem::path root;
+        std::filesystem::path root;
         std::string buildCommand;
         std::string runCommand;
         std::vector<std::string> flags;
@@ -15,9 +15,9 @@ public:
     };
 
     /// Set the current root
-    filesystem::path root(filesystem::path) const;
+    std::filesystem::path root(std::filesystem::path) const;
 
-    void updateCache(const filesystem::path &pathInProject,
+    void updateCache(const std::filesystem::path &pathInProject,
                      size_t max = 100000);
 
     const Settings &settings() const {
@@ -30,17 +30,17 @@ public:
 
     //! When in a cpp-file find the corresponding .h-file. And vice versa
     //! @return path to file if found or empty path if not found
-    filesystem::path findSwitchHeader(filesystem::path);
+    std::filesystem::path findSwitchHeader(std::filesystem::path);
 
 private:
     /// When there is no build command provided. Try to guess what it could be
     /// based on what files are in the project
     std::string guessBuildCommand();
 
-    std::vector<filesystem::path> _fileCache;
+    std::vector<std::filesystem::path> _fileCache;
 
-    std::vector<filesystem::path> findProjectFiles(
-        const filesystem::path &pathInProject, size_t max = 100000);
+    std::vector<std::filesystem::path> findProjectFiles(
+        const std::filesystem::path &pathInProject, size_t max = 100000);
 
     void loadProjectFile();
 

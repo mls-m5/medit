@@ -12,7 +12,9 @@ add_library(
     core/threadvalidation.cpp
     core/registers.cpp
     core/jstimer.cpp
+    core/files.cpp
     syntax/palette.cpp
+    linux/inotify.cpp
     )
 
 target_link_libraries(

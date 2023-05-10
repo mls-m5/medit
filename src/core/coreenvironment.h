@@ -13,7 +13,8 @@
 /// Environment shared with all user of the program/server
 class CoreEnvironment {
 public:
-    CoreEnvironment();
+    CoreEnvironment(ThreadContext &context);
+    ~CoreEnvironment();
 
     CoreEnvironment(const CoreEnvironment &) = delete;
     CoreEnvironment(CoreEnvironment &&) = delete;
@@ -26,10 +27,6 @@ public:
         return *_context;
     }
 
-    void context(ThreadContext *c) {
-        _context = c;
-    }
-
     Plugins &plugins() {
         return _plugins;
     }
@@ -39,11 +36,12 @@ public:
     }
 
 private:
+    ThreadContext *_context =
+        nullptr; // TODO: Handle lifetime of CoreEnvironment better
     Plugins _plugins;
     Files _files{*this};
 
-    ThreadValidation _tv{"core thread (gui thread)"};
+    static CoreEnvironment *_instance;
 
-    ThreadContext *_context =
-        nullptr; // TODO: Handle lifetime of CoreEnvironment better
+    ThreadValidation _tv{"core thread (gui thread)"};
 };

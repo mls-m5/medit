@@ -20,8 +20,8 @@ struct BufferEvent {
 /// Managing opening files to buffers
 class Files {
 public:
-    Files(CoreEnvironment &core)
-        : _core{core} {}
+    Files(CoreEnvironment &core);
+    ~Files();
 
     std::shared_ptr<Buffer> open(std::filesystem::path,
                                  std::shared_ptr<IEnvironment> env);
@@ -51,11 +51,15 @@ public:
     // Return a buffer only if it is loaded
     std::shared_ptr<Buffer> find(std::filesystem::path path);
 
+    DirectoryNotifications &directoryNotifications() {
+        return *_dirNotifications;
+    }
+
 private:
     CoreEnvironment &_core;
 
     std::vector<std::shared_ptr<Buffer>> _buffers;
-    //    std::mutex _fileMutex;
+    std::unique_ptr<DirectoryNotifications> _dirNotifications;
 
     struct BufferSubscription {
         BufferSubscriptionCallbackT f;

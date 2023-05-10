@@ -7,13 +7,13 @@
 #include "core/itimer.h"
 #include "core/plugins.h"
 #include "files/config.h"
+#include "linux/inotify.h"
+#include "meditfwd.h"
 #include "modes/insertmode.h"
 #include "navigation/inavigation.h"
 #include "screen/iscreen.h"
 #include "script/localenvironment.h"
-#include "syntax/iannotation.h"
 #include "syntax/iformat.h"
-#include "syntax/ihighlight.h"
 #include "syntax/palette.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
@@ -180,6 +180,9 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
 
 void MainWindow::updateLocatorBuffer() {
     _project.updateCache(filesystem::current_path());
+    _env->core().files().directoryNotifications().path(
+        _project.settings()
+            .root); // TODO: This should probably be handled somewhere else
 }
 
 void MainWindow::open(filesystem::path path,
@@ -214,7 +217,6 @@ void MainWindow::open(filesystem::path path,
     }
 
     _env->core().files().updateHighlighting();
-    //    updateHighlighting(editor->buffer());
 
     updateTitle();
 }

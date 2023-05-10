@@ -28,7 +28,7 @@ Todo:
 - [ ] Ide-tools
   - [x] Switch headers/source
   - [ ] Find usages
-  - [ ] Rename symbol
+  - [x] Rename symbol
   - [x] Goto definition
   - [x] Switch header/source
   - [x] Auto complete
@@ -42,7 +42,7 @@ Todo:
   - [ ] Select with mouse drag
 - [ ] File synch
   - [ ] Detect when open buffer is changed on disk
-  - [ ] Prompt if buffer contains unsaved changes, otherwise replace
+     - [ ] Prompt if buffer contains unsaved changes, otherwise replace
 - User interface
   - [x] Save unnamed buffers with popup with ctrl+s
   - [ ] Rename current document
@@ -51,6 +51,7 @@ Todo:
   - [ ] Ctrl+tab switch between opened buffers
   - [ ] Layouts that handle splits
   - [ ] Use formatting (palette) to handle grouping ({}) or hyperlink marking
+  - [ ] Prompt if the user want to save beforeo exits
 - [ ] ~~Use Lua~~
   - [x] Remove remainders of old scripting engine
   - [ ] ~~Make core functionality callable from lua~~
@@ -70,7 +71,7 @@ Todo:
 
 
 ## Feedback
-- [ ] Ways to check if the lsp-plugin has the right plugin
+- [ ] Lsp-plugin diagnostics
 - [ ] Make sure build command works properly, add settings
 - [ ] Ways to handle settings
 - [ ] Add searchable command pallette to make commands runnable (ctrl-p)

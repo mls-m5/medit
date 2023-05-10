@@ -21,6 +21,7 @@ constexpr Os getOs() {
     return Os::Emscripten;
 #else
     return Os::Linux;
+#define MEDIT_USING_LINUX
 #endif // __EMSCRIPTEN__
 #endif
 }
