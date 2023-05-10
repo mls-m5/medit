@@ -36,7 +36,7 @@ void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
         return;
     }
 
-    env->core().save(env->editor().buffer(), path);
+    env->core().files().save(env->editor().buffer(), path);
 }
 
 } // namespace

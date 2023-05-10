@@ -8,32 +8,32 @@
 
 CoreEnvironment::CoreEnvironment() {}
 
-std::shared_ptr<Buffer> CoreEnvironment::open(
-    std::filesystem::path path, std::shared_ptr<IEnvironment> env) {
+std::shared_ptr<Buffer> Files::open(std::filesystem::path path,
+                                    std::shared_ptr<IEnvironment> env) {
     _tv();
-    std::scoped_lock g{_fileMutex};
 
     if (auto buffer = find(path)) {
         emitBufferSubscriptionEvent({buffer, BufferEvent::Open});
         return buffer;
     }
 
+    // TODO: Maybe subscribe to buffer changes here and publish them or just
+    // use theme to update highlighting
+
     _buffers.push_back(Buffer::open(path));
     emitBufferSubscriptionEvent({_buffers.back(), BufferEvent::Open});
     return _buffers.back();
 }
 
-std::shared_ptr<Buffer> CoreEnvironment::create(
-    std::shared_ptr<IEnvironment> env) {
+std::shared_ptr<Buffer> Files::create(std::shared_ptr<IEnvironment> env) {
     _tv();
     _buffers.push_back(std::make_shared<Buffer>());
     emitBufferSubscriptionEvent({_buffers.back(), BufferEvent::Open});
     return _buffers.back();
 }
 
-void CoreEnvironment::save(Buffer &buffer, std::filesystem::path path) {
+void Files::save(Buffer &buffer, std::filesystem::path path) {
     _tv();
-    std::scoped_lock g{_fileMutex};
 
     buffer.assignFile(std::make_unique<File>(std::filesystem::absolute(path)));
     buffer.save();
@@ -47,14 +47,14 @@ CoreEnvironment &CoreEnvironment::instance() {
     return core;
 }
 
-void CoreEnvironment::subscribeToBufferEvents(BufferSubscriptionCallbackT f,
-                                              Buffer *buffer,
-                                              void *ref) {
+void Files::subscribeToBufferEvents(BufferSubscriptionCallbackT f,
+                                    Buffer *buffer,
+                                    void *ref) {
     _tv();
     _bufferSubscriptions.push_back({f, buffer, ref});
 }
 
-void CoreEnvironment::unsubscribeToBufferEvents(void *reference) {
+void Files::unsubscribeToBufferEvents(void *reference) {
     _tv();
 
     if (!reference) {
@@ -69,17 +69,16 @@ void CoreEnvironment::unsubscribeToBufferEvents(void *reference) {
     _bufferSubscriptions.erase(it, _bufferSubscriptions.end());
 }
 
-void CoreEnvironment::emitBufferSubscriptionEvent(BufferEvent e) {
+void Files::emitBufferSubscriptionEvent(BufferEvent e) {
     _tv();
     for (auto &subscriber : _bufferSubscriptions) {
         subscriber.f(e);
     }
 }
 
-void CoreEnvironment::publishDiagnostics(
-    std::filesystem::path file,
-    std::string source,
-    std::vector<Diagnostics::Diagnostic> data) {
+void Files::publishDiagnostics(std::filesystem::path file,
+                               std::string source,
+                               std::vector<Diagnostics::Diagnostic> data) {
     _tv();
     for (auto &buffer : _buffers) {
         if (buffer->path() == file) {
@@ -90,13 +89,13 @@ void CoreEnvironment::publishDiagnostics(
     }
 }
 
-void CoreEnvironment::updateHighlighting(ThreadContext &context) {
+void Files::updateHighlighting() {
     auto updateFunction = [this]() {
         for (auto &buffer : _buffers) {
             if (!buffer->isColorsOld()) {
                 continue;
             }
-            for (auto &highlight : plugins().get<IHighlight>()) {
+            for (auto &highlight : _core.plugins().get<IHighlight>()) {
                 if (highlight->shouldEnable(buffer->path())) {
                     highlight->highlight(*buffer);
 
@@ -104,7 +103,7 @@ void CoreEnvironment::updateHighlighting(ThreadContext &context) {
                     break;
                 }
             }
-            for (auto &annotation : plugins().get<IAnnotation>()) {
+            for (auto &annotation : _core.plugins().get<IAnnotation>()) {
                 if (annotation->shouldEnable(buffer->path())) {
                     annotation->annotate(*buffer);
                     break;
@@ -117,7 +116,7 @@ void CoreEnvironment::updateHighlighting(ThreadContext &context) {
     return; // Todo: find reason for crash
 #endif      //__EMSCRIPTEN__
 
-    auto &timer = _context->timer();
+    auto &timer = _core.context().timer();
 
     //    auto &timer = _env->context().timer();
     if (_updateTimeHandle) {
@@ -127,14 +126,14 @@ void CoreEnvironment::updateHighlighting(ThreadContext &context) {
 
     using namespace std::literals;
 
-    _updateTimeHandle = timer.setTimeout(1s, [this, updateFunction, &context] {
-        auto &queue = context.guiQueue();
+    _updateTimeHandle = timer.setTimeout(1s, [this, updateFunction] {
+        auto &queue = _core.context().guiQueue();
 
         queue.addTask([this, updateFunction] { updateFunction(); });
     });
 }
 
-std::shared_ptr<Buffer> CoreEnvironment::find(std::filesystem::path path) {
+std::shared_ptr<Buffer> Files::find(std::filesystem::path path) {
     _tv();
     path = std::filesystem::absolute(path);
     for (auto &buffer : _buffers) {

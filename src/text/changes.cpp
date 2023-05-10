@@ -80,8 +80,8 @@ void Changes::apply(IEnvironment &env) {
     for (auto it = changes.begin(); it != changes.end();) {
         auto &change = *it;
 
-        if (auto buffer =
-                core.find(env.project().settings().root / change.file)) {
+        if (auto buffer = core.files().find(env.project().settings().root /
+                                            change.file)) {
             for (auto &c : change.changes) {
                 c.apply(*buffer);
             }
@@ -95,8 +95,8 @@ void Changes::apply(IEnvironment &env) {
 
     // Handle files that is not opens
     for (auto it = changes.begin(); it != changes.end(); ++it) {
-        auto buffer = env.core().open(env.project().settings().root / it->file,
-                                      env.shared_from_this());
+        auto buffer = env.core().files().open(
+            env.project().settings().root / it->file, env.shared_from_this());
 
         for (auto &c : it->changes) {
             c.apply(*buffer);
@@ -109,7 +109,7 @@ void Changes::apply(IEnvironment &env) {
 
         // TODO: Close files after changes has been made
     }
-    env.core().updateHighlighting(env.context());
+    env.core().files().updateHighlighting();
 }
 
 void Changes::Change::apply(Buffer &buffer) const {

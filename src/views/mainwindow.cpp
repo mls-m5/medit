@@ -28,7 +28,7 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
     , _editors{}
     , _interactions{*this}
     , _env(std::make_unique<LocalEnvironment>(*this, context))
-    , _console(this, _env->core().create(_env))
+    , _console(this, _env->core().files().create(_env))
     , _locator(this, _project)
     , _completeView(
           this, CoreEnvironment::instance().plugins().get<ICompletionSource>())
@@ -36,7 +36,7 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
 
     //    for (int i = 0; i < 2; ++i) {
     _editors.push_back(
-        std::make_unique<Editor>(this, _env->core().create(_env)));
+        std::make_unique<Editor>(this, _env->core().files().create(_env)));
     //    }
     _inputFocus = _editors.front().get();
 
@@ -151,7 +151,7 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
     if (_inputFocus == currentEditor() && _completeView.visible()) {
         if (_completeView.keyPress(env)) {
             if (auto e = currentEditor()) {
-                env->core().updateHighlighting(env->context());
+                env->core().files().updateHighlighting();
                 //                updateHighlighting(e->buffer());
             }
             return true; // Otherwise give key events to editor
@@ -165,7 +165,7 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
 
     if (_inputFocus->keyPress(env)) {
         if (auto e = currentEditor()) {
-            env->core().updateHighlighting(env->core().context());
+            env->core().files().updateHighlighting();
             //            updateHighlighting(e->buffer());
         }
         if (_activePopup && _activePopup->isClosed()) {
@@ -200,7 +200,7 @@ void MainWindow::open(filesystem::path path,
 
     path = filesystem::absolute(path);
 
-    editor->buffer(_env->core().open(path, _env));
+    editor->buffer(_env->core().files().open(path, _env));
 
     {
         auto cur = editor->cursor();
@@ -213,7 +213,7 @@ void MainWindow::open(filesystem::path path,
         editor->cursor(cur);
     }
 
-    _env->core().updateHighlighting(_env->context());
+    _env->core().files().updateHighlighting();
     //    updateHighlighting(editor->buffer());
 
     updateTitle();

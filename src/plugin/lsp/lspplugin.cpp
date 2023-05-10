@@ -98,7 +98,7 @@ LspPlugin::LspPlugin()
 
     _client = std::make_unique<LspClient>(args);
 
-    CoreEnvironment::instance().subscribeToBufferEvents(
+    CoreEnvironment::instance().files().subscribeToBufferEvents(
         [this](BufferEvent e) { bufferEvent(e); }, nullptr, this);
 
     _client->request(InitializeParams{}, [](const nlohmann::json &j) {
@@ -122,7 +122,7 @@ LspPlugin::LspPlugin()
 
             CoreEnvironment::instance().context().guiQueue().addTask(
                 [path = uriToPath(params.uri), bufferDiagnostics] {
-                    CoreEnvironment::instance().publishDiagnostics(
+                    CoreEnvironment::instance().files().publishDiagnostics(
                         path,
                         "clangd",
                         //                params.diagnostics.front().source,
