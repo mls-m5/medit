@@ -6,11 +6,15 @@
 #include "files/file.h"
 #include "linux/inotify.h"
 #include "text/buffer.h"
+#include <iostream>
 
 Files::Files(CoreEnvironment &core)
     : _core{core}
     , _dirNotifications{
-          createDirectoryNotifications(_core.context().jobQueue())} {}
+          createDirectoryNotifications(_core.context().jobQueue())} {
+    _dirNotifications->subscribe(
+        [this](auto a, auto b, auto c) { fileChangeCallback(a, b, c); }, this);
+}
 
 Files::~Files() = default;
 
@@ -40,6 +44,26 @@ std::shared_ptr<Buffer> Files::find(std::filesystem::path path) {
         }
     }
     return nullptr;
+}
+
+void Files::fileChangeCallback(DirectoryNotifications::EventType type,
+                               std::filesystem::path path,
+                               std::filesystem::file_time_type time) {
+
+    // TODO: Handle deleted files later
+    if (type != DirectoryNotifications::Changed &&
+        type != DirectoryNotifications::Added) {
+        return;
+    }
+
+    _core.context().guiQueue().addTask([this, type, path, time] {
+        _tv();
+        if (auto f = find(path)) {
+            // TODO: Double check so that there is no unsaved changes in the
+            // document
+            f->load();
+        }
+    });
 }
 
 std::shared_ptr<Buffer> Files::create(std::shared_ptr<IEnvironment> env) {

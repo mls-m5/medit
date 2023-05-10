@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/threadvalidation.h"
+#include "linux/inotify.h"
 #include "meditfwd.h"
 #include "text/diagnostics.h"
 #include <filesystem>
@@ -60,6 +61,11 @@ private:
 
     std::vector<std::shared_ptr<Buffer>> _buffers;
     std::unique_ptr<DirectoryNotifications> _dirNotifications;
+
+    // Function that is called by the DirectoryNotifications
+    void fileChangeCallback(DirectoryNotifications::EventType,
+                            std::filesystem::path,
+                            std::filesystem::file_time_type);
 
     struct BufferSubscription {
         BufferSubscriptionCallbackT f;

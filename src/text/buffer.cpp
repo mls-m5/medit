@@ -41,6 +41,7 @@ void Buffer::load() {
     if (_file) {
         _file->load(*this);
         _raw.isChanged(false);
+        emitChangeSignal();
     }
 }
 

@@ -1,6 +1,8 @@
 
 
 #include "inotify.h"
+#include <filesystem>
+#include <system_error>
 
 #ifdef MEDIT_USING_LINUX
 
@@ -43,10 +45,10 @@ public:
     }
 
     EventType decodeEventMask(uint32_t mask) {
-        if (mask & IN_CREATE) {
+        if (mask & IN_CREATE || mask & IN_MOVED_TO) {
             return EventType::Added;
         }
-        else if (mask & IN_DELETE) {
+        else if (mask & IN_DELETE || mask & IN_MOVED_FROM) {
             return EventType::Removed;
         }
         else if (mask & IN_MODIFY) {
@@ -61,8 +63,11 @@ public:
         if (event) {
             EventType type = decodeEventMask(event->mask);
             std::filesystem::path filepath(directory / event->name);
+
+            auto ec = std::error_code{};
+
             emitChanges(
-                type, filepath, std::filesystem::last_write_time(filepath));
+                type, filepath, std::filesystem::last_write_time(filepath, ec));
         }
     }
 
@@ -85,8 +90,10 @@ public:
             return;
         }
 
-        watch_desc = inotify_add_watch(
-            inotify_fd, directory.c_str(), IN_CREATE | IN_DELETE | IN_MODIFY);
+        watch_desc = inotify_add_watch(inotify_fd,
+                                       directory.c_str(),
+                                       IN_CREATE | IN_DELETE | IN_MODIFY |
+                                           IN_MOVED_FROM | IN_MOVED_TO);
 
         if (watch_desc < 0) {
             std::cerr << "Error adding inotify watch" << std::endl;

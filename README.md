@@ -41,10 +41,11 @@ Todo:
   - [ ] Move cursor with mouse
   - [ ] Select with mouse drag
 - [ ] File synch
-  - [ ] Detect when open buffer is changed on disk
+  - [x] Detect when open buffer is changed on disk
      - [ ] Prompt if buffer contains unsaved changes, otherwise replace
 - User interface
   - [x] Save unnamed buffers with popup with ctrl+s
+  - [ ] Jump to file under cursor (path, markdown links etc)
   - [ ] Rename current document
   - [ ] File view
   - [ ] File name above buffers
