@@ -33,6 +33,13 @@ void build(std::shared_ptr<IEnvironment> env) {
         filesystem::current_path(root);
     }
 
+    if (project.settings().buildCommand.empty()) {
+        // TODO: Add guess with compile commands generation
+        consoleBuffer.pushBack(
+            std::string{"no build command specified. Aborting"});
+        return;
+    }
+
     env->context().jobQueue().addTask([&project, env] {
         POpenStream stream(project.settings().buildCommand, true, 100);
 
@@ -58,4 +65,3 @@ void build(std::shared_ptr<IEnvironment> env) {
     });
 #endif
 }
-

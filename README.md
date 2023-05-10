@@ -15,6 +15,7 @@ Todo:
   - [x] Registers
   - [x] Full row visual mode
   - [ ] Implement all navigation shortcuts for all modes (iw aw 'i{' etc)
+  - [ ] r-mode
 - [x] Undo/Redo
   - [x] Improve memory usage for undo/redo
 - [x] Multiple open editors
@@ -43,7 +44,7 @@ Todo:
   - [ ] Detect when open buffer is changed on disk
   - [ ] Prompt if buffer contains unsaved changes, otherwise replace
 - User interface
-  - [ ] Save unnamed buffers with popup with ctrl+s
+  - [x] Save unnamed buffers with popup with ctrl+s
   - [ ] Rename current document
   - [ ] File view
   - [ ] File name above buffers
@@ -124,6 +125,7 @@ build with
 ```
 ./containerized_build.sh
 ```
+
 
 
 
