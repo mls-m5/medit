@@ -85,7 +85,7 @@ Todo:
 - [x] Exit to normal mode when saving.
 - [ ] When alt+tab into editor, prevent from typing tab
 - [ ] Option to restore selection (gv)
-- [ ] Status line for common operations (for example saving, changing mode)
+- [x] Status line for common operations (for example saving, changing mode)
 
 ## Requirements
 

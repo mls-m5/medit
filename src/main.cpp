@@ -17,7 +17,6 @@
 #include "core/jsjobqueue.h"
 #include "core/jstimer.h"
 #include "screen/htmlscreen.h"
-// #include <emscripten.h>
 
 using ScreenType = HtmlScreen;
 using QueueType = JsJobQueue;
@@ -168,8 +167,6 @@ struct MainData {
     void loop();
 
     void stop();
-
-    //    void createScreen(const Settings &settings) {}
 };
 
 // Its defined publicly so that emscripten can keep it after the main function

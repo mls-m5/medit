@@ -43,27 +43,15 @@ bool InteractionHandling::keyPress(std::shared_ptr<IEnvironment> env) {
 
     /// This is when the user has edited the response and wants to accept it
     if (env->key().symbol == "\n") {
-        //        auto ss = std::istringstream{content(*buffer)};
         auto interaction = Interaction{.text = content(*buffer)};
-        //        interaction.deserialize(ss);
-
-        //        if (interaction.valid) {
         env->context().guiQueue().addTask(
             [callback = _callback, interaction, env]() {
                 callback(env, interaction);
             });
-        //        }
-        //        else {
-        //            // TODO: Print failing message here
-        //        }
 
         close();
         return true;
     }
-    //    if (env->key().key == Key::Escape) {
-    //        close(); Use ctrl+w instead
-    //        return true;
-    //    }
     return false;
 }
 

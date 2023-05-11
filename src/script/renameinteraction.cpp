@@ -25,7 +25,14 @@ void applyRenameChanges(std::shared_ptr<IEnvironment> env,
 
     changes.sort();
 
+    if (changes.changes.empty()) {
+        return;
+    }
+
     changes.apply(*env);
+    env->mainWindow().statusMessage(
+        "rename of " + changes.changes.front().changes.front().newText +
+        " complete...");
 }
 
 void lspRenameResponse(std::shared_ptr<IEnvironment> env, Changes changes) {
@@ -46,8 +53,6 @@ void lspRenameResponse(std::shared_ptr<IEnvironment> env, Changes changes) {
 /// When the user has selected the new name, handle what happends then
 void handleUserRenameResponse(std::shared_ptr<IEnvironment> env,
                               const Interaction &i) {
-    //    std::cout << "user input " << i.at("to") << std::endl;
-
     auto &renamePlugins = env->core().plugins().get<IRename>();
 
     for (auto &rename : renamePlugins) {
@@ -73,6 +78,10 @@ void renameVerifiedCallback(std::shared_ptr<IEnvironment> env,
 
     auto range = CursorRange{buffer, args.start, args.end};
     auto old = content(range);
+    if (range.empty()) {
+        env->mainWindow().statusMessage("could not rename symbol at cursor...");
+        return;
+    }
 
     auto si = SimpleInteraction{"rename",
                                 {

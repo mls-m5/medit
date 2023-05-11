@@ -417,7 +417,13 @@ bool LspRename::prepare(std::shared_ptr<IEnvironment> env,
                 callback(args);
             });
         },
-        [](const auto &j) { std::cout << "error: " << j << std::endl; });
+        [env, callback](const auto &j) {
+            env->context().guiQueue().addTask([env, callback] {
+                //            std::cout << "error: " << j << std::endl; //
+                auto args = IRename::PrepareCallbackArgs{};
+                callback(args);
+            });
+        });
 
     return true;
 }

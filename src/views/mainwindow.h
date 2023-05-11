@@ -30,6 +30,9 @@ struct MainWindow : public Window {
     size_t _currentEditor = 0;
     bool _shouldRedraw = true;
 
+    FString _statusMessage;
+    int _statusTimerHandle = 0;
+
     MainWindow(IScreen &screen, ThreadContext &context);
 
     ~MainWindow() override;
@@ -87,6 +90,8 @@ struct MainWindow : public Window {
     }
 
     void updateTitle();
+
+    void statusMessage(FString str);
 
     // Commands --------------------
     void escape();

@@ -3,6 +3,7 @@
 #include "fchar.h"
 #include <vector>
 
+/// Formatted string; string with formatted characters
 class FString {
     std::vector<FChar> _content;
 

@@ -36,7 +36,10 @@ void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
         return;
     }
 
-    env->core().files().save(env->editor().buffer(), path);
+    auto &buffer = env->editor().buffer();
+    env->mainWindow().statusMessage("saved to " +
+                                    buffer.file()->path().string());
+    env->core().files().save(buffer, path);
 }
 
 } // namespace
@@ -45,6 +48,8 @@ void saveInteraction(std::shared_ptr<IEnvironment> env) {
     auto &e = env->editor();
     if (e.file()) {
         e.save();
+        env->mainWindow().statusMessage("Saved to " +
+                                        e.file()->path().string());
         return;
     }
 

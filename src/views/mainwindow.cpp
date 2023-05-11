@@ -119,7 +119,8 @@ void MainWindow::resize(size_t w, size_t h) {
     }
 
     _console.width(width());
-    _console.height(_split - 1); // 1 character for toolbar
+    _console.height(_split -
+                    2); // 1 character for toolbar - 2 for how numbers works
     _console.x(0);
     _console.y(height() - _split + 1);
 
@@ -161,6 +162,23 @@ void MainWindow::draw(IScreen &screen) {
 
     if (_activePopup) {
         _activePopup->draw(screen);
+    }
+
+    {
+        auto &editor = _editors.at(_currentEditor);
+        auto statusMessage =
+            FString{" - " + std::string{editor->mode().name()} + " - "} +
+            _statusMessage;
+        auto fill = FString{width(), FChar{" "}};
+        _screen.draw(0, height() - 1, fill);
+        _screen.draw(0, height() - 1, statusMessage);
+
+        auto cur = editor->cursor();
+        auto cursorMessage = FString{std::to_string(cur.y() + 1) + ", " +
+                                     std::to_string(cur.x() + 1)};
+
+        _screen.draw(
+            width() - cursorMessage.size() - 1, height() - 1, cursorMessage);
     }
 }
 
@@ -355,6 +373,21 @@ void MainWindow::updateTitle() {
     else {
         _screen.title("unnamed*");
     }
+}
+
+void MainWindow::statusMessage(FString str) {
+    using namespace std::chrono_literals;
+    _statusMessage = std::move(str);
+
+    auto &timer = _env->core().context().timer();
+    timer.cancel(_statusTimerHandle);
+
+    _statusTimerHandle = timer.setTimeout(5s, [this] {
+        _statusMessage = {};
+        triggerRedraw();
+    });
+
+    triggerRedraw();
 }
 
 void MainWindow::escape() {
