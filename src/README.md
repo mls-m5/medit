@@ -2,6 +2,18 @@
 
 # Cases
 
+## Paste diff interaction 2023-05-11
+- [ ] Create diff function
+- [ ] Create interaction
+- [ ] Some way to trigger it
+   - [ ] Implement command palette
+
+## Save interaction 2023-05-09
+- [x] Ask user if it want to save files without names
+- [x] Ask if user is about to overwrite file
+- [x] Send message to lsp server when buffer is saved
+- [x] Ask where to put new files
+
 ## Rename interaction 2023-05-07
 
 - [x] Create rename standard command
@@ -26,11 +38,5 @@
 - [ ] Update highlighting on emitted changes instead of keypress
     - [ ] Move highlighting handling into core environment
 - [ ] Unload files after applying changes to closed files
-
-## Save interaction 2023-05-09
-- [x] Ask user if it want to save files without names
-- [x] Ask if user is about to overwrite file
-- [x] Send message to lsp server when buffer is saved
-- [ ] Ask where to put new files
 
 

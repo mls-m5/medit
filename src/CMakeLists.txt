@@ -109,6 +109,7 @@ add_library(
     text/diagnostics.cpp
     text/bufferedit.cpp
     text/changes.cpp
+    text/utf8caseconversion.cpp
     views/messagebox.cpp
     views/editor.cpp
     views/locator.cpp
@@ -119,6 +120,7 @@ add_library(
     views/listview.cpp
     views/bufferview.cpp
     views/interactionhandling.cpp
+    views/quicklist.cpp
     modes/normalmode.cpp
     modes/insertmode.cpp
     modes/parentmode.cpp

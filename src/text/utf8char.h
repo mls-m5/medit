@@ -3,6 +3,7 @@
 #include <array>
 #include <cstring> // for memcpy
 #include <ostream>
+#include <string_view>
 
 constexpr uint8_t utf8size(char first) {
     if ((first & 0b10000000) == 0) {
@@ -34,11 +35,11 @@ public:
         _data.front() = c;
     }
 
-    constexpr Utf8Char(const char *c, size_t size) {
-        for (size_t i = 0; i < size && i < _data.size(); ++i) {
-            _data[i] = c[i];
-        }
-    }
+    //    constexpr Utf8Char(const char *c, size_t size) {
+    //        for (size_t i = 0; i < size && i < _data.size(); ++i) {
+    //            _data[i] = c[i];
+    //        }
+    //    }
 
     constexpr Utf8Char(const char *data) {
         auto &c = *data;
@@ -56,6 +57,13 @@ public:
         }
     }
 
+    constexpr Utf8Char(std::string_view data) {
+        _data = {};
+        for (size_t i = 0; i < data.size() && i < 4; ++i) {
+            _data[i] = data[i];
+        }
+    }
+
     //! Create a Utf8Char and also returns the size
     static constexpr inline std::pair<Utf8Char, size_t> fromChar(
         const char *data) {
@@ -64,13 +72,13 @@ public:
             return {{c}, 1};
         }
         else if ((c & 0b11100000) == 0b11000000) {
-            return {{data, 2}, 2};
+            return {std::string_view{data, 2}, 2};
         }
         else if ((c & 0b11110000) == 0b11100000) {
-            return {{data, 3}, 3};
+            return {std::string_view{data, 3}, 3};
         }
         else if ((c & 0b11111000) == 0b11110000) {
-            return {{data, 4}, 4};
+            return {std::string_view{data, 4}, 4};
         }
         return {};
     }
@@ -178,4 +186,19 @@ public:
     friend std::ostream &operator<<(std::ostream &stream, Utf8Char &c) {
         return stream.write(&c._data.front(), static_cast<ptrdiff_t>(c.size()));
     }
+
+    friend struct std::hash<Utf8Char>;
 };
+
+namespace std {
+template <>
+struct hash<Utf8Char> {
+    std::size_t operator()(const Utf8Char &k) const {
+        std::size_t h = 0;
+        for (const auto &c : k._data) {
+            h ^= std::hash<char>{}(c) + 0x9e3779b9 + (h << 6) + (h >> 2);
+        }
+        return h;
+    }
+};
+} // namespace std

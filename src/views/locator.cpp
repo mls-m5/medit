@@ -1,86 +1,24 @@
 
 #include "locator.h"
-#include "script/ienvironment.h"
-#include "text/buffer.h"
-
-Locator::Locator(IView *parent, Project &projectFiles)
-    : Editor{parent, std::make_shared<Buffer>(true)}
-    , _list{parent}
-    , _projectFiles(projectFiles) {
-    //    buffer().singleLine(true);
-    _list.x(0);
-    _list.y(1);
-    _list.width(20);
-    _list.height(20);
-}
-
-bool Locator::keyPress(std::shared_ptr<IEnvironment> env) {
-    if (_list.keyPress(env)) {
-        return true;
-    }
-    else {
-        auto ret = Editor::keyPress(env);
-
-        updateList();
-        return ret;
-    }
-}
+#include "meditfwd.h"
+#include "quicklist.h"
+#include "syntax/palette.h"
+#include <filesystem>
 
 Locator::~Locator() = default;
 
-void Locator::draw(IScreen &screen) {
-    if (Editor::visible()) {
-        Editor::draw(screen);
-        _list.draw(screen);
+Locator::Locator(IView *parent, Project &projectFiles)
+    : QuickList{parent, [this]() { return populate(); }}
+    , _project{projectFiles} {}
+
+QuickList::PopulateRetT Locator::populate() const {
+    // Always read new list so that we do not get an outdated
+    // list
+    auto ret = PopulateRetT{};
+    for (auto &f : _project.files()) {
+        auto path = std::filesystem::relative(f, _project.settings().root);
+        ret.push_back({FString{f.filename().string(), Palette::identifier},
+                       path.string()});
     }
-}
-
-void Locator::callback(std::function<void(filesystem::path)> f) {
-    _list.callback([f, this](auto &&, size_t, auto &&path) {
-        if (path.has_value()) {
-            f(std::any_cast<filesystem::path>(path));
-        }
-        else {
-            f({});
-        }
-        buffer().clear();
-    });
-}
-
-void Locator::visible(bool value) {
-    _list.visible(value);
-    Editor::visible(value);
-
-    if (value) {
-        updateList();
-    }
-}
-
-bool Locator::visible() const {
-    return _list.visible();
-}
-
-void Locator::updateList() {
-    const size_t maxFillLen = 20;
-    _list.clear();
-
-    auto bufferStr = buffer().text();
-
-    for (auto &path : _projectFiles.files()) {
-        size_t fillLen = 1;
-        auto str = path.filename().string();
-
-        if (str.find(bufferStr) == std::string::npos) {
-            continue;
-        }
-
-        if (str.size() < maxFillLen) {
-            fillLen = maxFillLen - str.size();
-        }
-
-        _list.addLine(FString{path.filename().string() +
-                                  std::string(fillLen, ' ') + path.string(),
-                              1},
-                      path);
-    }
+    return ret;
 }

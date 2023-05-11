@@ -53,6 +53,8 @@ Todo:
   - [ ] Layouts that handle splits
   - [ ] Use formatting (palette) to handle grouping ({}) or hyperlink marking
   - [ ] Prompt if the user want to save beforeo exits
+  - [ ] Prompt to diff pasted data to data in editor (more than per line)
+      - [ ] Same logic can be used to view git diffs in editor
 - [ ] ~~Use Lua~~
   - [x] Remove remainders of old scripting engine
   - [ ] ~~Make core functionality callable from lua~~
@@ -79,7 +81,7 @@ Todo:
 - [ ] CMakeLists.txt html and xml-file formatting
 - [ ] CMakeLists.txt html and xml-file code highlighting
 - [x] Select all (ctrl-a)
-- [ ] Case insensitive matching in file list and command palette.
+- [x] Case insensitive matching in file list and command palette.
 - [x] Exit to normal mode when saving.
 - [ ] When alt+tab into editor, prevent from typing tab
 - [ ] Option to restore selection (gv)

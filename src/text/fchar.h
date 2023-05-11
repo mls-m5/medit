@@ -19,8 +19,8 @@ public:
     constexpr FChar(char c, FormatType f = {})
         : c(c)
         , f(f) {}
-    constexpr FChar(char *begin, size_t size)
-        : c(begin, size) {}
+    //    constexpr FChar(char *begin, size_t size)
+    //        : c(begin, size) {}
     constexpr FChar(Utf8Char c)
         : c(c) {}
 
