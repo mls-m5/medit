@@ -26,8 +26,6 @@ public:
     void cursor(size_t x, size_t y) override;
     //! @see IScreen
     void title(std::string title) override;
-    //    //! @see IScreen
-    //    const IPalette &palette() const override;
     //! @see IScreen
     void palette(const Palette &palette) override;
     //! @see IScreen

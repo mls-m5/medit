@@ -18,7 +18,12 @@ void File::save(const Buffer &buffer) {
     if (std::filesystem::is_directory(_path)) {
         return;
     }
-    std::ofstream{_path} << buffer << "\n";
+    if (buffer.lines().back().empty()) {
+        std::ofstream{_path} << buffer;
+    }
+    else {
+        std::ofstream{_path} << buffer << "\n";
+    }
 }
 
 std::string File::representation() const {

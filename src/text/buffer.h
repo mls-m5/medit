@@ -114,7 +114,7 @@ public:
         _tv();
         auto &lines = _raw.lines();
         if (lines.empty() || lines.front().empty()) {
-            std::out_of_range("RawBuffer is empty when calling front()");
+            throw std::out_of_range("RawBuffer is empty when calling front()");
         }
         return lines.front().front();
     }
@@ -122,8 +122,8 @@ public:
     [[nodiscard]] FChar back() const {
         _tv();
         auto &lines = _raw.lines();
-        if (lines.empty() || lines.front().empty()) {
-            std::out_of_range("RawBuffer is empty when calling back()");
+        if (lines.empty() || lines.back().empty()) {
+            throw std::out_of_range("RawBuffer is empty when calling back()");
         }
         return lines.back().back();
     }
