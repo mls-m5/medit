@@ -295,6 +295,11 @@ StandardCommands create() {
             CursorRange{::wordBegin(cursor), ::right(::wordEnd(cursor))};
         e.selection(range);
     };
+
+    DEF(commandPalette) {
+        env->mainWindow().showCommandPalette();
+    };
+
     // ------------------------
 
     commands.open = [](StandardCommands::EnvPtrT env,

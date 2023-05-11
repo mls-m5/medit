@@ -53,7 +53,8 @@
     STD_DEF(selectWord);                                                       \
     STD_DEF(selectInnerWord);                                                  \
     STD_DEF(renameSymbol);                                                     \
-    STD_DEF(selectAll);
+    STD_DEF(selectAll);                                                        \
+    STD_DEF(commandPalette);
 
 #define STD_DEF(name) std::function<void(EnvPtrT env)> name
 

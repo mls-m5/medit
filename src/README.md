@@ -2,6 +2,11 @@
 
 # Cases
 
+## Command palette 2023-05-11
+- [x] Case insensitive searching
+- [x] Create new view
+- [ ] Reformat names so that it has spaces (underlines) instead of pascalCase
+
 ## Paste diff interaction 2023-05-11
 - [ ] Create diff function
 - [ ] Create interaction

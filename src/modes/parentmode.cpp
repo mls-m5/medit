@@ -40,6 +40,8 @@ std::shared_ptr<IMode> createParentMode() {
          {[](Ptr env) { env->mainWindow().autoComplete(); }}},
         {KeyEvent{Key::KeyCombination, 'R', Modifiers::Ctrl}, sc.renameSymbol},
         {KeyEvent{Key::KeyCombination, 'A', Modifiers::Ctrl}, sc.selectAll},
+        {KeyEvent{Key::KeyCombination, 'P', Modifiers::Ctrl},
+         sc.commandPalette},
     }};
 
     map.defaultAction({});

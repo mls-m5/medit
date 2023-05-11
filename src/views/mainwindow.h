@@ -4,6 +4,7 @@
 #include "interactionhandling.h"
 #include "meditfwd.h"
 #include "script/localenvironment.h"
+#include "views/commandpalette.h"
 #include "views/completeview.h"
 #include "views/editor.h"
 #include "views/locator.h"
@@ -18,6 +19,7 @@ struct MainWindow : public Window {
     std::shared_ptr<LocalEnvironment> _env;
     Editor _console;
     Locator _locator;
+    CommandPalette _commandPalette;
     CompleteView _completeView;
     Project _project;
     size_t _split = 10;
@@ -102,4 +104,6 @@ struct MainWindow : public Window {
     void autoComplete();
 
     void showLocator();
+
+    void showCommandPalette();
 };

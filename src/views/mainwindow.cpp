@@ -30,6 +30,7 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
     , _env(std::make_unique<LocalEnvironment>(*this, context))
     , _console(this, _env->core().files().create(_env))
     , _locator(this, _project)
+    , _commandPalette(this, StandardCommands::get())
     , _completeView(
           this, CoreEnvironment::instance().plugins().get<ICompletionSource>())
     , _currentEditor(0) {
@@ -60,6 +61,17 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
     _locator.callback([this](auto &&path) {
         _locator.visible(false);
         open(path);
+        _inputFocus = currentEditor();
+    });
+
+    _commandPalette.visible(false);
+    _commandPalette.mode(createInsertMode());
+    _commandPalette.showLines(false);
+    _commandPalette.callback([this](auto &&path) {
+        _commandPalette.visible(false);
+        if (!path.empty()) {
+            StandardCommands::get().namedCommands.at(path)(_env);
+        }
         _inputFocus = currentEditor();
     });
 
@@ -116,6 +128,11 @@ void MainWindow::resize(size_t w, size_t h) {
     _locator.width(width());
     _locator.height(1);
 
+    _commandPalette.x(0);
+    _commandPalette.y(0);
+    _commandPalette.width(width());
+    _commandPalette.height(1);
+
     _splitString = FString{width(), FChar{'-', 6}};
 }
 
@@ -134,6 +151,10 @@ void MainWindow::draw(IScreen &screen) {
 
     if (_inputFocus == &_locator) {
         _locator.draw(screen);
+    }
+
+    if (_inputFocus == &_commandPalette) {
+        _commandPalette.draw(screen);
     }
 
     _completeView.draw(screen);
@@ -234,6 +255,9 @@ Editor *MainWindow::currentEditor() {
     }
     if (_locator.visible()) {
         return &_locator;
+    }
+    if (_commandPalette.visible()) {
+        return &_commandPalette;
     }
     if (_currentEditor >= _editors.size()) {
         _currentEditor = _editors.size() - 1;
@@ -392,4 +416,9 @@ void MainWindow::autoComplete() {
 void MainWindow::showLocator() {
     _locator.visible(true);
     _inputFocus = &_locator;
+}
+
+void MainWindow::showCommandPalette() {
+    _commandPalette.visible(true);
+    _inputFocus = &_commandPalette;
 }
