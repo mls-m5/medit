@@ -15,7 +15,7 @@ Todo:
   - [x] Registers
   - [x] Full row visual mode
   - [ ] Implement all navigation shortcuts for all modes (iw aw 'i{' etc)
-  - [ ] r-mode
+  - [ ] r-command (replace single character)
 - [x] Undo/Redo
   - [x] Improve memory usage for undo/redo
 - [x] Multiple open editors
@@ -38,7 +38,7 @@ Todo:
 - [x] Co-edit files with other people remotely
 - [ ] Mouse control
   - [x] Mouse wheel control
-  - [ ] Move cursor with mouse
+  - [x] Move cursor with mouse
   - [ ] Select with mouse drag
 - [ ] File synch
   - [x] Detect when open buffer is changed on disk
@@ -55,6 +55,7 @@ Todo:
   - [ ] Prompt if the user want to save beforeo exits
   - [ ] Prompt to diff pasted data to data in editor (more than per line)
       - [ ] Same logic can be used to view git diffs in editor
+      - [ ] Toggle markdown crosses with space
 - [ ] ~~Use Lua~~
   - [x] Remove remainders of old scripting engine
   - [ ] ~~Make core functionality callable from lua~~

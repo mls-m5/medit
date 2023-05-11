@@ -4,7 +4,6 @@
 #include "ienvironment.h"
 #include "keys/event.h"
 #include "meditfwd.h"
-// #include "script/luastate.h"
 #include "script/standardcommands.h"
 #include "views/editor.h"
 

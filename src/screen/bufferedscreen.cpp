@@ -10,6 +10,8 @@ struct BufferedScreen::Canvas {
     size_t _cursorX = 0, _cursorY = 0;
     std::string title;
 
+    bool isRefreshing = false;
+
     void resize(size_t width, size_t height) {
         if (width == this->width && height == this->height) {
             return;
@@ -63,9 +65,7 @@ void BufferedScreen::forceThread() {
 BufferedScreen::BufferedScreen(IScreen *screen)
     : _backend(screen)
     , _canvas(std::make_unique<Canvas>())
-    , _threadId(std::this_thread::get_id()) {
-    //    _canvas->resize(_backend->width(), _backend->height());
-}
+    , _threadId(std::this_thread::get_id()) {}
 
 BufferedScreen::~BufferedScreen() = default;
 
