@@ -15,10 +15,10 @@ std::shared_ptr<IMode> createInsertMode() {
         {{Key::Up}, {sc.up}},
         {{Key::Backspace}, {sc.erase}},
         {{Key::Delete}, {sc.combine(sc.right, sc.erase)}},
-        {{Key::Escape}, {sc.normalMode}},
+        {{Key::Escape}, {sc.normal_mode}},
         {KeyEvent{Key::KeyCombination, '\b', Modifiers::Ctrl},
-         {sc.eraseBeforeWord}},
-        {{"\n"}, {sc.combine(sc.split, sc.copyIndentation)}},
+         {sc.erase_before_word}},
+        {{"\n"}, {sc.combine(sc.split, sc.copy_indentation)}},
     }};
     map.defaultAction({sc.insert});
 

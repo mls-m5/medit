@@ -8,21 +8,21 @@
 std::shared_ptr<IMode> createParentMode() {
     auto &sc = StandardCommands::get();
     using Ptr = StandardCommands::EnvPtrT;
-
     auto map = KeyMap{{
         {KeyEvent{Key::F2},
          {[](Ptr env) { env->mainWindow().gotoDefinition(); }}},
-        {KeyEvent{Key::F4}, sc.switchHeader},
+        {KeyEvent{Key::F4}, sc.switch_header},
         {KeyEvent{Key::F5}, sc.run},
         {KeyEvent{Key::Home}, {sc.home}},
         {KeyEvent{Key::End}, {sc.end}},
-        {KeyEvent{Key::PageUp}, {sc.pageUp}},
-        {KeyEvent{Key::PageDown}, {sc.pageDown}},
+        {KeyEvent{Key::PageUp}, {sc.page_up}},
+        {KeyEvent{Key::PageDown}, {sc.page_down}},
         {KeyEvent{Key::KeyCombination, 'T', Modifiers::Ctrl},
          {[](Ptr env) { env->mainWindow().showConsole(); }}},
         {KeyEvent{Key::KeyCombination, 'E', Modifiers::Ctrl},
          {[](Ptr env) { env->mainWindow().switchEditor(); }}},
-        {KeyEvent{Key::KeyCombination, '7', Modifiers::Ctrl}, sc.toggleComment},
+        {KeyEvent{Key::KeyCombination, '7', Modifiers::Ctrl},
+         sc.toggle_comment},
         {KeyEvent{Key::KeyCombination, 'O', Modifiers::Ctrl},
          {[](Ptr env) { env->mainWindow().showOpen(); }}},
         {KeyEvent{Key::KeyCombination, 'S', Modifiers::Ctrl},
@@ -33,15 +33,15 @@ std::shared_ptr<IMode> createParentMode() {
         {KeyEvent{Key::KeyCombination, 'Y', Modifiers::Ctrl}, sc.redo},
         {KeyEvent{Key::KeyCombination, 'B', Modifiers::Ctrl},
          sc.combine(sc.save, sc.build)},
-        {KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}, sc.closeBuffer},
+        {KeyEvent{Key::KeyCombination, 'W', Modifiers::Ctrl}, sc.close_buffer},
         {KeyEvent{Key::KeyCombination, 'K', Modifiers::Ctrl},
          {[](Ptr env) { env->mainWindow().showLocator(); }}},
         {KeyEvent{Key::KeyCombination, ' ', Modifiers::Ctrl},
          {[](Ptr env) { env->mainWindow().autoComplete(); }}},
-        {KeyEvent{Key::KeyCombination, 'R', Modifiers::Ctrl}, sc.renameSymbol},
-        {KeyEvent{Key::KeyCombination, 'A', Modifiers::Ctrl}, sc.selectAll},
+        {KeyEvent{Key::KeyCombination, 'R', Modifiers::Ctrl}, sc.rename_symbol},
+        {KeyEvent{Key::KeyCombination, 'A', Modifiers::Ctrl}, sc.select_all},
         {KeyEvent{Key::KeyCombination, 'P', Modifiers::Ctrl},
-         sc.commandPalette},
+         sc.command_palette},
     }};
 
     map.defaultAction({});

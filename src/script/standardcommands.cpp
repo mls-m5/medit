@@ -53,7 +53,7 @@ StandardCommands create() {
         e.cursor(::end(e.cursor()));
     };
 
-    DEF(pageUp) {
+    DEF(page_up) {
         auto &e = env->editor();
         auto c = e.cursor();
 
@@ -62,7 +62,7 @@ StandardCommands create() {
         }
         e.cursor(c);
     };
-    DEF(pageDown) {
+    DEF(page_down) {
         auto &e = env->editor();
         auto c = e.cursor();
         for (size_t i = 0; i < 10; ++i) {
@@ -71,16 +71,16 @@ StandardCommands create() {
         e.cursor(c);
     };
 
-    DEF(wordBegin) {
+    DEF(word_begin) {
         auto &e = env->editor();
         e.cursor(::wordBegin(e.cursor()));
     };
-    DEF(wordEnd) {
+    DEF(word_end) {
         auto &e = env->editor();
         e.cursor(::wordEnd(e.cursor()));
     };
 
-    DEF(switchHeader) {
+    DEF(switch_header) {
         auto path = env->project().findSwitchHeader(env->editor().path());
         if (!path.empty()) {
             env->standardCommands().open(env, path, std::nullopt, std::nullopt);
@@ -89,7 +89,7 @@ StandardCommands create() {
 
     // ------- Edit ----------
 
-    DEF(yankLine) {
+    DEF(yank_line) {
         auto &e = env->editor();
         auto cursor = e.cursor();
         auto line = e.buffer().lineAt(cursor.y());
@@ -97,7 +97,7 @@ StandardCommands create() {
         env->editor().clearSelection();
     };
 
-    DEF(deleteLine) {
+    DEF(delete_line) {
         auto &e = env->editor();
         auto cursor = e.cursor();
         auto line = e.buffer().lineAt(cursor.y());
@@ -105,7 +105,7 @@ StandardCommands create() {
         e.cursor(deleteLine(e.cursor()));
     };
 
-    DEF(clearLine) {
+    DEF(clear_line) {
         auto &e = env->editor();
         auto cursor = e.cursor();
         auto line = e.buffer().lineAt(cursor.y());
@@ -157,7 +157,7 @@ StandardCommands create() {
         }
     };
 
-    DEF(eraseBeforeWord) {
+    DEF(erase_before_word) {
         // Mostly for ctrl+backspace
         auto &e = env->editor();
         auto selection = e.selection();
@@ -170,7 +170,7 @@ StandardCommands create() {
         }
     };
 
-    DEF(pasteBefore) {
+    DEF(paste_before) {
         auto str = env->registers().load(standardRegister);
         auto cursor = env->editor().cursor();
         if (str.isLine) {
@@ -222,14 +222,14 @@ StandardCommands create() {
     DEF(cut) {
         env->mainWindow().copy(true);
     };
-    DEF(copyIndentation) {
+    DEF(copy_indentation) {
         auto &e = env->editor();
         e.cursor(copyIndentation(e.cursor()));
     };
     DEF(undo) {
         env->editor().undo();
     };
-    DEF(undoMajor) {
+    DEF(undo_major) {
         env->editor().undoMajor();
     };
     DEF(redo) {
@@ -241,26 +241,26 @@ StandardCommands create() {
     DEF(run) {
         ::run(env);
     };
-    DEF(insertMode) {
+    DEF(insert_mode) {
         env->editor().mode(createInsertMode());
     };
-    DEF(normalMode) {
+    DEF(normal_mode) {
         env->editor().mode(createNormalMode());
     };
-    DEF(visualMode) {
+    DEF(visual_mode) {
         env->editor().mode(createVisualMode(*env));
     };
-    DEF(visualBlockMode) {
+    DEF(visual_block_mode) {
         env->editor().mode(createVisualMode(*env, true));
     };
-    DEF(toggleComment) {
+    DEF(toggle_comment) {
         ::toggleComments(env);
     };
     DEF(quit) {
         quitMedit(env->context());
     };
 
-    DEF(closeBuffer) {
+    DEF(close_buffer) {
         auto &buffer = env->editor();
         if (!buffer.closeBuffer()) {
             quitMedit(env->context());
@@ -270,25 +270,24 @@ StandardCommands create() {
     };
 
     // -----------------------
-    DEF(selectWord) {
+    DEF(select_word) {
         auto &e = env->editor();
         auto cursor = e.cursor();
         auto range = CursorRange{cursor, right(wordEnd(cursor))};
         e.selection(range);
     };
 
-    DEF(selectAll) {
+    DEF(select_all) {
         auto &e = env->editor();
         e.mode(createVisualMode(*env, true));
         e.selection(all(e.buffer()));
     };
 
-    DEF(renameSymbol) {
+    DEF(rename_symbol) {
         beginRenameInteraction(env);
     };
 
-    DEF(selectInnerWord) {
-        //    commands.selectInnerWord = [](StandardCommands::EnvPtrT env) {
+    DEF(select_inner_word) {
         auto &e = env->editor();
         auto cursor = e.cursor();
         auto range =
@@ -296,7 +295,7 @@ StandardCommands create() {
         e.selection(range);
     };
 
-    DEF(commandPalette) {
+    DEF(command_palette) {
         env->mainWindow().showCommandPalette();
     };
 

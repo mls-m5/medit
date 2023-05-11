@@ -17,44 +17,44 @@
     STD_DEF(down);                                                             \
     STD_DEF(home);                                                             \
     STD_DEF(end);                                                              \
-    STD_DEF(pageUp);                                                           \
-    STD_DEF(pageDown);                                                         \
-    STD_DEF(wordBegin);                                                        \
-    STD_DEF(wordEnd);                                                          \
-    STD_DEF(switchHeader);                                                     \
-    STD_DEF(yankLine);                                                         \
-    STD_DEF(deleteLine);                                                       \
-    STD_DEF(clearLine);                                                        \
+    STD_DEF(page_up);                                                          \
+    STD_DEF(page_down);                                                        \
+    STD_DEF(word_begin);                                                       \
+    STD_DEF(word_end);                                                         \
+    STD_DEF(switch_header);                                                    \
+    STD_DEF(yank_line);                                                        \
+    STD_DEF(delete_line);                                                      \
+    STD_DEF(clear_line);                                                       \
     STD_DEF(insert);                                                           \
     STD_DEF(split);                                                            \
     STD_DEF(yank);                                                             \
     STD_DEF(erase);                                                            \
-    STD_DEF(eraseBeforeWord);                                                  \
-    STD_DEF(pasteBefore);                                                      \
+    STD_DEF(erase_before_word);                                                \
+    STD_DEF(paste_before);                                                     \
     STD_DEF(paste);                                                            \
     STD_DEF(join);                                                             \
     STD_DEF(format);                                                           \
     STD_DEF(save);                                                             \
     STD_DEF(copy);                                                             \
     STD_DEF(cut);                                                              \
-    STD_DEF(copyIndentation);                                                  \
+    STD_DEF(copy_indentation);                                                 \
     STD_DEF(undo);                                                             \
-    STD_DEF(undoMajor);                                                        \
+    STD_DEF(undo_major);                                                       \
     STD_DEF(redo);                                                             \
     STD_DEF(build);                                                            \
     STD_DEF(run);                                                              \
     STD_DEF(quit);                                                             \
-    STD_DEF(closeBuffer);                                                      \
-    STD_DEF(insertMode);                                                       \
-    STD_DEF(normalMode);                                                       \
-    STD_DEF(visualMode);                                                       \
-    STD_DEF(visualBlockMode);                                                  \
-    STD_DEF(toggleComment);                                                    \
-    STD_DEF(selectWord);                                                       \
-    STD_DEF(selectInnerWord);                                                  \
-    STD_DEF(renameSymbol);                                                     \
-    STD_DEF(selectAll);                                                        \
-    STD_DEF(commandPalette);
+    STD_DEF(close_buffer);                                                     \
+    STD_DEF(insert_mode);                                                      \
+    STD_DEF(normal_mode);                                                      \
+    STD_DEF(visual_mode);                                                      \
+    STD_DEF(visual_block_mode);                                                \
+    STD_DEF(toggle_comment);                                                   \
+    STD_DEF(select_word);                                                      \
+    STD_DEF(select_inner_word);                                                \
+    STD_DEF(rename_symbol);                                                    \
+    STD_DEF(select_all);                                                       \
+    STD_DEF(command_palette);
 
 #define STD_DEF(name) std::function<void(EnvPtrT env)> name
 

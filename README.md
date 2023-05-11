@@ -77,7 +77,7 @@ Todo:
 - [ ] Lsp-plugin diagnostics
 - [ ] Make sure build command works properly, add settings
 - [ ] Ways to handle settings
-- [ ] Add searchable command pallette to make commands runnable (ctrl-p)
+- [x] Add searchable command pallette to make commands runnable (ctrl-p)
 - [ ] CMakeLists.txt html and xml-file formatting
 - [ ] CMakeLists.txt html and xml-file code highlighting
 - [x] Select all (ctrl-a)

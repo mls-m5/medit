@@ -24,82 +24,29 @@ std::shared_ptr<IMode> createVisualMode(IEnvironment &env,
             {{"k"}, {sc.up}},
             {{Key::Backspace}, {sc.left}},
             {{"X"}, {sc.erase}},
-            {{Key::Delete},
-             {
-                 sc.combine(sc.erase, sc.normalMode)
-                 //            "neditor.erase\neditor.normalmode"
-             }},
-            {{"x"},
-             {
-                 sc.combine(sc.erase, sc.normalMode)
-                 //            "editor.erase\neditor.normalmode"
-             }},
-            {{"d"},
-             {
-                 sc.combine(sc.erase, sc.normalMode)
-                 //            "editor.erase\neditor.normalmode"
-             }},
-            {{"c"},
-             {
-                 sc.combine(sc.erase, sc.insertMode)
-                 //            "editor.erase\neditor.insertmode"
-             }},
-            {{"v"},
-             {
-                 sc.visualMode
-                 //            "editor.visualmode"
-             }},
-            {{"V"},
-             {
-                 sc.visualBlockMode
-                 //            "editor.visualblockmode"
-             }},
-            {{Key::Escape},
-             {
-                 sc.normalMode
-                 //            "editor.normalmode"
-             }},
-            //            {{Key::Return}, {"editor.down"}},
-            {{"\n"},
-             {
-                 sc.down
-                 //            "editor.down"
-             }},
-            {{Key::Space},
-             {
-                 sc.right
-                 //            "editor.right"
-             }},
+            {{Key::Delete}, {sc.combine(sc.erase, sc.normal_mode)}},
+            {{"x"}, {sc.combine(sc.erase, sc.normal_mode)}},
+            {{"d"}, {sc.combine(sc.erase, sc.normal_mode)}},
+            {{"c"}, {sc.combine(sc.erase, sc.insert_mode)}},
+            {{"v"}, {sc.visual_mode}},
+            {{"V"}, {sc.visual_block_mode}},
+            {{Key::Escape}, {sc.normal_mode}},
+            {{"\n"}, {sc.down}},
+            {{Key::Space}, {sc.right}},
 
-            {{"b"},
-             {
-                 sc.combine(sc.left, sc.wordBegin)
-                 //            "editor.left\neditor.word_begin"
-             }},
-            {{"e"},
-             {
-                 sc.combine(sc.right, sc.wordEnd)
-                 //            "editor.right\neditor.word_end"
-             }},
+            {{"b"}, {sc.combine(sc.left, sc.word_begin)}},
+            {{"e"}, {sc.combine(sc.right, sc.word_end)}},
             {{"w"},
-             {
-                 sc.combine(sc.wordEnd, sc.right, sc.wordEnd, sc.wordBegin)
-                 //            "editor.word_end\neditor.right\neditor.word_end\neditor.word_"
-                 //              "begin"
-             }},
-            {{"y"},
-             {
-                 sc.combine(sc.yank, sc.normalMode)
-                 //            "editor.yank\neditor.normalmode"
-             }},
+             {sc.combine(sc.word_end, sc.right, sc.word_end, sc.word_begin)}},
+            {{"y"}, {sc.combine(sc.yank, sc.normal_mode)}},
 
         },
     };
     map.defaultAction({});
 
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
-        {{"iw"}, {sc.selectInnerWord}},
-        {{"aw"}, {sc.selectInnerWord}},
+        {{"iw"}, {sc.select_inner_word}},
+        {{"aw"}, {sc.select_inner_word}},
     }};
 
     auto mode = std::make_shared<Mode>("visual",
