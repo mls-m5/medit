@@ -55,7 +55,7 @@ Todo:
   - [ ] Prompt if the user want to save beforeo exits
   - [ ] Prompt to diff pasted data to data in editor (more than per line)
       - [ ] Same logic can be used to view git diffs in editor
-      - [ ] Toggle markdown crosses with space
+  - [ ] Toggle markdown crosses with space
 - [ ] ~~Use Lua~~
   - [x] Remove remainders of old scripting engine
   - [ ] ~~Make core functionality callable from lua~~
@@ -65,13 +65,21 @@ Todo:
 - Editors
   - [ ] Word wrapping
   - [ ] Horizontal scroll
-
+- [ ] Performance improvements for remote connections
+   - [ ] Serialize to binary
+- [ ] Communication over network sessions
+   - [ ] Add interactions for users to add own name
+   - [ ] Create some way for users to send short messages to eachother.
+- [ ] Git plugin
+   - [ ] Push
+   - [ ] Diff
+   - [ ] Blame
+   - [ ] Commit (interaction where you select which files)
 
 # Prioritized changes
 - [ ] Faster navigation
+   - [ ] Move between opened files in editor
 - [x] Highlighting 
-- [ ] Performance improvements for remote connections
-   - [ ] Serialize to binary
 
 
 ## Feedback
@@ -87,6 +95,7 @@ Todo:
 - [ ] When alt+tab into editor, prevent from typing tab
 - [ ] Option to restore selection (gv)
 - [x] Status line for common operations (for example saving, changing mode)
+- [ ] Test: Add margin from the cursor to the bottom of the screen (when not on end of file)
 
 ## Requirements
 

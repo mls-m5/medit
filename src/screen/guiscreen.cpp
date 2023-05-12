@@ -1,4 +1,6 @@
 #include "guiscreen.h"
+#include <algorithm>
+#include <mutex>
 
 #ifndef __EMSCRIPTEN__
 
@@ -103,6 +105,8 @@ Modifiers getModState() {
 
 struct GuiScreen::Buffer {
     std::vector<FString> lines;
+    std::vector<FString> shownLines;
+    std::mutex refreshMutex;
     CursorStyle cursorStyle = CursorStyle::Block;
     size_t width = 0;
     size_t height = 0;
@@ -201,6 +205,14 @@ struct GuiScreen::Buffer {
             line.resize(width, ' ');
         }
 
+        {
+            auto l = std::lock_guard{refreshMutex};
+            shownLines.resize(height);
+            for (auto &line : shownLines) {
+                line.resize(width, ' ');
+            }
+        }
+
         this->width = width;
         this->height = height;
 
@@ -251,11 +263,24 @@ struct GuiScreen::Buffer {
                       {0, screen.canvas.height - 1, screen.canvas.width, 1});
     }
 
+    // Copy lines to be refreshed, may be called from the applications thread
+    // and not the gui thread
+    void copyLines() {
+        auto l = std::lock_guard{
+            refreshMutex}; /// Make sure the lines is not currently being drawn
+        std::copy(lines.begin(), lines.end(), shownLines.begin());
+        _shouldRefresh = true;
+        auto event = SDL_Event{};
+        event.type = SDL_USEREVENT;
+        sdl::pushEvent(event);
+    }
+
     // Update the screen
     void refresh() {
+        auto l = std::lock_guard{refreshMutex};
         _tv();
-        for (size_t y = 0; y < lines.size(); ++y) {
-            renderLine(y, lines.at(y));
+        for (size_t y = 0; y < shownLines.size(); ++y) {
+            renderLine(y, shownLines.at(y));
         }
 
         renderer.drawColor(_styles.front().bg);
@@ -481,10 +506,7 @@ void GuiScreen::refresh() {
     if (_palette.isChanged()) {
         _palette.update(*this);
     }
-    _buffer->_shouldRefresh = true;
-    auto event = SDL_Event{};
-    event.type = SDL_USEREVENT;
-    sdl::pushEvent(event);
+    _buffer->copyLines();
 }
 
 void GuiScreen::clear() {

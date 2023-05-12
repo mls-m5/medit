@@ -9,6 +9,8 @@
 
 #ifndef __EMSCRIPTEN__
 
+/// The rendering and gui is running on one thread and assumes the application
+/// calls from one single thread
 class GuiScreen : public IScreen {
 public:
     void draw(size_t x, size_t y, FStringView str) override;
