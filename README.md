@@ -75,6 +75,7 @@ Todo:
    - [ ] Diff
    - [ ] Blame
    - [ ] Commit (interaction where you select which files)
+- [ ] Support for multiple consoles for different usages.
 
 # Prioritized changes
 - [ ] Faster navigation

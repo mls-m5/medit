@@ -1,17 +1,12 @@
 #include "run.h"
-#include "core/context.h"
-#include "core/jobqueue.h"
-#include "files/popenstream.h"
 #include "files/project.h"
 #include "syntax/palette.h"
 #include "text/buffer.h"
+#include "views/console.h"
 #include "views/editor.h"
 
 void run(std::shared_ptr<IEnvironment> env) {
 #ifndef __EMSCRIPTEN__
-
-    env->showConsole(true);
-
     auto &project = env->project();
 
     auto root = project.settings().root;
@@ -20,37 +15,22 @@ void run(std::shared_ptr<IEnvironment> env) {
         filesystem::current_path(root);
     }
 
-    auto &consoleBuffer = env->console().buffer();
-    consoleBuffer.clear();
-
     if (project.settings().runCommand.empty()) {
-        consoleBuffer.pushBack(std::string{"no run command specified..."});
+        auto &consoleBuffer = env->console().buffer();
+        env->statusMessage(FString{"no run command specified..."});
         return;
     }
 
-    consoleBuffer.pushBack(std::string{"running application..."});
+    auto runCommand = project.settings().runCommand;
 
-    env->context().jobQueue().addTask([&project, env] {
-        POpenStream stream(project.settings().runCommand, true, 100);
+    auto console = Console{
+        .openingMessage =
+            FString{"running application: ", Palette::comment} + runCommand,
+        .command = runCommand,
+        .buffer = &env->console().buffer(),
+    };
 
-        for (std::string line; getline(stream, line);) {
-            env->context().guiQueue().addTask([line, env] {
-                env->console().buffer().pushBack(line);
-                env->console().cursor({0, 100000000});
-            });
-        }
-
-        env->context().guiQueue().addTask([returnCode = stream.returnCode(),
-                                           env] {
-            auto &consoleBuffer = env->console().buffer();
-            if (returnCode) {
-                consoleBuffer.pushBack(FString("failed...", Palette::error));
-            }
-            else {
-                consoleBuffer.pushBack(std::string{"finished..."});
-            }
-        });
-    });
+    console.run(env);
 
 #endif // __EMSCRIPTEN__
 }

@@ -17,6 +17,7 @@
 #include "syntax/palette.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
+#include "text/fstringview.h"
 #include "views/inputbox.h"
 #include <filesystem>
 #include <memory>
@@ -375,9 +376,9 @@ void MainWindow::updateTitle() {
     }
 }
 
-void MainWindow::statusMessage(FString str) {
+void MainWindow::statusMessage(FStringView str) {
     using namespace std::chrono_literals;
-    _statusMessage = std::move(str);
+    _statusMessage = FString{str};
 
     auto &timer = _env->core().context().timer();
     timer.cancel(_statusTimerHandle);

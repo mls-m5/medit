@@ -1,16 +1,13 @@
 
 #include "plugin/build.h"
-#include "core/context.h"
-#include "core/ijobqueue.h"
-#include "files/popenstream.h"
 #include "files/project.h"
 #include "script/ienvironment.h"
 #include "syntax/palette.h"
 #include "text/buffer.h"
+#include "views/console.h"
 #include "views/editor.h"
 
 namespace {
-
 bool isBuilding = false;
 }
 
@@ -20,9 +17,9 @@ void build(std::shared_ptr<IEnvironment> env) {
         return;
     }
     isBuilding = true;
-    env->showConsole(true);
+
     auto &consoleBuffer = env->console().buffer();
-    consoleBuffer.clear();
+    //    consoleBuffer.clear();
     consoleBuffer.pushBack(std::string{"trying to build..."});
 
     auto &project = env->project();
@@ -35,33 +32,20 @@ void build(std::shared_ptr<IEnvironment> env) {
 
     if (project.settings().buildCommand.empty()) {
         // TODO: Add guess with compile commands generation
-        consoleBuffer.pushBack(
-            std::string{"no build command specified. Aborting"});
+        consoleBuffer.pushBack("no build command specified. Aborting");
         return;
     }
 
-    env->context().jobQueue().addTask([&project, env] {
-        POpenStream stream(project.settings().buildCommand, true, 100);
+    auto command = project.settings().buildCommand;
 
-        for (std::string line; getline(stream, line);) {
-            env->context().guiQueue().addTask([line, env] {
-                env->console().buffer().pushBack(line);
-                env->console().cursor({0, 100000000});
-            });
-        }
+    auto console = Console{
+        .openingMessage =
+            FString{"trying to build: ", Palette::comment} + command,
+        .command = command,
+        .buffer = &env->console().buffer(),
+        .callback = [] { isBuilding = false; },
+    };
 
-        env->context().guiQueue().addTask([returnCode = stream.returnCode(),
-                                           env] {
-            auto &consoleBuffer = env->console().buffer();
-            if (returnCode) {
-                consoleBuffer.pushBack(FString("failed...", Palette::error));
-            }
-            else {
-                consoleBuffer.pushBack(std::string{"finished..."});
-            }
-        });
-
-        isBuilding = false;
-    });
+    console.run(env);
 #endif
 }

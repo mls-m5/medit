@@ -122,6 +122,7 @@ add_library(
     views/interactionhandling.cpp
     views/quicklist.cpp
     views/commandpalette.cpp
+    views/console.cpp
     modes/normalmode.cpp
     modes/insertmode.cpp
     modes/parentmode.cpp

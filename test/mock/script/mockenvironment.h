@@ -20,4 +20,5 @@ public:
                  standardCommands,
                  (),
                  const override);
+    MOCK_METHOD1(void, statusMessage, (FStringView string), override);
 };

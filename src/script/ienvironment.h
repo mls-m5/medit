@@ -2,6 +2,7 @@
 
 #include "meditfwd.h"
 
+#include "text/fstringview.h"
 #include <functional>
 #include <memory>
 
@@ -24,6 +25,8 @@ public:
     //! Return the editor active in the current context
     [[nodiscard]] virtual Editor &editor() = 0;
     [[nodiscard]] virtual Editor &console() = 0;
+
+    virtual void statusMessage(FStringView string) = 0;
 
     //! In the future this can be multiple values depending on which console
     virtual void showConsole(bool shown = true) = 0;

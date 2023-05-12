@@ -37,7 +37,7 @@ void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
     }
 
     auto &buffer = env->editor().buffer();
-    env->mainWindow().statusMessage("saved to " +
+    env->mainWindow().statusMessage(FString{"saved to "} +
                                     buffer.file()->path().string());
     env->core().files().save(buffer, path);
 }
@@ -48,7 +48,7 @@ void saveInteraction(std::shared_ptr<IEnvironment> env) {
     auto &e = env->editor();
     if (e.file()) {
         e.save();
-        env->mainWindow().statusMessage("Saved to " +
+        env->mainWindow().statusMessage(FString{"Saved to "} +
                                         e.file()->path().string());
         return;
     }

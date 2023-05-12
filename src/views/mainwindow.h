@@ -91,7 +91,7 @@ struct MainWindow : public Window {
 
     void updateTitle();
 
-    void statusMessage(FString str);
+    void statusMessage(FStringView str);
 
     // Commands --------------------
     void escape();

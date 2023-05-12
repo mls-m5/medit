@@ -31,8 +31,8 @@ void applyRenameChanges(std::shared_ptr<IEnvironment> env,
 
     changes.apply(*env);
     env->mainWindow().statusMessage(
-        "rename of " + changes.changes.front().changes.front().newText +
-        " complete...");
+        FString{"rename of "} +
+        changes.changes.front().changes.front().newText + " complete...");
 }
 
 void lspRenameResponse(std::shared_ptr<IEnvironment> env, Changes changes) {
@@ -79,7 +79,8 @@ void renameVerifiedCallback(std::shared_ptr<IEnvironment> env,
     auto range = CursorRange{buffer, args.start, args.end};
     auto old = content(range);
     if (range.empty()) {
-        env->mainWindow().statusMessage("could not rename symbol at cursor...");
+        env->mainWindow().statusMessage(
+            FString{"could not rename symbol at cursor..."});
         return;
     }
 

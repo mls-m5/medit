@@ -28,3 +28,7 @@ Editor &LocalEnvironment::editor() {
 void LocalEnvironment::redrawScreen() {
     mainWindow().triggerRedraw();
 }
+
+void LocalEnvironment::statusMessage(FStringView str) {
+    _mainWindow.statusMessage(str);
+}

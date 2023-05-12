@@ -77,4 +77,6 @@ public:
 
     //! Trigger redraw of winow
     void redrawScreen();
+
+    void statusMessage(FStringView str) override;
 };
