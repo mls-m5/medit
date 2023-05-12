@@ -19,8 +19,20 @@ void gitStatus(std::shared_ptr<IEnvironment> env) {
     console.run(env);
 }
 
+void gitPush(std::shared_ptr<IEnvironment> env) {
+    auto root = env->project().settings().root;
+    auto console = Console{
+        .openingMessage = FString{"git push", Palette::comment},
+        .command = "git -C \"" + root.string() + "\" push",
+        .buffer = &env->console().buffer(),
+    };
+
+    console.run(env);
+}
+
 } // namespace
 
 void registerGitCommands(StandardCommands &standardCommands) {
     standardCommands.namedCommands["git_status"] = gitStatus;
+    standardCommands.namedCommands["git_push"] = gitPush;
 }
