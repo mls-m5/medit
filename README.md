@@ -79,6 +79,7 @@ Todo:
    - [x] Interact with console (focus, scroll, keypresses etc)
    - [ ] Support for multiple consoles for different usages.
        - [ ] Implement it
+       - [ ] Ways to switch between consoles
        - [ ] Open interactions in console as standard (but add option to open in current editor)
    - [ ] Support backspace characters for popen
    - [ ] Make Popenstream support colors in linux
