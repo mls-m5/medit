@@ -18,6 +18,7 @@
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "text/fstringview.h"
+#include "views/consolenum.h"
 #include "views/inputbox.h"
 #include <filesystem>
 #include <memory>
@@ -29,7 +30,7 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
     , _editors{}
     , _interactions{*this}
     , _env(std::make_unique<LocalEnvironment>(*this, context))
-    , _console(this, _env->core().files().create(_env))
+    //    , _console(this, _env->core().files().create(_env))
     , _locator(this, _project)
     , _commandPalette(this, StandardCommands::get())
     , _completeView(
@@ -45,8 +46,15 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
     for (auto &editor : _editors) {
         editor->showLines(true);
     }
-    _console.showLines(false);
-    _env->console(&_console);
+
+    for (int i = 0; i < ConsoleNum::Count; ++i) {
+        _consoles.push_back(
+            std::make_unique<Editor>(this, _env->core().files().create(_env)));
+        _consoles.back()->showLines(false);
+    }
+    //    _console.showLines(false);
+    //    _env->console(&_console);
+
     _env->project(&_project);
 
     {
@@ -119,11 +127,13 @@ void MainWindow::resize(size_t w, size_t h) {
         }
     }
 
-    _console.width(width());
-    _console.height(_split -
-                    2); // 1 character for toolbar - 2 for how numbers works
-    _console.x(0);
-    _console.y(height() - _split + 1);
+    for (auto &console : _consoles) {
+        console->width(width());
+        console->height(_split -
+                        2); // 1 character for toolbar - 2 for how numbers works
+        console->x(0);
+        console->y(height() - _split + 1);
+    }
 
     _locator.x(0);
     _locator.y(0);
@@ -147,7 +157,7 @@ void MainWindow::draw(IScreen &screen) {
         editor->draw(screen);
     }
     if (_env->showConsole()) {
-        _console.draw(screen);
+        _consoles.at(_currentConsole)->draw(screen);
         screen.draw(0, height() - _split, _splitString);
     }
 
@@ -277,8 +287,13 @@ Editor *MainWindow::currentEditor() {
     if (_commandPalette.visible()) {
         return &_commandPalette;
     }
-    if (_env->showConsole() && _inputFocus == &_console) {
-        return &_console;
+    if (_env->showConsole() &&
+        std::find_if(_consoles.begin(),
+                     _consoles.end(),
+                     [inputFocus = _inputFocus](auto &p) {
+                         return inputFocus == p.get();
+                     }) != _consoles.end()) {
+        return static_cast<Editor *>(_inputFocus);
     }
     if (_currentEditor >= _editors.size()) {
         _currentEditor = _editors.size() - 1;
@@ -286,6 +301,10 @@ Editor *MainWindow::currentEditor() {
     return _editors.at(_currentEditor).get();
 
     throw std::runtime_error("could not get the right editor");
+}
+
+Editor &MainWindow::console(int index) {
+    return *_consoles.at(index);
 }
 
 void MainWindow::resetFocus() {
@@ -398,9 +417,13 @@ void MainWindow::escape() {
     _inputFocus = currentEditor();
 }
 
-void MainWindow::showConsole() {
+void MainWindow::showConsole(int i) {
     _env->showConsole(true);
-    _inputFocus = &_console;
+    _inputFocus = _consoles.at(i).get();
+}
+
+int MainWindow::currentConsole() {
+    return _currentConsole;
 }
 
 void MainWindow::showOpen() {

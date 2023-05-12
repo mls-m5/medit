@@ -27,7 +27,7 @@ public:
         return _lastKeyEvent;
     }
 
-    Editor &console() override {
+    Editor &console(int) override {
         if (!_console) {
             throw std::runtime_error("no console set");
         }

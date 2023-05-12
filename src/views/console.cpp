@@ -6,9 +6,14 @@
 #include "syntax/palette.h"
 #include "text/fstring.h"
 #include "views/editor.h"
+#include "views/mainwindow.h"
 
 void Console::run(std::shared_ptr<IEnvironment> env) {
     env->showConsole(shouldShowConsole);
+
+    if (shouldShowConsole) {
+        env->mainWindow().showConsole(consoleNum);
+    }
 
     auto &buffer = env->console().buffer();
     if (shouldClear) {

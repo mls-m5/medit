@@ -17,7 +17,8 @@ struct MainWindow : public Window {
         _editors; // Shared ptr to allow for weak ptr
     InteractionHandling _interactions;
     std::shared_ptr<LocalEnvironment> _env;
-    Editor _console;
+    std::vector<std::shared_ptr<Editor>> _consoles;
+    size_t _currentConsole = 0;
     Locator _locator;
     CommandPalette _commandPalette;
     CompleteView _completeView;
@@ -59,6 +60,8 @@ struct MainWindow : public Window {
 
     Editor *currentEditor() override;
 
+    Editor &console(int);
+
     void resetFocus();
 
     void switchEditor();
@@ -95,7 +98,8 @@ struct MainWindow : public Window {
 
     // Commands --------------------
     void escape();
-    void showConsole();
+    void showConsole(int);
+    int currentConsole();
 
     /// Show open dialogue
     void showOpen();

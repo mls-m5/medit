@@ -17,8 +17,9 @@ std::shared_ptr<IMode> createParentMode() {
         {KeyEvent{Key::End}, {sc.end}},
         {KeyEvent{Key::PageUp}, {sc.page_up}},
         {KeyEvent{Key::PageDown}, {sc.page_down}},
-        {KeyEvent{Key::KeyCombination, 'T', Modifiers::Ctrl},
-         {[](Ptr env) { env->mainWindow().showConsole(); }}},
+        {KeyEvent{Key::KeyCombination, 'T', Modifiers::Ctrl}, {[](Ptr env) {
+             env->mainWindow().showConsole(env->mainWindow().currentConsole());
+         }}},
         {KeyEvent{Key::KeyCombination, 'E', Modifiers::Ctrl},
          {[](Ptr env) { env->mainWindow().switchEditor(); }}},
         {KeyEvent{Key::KeyCombination, '7', Modifiers::Ctrl},

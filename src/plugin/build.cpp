@@ -5,6 +5,7 @@
 #include "syntax/palette.h"
 #include "text/buffer.h"
 #include "views/console.h"
+#include "views/consolenum.h"
 #include "views/editor.h"
 
 namespace {
@@ -43,6 +44,7 @@ void build(std::shared_ptr<IEnvironment> env) {
         .command = command,
         .buffer = &env->console().buffer(),
         .callback = [] { isBuilding = false; },
+        .consoleNum = ConsoleNum::Build,
     };
 
     console.run(env);

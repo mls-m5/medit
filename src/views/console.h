@@ -14,6 +14,7 @@ struct Console {
     std::function<void()> callback;
     bool shouldShowConsole = true;
     bool shouldClear = true;
+    int consoleNum = 0;
 
     /// Run a process and print the output to the console
     void run(std::shared_ptr<IEnvironment> env);

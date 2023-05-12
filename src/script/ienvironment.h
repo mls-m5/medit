@@ -24,7 +24,7 @@ public:
 
     //! Return the editor active in the current context
     [[nodiscard]] virtual Editor &editor() = 0;
-    [[nodiscard]] virtual Editor &console() = 0;
+    [[nodiscard]] virtual Editor &console(int) = 0;
 
     virtual void statusMessage(FStringView string) = 0;
 

@@ -3,6 +3,7 @@
 #include "syntax/palette.h"
 #include "text/buffer.h"
 #include "views/console.h"
+#include "views/consolenum.h"
 #include "views/editor.h"
 
 void run(std::shared_ptr<IEnvironment> env) {
@@ -28,6 +29,7 @@ void run(std::shared_ptr<IEnvironment> env) {
             FString{"running application: ", Palette::comment} + runCommand,
         .command = runCommand,
         .buffer = &env->console().buffer(),
+        .consoleNum = ConsoleNum::Run,
     };
 
     console.run(env);
