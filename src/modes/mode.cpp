@@ -35,7 +35,6 @@ bool Mode::keyPress(std::shared_ptr<IEnvironment> env) {
         else if (m.first == BufferKeyMap::Match) {
             const auto &block = *m.second;
             block(env);
-            //            scope->run(block);
             _buffer.clear();
             return true;
         }
@@ -44,7 +43,6 @@ bool Mode::keyPress(std::shared_ptr<IEnvironment> env) {
 
     if (action) {
         action(env);
-        //        scope->run(action);
         return true;
     }
     return false;

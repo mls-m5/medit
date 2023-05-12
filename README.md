@@ -48,7 +48,6 @@ Todo:
   - [ ] Jump to file under cursor (path, markdown links etc)
   - [ ] Rename current document
   - [ ] File view
-  - [ ] Make Popenstream support colors in linux
   - [ ] File name above buffers
   - [ ] Ctrl+tab switch between opened buffers
   - [ ] Layouts that handle splits
@@ -72,11 +71,17 @@ Todo:
    - [ ] Add interactions for users to add own name
    - [ ] Create some way for users to send short messages to eachother.
 - [ ] Git plugin
-   - [ ] Push
+   - [x] Push
    - [ ] Diff
-   - [ ] Blame
-   - [ ] Commit (interaction where you select which files)
-- [ ] Support for multiple consoles for different usages.
+   - [x] Blame
+   - [ ] Commit (interaction where you select which files and write message)
+- [ ] Console
+   - [x] Interact with console (focus, scroll, keypresses etc)
+   - [ ] Support for multiple consoles for different usages.
+       - [ ] Implement it
+       - [ ] Open interactions in console as standard (but add option to open in current editor)
+   - [ ] Support backspace characters for popen
+   - [ ] Make Popenstream support colors in linux
 
 # Prioritized changes
 - [ ] Faster navigation

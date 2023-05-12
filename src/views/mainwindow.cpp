@@ -192,7 +192,6 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
         if (_completeView.keyPress(env)) {
             if (auto e = currentEditor()) {
                 env->core().files().updateHighlighting();
-                //                updateHighlighting(e->buffer());
             }
             return true; // Otherwise give key events to editor
         }
@@ -206,7 +205,6 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
     if (_inputFocus->keyPress(env)) {
         if (auto e = currentEditor()) {
             env->core().files().updateHighlighting();
-            //            updateHighlighting(e->buffer());
         }
         if (_activePopup && _activePopup->isClosed()) {
             _activePopup = nullptr;
@@ -267,6 +265,7 @@ void MainWindow::showPopup(std::unique_ptr<IWindow> popup) {
 }
 
 Editor *MainWindow::currentEditor() {
+    // Create some more generic layout management for this
     if (_activePopup) {
         if (auto e = _activePopup->currentEditor()) {
             return e;
@@ -277,6 +276,9 @@ Editor *MainWindow::currentEditor() {
     }
     if (_commandPalette.visible()) {
         return &_commandPalette;
+    }
+    if (_env->showConsole() && _inputFocus == &_console) {
+        return &_console;
     }
     if (_currentEditor >= _editors.size()) {
         _currentEditor = _editors.size() - 1;
