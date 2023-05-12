@@ -7,6 +7,7 @@ add_library(
     jsonformat.cpp
     build.cpp
     run.cpp
+    git.cpp
     clangformat.cpp
     lsp/headerdetection.cpp
     )

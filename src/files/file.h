@@ -2,7 +2,6 @@
 
 #include "files/ifile.h"
 #include "filesystem.h"
-#include "text/rawbuffer.h"
 
 class File : public IFile {
     filesystem::path _path;

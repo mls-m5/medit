@@ -84,6 +84,8 @@ Todo:
 
 ## Feedback
 - [ ] Lsp-plugin diagnostics
+   - [ ] Command that prints state of lsp-server and also command flags for
+         current document
 - [ ] Make sure build command works properly, add settings
 - [ ] Ways to handle settings
 - [x] Add searchable command pallette to make commands runnable (ctrl-p)
@@ -92,10 +94,12 @@ Todo:
 - [x] Select all (ctrl-a)
 - [x] Case insensitive matching in file list and command palette.
 - [x] Exit to normal mode when saving.
-- [ ] When alt+tab into editor, prevent from typing tab
+- [ ] When alt+tab into editor, prevent from typing tab, also when closing other
+      windows with ctrl + w
 - [ ] Option to restore selection (gv)
 - [x] Status line for common operations (for example saving, changing mode)
 - [ ] Test: Add margin from the cursor to the bottom of the screen (when not on end of file)
+- [ ] Lsp urli-s with special characters is not handled properly
 
 ## Requirements
 

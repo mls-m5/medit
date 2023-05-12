@@ -2,8 +2,10 @@
 #include "core/plugins.h"
 #include "navigation/headernavigation.h"
 #include "plugin/clangformat.h"
+#include "plugin/git.h"
 #include "plugin/jsonformat.h"
 #include "plugin/lsp/lspplugin.h"
+#include "script/standardcommands.h"
 #include "syntax/basichighligting.h"
 
 #ifdef ENABLE_LEGACY_CLANG_PLUGIN
@@ -28,4 +30,6 @@ void registerDefaultPlugins(Plugins &container) {
 #ifndef __EMSCRIPTEN__
     LspPlugin::registerPlugin(container);
 #endif
+
+    registerGitCommands(StandardCommands::get());
 }
