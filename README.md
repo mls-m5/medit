@@ -48,6 +48,7 @@ Todo:
   - [ ] Jump to file under cursor (path, markdown links etc)
   - [ ] Rename current document
   - [ ] File view
+  - [ ] Make Popenstream support colors in linux
   - [ ] File name above buffers
   - [ ] Ctrl+tab switch between opened buffers
   - [ ] Layouts that handle splits

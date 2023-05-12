@@ -19,7 +19,6 @@ void build(std::shared_ptr<IEnvironment> env) {
     isBuilding = true;
 
     auto &consoleBuffer = env->console().buffer();
-    //    consoleBuffer.clear();
     consoleBuffer.pushBack(std::string{"trying to build..."});
 
     auto &project = env->project();
