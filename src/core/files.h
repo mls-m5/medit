@@ -24,9 +24,8 @@ public:
     Files(CoreEnvironment &core);
     ~Files();
 
-    std::shared_ptr<Buffer> open(std::filesystem::path,
-                                 std::shared_ptr<IEnvironment> env);
-    std::shared_ptr<Buffer> create(std::shared_ptr<IEnvironment> env);
+    std::shared_ptr<Buffer> open(std::filesystem::path);
+    std::shared_ptr<Buffer> create();
 
     /// Use this when saving a buffer that does not have a file
     void save(Buffer &, std::filesystem::path);

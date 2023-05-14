@@ -95,8 +95,8 @@ void Changes::apply(IEnvironment &env) {
 
     // Handle files that is not opens
     for (auto it = changes.begin(); it != changes.end(); ++it) {
-        auto buffer = env.core().files().open(
-            env.project().settings().root / it->file, env.shared_from_this());
+        auto buffer =
+            env.core().files().open(env.project().settings().root / it->file);
 
         for (auto &c : it->changes) {
             c.apply(*buffer);

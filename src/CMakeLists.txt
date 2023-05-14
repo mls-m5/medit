@@ -134,6 +134,7 @@ add_library(
     script/luastate.cpp
     script/renameinteraction.cpp
     script/saveinteraction.cpp
+    script/newfileinteraction.cpp
     script/interaction.cpp
     navigation/headernavigation.cpp
     completion/autocomplete.cpp

@@ -1,5 +1,6 @@
 
 #include "standardcommands.h"
+#include "core/coreenvironment.h"
 #include "core/registers.h"
 #include "files/project.h"
 #include "main.h"
@@ -285,6 +286,9 @@ StandardCommands create() {
 
     DEF(rename_symbol) {
         beginRenameInteraction(env);
+    };
+    DEF(new_file) {
+        env->editor().buffer(env->core().files().create());
     };
 
     DEF(select_inner_word) {

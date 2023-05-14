@@ -8,7 +8,6 @@
 #include "core/plugins.h"
 #include "files/config.h"
 #include "linux/inotify.h"
-#include "meditfwd.h"
 #include "modes/insertmode.h"
 #include "navigation/inavigation.h"
 #include "screen/iscreen.h"
@@ -29,7 +28,7 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
     , _editors{}
     , _interactions{*this}
     , _env(std::make_unique<LocalEnvironment>(*this, context))
-    , _console(this, _env->core().files().create(_env))
+    , _console(this, _env->core().files().create())
     , _locator(this, _project)
     , _commandPalette(this, StandardCommands::get())
     , _completeView(
@@ -38,7 +37,7 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
 
     //    for (int i = 0; i < 2; ++i) {
     _editors.push_back(
-        std::make_unique<Editor>(this, _env->core().files().create(_env)));
+        std::make_unique<Editor>(this, _env->core().files().create()));
     //    }
     _inputFocus = _editors.front().get();
 
@@ -241,7 +240,7 @@ void MainWindow::open(filesystem::path path,
 
     path = filesystem::absolute(path);
 
-    editor->buffer(_env->core().files().open(path, _env));
+    editor->buffer(_env->core().files().open(path));
 
     {
         auto cur = editor->cursor();

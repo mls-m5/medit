@@ -18,8 +18,7 @@ Files::Files(CoreEnvironment &core)
 
 Files::~Files() = default;
 
-std::shared_ptr<Buffer> Files::open(std::filesystem::path path,
-                                    std::shared_ptr<IEnvironment> env) {
+std::shared_ptr<Buffer> Files::open(std::filesystem::path path) {
     _tv();
 
     if (auto buffer = find(path)) {
@@ -66,7 +65,7 @@ void Files::fileChangeCallback(DirectoryNotifications::EventType type,
     });
 }
 
-std::shared_ptr<Buffer> Files::create(std::shared_ptr<IEnvironment> env) {
+std::shared_ptr<Buffer> Files::create() {
     _tv();
     _buffers.push_back(std::make_shared<Buffer>());
     emitBufferSubscriptionEvent({_buffers.back(), BufferEvent::Open});

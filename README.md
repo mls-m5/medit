@@ -108,6 +108,7 @@ Todo:
 - [x] Status line for common operations (for example saving, changing mode)
 - [ ] Test: Add margin from the cursor to the bottom of the screen (when not on end of file)
 - [ ] Lsp urli-s with special characters is not handled properly
+- [ ] Fast way to create matching source for header (interaction with multiple alternative paths)
 
 ## Requirements
 

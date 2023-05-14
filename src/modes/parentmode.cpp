@@ -42,6 +42,7 @@ std::shared_ptr<IMode> createParentMode() {
         {KeyEvent{Key::KeyCombination, 'A', Modifiers::Ctrl}, sc.select_all},
         {KeyEvent{Key::KeyCombination, 'P', Modifiers::Ctrl},
          sc.command_palette},
+        {KeyEvent{Key::KeyCombination, 'N', Modifiers::Ctrl}, sc.new_file},
     }};
 
     map.defaultAction({});
