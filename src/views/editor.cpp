@@ -72,18 +72,14 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
         }
     }
 
-    /// If it is only a empty buffer. Nobody will miss it
-    if (!_bufferView.buffer().empty() || _bufferView.buffer().file()) {
-        _openedBuffers.push_back(
-            {_bufferView.buffer().weak_from_this(),
-             _cursor,
-             {_bufferView.xScroll(), _bufferView.yScroll()}});
-    }
-
     if (foundState) {
         restoreState(*foundState);
         return;
     }
+
+    _openedBuffers.push_back({_bufferView.buffer().weak_from_this(),
+                              _cursor,
+                              {_bufferView.xScroll(), _bufferView.yScroll()}});
 
     _cursor = Cursor{*buffer};
     _bufferView.scroll(0, 0);
@@ -270,6 +266,19 @@ bool Editor::closeBuffer() {
     }
 
     return false;
+}
+
+void Editor::removeEmptyUnsavedBufferHistory() {
+    if (_openedBuffers.empty()) {
+        return;
+    }
+
+    auto buffer = _openedBuffers.front().buffer.lock();
+
+    /// If it is only a empty unsaved buffer at startup. Nobody will miss it
+    if (buffer->empty() && !buffer->file()) {
+        _openedBuffers.erase(_openedBuffers.begin());
+    }
 }
 
 void Editor::restoreState(SavedState state) {

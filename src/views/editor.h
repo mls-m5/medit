@@ -99,6 +99,10 @@ public:
     /// existed
     bool closeBuffer();
 
+    /// Used at startup to make so that the program does not wait at a blonk
+    /// buffer if the user want to quit
+    void removeEmptyUnsavedBufferHistory();
+
 private:
     struct SavedState {
         std::weak_ptr<Buffer> buffer;

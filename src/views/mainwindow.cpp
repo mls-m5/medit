@@ -60,8 +60,11 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
 
     _locator.callback([this](auto &&path) {
         _locator.visible(false);
-        open(_project.settings().root / path);
         _inputFocus = currentEditor();
+        if (path.empty()) {
+            return;
+        }
+        open(_project.settings().root / path);
     });
 
     _commandPalette.visible(false);

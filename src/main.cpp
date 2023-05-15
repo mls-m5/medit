@@ -100,6 +100,7 @@ struct User {
         }
         else {
             mainWindow->open(settings.file);
+            mainWindow->currentEditor()->removeEmptyUnsavedBufferHistory();
         }
 
         screen->refresh();
@@ -250,4 +251,3 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-

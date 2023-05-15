@@ -6,11 +6,13 @@
 #include <filesystem>
 #include <fstream>
 #include <memory>
+#include <stdexcept>
 
 namespace {
 
 void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
-                                const Interaction &i) {
+                                const Interaction &i,
+                                std::shared_ptr<Buffer> buffer) {
     auto si = SimpleInteraction{};
 
     si.deserialize(i.text);
@@ -32,14 +34,23 @@ void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
         auto ni = Interaction{si.serialize(), {100000, 1}};
 
         env->mainWindow().interactions().newInteraction(
-            ni, handleUserFileNameResponse);
+            ni, [buffer](auto &&a, auto &&b) {
+                handleUserFileNameResponse(a, b, buffer);
+            });
         return;
     }
 
-    auto &buffer = env->editor().buffer();
-    env->mainWindow().statusMessage(FString{"saved to "} +
-                                    buffer.file()->path().string());
-    env->core().files().save(buffer, path);
+    //    auto &buffer = env->editor().buffer();
+
+    try {
+        env->core().files().save(*buffer, path);
+        env->mainWindow().statusMessage(FString{"saved to "} +
+                                        buffer->file()->path().string());
+    }
+    catch (std::runtime_error &e) {
+        env->statusMessage(FString{"failed to save file "} + FString{path} +
+                           ": " + e.what());
+    }
 }
 
 } // namespace
@@ -69,6 +80,10 @@ void saveInteraction(std::shared_ptr<IEnvironment> env) {
 
     i.text = si.serialize();
 
-    env->mainWindow().interactions().newInteraction(i,
-                                                    handleUserFileNameResponse);
+    auto buffer = e.buffer().shared_from_this();
+
+    env->mainWindow().interactions().newInteraction(
+        i, [buffer](auto &&a, auto &&b) {
+            handleUserFileNameResponse(a, b, buffer);
+        });
 }
