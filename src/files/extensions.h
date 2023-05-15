@@ -44,8 +44,17 @@ inline bool isTextFile(const filesystem::path &path) {
     return path.extension() == ".txt";
 }
 
+inline bool isHtmlFile(const filesystem::path &path) {
+    return path.extension() == ".html";
+}
+
+inline bool isJsFile(const filesystem::path &path) {
+    return path.extension() == ".js";
+}
+
 inline bool isKnownExtension(const filesystem::path &path) {
     return isCppHeader(path) || isCppSource(path) || isCSource(path) ||
            isCpp(path) || isJson(path) || isMarkdown(path) || isMake(path) ||
-           isMatmake(path) || isCmakeLists(path) || isTextFile(path);
+           isMatmake(path) || isCmakeLists(path) || isTextFile(path) ||
+           isHtmlFile(path) || isJsFile(path);
 }

@@ -186,11 +186,6 @@ void MainData::start(const Settings &settings) {
     registerDefaultPlugins(CoreEnvironment::instance().plugins());
     CoreEnvironment::instance().plugins().sort();
 
-    //    createScreen(settings);
-
-    // TODO: Core context should probably live in this file somewhere
-    //    CoreEnvironment::instance().context(context.get());
-
     timer->start();
     jobQueue->start();
 

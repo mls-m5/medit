@@ -45,7 +45,7 @@ Todo:
      - [ ] Prompt if buffer contains unsaved changes, otherwise replace
 - User interface
   - [x] Save unnamed buffers with popup with ctrl+s
-  - [ ] Jump to file under cursor (path, markdown links etc)
+  - [ ] Jump to file under cursor (path, markdown links etc) `[[braces syntax]]`
   - [ ] Rename current document
   - [ ] File view
   - [ ] File name above buffers
@@ -83,6 +83,12 @@ Todo:
        - [ ] Open interactions in console as standard (but add option to open in current editor)
    - [ ] Support backspace characters for popen
    - [ ] Make Popenstream support colors in linux
+- [ ] Lsp-plugin
+    - [ ] Lsp-plugin diagnostics
+       - [ ] Command that prints state of lsp-server and also command flags for
+             current document
+    - [ ] Fix: Lsp urli-s with special characters is not handled properly
+    - [ ] Add refactor function (alt+return)
 
 # Prioritized changes
 - [ ] Faster navigation
@@ -91,9 +97,6 @@ Todo:
 
 
 ## Feedback
-- [ ] Lsp-plugin diagnostics
-   - [ ] Command that prints state of lsp-server and also command flags for
-         current document
 - [ ] Make sure build command works properly, add settings
 - [ ] Ways to handle settings
 - [x] Add searchable command pallette to make commands runnable (ctrl-p)
@@ -107,8 +110,8 @@ Todo:
 - [ ] Option to restore selection (gv)
 - [x] Status line for common operations (for example saving, changing mode)
 - [ ] Test: Add margin from the cursor to the bottom of the screen (when not on end of file)
-- [ ] Lsp urli-s with special characters is not handled properly
 - [ ] Fast way to create matching source for header (interaction with multiple alternative paths)
+- [ ] Reloada file lists when files are added or deleted (using the inotify code)
 
 ## Requirements
 
