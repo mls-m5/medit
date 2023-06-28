@@ -4,6 +4,7 @@
 #include "cursorrange.h"
 #include <functional>
 
+/// Helper class to split up a range into words
 class Words {
 public:
     static auto next(Cursor cursor) {
@@ -21,7 +22,8 @@ public:
         CursorRange range;
 
         Iterator(CursorRange *fullRange, CursorRange range)
-            : fullRange(fullRange), range(range) {}
+            : fullRange(fullRange)
+            , range(range) {}
 
         Iterator &operator++() {
             auto cursor = range.end();
@@ -57,7 +59,8 @@ public:
             &_range, CursorRange{_range.buffer(), _range.end(), _range.end()}};
     }
 
-    Words(CursorRange range) : _range(range) {}
+    Words(CursorRange range)
+        : _range(range) {}
 
 private:
     CursorRange _range;
