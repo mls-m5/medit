@@ -301,7 +301,8 @@ void MainWindow::switchEditor() {
 
 void MainWindow::paste(std::string text) {
     if (auto e = currentEditor()) {
-        e->cursor(insert(e->cursor(), text));
+        e->selection(replace(e->selection(), text));
+        StandardCommands::get().normal_mode(env().shared_from_this());
     }
 }
 

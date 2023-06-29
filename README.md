@@ -111,7 +111,9 @@ Todo:
 - [x] Status line for common operations (for example saving, changing mode)
 - [ ] Test: Add margin from the cursor to the bottom of the screen (when not on end of file)
 - [ ] Fast way to create matching source for header (interaction with multiple alternative paths)
-- [ ] Reloada file lists when files are added or deleted (using the inotify code)
+- [ ] Reload file lists when files are added or deleted (using the inotify code)
+- [x] Replace selection instead of just inserting when pasting
+- [ ] Do something about selection when undoing
 
 ## Requirements
 
