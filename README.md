@@ -114,6 +114,9 @@ Todo:
 - [ ] Reload file lists when files are added or deleted (using the inotify code)
 - [x] Replace selection instead of just inserting when pasting
 - [ ] Do something about selection when undoing
+- [x] When doing dd in beginning of file nothing happens, also dd moves cursor
+      to previous row. That should not happend either
+- [ ] Highlighting does not update with timer (only when pressing key)
 
 ## Requirements
 

@@ -87,7 +87,7 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
 }
 
 Cursor Editor::cursor() const {
-    return _cursor;
+    return fix(_cursor);
 }
 
 Position Editor::cursorPosition(Position editorPos) const {

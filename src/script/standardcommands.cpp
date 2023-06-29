@@ -103,7 +103,8 @@ StandardCommands create() {
         auto cursor = e.cursor();
         auto line = e.buffer().lineAt(cursor.y());
         env->registers().save(standardRegister, std::string{line}, true);
-        e.cursor(deleteLine(e.cursor()));
+        deleteLine(e.cursor());
+        e.cursor({e.buffer(), cursor.x(), cursor.y()});
     };
 
     DEF(clear_line) {
