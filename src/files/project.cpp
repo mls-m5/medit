@@ -1,8 +1,11 @@
 
 #include "project.h"
+#include "core/files.h"
+#include "files/directorynotifications.h"
 #include "files/extensions.h"
 #include "text/startswith.h"
 #include "json/json.h"
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -23,6 +26,21 @@ std::string translateInclude(std::string flag, const filesystem::path &root) {
 }
 
 } // namespace
+
+Project::Project(DirectoryNotifications &directoryNotifications) {
+    directoryNotifications.subscribe(
+        [this](DirectoryNotifications::EventType type,
+               std::filesystem::path path,
+               std::filesystem::file_time_type) {
+            if (type == DirectoryNotifications::Added) {
+                addCachedFile(path);
+            }
+            else if (type == DirectoryNotifications::Removed) {
+                removeCachedFile(path);
+            }
+        },
+        this);
+}
 
 filesystem::path Project::root(filesystem::path path) const {
     path = filesystem::absolute(path);
@@ -180,4 +198,16 @@ void Project::loadProjectFile() {
             }
         }
     }
+}
+
+void Project::addCachedFile(std::filesystem::path path) {
+    if (std::find(_fileCache.begin(), _fileCache.end(), path) !=
+        _fileCache.end()) {
+        return;
+    }
+    _fileCache.push_back(path);
+}
+
+void Project::removeCachedFile(std::filesystem::path path) {
+    _fileCache.erase(std::remove(_fileCache.begin(), _fileCache.end(), path));
 }

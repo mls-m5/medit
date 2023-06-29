@@ -40,8 +40,6 @@ void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
         return;
     }
 
-    //    auto &buffer = env->editor().buffer();
-
     try {
         env->core().files().save(*buffer, path);
         env->mainWindow().statusMessage(FString{"saved to "} +

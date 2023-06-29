@@ -1,11 +1,13 @@
 #pragma once
 
+#include "meditfwd.h"
 #include <filesystem>
 #include <vector>
 
 class Project {
-
 public:
+    Project(DirectoryNotifications &files);
+
     struct Settings {
         std::filesystem::path root;
         std::string buildCommand;
@@ -45,4 +47,7 @@ private:
     void loadProjectFile();
 
     Settings _settings;
+
+    void addCachedFile(std::filesystem::path);
+    void removeCachedFile(std::filesystem::path);
 };

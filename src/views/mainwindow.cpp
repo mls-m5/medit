@@ -7,7 +7,6 @@
 #include "core/itimer.h"
 #include "core/plugins.h"
 #include "files/config.h"
-#include "linux/inotify.h"
 #include "modes/insertmode.h"
 #include "navigation/inavigation.h"
 #include "screen/iscreen.h"
@@ -33,6 +32,7 @@ MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
     , _commandPalette(this, StandardCommands::get())
     , _completeView(
           this, CoreEnvironment::instance().plugins().get<ICompletionSource>())
+    , _project{_env->core().files().directoryNotifications()}
     , _currentEditor(0) {
 
     //    for (int i = 0; i < 2; ++i) {
