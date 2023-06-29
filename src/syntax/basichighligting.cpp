@@ -3,10 +3,14 @@
 #include "files/extensions.h"
 #include "syntax/palette.h"
 #include "text/cursorrangeops.h"
+#include "text/fchar.h"
+#include "text/utf8char.h"
 #include "text/words.h"
 #include <array>
+#include <cctype>
 #include <filesystem>
 #include <iostream>
+#include <locale>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -121,6 +125,26 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
 
     format(all(buffer), Palette::standard);
 
+    {
+        // Find function names
+        auto prev = CursorRange{buffer.begin(), buffer.begin()};
+
+        for (auto word : Words(buffer)) {
+            auto first =
+                content(word.begin()).at(0); // Only match the first part
+            if (first == '(' or first == '.') {
+                if (prev.empty()) {
+                    continue;
+                }
+
+                if (std::isalpha(content(prev.begin()).at(0), std::locale())) {
+                    format(prev, Palette::identifier);
+                }
+            }
+            prev = word;
+        }
+    }
+
     for (auto word : Words(buffer)) {
         highlightWord(word, *wordList);
     }
@@ -143,6 +167,31 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
             if (line.front().c == '#') {
                 auto range = CursorRange{buffer, {0, y}, {10000, y}};
                 format(range, Palette::comment);
+            }
+        }
+    }
+
+    // Identify strings
+    for (size_t y = 0; y < buffer.lines().size(); ++y) {
+        FChar startChar = '"';
+        auto &line = buffer.lineAt(y);
+        for (size_t x = 0; x < line.size(); ++x) {
+
+            if (line.at(x).c == '"') {
+                size_t begin = x;
+                startChar = line.at(x);
+                ++x;
+                for (; x < line.size(); ++x) {
+                    if (line.at(x).c == startChar) {
+                        ++x;
+                        break;
+                    }
+                }
+                size_t end = x;
+
+                auto range = CursorRange{buffer, {begin, y}, {end, y}};
+                std::cout << "string: " << range << std::endl;
+                format(range, Palette::string);
             }
         }
     }
