@@ -56,9 +56,18 @@ inline bool isPython(const filesystem::path &path) {
     return path.extension() == ".js";
 }
 
+inline bool isJava(const filesystem::path &path) {
+    return path.extension() == ".java";
+}
+
+inline bool isCSharp(const filesystem::path &path) {
+    return path.extension() == ".cs";
+}
+
 inline bool isKnownExtension(const filesystem::path &path) {
     return isCppHeader(path) || isCppSource(path) || isCSource(path) ||
            isCpp(path) || isJson(path) || isMarkdown(path) || isMake(path) ||
            isMatmake(path) || isCmakeLists(path) || isTextFile(path) ||
-           isHtml(path) || isJs(path) || isPython(path);
+           isHtml(path) || isJs(path) || isPython(path) || isJava(path) ||
+           isCSharp(path);
 }

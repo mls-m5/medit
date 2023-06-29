@@ -1,6 +1,5 @@
 
 #include "plugin/clangformat.h"
-#include "core/plugins.h"
 #include "files/extensions.h"
 #include "files/ifile.h"
 #include "views/editor.h"
@@ -13,7 +12,8 @@ bool ClangFormat::format(Editor &editor) {
 
     auto path = file->path();
 
-    if (!isCpp(path) && !isCSource(path)) {
+    if (!isCpp(path) && !isCSource(path) && !isJs(path) && !isJava(path) &&
+        !isCSharp(path)) {
         return false;
     }
 
@@ -23,7 +23,3 @@ bool ClangFormat::format(Editor &editor) {
 
     return true;
 }
-
-// void ClangFormat::registerPlugin() {
-//     registerFormat<ClangFormat>();
-// }

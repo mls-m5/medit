@@ -117,6 +117,8 @@ Todo:
 - [x] When doing dd in beginning of file nothing happens, also dd moves cursor
       to previous row. That should not happend either
 - [ ] Highlighting does not update with timer (only when pressing key)
+- [ ] Really want "rename_file" functionality
+- [ ] Also really want that the locator updates when there is changes to files
 
 ## Requirements
 

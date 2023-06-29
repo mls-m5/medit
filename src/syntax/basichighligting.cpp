@@ -176,8 +176,8 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
         FChar startChar = '"';
         auto &line = buffer.lineAt(y);
         for (size_t x = 0; x < line.size(); ++x) {
-
-            if (line.at(x).c == '"') {
+            auto c = line.at(x).c;
+            if (c == '"' || c == '\'') {
                 size_t begin = x;
                 startChar = line.at(x);
                 ++x;
@@ -190,7 +190,7 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
                 size_t end = x;
 
                 auto range = CursorRange{buffer, {begin, y}, {end, y}};
-                std::cout << "string: " << range << std::endl;
+                //                std::cout << "string: " << range << std::endl;
                 format(range, Palette::string);
             }
         }
