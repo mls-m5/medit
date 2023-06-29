@@ -197,4 +197,6 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
     }
 
     buffer.isColorsOld(false);
+
+    buffer.emitChangeSignal();
 }

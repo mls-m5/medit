@@ -264,7 +264,7 @@ void LspPlugin::handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
                translate(static_cast<SemanticTokenTypes>(item.tokenType)));
     }
 
-    buffer->emitChangeSignal();
+    //    buffer->emitChangeSignal();
 }
 
 void LspPlugin::requestSemanticsToken(std::shared_ptr<Buffer> buffer) {
