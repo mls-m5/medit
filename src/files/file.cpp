@@ -2,6 +2,7 @@
 #include "text/buffer.h"
 #include <filesystem>
 #include <fstream>
+#include <system_error>
 
 File::File(filesystem::path path)
     : _path(path) {}
@@ -32,4 +33,11 @@ std::string File::representation() const {
 
 filesystem::path File::path() const {
     return _path;
+}
+
+bool File::rename(std::filesystem::path to) {
+    std::error_code ec;
+    std::filesystem::rename(_path, to, ec);
+
+    return static_cast<bool>(ec);
 }

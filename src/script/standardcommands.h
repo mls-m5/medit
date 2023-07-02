@@ -55,7 +55,8 @@
     STD_DEF(rename_symbol);                                                    \
     STD_DEF(select_all);                                                       \
     STD_DEF(command_palette);                                                  \
-    STD_DEF(new_file);
+    STD_DEF(new_file);                                                         \
+    STD_DEF(rename_file);
 
 #define STD_DEF(name) std::function<void(EnvPtrT env)> name
 

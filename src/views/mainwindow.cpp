@@ -377,7 +377,7 @@ void MainWindow::updateTitle() {
         _screen.title(title);
     }
     else {
-        _screen.title("unnamed*");
+        _screen.title("[unnamed buffer]*");
     }
 }
 

@@ -11,6 +11,7 @@
 #include "plugin/run.h"
 #include "renameinteraction.h"
 #include "saveinteraction.h"
+#include "script/renamefileinteraction.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
 #include "togglecomments.h"
@@ -290,6 +291,10 @@ StandardCommands create() {
     };
     DEF(new_file) {
         env->editor().buffer(env->core().files().create());
+    };
+
+    DEF(rename_file) {
+        beginRenameFileInteraction(env);
     };
 
     DEF(select_inner_word) {

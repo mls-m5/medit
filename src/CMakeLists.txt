@@ -133,6 +133,7 @@ add_library(
     script/togglecomments.cpp
     script/luastate.cpp
     script/renameinteraction.cpp
+    script/renamefileinteraction.cpp
     script/saveinteraction.cpp
     script/newfileinteraction.cpp
     script/interaction.cpp

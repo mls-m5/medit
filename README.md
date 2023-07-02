@@ -73,7 +73,8 @@ Todo:
 - [ ] Git plugin
    - [x] Push
    - [ ] Diff
-   - [x] Blame
+   - [x] Status
+   - [ ] Blame
    - [ ] Commit (interaction where you select which files and write message)
 - [ ] Console
    - [x] Interact with console (focus, scroll, keypresses etc)
