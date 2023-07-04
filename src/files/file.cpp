@@ -35,15 +35,6 @@ filesystem::path File::path() const {
     return _path;
 }
 
-bool File::rename(std::filesystem::path to) {
-    std::error_code ec;
-    std::filesystem::rename(_path, to, ec);
-
-    if (ec) {
-        return true;
-    }
-
+void File::rename(std::filesystem::path to) {
     _path = to;
-
-    return false;
 }

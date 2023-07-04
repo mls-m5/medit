@@ -17,6 +17,7 @@ class IView;
 class IMode;
 class Editor;
 class IFile;
+class Files;
 class BufferView;
 class Command;
 class ClangModel;

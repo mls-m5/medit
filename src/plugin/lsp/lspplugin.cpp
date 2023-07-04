@@ -144,7 +144,7 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
         auto params = DidOpenTextDocumentParams{
             .textDocument =
                 TextDocumentItem{
-                    .uri = pathToUri(event.buffer->path()),
+                    .uri = pathToUri(event.path),
                     .languageId = "cpp",
                     .version = event.buffer->history().revision(),
                     .text = content,
@@ -155,19 +155,19 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
         requestSemanticsToken(event.buffer);
     }
     if (event.type == BufferEvent::Close) {
-        if (!shouldProcessFileWithClang(event.buffer->path())) {
+        if (!shouldProcessFileWithClang(event.path)) {
             return;
         }
 
         auto params = DidCloseTextDocumentParams{
             .textDocument =
                 {
-                    .uri = pathToUri(event.buffer->path()),
+                    .uri = pathToUri(event.path),
                 },
         };
 
         _client->notify(params);
-        requestSemanticsToken(event.buffer);
+        //        requestSemanticsToken(event.buffer);
     }
 }
 

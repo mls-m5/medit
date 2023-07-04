@@ -32,7 +32,7 @@ void handleUserResponse(std::shared_ptr<IEnvironment> env,
             "failed to rename from ", si.at("from"), " to ", si.at("to"));
     }
 
-    if (file->rename(si.at("to"))) {
+    if (env->core().files().rename(si.at("from"), si.at("to"))) {
         debugOutput(
             "failed to rename from ", si.at("from"), " to ", si.at("to"));
     }

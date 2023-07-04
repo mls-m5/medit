@@ -15,6 +15,9 @@ public:
     std::string representation() const override;
     filesystem::path path() const override;
 
-    //! Returns true on error
-    bool rename(std::filesystem::path to) override;
+private:
+    //! Function used by Files class to change the path
+    void rename(std::filesystem::path to) override;
+
+    friend class Files;
 };

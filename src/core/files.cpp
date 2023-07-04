@@ -6,6 +6,7 @@
 #include "files/file.h"
 #include "linux/inotify.h"
 #include "text/buffer.h"
+#include <filesystem>
 #include <iostream>
 
 Files::Files(CoreEnvironment &core)
@@ -22,7 +23,8 @@ std::shared_ptr<Buffer> Files::open(std::filesystem::path path) {
     _tv();
 
     if (auto buffer = find(path)) {
-        emitBufferSubscriptionEvent({buffer, BufferEvent::Open});
+        emitBufferSubscriptionEvent(
+            {buffer, buffer->file()->path(), BufferEvent::Open});
         return buffer;
     }
 
@@ -30,7 +32,8 @@ std::shared_ptr<Buffer> Files::open(std::filesystem::path path) {
     // use theme to update highlighting
 
     _buffers.push_back(Buffer::open(path));
-    emitBufferSubscriptionEvent({_buffers.back(), BufferEvent::Open});
+    emitBufferSubscriptionEvent(
+        {_buffers.back(), _buffers.back()->file()->path(), BufferEvent::Open});
     return _buffers.back();
 }
 
@@ -43,6 +46,49 @@ std::shared_ptr<Buffer> Files::find(std::filesystem::path path) {
         }
     }
     return nullptr;
+}
+
+bool Files::rename(std::filesystem::path from, std::filesystem::path to) {
+    _tv();
+
+    if (from == to) {
+        return true;
+    }
+
+    if (find(to)) {
+        return true;
+    }
+
+    if (std::filesystem::exists(to)) {
+        return true;
+    }
+
+    auto buffer = find(from);
+
+    if (!buffer) {
+        return true;
+    }
+
+    auto file = buffer->file();
+
+    if (!file) {
+        return true;
+    }
+
+    std::error_code ec;
+
+    std::filesystem::rename(from, to, ec);
+
+    if (ec) {
+        return true;
+    }
+
+    file->rename(to);
+
+    emitBufferSubscriptionEvent({nullptr, from, BufferEvent::Close});
+    emitBufferSubscriptionEvent({buffer, to, BufferEvent::Open});
+
+    return false;
 }
 
 void Files::fileChangeCallback(DirectoryNotifications::EventType type,
@@ -68,7 +114,7 @@ void Files::fileChangeCallback(DirectoryNotifications::EventType type,
 std::shared_ptr<Buffer> Files::create() {
     _tv();
     _buffers.push_back(std::make_shared<Buffer>());
-    emitBufferSubscriptionEvent({_buffers.back(), BufferEvent::Open});
+    emitBufferSubscriptionEvent({_buffers.back(), {}, BufferEvent::Open});
     return _buffers.back();
 }
 
@@ -79,7 +125,8 @@ void Files::save(Buffer &buffer, std::filesystem::path path) {
     buffer.save();
 
     _buffers.push_back(buffer.shared_from_this());
-    emitBufferSubscriptionEvent({_buffers.back(), BufferEvent::Open});
+    emitBufferSubscriptionEvent(
+        {_buffers.back(), _buffers.back()->file()->path(), BufferEvent::Open});
 }
 
 void Files::unsubscribeToBufferEvents(void *reference) {

@@ -10,11 +10,10 @@
 
 struct BufferEvent {
     std::shared_ptr<Buffer> buffer;
+    std::filesystem::path path; // This is separate for when the path is changed
     enum {
         Open,
         Close,
-        //        Redraw, // For example new diagnostics is published or buffer
-        //        changed
     } type = Open;
 };
 
@@ -54,6 +53,8 @@ public:
     DirectoryNotifications &directoryNotifications() {
         return *_dirNotifications;
     }
+
+    bool rename(std::filesystem::path from, std::filesystem::path to);
 
 private:
     CoreEnvironment &_core;
