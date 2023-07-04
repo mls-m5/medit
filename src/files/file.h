@@ -16,5 +16,5 @@ public:
     filesystem::path path() const override;
 
     //! Returns true on error
-    bool rename(std::filesystem::path to);
+    bool rename(std::filesystem::path to) override;
 };

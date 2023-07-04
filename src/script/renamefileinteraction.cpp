@@ -1,7 +1,9 @@
 #include "renamefileinteraction.h"
+#include "core/coreenvironment.h"
 #include "core/debugoutput.h"
 #include "script/ienvironment.h"
 #include "script/interaction.h"
+#include "text/fstring.h"
 #include "views/editor.h"
 #include "views/mainwindow.h"
 #include <memory>
@@ -11,16 +13,29 @@ namespace {
 
 void handleUserResponse(std::shared_ptr<IEnvironment> env,
                         const Interaction &i) {
-    debugOutput("got response: ", i.text);
-
     auto si = SimpleInteraction{};
     si.deserialize(i.text);
 
-    debugOutput("should rename from ", si.at("from"), " to ", si.at("to"));
+    auto path = si.at("from");
 
-#warning "continue here"
+    auto buffer = env->core().files().find(path);
 
-    throw std::runtime_error{"implement this"};
+    if (!buffer) {
+        debugOutput(
+            "failed to rename from ", si.at("from"), " to ", si.at("to"));
+    }
+
+    auto file = buffer->file();
+
+    if (!file) {
+        debugOutput(
+            "failed to rename from ", si.at("from"), " to ", si.at("to"));
+    }
+
+    if (file->rename(si.at("to"))) {
+        debugOutput(
+            "failed to rename from ", si.at("from"), " to ", si.at("to"));
+    }
 }
 
 } // namespace
@@ -34,12 +49,15 @@ void beginRenameFileInteraction(std::shared_ptr<IEnvironment> env) {
 
     auto path = file->path();
 
+    auto pathStr = FString{path.string()};
+
     auto si = SimpleInteraction{"rename file",
                                 {
-                                    {"from", path.string()},
-                                    {"to", path.string()},
+                                    {"from", pathStr},
+                                    {"to", pathStr},
                                 }};
 
     env->mainWindow().interactions().newInteraction(
-        Interaction{si.serialize(), {4, 2}}, handleUserResponse);
+        Interaction{si.serialize(), {3 + pathStr.size(), 2}},
+        handleUserResponse);
 }

@@ -39,5 +39,11 @@ bool File::rename(std::filesystem::path to) {
     std::error_code ec;
     std::filesystem::rename(_path, to, ec);
 
-    return static_cast<bool>(ec);
+    if (ec) {
+        return true;
+    }
+
+    _path = to;
+
+    return false;
 }
