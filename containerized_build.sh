@@ -1,2 +1,2 @@
 
-docker-compose up --build
+podman-compose up --build
