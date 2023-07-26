@@ -1,4 +1,5 @@
 #include "guiscreen.h"
+#include "core/threadname.h"
 #include <algorithm>
 #include <mutex>
 
@@ -522,6 +523,7 @@ GuiScreen::GuiScreen() {
     std::condition_variable cv;
 
     _thread = std::thread([this, &cv] {
+        setThreadName("gui screen");
         _buffer = std::make_unique<Buffer>(80, 40);
         cv.notify_one();
         _buffer->loop();

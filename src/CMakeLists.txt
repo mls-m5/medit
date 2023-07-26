@@ -13,6 +13,7 @@ add_library(
     core/registers.cpp
     core/jstimer.cpp
     core/files.cpp
+    core/threadname.cpp
     syntax/palette.cpp
     linux/inotify.cpp
     )

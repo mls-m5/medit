@@ -1,3 +1,4 @@
+#include "core/threadname.h"
 #ifndef __EMSCRIPTEN__
 #include "ncursesscreen.h"
 #include "syntax/color.h"
@@ -134,6 +135,7 @@ void NCursesScreen::cursor(size_t x, size_t y) {
 
 NCursesScreen::NCursesScreen()
     : _ncursesThread([this] {
+        setThreadName("ncurses thread");
         init();
         _isRunning = true;
         loop();

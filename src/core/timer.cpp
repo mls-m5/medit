@@ -1,4 +1,5 @@
 #include "core/timer.h"
+#include "core/threadname.h"
 #include <algorithm>
 #include <thread>
 
@@ -51,6 +52,7 @@ void Timer::stop() {
 }
 
 void Timer::loop() {
+    setThreadName("timer");
     _isRunning = true;
     while (_isRunning) {
         {

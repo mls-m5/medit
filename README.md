@@ -46,7 +46,7 @@ Todo:
 - User interface
   - [x] Save unnamed buffers with popup with ctrl+s
   - [ ] Jump to file under cursor (path, markdown links etc) `[[braces syntax]]`
-  - [ ] Rename current document
+  - [x] Rename current document
   - [ ] File view
   - [ ] File name above buffers
   - [ ] Ctrl+tab switch between opened buffers
@@ -121,6 +121,20 @@ Todo:
 - [x] Highlighting does not update with timer (only when pressing key)
 - [ ] Really want "rename_file" functionality
 - [x] Also really want that the locator updates when there is changes to files
+- [ ] Scroll-bar to show location in file
+- [ ] Sometimes selection is active when not in visual mode. For example when
+      pasing (maybe when pasting in visual mode or normal mode)
+      - [ ] Fix that
+      - [ ] Make so that changing mode and pressing escape always resets selection
+- [ ] When trying to build and the build directory does not exist, it does not
+      continue. Ask if the user wants to create the directory
+- [ ] .medit.json does not reload when changed. Fix that
+- [ ] Maybe sessions that reopens files when project is closed
+- [ ] Build before running
+      
+## Bugs
+- [ ] When open a file where there is no projec/.git, the program freezes
+- [ ] Segmentation fault when using goto symbol on std::numeric::pi
 
 ## Requirements
 

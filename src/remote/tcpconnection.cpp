@@ -1,12 +1,14 @@
 #include "tcpconnection.h"
 #include "boost/asio.hpp"
 #include "core/debugoutput.h"
+#include "core/threadname.h"
 
 using namespace boost::asio;
 using namespace boost::asio::ip;
 using boost::system::error_code;
 
 void TcpConnection::inLoop() {
+    setThreadName("tcp in");
     while (true) {
         if (!_socket.is_open()) {
             break;

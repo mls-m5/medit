@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/threadname.h"
 #include "ijobqueue.h"
 #include <functional>
 #include <mutex>
@@ -58,6 +59,7 @@ public:
 private:
     //! Run and lock the current thread
     void loop() {
+        setThreadName("jobs");
         _threadId = std::this_thread::get_id();
         while (_running) {
             work();
@@ -86,15 +88,3 @@ private:
     std::thread::id _threadId = {};
     std::thread _thread;
 };
-
-
-
-
-
-
-
-
-
-
-
-

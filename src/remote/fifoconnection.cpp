@@ -1,9 +1,11 @@
 #include "fifoconnection.h"
+#include "core/threadname.h"
 
 FifoConnection::FifoConnection(std::filesystem::path inPath,
                                std::filesystem::path outPath) {
 
     _inThread = std::thread([this, inPath] {
+        setThreadName("fifo in");
         _in.open(inPath);
         inLoop();
     });

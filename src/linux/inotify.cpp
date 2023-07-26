@@ -1,6 +1,7 @@
 
 
 #include "inotify.h"
+#include "core/threadname.h"
 #include <filesystem>
 #include <system_error>
 
@@ -101,6 +102,7 @@ public:
         }
 
         event_thread = std::thread([this]() {
+            setThreadName("inotify");
             constexpr size_t buffer_size =
                 sizeof(struct inotify_event) + NAME_MAX + 1;
             char buffer[buffer_size];

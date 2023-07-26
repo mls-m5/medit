@@ -2,6 +2,7 @@
 #include "core/context.h"
 #include "core/coreenvironment.h"
 #include "core/jobqueue.h"
+#include "core/threadname.h"
 #include "core/timer.h"
 #include "registerdefaultplugins.h"
 #include "screen/bufferedscreen.h"
@@ -231,6 +232,8 @@ void MainData::loop() {
 int main(int argc, char **argv) {
     auto settings = Settings{argc, argv};
 
+    setThreadName("main");
+
 #ifndef __EMSCRIPTEN__
     if (settings.style == UiStyle::FifoClient ||
         settings.style == UiStyle::TcpClient) {
@@ -239,6 +242,8 @@ int main(int argc, char **argv) {
 #endif
 
     mainData.start(settings);
+    setThreadName("main loop"); // Renaming since all child threads inherits the
+                                // first name
     mainData.loop();
 #ifndef __EMSCRIPTEN__
     mainData.stop();
