@@ -15,6 +15,7 @@
 #include "syntax/palette.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
+#include "text/fstring.h"
 #include "text/fstringview.h"
 #include "views/inputbox.h"
 #include <filesystem>
@@ -242,6 +243,12 @@ void MainWindow::open(filesystem::path path,
     }
 
     path = filesystem::absolute(path);
+
+    if (!std::filesystem::is_regular_file(path)) {
+        statusMessage(
+            FString{"trying to open non existing path " + path.string()});
+        return;
+    }
 
     editor->buffer(_env->core().files().open(path));
 
