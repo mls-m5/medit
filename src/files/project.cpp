@@ -42,8 +42,13 @@ Project::Project(DirectoryNotifications &directoryNotifications) {
         this);
 }
 
-filesystem::path Project::root(filesystem::path path) const {
-    path = filesystem::absolute(path);
+filesystem::path Project::root(filesystem::path arg) const {
+
+    if (std::filesystem::is_directory(arg)) {
+        return arg;
+    }
+
+    auto path = filesystem::absolute(arg);
 
     do {
         if (filesystem::exists(path / projectFileName)) {
@@ -56,13 +61,13 @@ filesystem::path Project::root(filesystem::path path) const {
 
         path = path.parent_path();
 
-    } while (!path.empty());
+    } while (!path.empty() && path != "/");
 
     if (path.empty()) {
-        return {};
+        return arg;
     }
 
-    return path.parent_path();
+    return arg.parent_path();
 }
 
 void Project::updateCache(const filesystem::path &pathInProject, size_t max) {
