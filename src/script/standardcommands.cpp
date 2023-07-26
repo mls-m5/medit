@@ -242,6 +242,7 @@ StandardCommands create() {
         ::build(env);
     };
     DEF(run) {
+        ::build(env);
         ::run(env);
     };
     DEF(insert_mode) {

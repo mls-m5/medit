@@ -130,12 +130,13 @@ Todo:
       continue. Ask if the user wants to create the directory
 - [ ] .medit.json does not reload when changed. Fix that
 - [ ] Maybe sessions that reopens files when project is closed
-- [ ] Build before running
+- [x] Build before running
 - [ ] Locator performance is really bad when opening large project
       
 ## Bugs
 - [x] When open a file where there is no project/.git, the program freezes
 - [ ] Segmentation fault when using goto symbol on std::numeric::pi
+- [ ] Move cursor to the left when exiting input mode (like regular vim)
 
 ## Requirements
 

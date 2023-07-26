@@ -14,11 +14,14 @@ void Console::run(std::shared_ptr<IEnvironment> env) {
     if (shouldClear) {
         buffer.clear();
     }
-    buffer.pushBack(openingMessage);
 
     env->context().jobQueue().addTask([command = this->command,
                                        env,
-                                       callback = this->callback] {
+                                       callback = this->callback,
+                                       openingMessage = openingMessage] {
+        env->context().guiQueue().addTask([env, openingMessage] {
+            env->console().buffer().pushBack(openingMessage);
+        });
         POpenStream stream(command, true, 100);
 
         for (std::string line; getline(stream, line);) {
