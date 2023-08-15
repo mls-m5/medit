@@ -131,7 +131,9 @@ LspPlugin::LspPlugin()
         }});
 }
 
-LspPlugin::~LspPlugin() = default;
+LspPlugin::~LspPlugin() {
+    _client->shutdown().get();
+}
 
 void LspPlugin::bufferEvent(BufferEvent &event) {
     if (event.type == BufferEvent::Open) {
