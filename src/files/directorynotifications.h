@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <functional>
 
-// TODO move to someowhere else
 class DirectoryNotifications {
 public:
     virtual ~DirectoryNotifications() = default;

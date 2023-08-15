@@ -64,10 +64,14 @@ inline bool isCSharp(const filesystem::path &path) {
     return path.extension() == ".cs";
 }
 
+inline bool isPhp(const filesystem::path &path) {
+    return path.extension() == ".php";
+}
+
 inline bool isKnownExtension(const filesystem::path &path) {
     return isCppHeader(path) || isCppSource(path) || isCSource(path) ||
            isCpp(path) || isJson(path) || isMarkdown(path) || isMake(path) ||
            isMatmake(path) || isCmakeLists(path) || isTextFile(path) ||
            isHtml(path) || isJs(path) || isPython(path) || isJava(path) ||
-           isCSharp(path);
+           isCSharp(path) || isPhp(path);
 }
