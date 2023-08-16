@@ -11,6 +11,11 @@ public:
     BufferView(IView *parent, std::shared_ptr<Buffer> buffer);
     ~BufferView() override;
 
+    BufferView(const BufferView &) = delete;
+    BufferView(BufferView &&) = delete;
+    BufferView &operator=(const BufferView &) = delete;
+    BufferView &operator=(BufferView &&) = delete;
+
     void draw(IScreen &) override;
 
     void drawSpecial(IScreen &, const CursorRange &range, FormatType f) const;

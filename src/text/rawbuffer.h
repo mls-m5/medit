@@ -22,6 +22,7 @@ public:
     RawBuffer(RawBuffer &&) = delete;
     RawBuffer &operator=(const RawBuffer &) = delete;
     RawBuffer &operator=(RawBuffer &&) = delete;
+    ~RawBuffer() = default;
 
     [[nodiscard]] const std::vector<FString> &lines() const;
 

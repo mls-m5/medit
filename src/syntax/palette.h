@@ -59,8 +59,8 @@ public:
     Color getColor(std::string_view name) const;
     Color getStyleColor(std::string_view name) const;
 
-    bool update(IScreen &screen) /*override*/;
-    void load(filesystem::path) /*override*/;
+    bool update(IScreen &screen);
+    void load(filesystem::path);
     void load(std::istream &stream);
 
     bool isChanged() const {

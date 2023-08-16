@@ -1,7 +1,7 @@
 #pragma once
 
 #include "keys/ikeysink.h"
-#include "views/view.h"
+#include "views/iview.h"
 
 class IWindow : public virtual IView, public virtual IKeySink {
 public:

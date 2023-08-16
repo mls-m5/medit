@@ -5,6 +5,12 @@
 
 class IView {
 public:
+    IView(const IView &) = delete;
+    IView(IView &&) = delete;
+    IView &operator=(const IView &) = delete;
+    IView &operator=(IView &&) = delete;
+    IView() = default;
+
     virtual void draw(IScreen &) = 0;
 
     virtual ~IView() = default;

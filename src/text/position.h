@@ -8,11 +8,14 @@ private:
     size_t _y;
 
 public:
-    constexpr Position(size_t x = 0, size_t y = 0) : _x(x), _y(y) {}
+    constexpr Position(size_t x = 0, size_t y = 0)
+        : _x(x)
+        , _y(y) {}
     constexpr Position(const Position &) = default;
     constexpr Position(Position &&) = default;
     constexpr Position &operator=(const Position &) = default;
     constexpr Position &operator=(Position &&) = default;
+    ~Position() = default;
     constexpr auto x() const {
         return _x;
     }
