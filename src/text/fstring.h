@@ -5,11 +5,10 @@
 
 /// Formatted string; string with formatted characters
 class FString {
-    std::vector<FChar> _content;
-
 public:
-    using iterator = std::vector<FChar>::iterator;
-    using const_iterator = std::vector<FChar>::const_iterator;
+    using VectorT = std::vector<FChar>;
+    using iterator = VectorT::iterator;
+    using const_iterator = VectorT::const_iterator;
 
     FString() = default;
     FString(const FString &) = default;
@@ -128,15 +127,15 @@ public:
         }
     }
 
-    auto *data() {
+    FChar *data() {
         return _content.data();
     }
 
-    auto *data() const {
+    const FChar *data() const {
         return _content.data();
     }
 
-    auto &content() {
+    VectorT &content() {
         return _content;
     }
 
@@ -162,6 +161,9 @@ public:
 
     bool operator!=(const FString &other) const;
     bool operator==(const FString &other) const;
+
+private:
+    VectorT _content;
 };
 
 inline std::ostream &operator<<(std::ostream &out, const FString &str) {
