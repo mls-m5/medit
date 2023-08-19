@@ -11,7 +11,8 @@ struct KeyMatch {
     KeyMatch &operator=(const KeyMatch &) = default;
     KeyMatch &operator=(KeyMatch &&) = default;
 
-    KeyMatch(KeyEvent key) : event(key) {}
+    KeyMatch(KeyEvent key)
+        : event(key) {}
     KeyMatch(std::string_view str) {
         event = {};
         event.key = Key::Text;
@@ -43,5 +44,9 @@ public:
 
     CommandBlock defaultAction() const {
         return _defaultAction;
+    }
+
+    void bind(std::pair<KeyMatch, CommandBlock> bind) {
+        _map.push_back(std::move(bind));
     }
 };

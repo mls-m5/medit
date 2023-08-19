@@ -38,10 +38,16 @@ std::shared_ptr<IMode> createVisualMode(IEnvironment &env,
             {{"e"}, {sc.combine(sc.right, sc.word_end)}},
             {{"w"},
              {sc.combine(sc.word_end, sc.right, sc.word_end, sc.word_begin)}},
-            {{"y"}, {sc.combine(sc.yank, sc.normal_mode)}},
-
+            //            {{"y"}, {sc.combine(sc.yank, sc.normal_mode)}},
         },
     };
+
+    if (blockSelection) {
+        map.bind({{"y"}, {sc.combine(sc.yank_block, sc.normal_mode)}});
+    }
+    else {
+        map.bind({{"y"}, {sc.combine(sc.yank, sc.normal_mode)}});
+    }
     map.defaultAction({});
 
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{

@@ -137,7 +137,11 @@ CursorRange Editor::selection() {
     }
 
     if (_selectionAnchor) {
-        return {*_selectionAnchor, _cursor};
+        auto range = CursorRange{*_selectionAnchor, _cursor};
+
+        range.endPosition(right(range.end(), false));
+
+        return range;
     }
     return {_cursor};
 }

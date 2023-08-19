@@ -14,11 +14,13 @@
 #include "script/renamefileinteraction.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
+#include "text/fstring.h"
 #include "togglecomments.h"
 #include "views/editor.h"
 #include "views/mainwindow.h"
 #include <functional>
 #include <map>
+#include <sstream>
 #include <string>
 
 namespace {
@@ -146,6 +148,22 @@ StandardCommands create() {
         e.cursor(selection.begin(), true);
     };
 
+    DEF(yank_block) {
+        // Used in visual block
+        // Maybe find some way to merge this with "yank"
+        auto &e = env->editor();
+        auto selection = e.selection();
+        if (selection.empty()) {
+            env->registers().save(
+                standardRegister, content(e.cursor()).toString(), true);
+        }
+        else {
+            env->registers().save(standardRegister, toString(selection), true);
+        }
+
+        e.cursor(selection.begin(), true);
+    };
+
     DEF(erase) {
         auto &e = env->editor();
         auto selection = e.selection();
@@ -176,13 +194,19 @@ StandardCommands create() {
     DEF(paste_before) {
         auto str = env->registers().load(standardRegister);
         auto cursor = env->editor().cursor();
+        auto oldCursor = cursor;
         if (str.isLine) {
             insert({cursor.buffer(), 0, cursor.y()}, str.value + '\n');
         }
         else {
-            for (auto c : str.value) {
-                //! Todo: Make efficient if this slows down
-                cursor = insert(c, cursor);
+            auto ss = std::istringstream{str.value};
+            bool isFirstLine = true;
+            for (std::string line; std::getline(ss, line);) {
+                if (!isFirstLine) {
+                    cursor = insert('\n', cursor);
+                }
+                isFirstLine = false;
+                cursor = insert(cursor, FString{line});
             }
             env->editor().cursor(left(cursor));
         }
@@ -197,10 +221,16 @@ StandardCommands create() {
             env->editor().cursor(cursor);
         }
         else {
-            cursor = right(cursor);
-            for (auto c : str.value) {
-                //! Todo: Make efficient if this slows down
-                cursor = insert(c, cursor);
+            auto ss = std::istringstream{str.value};
+            bool isFirstLine = true;
+            cursor = right(cursor, false);
+
+            for (std::string line; std::getline(ss, line);) {
+                if (!isFirstLine) {
+                    cursor = insert('\n', cursor);
+                }
+                isFirstLine = false;
+                cursor = insert(cursor, FString{line});
             }
             env->editor().cursor(cursor);
         }
