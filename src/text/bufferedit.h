@@ -2,7 +2,6 @@
 
 #include "cursor.h"
 #include "fstring.h"
-#include "utf8char.h"
 #include <vector>
 
 class BufferEdit {

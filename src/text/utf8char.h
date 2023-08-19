@@ -30,16 +30,11 @@ public:
     constexpr Utf8Char(Utf8Char &&) = default;
     constexpr Utf8Char &operator=(const Utf8Char &) = default;
     constexpr Utf8Char &operator=(Utf8Char &&) = default;
+    ~Utf8Char() = default;
 
     constexpr Utf8Char(char c) {
         _data.front() = c;
     }
-
-    //    constexpr Utf8Char(const char *c, size_t size) {
-    //        for (size_t i = 0; i < size && i < _data.size(); ++i) {
-    //            _data[i] = c[i];
-    //        }
-    //    }
 
     constexpr Utf8Char(const char *data) {
         auto &c = *data;
@@ -84,19 +79,19 @@ public:
     }
 
     constexpr char operator[](size_t index) const {
-        return _data[index];
+        return _data.at(index);
     }
 
     constexpr char &operator[](size_t index) {
-        return _data[index];
+        return _data.at(index);
     }
 
     constexpr char at(size_t index) const {
-        return _data[index];
+        return _data.at(index);
     }
 
     constexpr char &at(size_t index) {
-        return _data[index];
+        return _data.at(index);
     }
 
     constexpr auto begin() {

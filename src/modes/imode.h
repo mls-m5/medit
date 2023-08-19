@@ -8,6 +8,13 @@
 
 class IMode {
 public:
+    IMode(const IMode &) = delete;
+    IMode(IMode &&) = delete;
+    IMode &operator=(const IMode &) = delete;
+    IMode &operator=(IMode &&) = delete;
+    IMode() = default;
+    virtual ~IMode() = default;
+
     /// @return true if handled by this mode
     virtual bool keyPress(std::shared_ptr<IEnvironment>) = 0;
     virtual std::string_view name() const = 0;
@@ -18,6 +25,4 @@ public:
 
     /// If only whole lines can be selected
     virtual bool isBlockSelection() const = 0;
-
-    virtual ~IMode() = default;
 };

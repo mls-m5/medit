@@ -15,6 +15,7 @@ public:
     FString(FString &&) = default;
     FString &operator=(const FString &) = default;
     FString &operator=(FString &&) = default;
+    ~FString() = default;
 
     // Convert from a standard string to a fstring
     FString(const std::string &str, FormatType f = 1);
@@ -26,43 +27,43 @@ public:
     FString(const FChar *begin, const FChar *end);
     operator std::string() const;
 
-    [[nodiscard]] auto size() const {
+    [[nodiscard]] size_t size() const {
         return _content.size();
     }
 
-    [[nodiscard]] auto empty() const {
+    [[nodiscard]] bool empty() const {
         return _content.empty();
     }
 
-    [[nodiscard]] auto begin() const {
+    [[nodiscard]] VectorT::const_iterator begin() const {
         return _content.begin();
     }
 
-    [[nodiscard]] auto begin() {
+    [[nodiscard]] VectorT::iterator begin() {
         return _content.begin();
     }
 
-    [[nodiscard]] auto end() const {
+    [[nodiscard]] VectorT::const_iterator end() const {
         return _content.end();
     }
 
-    [[nodiscard]] auto end() {
+    [[nodiscard]] VectorT::iterator end() {
         return _content.end();
     }
 
-    [[nodiscard]] auto at(size_t index) const {
+    [[nodiscard]] FChar at(size_t index) const {
         return _content.at(index);
     }
 
-    [[nodiscard]] auto &at(size_t index) {
+    [[nodiscard]] FChar &at(size_t index) {
         return _content.at(index);
     }
 
-    [[nodiscard]] auto front() const {
+    [[nodiscard]] FChar front() const {
         return _content.front();
     }
 
-    [[nodiscard]] auto back() const {
+    [[nodiscard]] FChar back() const {
         return _content.back();
     }
 
