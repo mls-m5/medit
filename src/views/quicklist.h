@@ -1,8 +1,8 @@
 #pragma once
 
-#include "files/filesystem.h"
 #include "views/editor.h"
 #include "views/listview.h"
+#include <filesystem>
 
 class QuickList : public Editor {
 public:
@@ -18,7 +18,7 @@ public:
     // @see IView
     void draw(IScreen &) override;
 
-    void callback(std::function<void(filesystem::path)> f);
+    void callback(std::function<void(std::filesystem::path)> f);
 
     void visible(bool value);
 

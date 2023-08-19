@@ -1,4 +1,5 @@
 #pragma once
-#include "files/filesystem.h"
 
-filesystem::path findFont(filesystem::path path);
+#include <filesystem>
+
+std::filesystem::path findFont(std::filesystem::path path);

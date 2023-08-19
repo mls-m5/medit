@@ -2,6 +2,8 @@
 #include "core/os.h"
 #include <cstdlib>
 
+namespace filesystem = std::filesystem;
+
 filesystem::path findConfig(filesystem::path file) {
     if (auto env = getenv("HOME")) {
         auto fullPath = filesystem::path{env} / ".config/medit" / file;

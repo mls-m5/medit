@@ -4,7 +4,7 @@
 #include <fstream>
 #include <system_error>
 
-File::File(filesystem::path path)
+File::File(std::filesystem::path path)
     : _path(path) {}
 
 void File::load(Buffer &buffer) {
@@ -31,7 +31,7 @@ std::string File::representation() const {
     return _path.string();
 }
 
-filesystem::path File::path() const {
+std::filesystem::path File::path() const {
     return _path;
 }
 

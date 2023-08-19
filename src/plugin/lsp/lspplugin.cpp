@@ -355,7 +355,7 @@ bool LspComplete::shouldComplete(std::shared_ptr<IEnvironment> env) {
     return shouldProcessFileWithClang(env->editor().path());
 }
 
-bool LspHighlight::shouldEnable(filesystem::path path) {
+bool LspHighlight::shouldEnable(std::filesystem::path path) {
     return shouldProcessFileWithClang(path);
 }
 

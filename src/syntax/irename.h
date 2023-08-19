@@ -8,6 +8,13 @@
 
 class IRename {
 public:
+    IRename() = default;
+    IRename(const IRename &) = delete;
+    IRename(IRename &&) = delete;
+    IRename &operator=(const IRename &) = delete;
+    IRename &operator=(IRename &&) = delete;
+    virtual ~IRename() = default;
+
     struct RenameArgs {
         std::string newName;
     };

@@ -26,7 +26,7 @@ void build(std::shared_ptr<IEnvironment> env) {
     auto root = project.settings().root;
 
     if (!root.empty()) {
-        filesystem::current_path(root);
+        std::filesystem::current_path(root);
     }
 
     if (project.settings().buildCommand.empty()) {

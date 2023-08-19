@@ -24,7 +24,7 @@ IFile *Editor::file() {
     return buffer().file();
 }
 
-filesystem::path Editor::path() {
+std::filesystem::path Editor::path() {
     return buffer().path();
 }
 

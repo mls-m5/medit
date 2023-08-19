@@ -10,16 +10,17 @@ filesystem::Path getPath() {
 }
 
 #else
-filesystem::path getPath() {
-    auto possibleLinks = std::array<filesystem::path, 3>{
+std::filesystem::path getPath() {
+    auto possibleLinks = std::array<std::filesystem::path, 3>{
         "/proc/self/exe",
         "/proc/curproc/file",
         "/proc/self/path/a.out",
     };
 
     for (auto &link : possibleLinks) {
-        if (filesystem::exists(link) || filesystem::is_symlink(link)) {
-            return filesystem::read_symlink(link);
+        if (std::filesystem::exists(link) ||
+            std::filesystem::is_symlink(link)) {
+            return std::filesystem::read_symlink(link);
         }
     }
 
@@ -30,6 +31,6 @@ filesystem::path getPath() {
 
 } // namespace
 
-filesystem::path executablePath() {
+std::filesystem::path executablePath() {
     return getPath();
 }

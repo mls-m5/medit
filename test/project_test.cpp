@@ -1,11 +1,11 @@
 
-#include "files/filesystem.h"
 #include "files/project.h"
 #include "mls-unit-test/unittest.h"
 #include "mock/files/mockdirectorynotifications.h"
+#include <filesystem>
 
-const filesystem::path path = "test/res/.medit.json";
-const filesystem::path root = "test/res";
+const std::filesystem::path path = "test/res/.medit.json";
+const std::filesystem::path root = "test/res";
 
 TEST_SUIT_BEGIN
 
@@ -18,7 +18,7 @@ TEST_CASE("load") {
 
     project.updateCache(path);
 
-    ASSERT_EQ(project.settings().root, filesystem::absolute(root));
+    ASSERT_EQ(project.settings().root, std::filesystem::absolute(root));
 
     ASSERT_EQ(project.settings().buildCommand, "matmake");
 }

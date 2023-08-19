@@ -63,7 +63,7 @@ public:
 
 class LspHighlight : public IHighlight {
 public:
-    bool shouldEnable(filesystem::path) override;
+    bool shouldEnable(std::filesystem::path) override;
     void highlight(Buffer &) override;
     int priority() override {
         return 100;

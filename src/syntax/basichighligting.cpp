@@ -99,7 +99,7 @@ BasicHighlighting::BasicHighlighting() = default;
 
 BasicHighlighting::~BasicHighlighting() = default;
 
-bool BasicHighlighting::shouldEnable(filesystem::path) {
+bool BasicHighlighting::shouldEnable(std::filesystem::path) {
     return true;
 }
 

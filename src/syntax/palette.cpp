@@ -54,7 +54,7 @@ void Palette::load(std::istream &stream) {
     }
 }
 
-void Palette::load(filesystem::path path) {
+void Palette::load(std::filesystem::path path) {
     std::fstream(path) >> *this;
 }
 

@@ -15,7 +15,8 @@ namespace {
 
 const std::string_view projectFileName = ".medit.json";
 
-std::string translateInclude(std::string flag, const filesystem::path &root) {
+std::string translateInclude(std::string flag,
+                             const std::filesystem::path &root) {
     if (starts_with(flag, "-I") && flag.size() > 2) {
         if (flag.at(2) != '/') {
             flag = "-I" + (root / flag.substr(2)).string();
@@ -42,20 +43,20 @@ Project::Project(DirectoryNotifications &directoryNotifications) {
         this);
 }
 
-filesystem::path Project::root(filesystem::path arg) const {
+std::filesystem::path Project::root(std::filesystem::path arg) const {
 
     if (std::filesystem::is_directory(arg)) {
         return arg;
     }
 
-    auto path = filesystem::absolute(arg);
+    auto path = std::filesystem::absolute(arg);
 
     do {
-        if (filesystem::exists(path / projectFileName)) {
+        if (std::filesystem::exists(path / projectFileName)) {
             return path;
         }
 
-        if (filesystem::exists(path / ".git")) {
+        if (std::filesystem::exists(path / ".git")) {
             return path;
         }
 
@@ -70,7 +71,8 @@ filesystem::path Project::root(filesystem::path arg) const {
     return arg.parent_path();
 }
 
-void Project::updateCache(const filesystem::path &pathInProject, size_t max) {
+void Project::updateCache(const std::filesystem::path &pathInProject,
+                          size_t max) {
     _fileCache = findProjectFiles(pathInProject, max);
     loadProjectFile();
     if (_settings.buildCommand.empty()) {
@@ -78,7 +80,7 @@ void Project::updateCache(const filesystem::path &pathInProject, size_t max) {
     }
 }
 
-filesystem::path Project::findSwitchHeader(filesystem::path path) {
+std::filesystem::path Project::findSwitchHeader(std::filesystem::path path) {
     if (path.empty()) {
         return {};
     }
@@ -128,8 +130,8 @@ std::string Project::guessBuildCommand() {
     return {};
 }
 
-std::vector<filesystem::path> Project::findProjectFiles(
-    const filesystem::path &pathInProject, size_t max) {
+std::vector<std::filesystem::path> Project::findProjectFiles(
+    const std::filesystem::path &pathInProject, size_t max) {
 
 #ifdef __EMSCRIPTEN__
 
@@ -143,10 +145,10 @@ std::vector<filesystem::path> Project::findProjectFiles(
         return {};
     }
 
-    std::vector<filesystem::path> paths;
+    std::vector<std::filesystem::path> paths;
 
     size_t i = 0;
-    for (auto &path : filesystem::recursive_directory_iterator{
+    for (auto &path : std::filesystem::recursive_directory_iterator{
              root,
              std::filesystem::directory_options::skip_permission_denied}) {
         if (!isKnownExtension(path)) {
@@ -164,7 +166,7 @@ std::vector<filesystem::path> Project::findProjectFiles(
 
 void Project::loadProjectFile() {
     auto projectFile = _settings.root / projectFileName;
-    if (!filesystem::exists(projectFile)) {
+    if (!std::filesystem::exists(projectFile)) {
         return;
     }
 

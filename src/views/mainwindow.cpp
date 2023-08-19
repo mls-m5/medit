@@ -220,13 +220,13 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
 }
 
 void MainWindow::updateLocatorBuffer() {
-    _project.updateCache(filesystem::current_path());
+    _project.updateCache(std::filesystem::current_path());
     _env->core().files().directoryNotifications().path(
         _project.settings()
             .root); // TODO: This should probably be handled somewhere else
 }
 
-void MainWindow::open(filesystem::path path,
+void MainWindow::open(std::filesystem::path path,
                       std::optional<int> x,
                       std::optional<int> y) {
     if (path.empty()) {
@@ -242,7 +242,7 @@ void MainWindow::open(filesystem::path path,
         return;
     }
 
-    path = filesystem::absolute(path);
+    path = std::filesystem::absolute(path);
 
     if (!std::filesystem::is_regular_file(path)) {
         statusMessage(
@@ -420,7 +420,7 @@ void MainWindow::showOpen() {
     }
     auto path = editor->path();
     if (path.empty()) {
-        path = filesystem::current_path();
+        path = std::filesystem::current_path();
     }
     auto input =
         std::make_unique<InputBox>(this, "Path to open: ", path.string());

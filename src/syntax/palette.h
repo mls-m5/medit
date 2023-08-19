@@ -1,11 +1,11 @@
 #pragma once
 
-#include "files/filesystem.h"
 #include "meditfwd.h"
 #include "nlohmann/json.hpp"
 #include "syntax/color.h"
 #include "syntax/palette.h"
 #include "text/formattype.h"
+#include <filesystem>
 #include <iosfwd>
 #include <map>
 
@@ -60,7 +60,7 @@ public:
     Color getStyleColor(std::string_view name) const;
 
     bool update(IScreen &screen);
-    void load(filesystem::path);
+    void load(std::filesystem::path);
     void load(std::istream &stream);
 
     bool isChanged() const {

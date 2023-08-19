@@ -1,5 +1,5 @@
 #pragma once
 
-#include "files/filesystem.h"
+#include <filesystem>
 
-filesystem::path findConfig(filesystem::path file);
+std::filesystem::path findConfig(std::filesystem::path file);

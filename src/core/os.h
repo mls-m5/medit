@@ -1,6 +1,6 @@
 #pragma once
 
-#include "files/filesystem.h"
+#include <filesystem>
 #include <stdexcept>
 #include <string>
 
@@ -37,4 +37,4 @@ inline bool hasCommand(std::string command) {
     }
 }
 
-filesystem::path executablePath();
+std::filesystem::path executablePath();

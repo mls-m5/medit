@@ -36,7 +36,7 @@ void QuickList::draw(IScreen &screen) {
     }
 }
 
-void QuickList::callback(std::function<void(filesystem::path)> f) {
+void QuickList::callback(std::function<void(std::filesystem::path)> f) {
     _list.callback([f, this](auto &&, size_t, auto &&path) {
         if (path.has_value()) {
             f(std::any_cast<std::string>(path));

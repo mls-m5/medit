@@ -51,7 +51,7 @@ struct MainWindow : public Window {
 
     void updateLocatorBuffer();
 
-    void open(filesystem::path path,
+    void open(std::filesystem::path path,
               std::optional<int> x = {},
               std::optional<int> y = {});
 

@@ -12,7 +12,7 @@ public:
     ~BasicHighlighting();
 
     //! @see IHighlight
-    bool shouldEnable(filesystem::path) override;
+    bool shouldEnable(std::filesystem::path) override;
     static void highlightStatic(Buffer &buffer);
     void highlight(Buffer &buffer) override;
 
