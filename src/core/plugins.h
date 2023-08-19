@@ -33,6 +33,7 @@ private:
         }
     }
 
+    /// Try to add a plugin as any possible plugin
     template <typename... T, typename V>
     void addMultiple(std::shared_ptr<V> ptr) {
         (addSingle<T, V>(ptr), ...);

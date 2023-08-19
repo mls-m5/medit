@@ -42,6 +42,7 @@ public:
     constexpr CursorRange(CursorRange &&) = default;
     constexpr CursorRange &operator=(const CursorRange &) = default;
     constexpr CursorRange &operator=(CursorRange &&) = default;
+    ~CursorRange() = default;
 
     constexpr void fixOrder() {
         if (_end < _begin) {

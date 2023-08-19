@@ -69,7 +69,6 @@ void QuickList::updateList() {
 
     for (auto &item : _populate()) {
         size_t fillLen = 1;
-        //        auto str = std::string{fstring};
         auto str = std::string{toLower(item.second)};
 
         if (str.find(bufferStr) == std::string::npos) {
@@ -79,8 +78,6 @@ void QuickList::updateList() {
         if (item.first.size() < maxFillLen) {
             fillLen = maxFillLen - item.first.size();
         }
-
-        //        auto path = std::filesystem::path{fstring};
 
         _list.addLine(FString{item.first} +
                           FString{std::string(fillLen, ' '), 1} + item.second,

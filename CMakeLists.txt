@@ -50,7 +50,7 @@ target_link_libraries(
 target_compile_features(
     medit_common
     INTERFACE
-    cxx_std_17
+    cxx_std_20
     )
 
 add_subdirectory(test)

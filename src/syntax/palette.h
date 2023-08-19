@@ -34,6 +34,12 @@ struct Style {
         }
     }
 
+    void visit(Archive &arch) {
+        arch("c", color);
+        arch("b", background);
+        arch("f", f);
+    }
+
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(Style, color, background, f);
 };
 
@@ -89,6 +95,8 @@ public:
         warning,
         note,
     };
+
+    void visit(Archive &arch) {}
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(Palette, _palette, _styles)
 };

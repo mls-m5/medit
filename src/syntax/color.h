@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core/archive.h"
+#include "meditfwd.h"
 #include "nlohmann/json.hpp"
 #include <string_view>
 
@@ -29,6 +31,8 @@ public:
         , _b(b)
         , _notSet(notSet) {}
 
+    ~Color() = default;
+
     constexpr auto r() const {
         return _r;
     }
@@ -43,6 +47,12 @@ public:
 
     constexpr operator bool() const {
         return !_notSet;
+    }
+
+    void visit(Archive &arch) {
+        arch("r", _r);
+        arch("g", _g);
+        arch("b", _b);
     }
 
 private:

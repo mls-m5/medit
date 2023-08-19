@@ -27,6 +27,7 @@ class Palette;
 class IAnnotation;
 class Registers;
 class Interaction;
+class Archive;
 
 class MainWindow;
 class IWindow;

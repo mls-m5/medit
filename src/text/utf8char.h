@@ -52,6 +52,36 @@ public:
         }
     }
 
+    /// c++20 stuff
+    constexpr Utf8Char(const char8_t *data) {
+        auto &c = *data;
+        if ((c & 0b10000000) == 0) {
+            _data = {static_cast<char>(c)};
+        }
+        else if ((c & 0b11100000) == 0b11000000) {
+            _data = {static_cast<char>(data[0]), static_cast<char>(data[1])};
+        }
+        else if ((c & 0b11110000) == 0b11100000) {
+            _data = {static_cast<char>(data[0]),
+                     static_cast<char>(data[1]),
+                     static_cast<char>(data[2])};
+        }
+        else if ((c & 0b11111000) == 0b11110000) {
+            _data = {static_cast<char>(data[0]),
+                     static_cast<char>(data[1]),
+                     static_cast<char>(data[2]),
+                     static_cast<char>(data[3])};
+        }
+    }
+
+    /// c++20 stuff
+    constexpr Utf8Char(std::u8string_view data) {
+        _data = {};
+        for (size_t i = 0; i < data.size() && i < 4; ++i) {
+            _data[i] = static_cast<char>(data[i]);
+        }
+    }
+
     constexpr Utf8Char(std::string_view data) {
         _data = {};
         for (size_t i = 0; i < data.size() && i < 4; ++i) {

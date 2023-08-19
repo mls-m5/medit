@@ -14,6 +14,8 @@ add_library(
     core/jstimer.cpp
     core/files.cpp
     core/threadname.cpp
+    core/inarchive.cpp
+    core/outarchive.cpp
     syntax/palette.cpp
     linux/inotify.cpp
     )

@@ -9,6 +9,10 @@ public:
     using PopulateRetT = std::vector<std::pair<FString, FString>>;
     using PopulateFunctionT = std::function<PopulateRetT()>;
 
+    QuickList(const QuickList &) = delete;
+    QuickList(QuickList &&) = delete;
+    QuickList &operator=(const QuickList &) = delete;
+    QuickList &operator=(QuickList &&) = delete;
     QuickList(IView *parent, PopulateFunctionT);
     ~QuickList() override;
 
