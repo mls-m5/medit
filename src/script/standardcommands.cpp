@@ -124,11 +124,7 @@ StandardCommands create() {
         auto event = env->key();
         e.cursor(insert(event.symbol, e.cursor()));
     };
-    DEF(insert) {
-        auto &e = env->editor();
-        auto event = env->key();
-        e.cursor(insert(event.symbol, e.cursor()));
-    };
+
     DEF(split) {
         auto &e = env->editor();
         e.cursor(split(e.cursor()));
@@ -200,14 +196,7 @@ StandardCommands create() {
         }
         else {
             auto ss = std::istringstream{str.value};
-            bool isFirstLine = true;
-            for (std::string line; std::getline(ss, line);) {
-                if (!isFirstLine) {
-                    cursor = insert('\n', cursor);
-                }
-                isFirstLine = false;
-                cursor = insert(cursor, FString{line});
-            }
+            cursor = insert(cursor, str.value);
             env->editor().cursor(left(cursor));
         }
     };
@@ -222,16 +211,8 @@ StandardCommands create() {
         }
         else {
             auto ss = std::istringstream{str.value};
-            bool isFirstLine = true;
             cursor = right(cursor, false);
-
-            for (std::string line; std::getline(ss, line);) {
-                if (!isFirstLine) {
-                    cursor = insert('\n', cursor);
-                }
-                isFirstLine = false;
-                cursor = insert(cursor, FString{line});
-            }
+            cursor = insert(cursor, str.value);
             env->editor().cursor(cursor);
         }
     };
