@@ -1,6 +1,7 @@
 #include "inarchive.h"
 
-InArchive::InArchive(std::istream &stream) {
+InArchive::InArchive(std::istream &stream)
+    : Archive{Archive::In} {
     stream >> json;
 }
 
@@ -23,5 +24,9 @@ void InArchive::handle(Sv name, long long &value) {
 }
 
 void InArchive::handle(Sv name, double &value) {
+    current()[name].get_to(value);
+}
+
+void InArchive::handle(Sv name, std::string &value) {
     current()[name].get_to(value);
 }

@@ -12,6 +12,7 @@ public:
 
     void handle(Sv, long long &) override;
     void handle(Sv, double &) override;
+    void handle(Sv, std::string &) override;
 
     InArchive(std::istream &stream);
 
