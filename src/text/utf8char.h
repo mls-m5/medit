@@ -5,6 +5,8 @@
 #include <ostream>
 #include <string_view>
 
+class Archive;
+
 constexpr uint8_t utf8size(char first) {
     if ((first & 0b10000000) == 0) {
         return 1;
@@ -211,6 +213,8 @@ public:
     friend std::ostream &operator<<(std::ostream &stream, Utf8Char &c) {
         return stream.write(&c._data.front(), static_cast<ptrdiff_t>(c.size()));
     }
+
+    void visit(Archive &arch);
 
     friend struct std::hash<Utf8Char>;
 };

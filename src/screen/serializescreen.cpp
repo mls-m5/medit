@@ -1,18 +1,18 @@
 #include "serializescreen.h"
-#include "keys/event_serialization.h"
-#include "nlohmann/json.hpp"
+// #include "keys/event_serialization.h"
+// #include "nlohmann/json.hpp"
+#include "core/inarchive.h"
 #include "syntax/palette.h"
-#include "text/fstring_serialization.h"
-#include "text/fstringview_serialization.h"
+// #include "text/fstring_serialization.h"
+// #include "text/fstringview_serialization.h"
 #include <sstream>
 
 SerializeScreen::SerializeScreen(std::shared_ptr<IConnection> connection)
     : _connection{connection} {
     connection->subscribe([this](std::string_view str) {
         auto ss = std::istringstream{std::string{str}};
-        auto json = nlohmann::json{};
-        ss >> json;
-        receive(json);
+        auto arch = InArchive{ss};
+        receive(arch);
     });
 }
 
@@ -135,7 +135,8 @@ nlohmann::json SerializeScreen::request(nlohmann::json json) {
     }
 }
 
-void SerializeScreen::receive(const nlohmann::json &json) {
+// void SerializeScreen::receive(const nlohmann::json &json) {
+void SerializeScreen::receive(Archive &arch) {
     if (auto it = json.find("id"); it != json.end()) {
         auto lock = std::unique_lock(_mutex);
         _receivedRequest = it->get<long>();

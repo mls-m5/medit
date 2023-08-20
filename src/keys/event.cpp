@@ -1,5 +1,7 @@
 #include "keys/event.h"
+#include "core/archive.h"
 #include "text/fstring.h"
+#include <variant>
 
 KeyEvent KeyEvent::translate(std::string name) {
 
@@ -48,4 +50,68 @@ KeyEvent KeyEvent::translate(std::string name) {
 
     auto fname = FString{name};
     return KeyEvent{};
+}
+
+void KeyEvent::visit(Archive &arch) {
+    arch("key", key);
+    arch("symbol", symbol);
+    arch("modifiers", modifiers);
+    arch("state", state);
+}
+
+void load(Archive &arch, Event &e) {
+    size_t t = 0;
+    arch("event_type", t);
+    switch (t) {
+    case 0:
+        e = NullEvent{};
+        break;
+    case 1: {
+        auto e = KeyEvent{};
+        break;
+    }
+    case 2: {
+        auto pe = MouseDownEvent{};
+        break;
+    }
+    case 3: {
+        auto pe = MouseMoveEvent{};
+        break;
+    }
+    case 4: {
+        auto pe = PasteEvent{};
+        break;
+    }
+    case 5: {
+        auto pe = ResizeEvent{};
+        break;
+    }
+    }
+
+    arch.beginChild("event");
+    std::visit([&arch](auto &e) { e.visit(arch); }, e);
+    arch.endChild();
+}
+
+void MouseDownEvent::visit(Archive &arch) {
+    ARCH_PAIR(button);
+    ARCH_PAIR(x);
+    ARCH_PAIR(y);
+}
+
+void MouseMoveEvent::visit(Archive &arch) {
+    ARCH_PAIR(button);
+    ARCH_PAIR(x);
+    ARCH_PAIR(y);
+}
+
+void NullEvent::visit(Archive &arch) {}
+
+void PasteEvent::visit(Archive &arch) {
+    ARCH_PAIR(text);
+}
+
+void ResizeEvent::visit(Archive &arch) {
+    ARCH_PAIR(width);
+    ARCH_PAIR(height);
 }

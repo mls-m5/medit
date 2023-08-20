@@ -1,5 +1,6 @@
 #pragma once
 
+#include "meditfwd.h"
 #include "text/utf8char.h"
 #include <functional>
 #include <variant>
@@ -51,6 +52,7 @@ public:
     constexpr KeyEvent(KeyEvent &&) = default;
     constexpr KeyEvent &operator=(const KeyEvent &) = default;
     constexpr KeyEvent &operator=(KeyEvent &&) = default;
+    ~KeyEvent() = default;
 
     constexpr KeyEvent(Key key,
                        Utf8Char symbol = {},
@@ -81,6 +83,8 @@ public:
     Utf8Char symbol = {};
     Modifiers modifiers = Modifiers::None;
     bool state = true;
+
+    void visit(Archive &arch);
 };
 
 struct MouseDownEvent {
@@ -88,6 +92,8 @@ public:
     int button = 1;
     int x = -1;
     int y = -1;
+
+    void visit(Archive &arch);
 };
 
 struct MouseMoveEvent {
@@ -95,17 +101,25 @@ public:
     int button = 1;
     int x = -1;
     int y = -1;
+
+    void visit(Archive &arch);
 };
 
-struct NullEvent {};
+struct NullEvent {
+    void visit(Archive &arch);
+};
 
 struct PasteEvent {
     std::string text;
+
+    void visit(Archive &arch);
 };
 
 struct ResizeEvent {
     size_t width;
     size_t height;
+
+    void visit(Archive &arch);
 };
 
 using Event = std::variant<NullEvent,
@@ -114,3 +128,7 @@ using Event = std::variant<NullEvent,
                            MouseMoveEvent,
                            PasteEvent,
                            ResizeEvent>;
+
+/// Serialization
+void save(Archive &, Event &);
+void load(Archive &, Event &);

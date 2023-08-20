@@ -11,7 +11,7 @@
 class SerializeScreen : public IScreen {
 public:
     SerializeScreen(std::shared_ptr<IConnection> connection);
-    ~SerializeScreen();
+    ~SerializeScreen() override;
 
     SerializeScreen() = delete;
     SerializeScreen(const SerializeScreen &) = delete;
@@ -51,7 +51,8 @@ private:
     nlohmann::json request(nlohmann::json);
 
     //! Where the remote data enters this class
-    void receive(const nlohmann::json &);
+    //    void receive(const nlohmann::json &);
+    void receive(Archive &);
 
     std::mutex _mutex;
     std::condition_variable _cv;

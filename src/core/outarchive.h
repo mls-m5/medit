@@ -14,6 +14,7 @@ public:
 
     void handle(Sv, long long &value) override;
     void handle(Sv, double &value) override;
+    void handle(Sv, std::string &value) override;
 
     OutArchive(std::ostream &stream);
 
