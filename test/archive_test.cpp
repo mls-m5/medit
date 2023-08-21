@@ -2,6 +2,8 @@
 #include "core/inarchive.h"
 #include "core/outarchive.h"
 #include "mls-unit-test/unittest.h"
+#include "text/fstring.h"
+#include "text/utf8char.h"
 #include <sstream>
 
 struct Apa {
@@ -21,14 +23,24 @@ TEST_CASE("basic test") {
         auto arch = OutArchive{ss};
 
         int i = 10;
-        arch("hello", i);
+        EXPECT_FALSE(arch("hello", i));
 
-        arch.beginChild("child1");
+        EXPECT_TRUE(arch.beginChild("child1"));
 
         i = 20;
-        arch("x", i);
+        EXPECT_FALSE(arch("x", i));
 
         arch.endChild();
+
+        auto v = std::vector<int>{1, 2, 3};
+        EXPECT_FALSE(arch("list", v));
+
+        auto c = Utf8Char{"ö"};
+
+        EXPECT_FALSE(arch("char", c));
+
+        //        auto fstr = FString{"hello", 2};
+        //        EXPECT_FALSE(arch("fstr", fstr));
     }
 
     {
@@ -38,13 +50,30 @@ TEST_CASE("basic test") {
         arch("hello", i);
         EXPECT_EQ(10, i);
 
-        arch.beginChild("child1");
+        EXPECT_TRUE(arch.beginChild("child1"));
 
-        arch("x", i);
+        EXPECT_TRUE(arch("x", i));
 
         EXPECT_EQ(i, 20);
 
         arch.endChild();
+
+        auto v = std::vector<int>{1, 2, 3};
+        EXPECT_TRUE(arch("list", v));
+
+        EXPECT_EQ(v.size(), 3);
+        EXPECT_EQ(v.at(0), 1);
+        EXPECT_EQ(v.at(1), 2);
+        EXPECT_EQ(v.at(2), 3);
+
+        auto c = Utf8Char{};
+
+        EXPECT_TRUE(arch("char", c));
+        EXPECT_EQ(c, "ö");
+
+        EXPECT_FALSE(arch.beginChild("non-existent"));
+        size_t size = 10;
+        EXPECT_FALSE(arch.beginList("non-existent", size));
     }
 }
 

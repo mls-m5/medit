@@ -2,6 +2,7 @@
 
 #include <concepts>
 #include <string_view>
+#include <vector>
 
 #define ARCH_PAIR(x) arch(#x, x)
 
@@ -25,6 +26,9 @@ concept HasGlobalSaveLoad = requires(T value, Archive &archive) {
 template <typename T>
 concept Enum = std::is_enum_v<T>;
 
+/// Note that the handdle functions returns true for when a element is found in
+/// inarchive, and always returns false for out archives (the value has not been
+/// written to
 class Archive {
 public:
     enum Direction {
@@ -36,71 +40,116 @@ public:
 
     using Sv = std::string_view;
 
-    virtual void beginChild(Sv) = 0;
+    /// Return true if the child is successfully created/found
+    virtual bool beginChild(Sv) = 0;
+
+    /// Return true if the child is successfully created/found
+    virtual bool beginList(Sv, size_t &) = 0;
+
+    /// Only call this if begin statement has returned true
     virtual void endChild() = 0;
 
-    virtual void handle(Sv, long long &) = 0;
-    virtual void handle(Sv, double &) = 0;
-    virtual void handle(Sv, std::string &) = 0;
+    virtual bool handle(Sv, long long &) = 0;
+    virtual bool handle(Sv, double &) = 0;
+    virtual bool handle(Sv, std::string &) = 0;
 
     template <typename T>
         requires HasVisit<T>
-    void operator()(Sv name, T &value) {
-        beginChild(name);
+    bool operator()(Sv name, T &value) {
+        if (!beginChild(name)) {
+            return false;
+        }
+
         value.visit(*this);
         endChild();
+        return direction == In;
     }
 
     template <typename T>
         requires HasGlobalVisit<T>
-    void operator()(Sv name, T &value) {
-        beginChild(name);
+    bool operator()(Sv name, T &value) {
+        if (!beginChild(name)) {
+            return false;
+        }
         visit(*this, value);
         endChild();
+        return direction == In;
     }
 
     template <typename T>
         requires HasGlobalSaveLoad<T>
-    void operator()(Sv name, T &value) {
-        beginChild(name);
+    bool operator()(Sv name, T &value) {
+        if (!beginChild(name)) {
+            return false;
+        }
         if (direction == In) {
             load(*this, value);
         }
-        else {
+        else { // void load(Archive &arch, Event &e);
+            // void save(Archive &arch, Event &e);
+
             save(*this, value);
         }
         endChild();
+        return direction == In;
     }
 
     template <std::integral T>
-    void operator()(Sv name, T &value) {
+    bool operator()(Sv name, T &value) {
         long long tmp = value;
-        handle(name, tmp);
-        if (tmp != value) {
+        if (handle(name, tmp)) {
             value = static_cast<T>(tmp);
+            return direction == In;
         }
+        return false;
     }
 
     template <Enum T>
-    void operator()(Sv name, T &value) {
+    bool operator()(Sv name, T &value) {
         long long tmp = static_cast<long long>(value);
-        handle(name, tmp);
-        if (tmp != value) {
+        if (handle(name, tmp)) {
             value = static_cast<T>(tmp);
+            return direction == In;
         }
+        return false;
     }
 
     template <std::floating_point T>
-    void operator()(Sv name, T &value) {
+    bool operator()(Sv name, T &value) {
         double tmp = value;
-        handle(name, tmp);
-        if (tmp != value) {
+        if (handle(name, tmp)) {
             value = static_cast<T>(tmp);
+            return direction == In;
         }
+        return false;
     }
 
-    void operator()(Sv name, std::string &value) {
-        handle(name, value);
+    bool operator()(Sv name, std::string &value) {
+        return handle(name, value);
+    }
+
+    template <typename T>
+    bool operator()(Sv name, std::vector<T> &v) {
+        size_t size = v.size();
+        if (!beginList(name, size)) {
+            return false;
+        }
+        if (direction == In) {
+            v.resize(size);
+        }
+        for (auto &element : v) {
+            (*this)("", element);
+        }
+        endChild();
+        return direction == In;
+    }
+
+    /// Shorthand for reading a value
+    template <typename T>
+    T get(Sv name) {
+        T ret;
+        (*this)(name, ret);
+        return ret;
     }
 
     Archive(Direction d)

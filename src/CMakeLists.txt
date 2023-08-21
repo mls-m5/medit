@@ -18,6 +18,8 @@ add_library(
     core/outarchive.cpp
     syntax/palette.cpp
     linux/inotify.cpp
+    keys/event.cpp
+    text/utf8char.cpp
     )
 
 target_link_libraries(
@@ -100,7 +102,7 @@ add_library(
     files/file.cpp
     files/project.cpp
     keys/keymap.cpp
-    keys/event.cpp
+#    keys/event.cpp
     syntax/basichighligting.cpp
     text/fstring.cpp
     text/cursorrangeops.cpp

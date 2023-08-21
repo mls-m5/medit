@@ -130,5 +130,5 @@ using Event = std::variant<NullEvent,
                            ResizeEvent>;
 
 /// Serialization
-void save(Archive &, Event &);
-void load(Archive &, Event &);
+void load(Archive &arch, Event &e);
+void save(Archive &arch, Event &e);

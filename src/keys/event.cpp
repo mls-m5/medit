@@ -59,6 +59,29 @@ void KeyEvent::visit(Archive &arch) {
     arch("state", state);
 }
 
+void MouseDownEvent::visit(Archive &arch) {
+    ARCH_PAIR(button);
+    ARCH_PAIR(x);
+    ARCH_PAIR(y);
+}
+
+void MouseMoveEvent::visit(Archive &arch) {
+    ARCH_PAIR(button);
+    ARCH_PAIR(x);
+    ARCH_PAIR(y);
+}
+
+void NullEvent::visit(Archive &arch) {}
+
+void PasteEvent::visit(Archive &arch) {
+    ARCH_PAIR(text);
+}
+
+void ResizeEvent::visit(Archive &arch) {
+    ARCH_PAIR(width);
+    ARCH_PAIR(height);
+}
+
 void load(Archive &arch, Event &e) {
     size_t t = 0;
     arch("event_type", t);
@@ -93,25 +116,12 @@ void load(Archive &arch, Event &e) {
     arch.endChild();
 }
 
-void MouseDownEvent::visit(Archive &arch) {
-    ARCH_PAIR(button);
-    ARCH_PAIR(x);
-    ARCH_PAIR(y);
-}
+void save(Archive &arch, Event &e) {
+    auto t = e.index();
 
-void MouseMoveEvent::visit(Archive &arch) {
-    ARCH_PAIR(button);
-    ARCH_PAIR(x);
-    ARCH_PAIR(y);
-}
+    arch("event_type", t);
 
-void NullEvent::visit(Archive &arch) {}
-
-void PasteEvent::visit(Archive &arch) {
-    ARCH_PAIR(text);
-}
-
-void ResizeEvent::visit(Archive &arch) {
-    ARCH_PAIR(width);
-    ARCH_PAIR(height);
+    arch.beginChild("event");
+    std::visit([&arch](auto &e) { e.visit(arch); }, e);
+    arch.endChild();
 }

@@ -48,16 +48,18 @@ private:
     nlohmann::json createRequest(std::string name);
 
     void send(const nlohmann::json &);
-    nlohmann::json request(nlohmann::json);
+    nlohmann::json request(std::string_view method);
 
     //! Where the remote data enters this class
     //    void receive(const nlohmann::json &);
-    void receive(Archive &);
+    //    void receive(Archive &);
+    void receive(std::string_view data);
 
     std::mutex _mutex;
     std::condition_variable _cv;
 
-    nlohmann::json _receivedData;
+    //    nlohmann::json _receivedData;
+    std::string _receivedData;
 
     CallbackT _callback;
 };
