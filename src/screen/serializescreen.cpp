@@ -1,19 +1,17 @@
 #include "serializescreen.h"
-// #include "keys/event_serialization.h"
+#include "core/outarchive.h"
+#include "keys/event_serialization.h"
 // #include "nlohmann/json.hpp"
 #include "core/inarchive.h"
 #include "syntax/palette.h"
-// #include "text/fstring_serialization.h"
-// #include "text/fstringview_serialization.h"
+#include "text/fstring_serialization.h"
+#include "text/fstringview_serialization.h"
 #include <sstream>
+#include <string_view>
 
 SerializeScreen::SerializeScreen(std::shared_ptr<IConnection> connection)
     : _connection{connection} {
-    connection->subscribe([this](std::string_view str) {
-        auto ss = std::istringstream{std::string{str}};
-        auto arch = InArchive{ss};
-        receive(arch);
-    });
+    connection->subscribe([this](std::string_view str) { receive(str); });
 }
 
 SerializeScreen::~SerializeScreen() {
@@ -92,10 +90,7 @@ void SerializeScreen::unsubscribe() {
 }
 
 std::string SerializeScreen::clipboardData() {
-    auto r = const_cast<SerializeScreen *>(this)->request({
-        {"method", "get/clipboard"},
-    });
-    return r["value"];
+    return const_cast<SerializeScreen *>(this)->request("get/clipboard");
 }
 
 void SerializeScreen::clipboardData(std::string text) {
@@ -111,12 +106,18 @@ void SerializeScreen::send(const nlohmann::json &json) {
     _connection->write(ss.str());
 }
 
-nlohmann::json SerializeScreen::request(nlohmann::json json) {
+nlohmann::json SerializeScreen::request(std::string_view method) {
     int id = ++_currentRequest;
-    json["id"] = static_cast<double>(id);
-    auto ss = std::stringstream{};
-    ss << json;
-    _connection->write(ss.str());
+    {
+        auto ss = std::ostringstream{};
+        {
+            OutArchive oarch{ss};
+            oarch("id", id);
+            auto methodstr = std::string{method};
+            oarch("method", methodstr);
+        };
+        _connection->write(ss.str());
+    }
 
     {
         auto lock = std::unique_lock(_mutex);
@@ -136,14 +137,21 @@ nlohmann::json SerializeScreen::request(nlohmann::json json) {
 }
 
 // void SerializeScreen::receive(const nlohmann::json &json) {
-void SerializeScreen::receive(Archive &arch) {
-    if (auto it = json.find("id"); it != json.end()) {
+// void SerializeScreen::receive(Archive &arch) {
+void SerializeScreen::receive(std::string_view str) {
+    auto ss = std::istringstream{std::string{str}};
+    auto arch = InArchive{ss};
+
+    long id = 0;
+
+    if (arch("id", id)) {
         auto lock = std::unique_lock(_mutex);
-        _receivedRequest = it->get<long>();
-        _receivedData = std::move(json); // Note: json + it is moved from
+        _receivedRequest = id;
+        _receivedData = arch.get<std::string>("value");
     }
     else {
-        std::vector<Event> e = json;
+        std::vector<Event> e; //  = json;
+        arch("events", e);
         _callback(e);
 
         return;

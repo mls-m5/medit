@@ -9,12 +9,13 @@
 
 class OutArchive : public Archive {
 public:
-    void beginChild(Sv) override;
+    bool beginChild(Sv) override;
+    bool beginList(Sv, size_t &) override;
     void endChild() override;
 
-    void handle(Sv, long long &value) override;
-    void handle(Sv, double &value) override;
-    void handle(Sv, std::string &value) override;
+    bool handle(Sv, long long &value) override;
+    bool handle(Sv, double &value) override;
+    bool handle(Sv, std::string &value) override;
 
     OutArchive(std::ostream &stream);
 
@@ -25,6 +26,9 @@ public:
     ~OutArchive() override;
 
 private:
+    template <typename T>
+    bool handleInternal(Sv name, T &value);
+
     std::ostream *stream = nullptr;
 
     nlohmann::json json;
