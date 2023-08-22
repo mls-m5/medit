@@ -9,12 +9,12 @@ inline void to_json(nlohmann::json &j, const FChar &c) {
     auto data = std::array<int, 5>{};
     std::copy(c.c.begin(), c.c.end(), data.begin());
     data[4] = c.f;
-    j = data;
+    j["c"] = data;
 }
 
 inline void from_json(const nlohmann::json &j, FChar &c) {
     auto data = std::array<int, 5>{};
-    data = j;
+    data = j.at("c");
     std::copy(data.begin(), data.end(), c.c.begin());
     c.f = data.at(4);
 }

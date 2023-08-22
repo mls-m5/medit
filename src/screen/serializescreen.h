@@ -6,6 +6,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
+#include <string_view>
 
 //! Screen used on server to serialize screen calls to binary form
 class SerializeScreen : public IScreen {
@@ -48,6 +49,7 @@ private:
     nlohmann::json createRequest(std::string name);
 
     void send(const nlohmann::json &);
+    void send(std::string_view str);
     nlohmann::json request(std::string_view method);
 
     //! Where the remote data enters this class

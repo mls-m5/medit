@@ -5,6 +5,7 @@
 #include "archive.h"
 #include "nlohmann/json.hpp"
 #include <ostream>
+#include <string_view>
 #include <vector>
 
 class OutArchive : public Archive {
@@ -24,6 +25,8 @@ public:
     OutArchive &operator=(const OutArchive &) = delete;
     OutArchive &operator=(OutArchive &&) = delete;
     ~OutArchive() override;
+
+    void finalize();
 
 private:
     template <typename T>

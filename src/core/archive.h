@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <stdexcept>
 #include <string_view>
 #include <vector>
 
@@ -85,9 +86,7 @@ public:
         if (direction == In) {
             load(*this, value);
         }
-        else { // void load(Archive &arch, Event &e);
-            // void save(Archive &arch, Event &e);
-
+        else {
             save(*this, value);
         }
         endChild();
@@ -132,6 +131,7 @@ public:
     bool operator()(Sv name, std::vector<T> &v) {
         size_t size = v.size();
         if (!beginList(name, size)) {
+            throw std::runtime_error{"could not begin list"};
             return false;
         }
         if (direction == In) {
@@ -150,6 +150,12 @@ public:
         T ret;
         (*this)(name, ret);
         return ret;
+    }
+
+    /// Shorthand for reading a value
+    template <typename T>
+    void set(Sv name, T value) {
+        (*this)(name, value);
     }
 
     Archive(Direction d)

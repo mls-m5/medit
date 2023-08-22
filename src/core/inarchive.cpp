@@ -19,6 +19,14 @@ size_t InArchive::currentIndex() const {
 
 bool InArchive::beginChild(Sv name) {
     auto &c = current();
+
+    if (name.empty() && c.is_array()) {
+        stack.push_back({&(
+            c.get_ptr<std::vector<nlohmann::json> *>()->at(currentIndex()))});
+        ++stack.at(stack.size() - 2).arrayIndex;
+        return true;
+    }
+
     if (auto f = c.find(name); f != c.end()) {
         stack.push_back({&current().at(name)});
         return true;
@@ -27,13 +35,32 @@ bool InArchive::beginChild(Sv name) {
 }
 
 bool InArchive::beginList(Sv name, size_t &size) {
-    auto &c = current();
-    if (auto f = c.find(name); f != c.end()) {
-        stack.push_back({&current().at(name)});
-        assert(current().size() == size);
-        return true;
+    if (!InArchive::beginChild(name)) {
+        return false;
     }
-    return false;
+
+    size = current().size();
+    return true;
+
+    //    auto &c = current();
+
+    //    if (name.empty()) {
+    //        if (c.is_array()) {
+    //            stack.push_back({&(c.get_ptr<std::vector<nlohmann::json>
+    //            *>()->at(
+    //                currentIndex()))});
+    //            ++stack.at(stack.size() - 2).arrayIndex;
+    //            size = current().size();
+    //            return true;
+    //        }
+    //    }
+
+    //    if (auto f = c.find(name); f != c.end()) {
+    //        stack.push_back({&current().at(name)});
+    //        size = current().size();
+    //        return true;
+    //    }
+    //    return false;
 }
 
 void InArchive::endChild() {

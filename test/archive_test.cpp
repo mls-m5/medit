@@ -16,6 +16,29 @@ struct Apa {
 
 TEST_SUIT_BEGIN
 
+TEST_CASE("0-fstr") {
+    auto ss = std::stringstream{};
+
+    {
+        auto arch = OutArchive{ss};
+
+        auto fstr = FString{"hello", 2};
+        fstr.visit(arch);
+    }
+    {
+        auto arch = InArchive{ss};
+
+        {
+            auto fstr = FString{"yo", 2};
+            fstr.visit(arch);
+
+            auto cmp = FString{"hello", 2};
+            EXPECT_EQ(cmp, fstr);
+            EXPECT_EQ(cmp.front().f, fstr.front().f);
+        }
+    }
+}
+
 TEST_CASE("basic test") {
     auto ss = std::stringstream{};
 
@@ -39,8 +62,8 @@ TEST_CASE("basic test") {
 
         EXPECT_FALSE(arch("char", c));
 
-        //        auto fstr = FString{"hello", 2};
-        //        EXPECT_FALSE(arch("fstr", fstr));
+        auto fstr = FString{"hello", 2};
+        EXPECT_FALSE(arch("fstr", fstr));
     }
 
     {
@@ -70,6 +93,15 @@ TEST_CASE("basic test") {
 
         EXPECT_TRUE(arch("char", c));
         EXPECT_EQ(c, "ö");
+
+        {
+            auto fstr = FString{"there", 2};
+            EXPECT_TRUE(arch("fstr", fstr));
+
+            auto cmp = FString{"hello", 2};
+            EXPECT_EQ(cmp, fstr);
+            EXPECT_EQ(cmp.front().f, fstr.front().f);
+        }
 
         EXPECT_FALSE(arch.beginChild("non-existent"));
         size_t size = 10;

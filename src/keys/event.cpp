@@ -90,29 +90,33 @@ void load(Archive &arch, Event &e) {
         e = NullEvent{};
         break;
     case 1: {
-        auto e = KeyEvent{};
+        e = KeyEvent{};
         break;
     }
     case 2: {
-        auto pe = MouseDownEvent{};
+        e = MouseDownEvent{};
         break;
     }
     case 3: {
-        auto pe = MouseMoveEvent{};
+        e = MouseMoveEvent{};
         break;
     }
     case 4: {
-        auto pe = PasteEvent{};
+        e = PasteEvent{};
         break;
     }
     case 5: {
-        auto pe = ResizeEvent{};
+        e = ResizeEvent{};
         break;
     }
     }
 
     arch.beginChild("event");
-    std::visit([&arch](auto &e) { e.visit(arch); }, e);
+    std::visit(
+        [&arch](auto &e) {
+            e.visit(arch); //
+        },
+        e);
     arch.endChild();
 }
 

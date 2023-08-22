@@ -117,3 +117,9 @@ inline std::ostream &operator<<(std::ostream &out, const FStringView &str) {
     out << std::string{str};
     return out;
 }
+
+void save(Archive &arch, FStringView &value);
+
+inline void load(Archive &arch, FStringView &value) {
+    static_assert("not supportoed");
+}

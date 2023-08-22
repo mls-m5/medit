@@ -5,9 +5,9 @@
 #include "nlohmann/json.hpp"
 
 inline void to_json(nlohmann::json &j, const FString &c) {
-    j = c.content();
+    j["str"] = c.content();
 }
 
 inline void from_json(const nlohmann::json &j, FString &c) {
-    c.content() = j;
+    c.content() = j["str"];
 }
