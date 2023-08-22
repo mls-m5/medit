@@ -9,6 +9,8 @@
 #include <sstream>
 #include <string_view>
 
+using namespace std::literals;
+
 SerializeScreen::SerializeScreen(std::shared_ptr<IConnection> connection)
     : _connection{connection} {
     connection->subscribe([this](std::string_view str) { receive(str); });
@@ -19,39 +21,60 @@ SerializeScreen::~SerializeScreen() {
 }
 
 void SerializeScreen::draw(size_t x, size_t y, FStringView str) {
-    send(nlohmann::json{
-        {"method", "draw"},
-        {"x", static_cast<double>(x)},
-        {"y", static_cast<double>(y)},
-        {"text", str},
-    });
+    auto ss = std::ostringstream{};
+    {
+        auto arch = OutArchive{ss};
+        arch.set("method", "draw"s);
+        arch.set("x", static_cast<double>(x));
+        arch.set("y", static_cast<double>(y));
+        arch.set("text", str);
+    }
+    send(std::string_view{ss.str()});
+    //    send(nlohmann::json{
+    //        {"method", "draw"},
+    //        {"x", static_cast<double>(x)},
+    //        {"y", static_cast<double>(y)},
+    //        {"text", str},
+    //    });
 }
 
 void SerializeScreen::refresh() {
-    send(nlohmann::json{
-        {"method", "refresh"},
-    });
+    auto ss = std::ostringstream{};
+    {
+        auto arch = OutArchive{ss};
+        arch.set("method", "refresh"s);
+    }
+    send(std::string_view{ss.str()});
 }
 
 void SerializeScreen::clear() {
-    send(nlohmann::json{
-        {"method", "clear"},
-    });
+    auto ss = std::ostringstream{};
+    {
+        auto arch = OutArchive{ss};
+        arch.set("method", "clear"s);
+    }
+    send(std::string_view{ss.str()});
 }
 
 void SerializeScreen::cursor(size_t x, size_t y) {
-    send(nlohmann::json{
-        {"method", "cursor"},
-        {"x", static_cast<double>(x)},
-        {"y", static_cast<double>(y)},
-    });
+    auto ss = std::ostringstream{};
+    {
+        auto arch = OutArchive{ss};
+        arch.set("method", "cursor"s);
+        arch.set("x", static_cast<double>(x));
+        arch.set("y", static_cast<double>(y));
+    }
+    send(std::string_view{ss.str()});
 }
 
 void SerializeScreen::title(std::string title) {
-    send(nlohmann::json{
-        {"method", "title"},
-        {"value", title},
-    });
+    auto ss = std::ostringstream{};
+    {
+        auto arch = OutArchive{ss};
+        arch.set("method", "title"s);
+        arch("value", title);
+    }
+    send(std::string_view{ss.str()});
 }
 
 // const IPalette &SerializeScreen::palette() const {}
@@ -104,6 +127,10 @@ void SerializeScreen::send(const nlohmann::json &json) {
     auto ss = std::stringstream{};
     ss << json;
     _connection->write(ss.str());
+}
+
+void SerializeScreen::send(std::string_view str) {
+    _connection->write(str);
 }
 
 nlohmann::json SerializeScreen::request(std::string_view method) {

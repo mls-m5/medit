@@ -1,9 +1,11 @@
 #include "utf8char.h"
 #include "core/archive.h"
+#include <stdexcept>
 
 void Utf8Char::visit(Archive &arch) {
     size_t size = 4;
     if (!arch.beginList("c", size)) {
+        throw std::runtime_error{"could not parse char"};
         return;
     }
 

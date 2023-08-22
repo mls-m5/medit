@@ -20,6 +20,9 @@ add_library(
     linux/inotify.cpp
     keys/event.cpp
     text/utf8char.cpp
+    text/fchar.cpp
+    text/fstring.cpp
+    text/fstringview.cpp
     )
 
 target_link_libraries(
@@ -104,7 +107,6 @@ add_library(
     keys/keymap.cpp
 #    keys/event.cpp
     syntax/basichighligting.cpp
-    text/fstring.cpp
     text/cursorrangeops.cpp
     text/cursorops.cpp
     text/cursor.cpp

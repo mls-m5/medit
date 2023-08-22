@@ -163,6 +163,8 @@ public:
     bool operator!=(const FString &other) const;
     bool operator==(const FString &other) const;
 
+    void visit(Archive &arch);
+
 private:
     VectorT _content;
 };

@@ -110,5 +110,5 @@ void DeserializeScreen::send(const nlohmann::json &data) {
 }
 
 void DeserializeScreen::screenCallback(IScreen::EventListT list) {
-    send(list);
+    send(nlohmann::json{{"events", list}});
 }

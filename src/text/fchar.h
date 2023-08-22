@@ -47,4 +47,9 @@ public:
     friend bool operator<(const FChar &a, const FChar b) {
         return a.c < b.c;
     }
+
+    void visit(Archive &arch);
 };
+
+// void save(Archive &arch, FChar c);
+// void load(Archive &arch, FChar c);

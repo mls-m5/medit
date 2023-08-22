@@ -1,4 +1,5 @@
 #include "outarchive.h"
+#include "nlohmann/json.hpp"
 #include <vector>
 
 OutArchive::OutArchive(std::ostream &stream)
@@ -6,16 +7,32 @@ OutArchive::OutArchive(std::ostream &stream)
     , stream{&stream} {}
 
 bool OutArchive::beginChild(Sv name) {
-    auto &ref = json[name] = nlohmann::json::object();
+    auto &c = current();
+
+    if (c.is_array()) {
+        c.push_back(nlohmann::json::object());
+        stack.push_back(&c.back());
+        return true;
+    }
+
+    auto &ref = c[name] = nlohmann::json::object();
     stack.push_back(&ref);
     return true;
 }
 
 bool OutArchive::beginList(Sv name, size_t &size) {
+    auto &c = current();
     nlohmann::json jsonArray = nlohmann::json::array();
     auto arr = nlohmann::json::array();
     arr.get_ptr<std::vector<nlohmann::json> *>()->reserve(size);
-    auto &ref = current()[name] = std::move(arr);
+
+    if (c.is_array()) {
+        c.push_back(std::move(arr));
+        stack.push_back(&c.back());
+        return true;
+    }
+
+    auto &ref = c[name] = std::move(arr);
     stack.push_back(&ref);
     return true;
 }
@@ -41,9 +58,14 @@ nlohmann::json &OutArchive::current() {
 }
 
 OutArchive::~OutArchive() {
+    finalize();
+}
+
+void OutArchive::finalize() {
     if (stream) {
         *stream << json;
     }
+    stream = nullptr;
 }
 
 template <typename T>

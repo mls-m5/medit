@@ -1,5 +1,6 @@
 
 #include "text/fstring.h"
+#include "core/archive.h"
 #include <algorithm>
 
 FString::FString(const std::string &str, FormatType f)
@@ -44,6 +45,10 @@ bool FString::operator!=(const FString &other) const {
 
 bool FString::operator==(const FString &other) const {
     return _content == other._content;
+}
+
+void FString::visit(Archive &arch) {
+    arch("str", _content);
 }
 
 FString::operator std::string() const {
