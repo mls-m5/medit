@@ -1,11 +1,8 @@
 #include "deserializescreen.h"
 #include "core/inarchive.h"
 #include "core/outarchive.h"
-// #include "keys/event_serialization.h"
-//  #include "nlohmann/json.hpp"
 #include "screen/cursorstyle.h"
 #include "syntax/palette.h"
-// #include "text/fstring_serialization.h"
 #include <sstream>
 #include <string_view>
 #include <thread>
