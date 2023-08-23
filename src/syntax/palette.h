@@ -1,13 +1,14 @@
 #pragma once
 
 #include "meditfwd.h"
-#include "nlohmann/json.hpp"
+// #include "nlohmann/json.hpp"
 #include "syntax/color.h"
 #include "syntax/palette.h"
 #include "text/formattype.h"
 #include <filesystem>
 #include <iosfwd>
 #include <map>
+#include <string_view>
 
 inline const std::string standardFormatName = "text";
 
@@ -40,7 +41,7 @@ struct Style {
         arch("f", f);
     }
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Style, color, background, f);
+    //    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Style, color, background, f);
 };
 
 class Palette /*: public IPalette*/ {
@@ -61,9 +62,11 @@ public:
         return stream;
     }
 
-    FormatType getFormat(std::string name) const /*override*/;
-    Color getColor(std::string_view name) const;
-    Color getStyleColor(std::string_view name) const;
+    FormatType format(std::string name) const;
+    Color color(std::string_view name) const;
+    Color styleColor(std::string_view name) const;
+
+    void color(std::string_view name, Color);
 
     bool update(IScreen &screen);
     void load(std::filesystem::path);
@@ -99,7 +102,7 @@ public:
     void visit(Archive &arch);
 
     // TODO: Deprecated, remove this
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Palette, _palette, _styles)
+    //    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Palette, _palette, _styles)
 };
 
 void visit(Archive &arch, std::map<std::string, Color> &);

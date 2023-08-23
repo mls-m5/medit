@@ -2,7 +2,7 @@
 
 #include "core/archive.h"
 #include "meditfwd.h"
-#include "nlohmann/json.hpp"
+// #include "nlohmann/json.hpp"
 #include <string_view>
 
 class Color {
@@ -76,5 +76,5 @@ private:
         return 0;
     }
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Color, _r, _g, _b)
+    //    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Color, _r, _g, _b)
 };
