@@ -1,11 +1,7 @@
 #include "serializescreen.h"
-#include "core/outarchive.h"
-#include "keys/event_serialization.h"
-// #include "nlohmann/json.hpp"
 #include "core/inarchive.h"
+#include "core/outarchive.h"
 #include "syntax/palette.h"
-#include "text/fstring_serialization.h"
-#include "text/fstringview_serialization.h"
 #include <sstream>
 #include <string_view>
 
@@ -30,12 +26,6 @@ void SerializeScreen::draw(size_t x, size_t y, FStringView str) {
         arch.set("text", str);
     }
     send(std::string_view{ss.str()});
-    //    send(nlohmann::json{
-    //        {"method", "draw"},
-    //        {"x", static_cast<double>(x)},
-    //        {"y", static_cast<double>(y)},
-    //        {"text", str},
-    //    });
 }
 
 void SerializeScreen::refresh() {
