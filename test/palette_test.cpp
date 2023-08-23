@@ -37,14 +37,14 @@ TEST_CASE("create") {
     std::stringstream(testJson) >> palette;
 
     {
-        auto color = palette.getColor("hello");
+        auto color = palette.color("hello");
         ASSERT_EQ(color.r(), 0xab);
         ASSERT_EQ(color.g(), 0xcd);
         ASSERT_EQ(color.b(), 0xef);
     }
 
     {
-        auto color = palette.getStyleColor("standard");
+        auto color = palette.styleColor("standard");
         ASSERT_EQ(color.r(), 0xab);
         ASSERT_EQ(color.g(), 0xcd);
         ASSERT_EQ(color.b(), 0xef);

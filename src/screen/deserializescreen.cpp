@@ -1,9 +1,13 @@
 #include "deserializescreen.h"
-#include "keys/event_serialization.h"
-#include "nlohmann/json.hpp"
+#include "core/inarchive.h"
+#include "core/outarchive.h"
+// #include "keys/event_serialization.h"
+//  #include "nlohmann/json.hpp"
+#include "screen/cursorstyle.h"
 #include "syntax/palette.h"
-#include "text/fstring_serialization.h"
+// #include "text/fstring_serialization.h"
 #include <sstream>
+#include <string_view>
 #include <thread>
 
 DeserializeScreen::DeserializeScreen(std::shared_ptr<IScreen> screen)
@@ -23,41 +27,55 @@ void DeserializeScreen::close() {
 }
 
 void DeserializeScreen::write(std::string_view data) {
-    handle(nlohmann::json::parse(data));
+    handle(data);
 }
 
 void DeserializeScreen::unsubscribe() {
     _callback = {};
 }
 
-void DeserializeScreen::handle(const nlohmann::json &json) {
-    long id = 0;
-    if (auto f = json.find("id"); f != json.end()) {
-        id = *f;
-    }
+void DeserializeScreen::handle(std::string_view str) {
+    auto ss = std::istringstream{std::string{str}};
+    auto arch = InArchive{ss};
 
-    auto method = std::string{};
-    if (auto f = json.find("method"); f != json.end()) {
-        method = *f;
-    }
+    long id = 0;
+
+    arch("id", id);
+
+    //    if (auto f = json.find("id"); f != json.end()) {
+    //        id = *f;
+    //    }
+
+    auto method = arch.get<std::string>("method");
+
+    //    auto method = std::string{};
+    //    if (auto f = json.find("method"); f != json.end()) {
+    //        method = *f;
+    //    }
 
     if (method == "draw") {
-        _screen->draw(json["x"], json["y"], FString{json["text"]});
+        _screen->draw(arch.get<size_t>("x"),
+                      arch.get<size_t>("y"),
+                      arch.get<FString>("text"));
+        //        _screen->draw(json["x"], json["y"], FString{json["text"]});
         return;
     }
 
     if (method == "cursor") {
-        _screen->cursor(json["x"], json["y"]);
+        _screen->cursor(arch.get<size_t>("x"), arch.get<size_t>("y"));
+        //        _screen->cursor(json["x"], json["y"]);
         return;
     }
 
     if (method == "cursorStyle") {
-        _screen->cursorStyle(json["value"]);
+        _screen->cursorStyle(arch.get<CursorStyle>("value"));
+        //        _screen->cursorStyle(json["value"]);
         return;
     }
 
     if (method == "title") {
-        _screen->title(json["value"]);
+        _screen->title(arch.get<std::string>("value"));
+        //        _screen->title(json["value"]);
         return;
     }
 
@@ -77,38 +95,57 @@ void DeserializeScreen::handle(const nlohmann::json &json) {
     }
 
     if (method == "palette") {
-        _screen->palette(json["value"]);
+        _screen->palette(arch.get<Palette>("value"));
+        //        _screen->palette(json["value"]);
         return;
     }
 
     if (method == "set/clipboard") {
-        _screen->clipboardData(json["value"]);
+        _screen->clipboardData(arch.get<std::string>("value"));
+        //        _screen->clipboardData(json["value"]);
     }
 
     if (method == "get/clipboard") {
-        send(nlohmann::json{
-            {"id", id},
-            {"value", _screen->clipboardData()},
-        });
+        auto oss = std::ostringstream{};
+        {
+            auto oarch = OutArchive{oss};
+
+            oarch.set("id", id);
+            oarch.set("value", _screen->clipboardData());
+        }
+        send(oss.str());
+
+        //        send(nlohmann::json{
+        //            {"id", id},
+        //            {"value", _screen->clipboardData()},
+        //        });
         return;
     }
 }
 
-void DeserializeScreen::send(const nlohmann::json &data) {
-    auto ss = std::stringstream{};
-    ss << data;
+void DeserializeScreen::send(std::string_view str) {
+    //    auto ss = std::stringstream{};
+    //    ss << data;
     if (!_callback) {
-        _unhandledQueue.push_back(ss.str());
+        _unhandledQueue.push_back(std::string{str});
     }
     else {
         for (std::string_view item : _unhandledQueue) {
             _callback(item);
         }
         _unhandledQueue.clear();
-        _callback(ss.str());
+        _callback(str);
     }
 }
 
 void DeserializeScreen::screenCallback(IScreen::EventListT list) {
-    send(nlohmann::json{{"events", list}});
+
+    auto ss = std::ostringstream{};
+    {
+        auto oarch = OutArchive{ss};
+        oarch("events", list);
+    }
+    send(ss.str());
+
+    //    send(nlohmann::json{{"events", list}});
 }

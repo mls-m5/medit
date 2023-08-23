@@ -5,13 +5,14 @@
 #include "json/json.h"
 #include <algorithm>
 #include <fstream>
+#include <string>
 #include <string_view>
 
 Palette::Palette() = default;
 
 Palette::~Palette() = default;
 
-FormatType Palette::getFormat(std::string name) const {
+FormatType Palette::format(std::string name) const {
     if (auto f = _styles.find(name); f != _styles.end()) {
         return f->second.f;
     }
@@ -39,7 +40,7 @@ void Palette::load(std::istream &stream) {
         for (auto &style : *f) {
             auto &s = _styles[style.name];
             for (auto &property : style) {
-                s.setProperty(property.name, getColor(property.value));
+                s.setProperty(property.name, color(property.value));
             }
 
             if (style.name == standardFormatName) {
@@ -60,7 +61,7 @@ void Palette::load(std::filesystem::path path) {
     std::fstream(path) >> *this;
 }
 
-Color Palette::getColor(std::string_view name) const {
+Color Palette::color(std::string_view name) const {
     if (auto f = std::find_if(_palette.begin(),
                               _palette.end(),
                               [&name](auto &&a) { return a.first == name; });
@@ -78,7 +79,7 @@ Style *Palette::getStyle(const std::string &name) {
     return nullptr;
 }
 
-Color Palette::getStyleColor(std::string_view name) const {
+Color Palette::styleColor(std::string_view name) const {
     if (auto f = std::find_if(_styles.begin(),
                               _styles.end(),
                               [&name](auto &&a) { return a.first == name; });
@@ -86,6 +87,10 @@ Color Palette::getStyleColor(std::string_view name) const {
         return f->second.color;
     }
     return {};
+}
+
+void Palette::color(std::string_view name, Color color) {
+    _palette[std::string{name}] = color;
 }
 
 void Palette::setFormat(IScreen &screen, Style *style, size_t index) {
@@ -158,8 +163,10 @@ void visitInternal(Archive &arch,
     }
     else {
         map.clear();
+        size /= 2; // Since there is two elements per map item
         for (size_t i = 0; i < size; ++i) {
-            map[arch.get<std::string>("")] = arch.get<U>("");
+            auto name = arch.get<std::string>("");
+            map[name] = arch.get<U>("");
         }
     }
 

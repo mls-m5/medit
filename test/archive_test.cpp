@@ -2,6 +2,7 @@
 #include "core/inarchive.h"
 #include "core/outarchive.h"
 #include "mls-unit-test/unittest.h"
+#include "syntax/palette.h"
 #include "text/fstring.h"
 #include "text/utf8char.h"
 #include <sstream>
@@ -125,6 +126,28 @@ TEST_CASE("serialize visitable class") {
         arch("apa1", apa);
 
         EXPECT_EQ(apa.x, 22);
+    }
+}
+
+TEST_CASE("serialize palette") {
+
+    auto ss = std::stringstream{};
+
+    {
+        auto palette = Palette{};
+
+        auto arch = OutArchive{ss};
+
+        palette.color("beige", {1, 2, 3});
+        EXPECT_FALSE(arch("p", palette));
+    }
+    {
+        auto palette = Palette{};
+
+        auto arch = InArchive{ss};
+        EXPECT_TRUE(arch("p", palette));
+
+        EXPECT_EQ(palette.color("beige").b(), 3);
     }
 }
 
