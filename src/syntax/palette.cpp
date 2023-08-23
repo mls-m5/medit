@@ -1,9 +1,11 @@
 #include "syntax/palette.h"
+#include "core/archive.h"
 #include "screen/iscreen.h"
 #include "syntax/color.h"
 #include "json/json.h"
 #include <algorithm>
 #include <fstream>
+#include <string_view>
 
 Palette::Palette() = default;
 
@@ -131,4 +133,43 @@ bool Palette::update(IScreen &screen) {
         return true;
     }
     return false;
+}
+
+void Palette::visit(Archive &arch) {
+    ARCH_PAIR(_palette);
+    ARCH_PAIR(_styles);
+}
+
+template <typename U>
+void visitInternal(Archive &arch,
+                   std::map<std::string, U> &map,
+                   std::string_view name) {
+    size_t size = map.size();
+    if (!arch.beginList(name, size)) {
+        return;
+    }
+
+    /// Uggly handling
+    if (arch.direction == arch.Out) {
+        for (auto &it : map) {
+            arch.set("", it.first);
+            arch.set("", it.second);
+        }
+    }
+    else {
+        map.clear();
+        for (size_t i = 0; i < size; ++i) {
+            map[arch.get<std::string>("")] = arch.get<U>("");
+        }
+    }
+
+    arch.endChild();
+}
+
+void visit(Archive &arch, std::map<std::string, Color> &map) {
+    visitInternal(arch, map, "colors");
+}
+
+void visit(Archive &arch, std::map<std::string, Style> &map) {
+    visitInternal(arch, map, "styles");
 }
