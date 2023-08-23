@@ -77,31 +77,51 @@ void SerializeScreen::title(std::string title) {
     send(std::string_view{ss.str()});
 }
 
-// const IPalette &SerializeScreen::palette() const {}
-
 void SerializeScreen::palette(const Palette &palette) {
-    send({
-        {"method", "palette"},
-        {"value", palette},
-    });
+    auto ss = std::ostringstream{};
+    {
+        auto arch = OutArchive{ss};
+        arch.set("method", "palette"s);
+        arch.set("value", palette);
+    }
+    send(std::string_view{ss.str()});
+
+    //    send({
+    //        {"method", "palette"},
+    //        {"value", palette},
+    //    });
 }
 
 size_t SerializeScreen::addStyle(const Color &foreground,
                                  const Color &background,
                                  size_t index) {
-    //    Json json;
-    //    json["method"] = "addStyle";
-    //    json["title"] = title;
-    //    send(json);
+    auto ss = std::ostringstream{};
+    {
+        auto arch = OutArchive{ss};
+        arch.set("method", "add_style"s);
+        auto c = foreground;
+        arch("foreground", c);
+        c = background;
+        arch("background", c);
+        arch("index", index);
+    }
+    send(std::string_view{ss.str()});
     // TODO: Implement this
     return 0;
 }
 
 void SerializeScreen::cursorStyle(CursorStyle style) {
-    send({
-        {"method", "cursorStyle"},
-        {"value", static_cast<double>(style)},
-    });
+    auto ss = std::ostringstream{};
+    {
+        auto arch = OutArchive{ss};
+        arch.set("method", "cursorStyle"s);
+        arch("value", style);
+    }
+    send(std::string_view{ss.str()});
+    //    send({
+    //        {"method", "cursorStyle"},
+    //        {"value", static_cast<double>(style)},
+    //    });
 }
 
 void SerializeScreen::subscribe(CallbackT f) {
@@ -113,28 +133,35 @@ void SerializeScreen::unsubscribe() {
 }
 
 std::string SerializeScreen::clipboardData() {
-    return const_cast<SerializeScreen *>(this)->request("get/clipboard");
+    return this->request("get/clipboard");
 }
 
 void SerializeScreen::clipboardData(std::string text) {
-    send({
-        {"method", "set/clipboard"},
-        {"value", text},
-    });
+    auto ss = std::ostringstream{};
+    {
+        auto arch = OutArchive{ss};
+        arch.set("method", "set/clipboard"s);
+        arch("value", text);
+    }
+    send(std::string_view{ss.str()});
+    //    send({
+    //        {"method", "set/clipboard"},
+    //        {"value", text},
+    //    });
 }
 
-void SerializeScreen::send(const nlohmann::json &json) {
-    auto ss = std::stringstream{};
-    ss << json;
-    _connection->write(ss.str());
-}
+// void SerializeScreen::send(const nlohmann::json &json) {
+//     auto ss = std::stringstream{};
+//     ss << json;
+//     _connection->write(ss.str());
+// }
 
 void SerializeScreen::send(std::string_view str) {
     _connection->write(str);
 }
 
-nlohmann::json SerializeScreen::request(std::string_view method) {
-    int id = ++_currentRequest;
+std::string SerializeScreen::request(std::string_view method) {
+    auto id = ++_currentRequest;
     {
         auto ss = std::ostringstream{};
         {

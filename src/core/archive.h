@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <map>
 #include <stdexcept>
 #include <string_view>
 #include <vector>
@@ -144,6 +145,19 @@ public:
         return direction == In;
     }
 
+    //    template <typename T>
+    //    bool operator()(Sv name, std::map<std::string, T> &m) {
+    //        if (!beginChild(name)) {
+    //            throw std::runtime_error{"could not begin list"};
+    //            return false;
+    //        }
+    //        for (auto &element : v) {
+    //            (*this)("", element);
+    //        }
+    //        endChild();
+    //        return direction == In;
+    //    }
+
     /// Shorthand for reading a value
     template <typename T>
     T get(Sv name) {
@@ -153,6 +167,7 @@ public:
     }
 
     /// Shorthand for reading a value
+    /// The argument acts as temporary
     template <typename T>
     void set(Sv name, T value) {
         (*this)(name, value);

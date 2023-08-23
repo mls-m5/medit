@@ -96,7 +96,11 @@ public:
         note,
     };
 
-    void visit(Archive &arch) {}
+    void visit(Archive &arch);
 
+    // TODO: Deprecated, remove this
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(Palette, _palette, _styles)
 };
+
+void visit(Archive &arch, std::map<std::string, Color> &);
+void visit(Archive &arch, std::map<std::string, Style> &);
