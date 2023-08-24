@@ -20,7 +20,7 @@ add_library(
     medit_core
     STATIC
     core/coreenvironment.cpp
-    core/files.cpp
+    core/files.cpp # Cannot be put in core.cpp for some reason
     core.cpp
     )
 
@@ -28,8 +28,6 @@ target_link_libraries(
     medit_core
     PUBLIC
     medit_common
-#    lua
-#    sol2
     )
 
 
@@ -52,6 +50,7 @@ target_link_libraries(
         matrix-screen
     )
 endif()
+
 
 # ---------------------- ncurses screen --------------------
 
@@ -105,44 +104,10 @@ add_library(
     files/project.cpp
     keys/keymap.cpp
     syntax/basichighligting.cpp
-    text/cursorrangeops.cpp
-    text/cursorops.cpp
-    text/cursor.cpp
-    text/rawbuffer.cpp
-    text/buffer.cpp
-    text/history.cpp
-    text/diagnostics.cpp
-    text/bufferedit.cpp
-    text/changes.cpp
-    text/utf8caseconversion.cpp
-#    views/messagebox.cpp
-#    views/editor.cpp
-#    views/locator.cpp
-#    views/mainwindow.cpp
-#    views/inputbox.cpp
-#    views/scrollview.cpp
-#    views/completeview.cpp
-#    views/listview.cpp
-#    views/bufferview.cpp
-#    views/interactionhandling.cpp
-#    views/quicklist.cpp
-#    views/commandpalette.cpp
-#    views/console.cpp
+    text.cpp
     views.cpp
-    modes/normalmode.cpp
-    modes/insertmode.cpp
-    modes/parentmode.cpp
-    modes/visualmode.cpp
-    modes/mode.cpp
-    script/localenvironment.cpp
-    script/standardcommands.cpp
-    script/togglecomments.cpp
-    script/luastate.cpp
-    script/renameinteraction.cpp
-    script/renamefileinteraction.cpp
-    script/saveinteraction.cpp
-    script/newfileinteraction.cpp
-    script/interaction.cpp
+    modes.cpp
+    script.cpp
     navigation/headernavigation.cpp
     completion/autocomplete.cpp
     screen/draw.cpp
