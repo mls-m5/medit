@@ -1,0 +1,5 @@
+#include "modes/insertmode.cpp"
+#include "modes/mode.cpp"
+#include "modes/normalmode.cpp"
+#include "modes/parentmode.cpp"
+#include "modes/visualmode.cpp"
