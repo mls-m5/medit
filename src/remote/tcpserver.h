@@ -1,8 +1,8 @@
 #pragma once
 
 #include "screen/iconnection.h"
-#include <boost/asio.hpp>
 #include <memory>
+#include <thread>
 
 class TcpServer {
 public:
