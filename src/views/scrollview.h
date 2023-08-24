@@ -29,10 +29,17 @@ public:
 
     void fitPosition(Position localPosition);
 
+    void contentHeight(size_t value) {
+        _contentHeight = value;
+    }
+
 private:
     size_t _yScroll = 0;
     size_t _contentHeight = 0;
 
     size_t _xScroll = 0;
     size_t _contentWidth = 0;
+
+    size_t _yScrollMargin = 3;
+    size_t _xScrollMargin = 3;
 };

@@ -171,6 +171,7 @@ void BufferView::unsubscribe() {
 }
 
 void BufferView::bufferChangedEvent() {
+    contentHeight(_buffer->lines().size());
     if (auto w = window()) {
         w->triggerRedraw();
     }
