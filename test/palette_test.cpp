@@ -6,11 +6,10 @@
 
 using namespace std::literals;
 
-TEST_SUIT_BEGIN
+TEST_SUIT_BEGIN(Palette)
 
 TEST_CASE("color") {
     auto color = Color{"#abcdef"};
-    
 
     ASSERT_EQ(color.r(), 0xab);
     ASSERT_EQ(color.g(), 0xcd);

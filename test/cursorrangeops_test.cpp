@@ -5,7 +5,7 @@
 
 using namespace std::literals;
 
-TEST_SUIT_BEGIN
+TEST_SUIT_BEGIN(CursorRangeOps)
 
 TEST_CASE("single line content") {
     auto buffer = Buffer{"apa bepa\ncepa"sv};

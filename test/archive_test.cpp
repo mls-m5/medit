@@ -15,7 +15,7 @@ struct Apa {
     }
 };
 
-TEST_SUIT_BEGIN
+TEST_SUIT_BEGIN(Archive)
 
 TEST_CASE("0-fstr") {
     auto ss = std::stringstream{};
@@ -38,7 +38,7 @@ TEST_CASE("0-fstr") {
             EXPECT_EQ(cmp.front().f, fstr.front().f);
         }
     }
-}
+};
 
 TEST_CASE("basic test") {
     auto ss = std::stringstream{};

@@ -29,7 +29,9 @@ struct Fixture {
     SerializeScreen ss{ds};
 };
 
-TEST_SUIT_BEGIN
+TEST_SUIT_BEGIN(SerializeScreen)
+
+    ;
 
 TEST_CASE("draw(...)") {
     auto f = Fixture{};

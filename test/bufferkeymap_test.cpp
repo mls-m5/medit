@@ -1,7 +1,7 @@
 #include "keys/bufferkeymap.h"
 #include "mls-unit-test/unittest.h"
 
-TEST_SUIT_BEGIN
+TEST_SUIT_BEGIN(BufferKeyMap)
 
 TEST_CASE("create") {
     auto map = BufferKeyMap{BufferKeyMap::MapType{

@@ -5,7 +5,7 @@
 
 using namespace std::literals;
 
-TEST_SUIT_BEGIN
+TEST_SUIT_BEGIN(WordsIterator)
 
 TEST_CASE("count words") {
     auto buffer = Buffer{"hello there you"sv};

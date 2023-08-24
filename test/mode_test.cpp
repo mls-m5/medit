@@ -31,7 +31,7 @@
 //                                  std::move(bufferMap));
 //}
 
-TEST_SUIT_BEGIN
+TEST_SUIT_BEGIN(Mode)
 
 // TEST_CASE("create mode") {
 //     auto mode = createTestMode([](auto e) {});

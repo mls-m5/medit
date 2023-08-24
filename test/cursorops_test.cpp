@@ -5,7 +5,7 @@
 
 using namespace std::literals;
 
-TEST_SUIT_BEGIN
+TEST_SUIT_BEGIN(CursorOps)
 
 TEST_CASE("remove character") {
     const std::string_view testText = "apa bepa\n bearne";

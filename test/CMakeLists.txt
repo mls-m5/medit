@@ -3,63 +3,60 @@ project(vb6-script-2022)
 
 enable_testing()
 
-function(test_disabled testname)
-    add_executable(${testname}_test ${testname}_test.cpp)
+add_executable(
+    medit_tests
+    basichighlighting_test.cpp
+    buffer_test.cpp
+    bufferkeymap_test.cpp
+    cursorops_test.cpp
+    cursorrangeops_test.cpp
+    fstring_test.cpp
+    history_test.cpp
+    keysettings_test.cpp
+    mode_test.cpp
+    palette_test.cpp
+    project_test.cpp
+    utf8char_test.cpp
+    wordsiterator_test.cpp
+    serializescreen_test.cpp
+    archive_test.cpp
+    mls-unit-test/test_main.cpp
+)
 
-    target_include_directories(${testname}_test PRIVATE tests)
+target_include_directories(medit_tests PRIVATE tests)
 
-    target_compile_features(
-        ${testname}_test
-        PRIVATE
-        cxx_std_17
-        )
+target_compile_features(
+    medit_tests
+    PRIVATE
+    cxx_std_17
+    )
 
-    target_link_libraries(
-        ${testname}_test
-        PUBLIC
-        medit_common
-        lib_medit
-        medit_plugins
-        )
+target_link_libraries(
+    medit_tests
+    PUBLIC
+    medit_common
+    lib_medit
+    medit_plugins
+    )
 
-    target_include_directories(
-        ${testname}_test
-        PUBLIC
-        .
-        ../src
-        )
+target_include_directories(
+    medit_tests
+    PUBLIC
+    .
+    ../src
+    )
 
-endfunction()
+#test_disabled(${testname})
 
-function(test testname)
-    test_disabled(${testname})
-
-    add_test(NAME ${testname}_test
-        COMMAND ${testname}_test
-        )
-endfunction()
+add_test(NAME medit_tests
+    COMMAND medit_tests
+    )
 
 file(
     COPY res
     DESTINATION test
     )
 
-test(basichighlighting)
-test(buffer)
-test(bufferkeymap)
-test(cursorops)
-test(cursorrangeops)
-test(fstring)
-test(history)
-test(keysettings)
-test(mode)
-test(palette)
-test(project)
-test(utf8char)
-test(wordsiterator)
-test(serializescreen)
-test(serialization)
-test(archive)
 
 if (ENABLE_LEGACY_CLANG_PLUGIN)
     test(clang_autocomplete)

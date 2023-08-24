@@ -4,7 +4,7 @@
 
 using namespace std::literals;
 
-TEST_SUIT_BEGIN
+TEST_SUIT_BEGIN(Buffer)
 
 TEST_CASE("instantiate") {
     Buffer buffer;

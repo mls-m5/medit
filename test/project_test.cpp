@@ -7,7 +7,7 @@
 const std::filesystem::path path = "test/res/.medit.json";
 const std::filesystem::path root = "test/res";
 
-TEST_SUIT_BEGIN
+TEST_SUIT_BEGIN(Project_Test)
 
 TEST_CASE("load") {
     MockDirectoryNotifications dirNotifications;

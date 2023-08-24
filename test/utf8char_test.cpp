@@ -3,7 +3,7 @@
 #include "text/utf8caseconversion.h"
 #include "text/utf8char.h"
 
-TEST_SUIT_BEGIN
+TEST_SUIT_BEGIN(__FILE__)
 
 TEST_CASE("single character char") {
     {

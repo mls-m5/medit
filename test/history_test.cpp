@@ -5,7 +5,7 @@
 
 using namespace std::literals;
 
-TEST_SUIT_BEGIN
+TEST_SUIT_BEGIN(History)
 
 TEST_CASE("simple undo") {
     auto testString1 = "hello there"s;

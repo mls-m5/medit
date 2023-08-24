@@ -2,7 +2,7 @@
 #include "keys/keysettings.h"
 #include "mls-unit-test/unittest.h"
 
-TEST_SUIT_BEGIN
+TEST_SUIT_BEGIN(Key_Settings)
 
 TEST_CASE("instantiate") {
     KeySettings settings;
