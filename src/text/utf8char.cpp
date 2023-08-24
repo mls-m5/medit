@@ -1,5 +1,6 @@
 #include "utf8char.h"
 #include "core/archive.h"
+#include <ostream>
 #include <stdexcept>
 
 void Utf8Char::visit(Archive &arch) {
@@ -16,4 +17,8 @@ void Utf8Char::visit(Archive &arch) {
     arch("", _data.at(3));
 
     arch.endChild();
+}
+
+std::ostream &operator<<(std::ostream &stream, Utf8Char &c) {
+    return stream.write(&c._data.front(), static_cast<ptrdiff_t>(c.size()));
 }

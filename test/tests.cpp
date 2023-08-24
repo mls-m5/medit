@@ -11,7 +11,6 @@
 #include "mode_test.cpp"
 #include "palette_test.cpp"
 #include "project_test.cpp"
-#include "serialization_test.cpp"
 #include "serializescreen_test.cpp"
 #include "utf8char_test.cpp"
 #include "wordsiterator_test.cpp"

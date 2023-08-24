@@ -9,6 +9,7 @@
 #include "settings.h"
 #include "thinmain.h"
 #include "views/mainwindow.h"
+#include <iostream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -32,6 +33,7 @@ using TimerType = JsTimer;
 #include "screen/guiscreen.h"
 #include "screen/ncursesscreen.h"
 #include "screen/serializescreen.h"
+
 using ScreenType = GuiScreen;
 using QueueType = JobQueue;
 using TimerType = Timer;

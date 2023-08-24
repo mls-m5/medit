@@ -3,8 +3,8 @@
 #include "meditfwd.h"
 #include "text/position.h"
 #include <filesystem>
+#include <iosfwd>
 #include <istream>
-#include <ostream>
 #include <vector>
 
 /// Struct that represent changes that could to be made

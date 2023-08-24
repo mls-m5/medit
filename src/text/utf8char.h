@@ -2,7 +2,9 @@
 
 #include <array>
 #include <cstring> // for memcpy
-#include <ostream>
+// #include <ostream>
+#include <iosfwd>
+#include <string>
 #include <string_view>
 
 class Archive;
@@ -210,9 +212,7 @@ public:
         return ret;
     }
 
-    friend std::ostream &operator<<(std::ostream &stream, Utf8Char &c) {
-        return stream.write(&c._data.front(), static_cast<ptrdiff_t>(c.size()));
-    }
+    friend std::ostream &operator<<(std::ostream &stream, Utf8Char &c);
 
     void visit(Archive &arch);
 

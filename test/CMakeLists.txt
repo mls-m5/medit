@@ -5,21 +5,22 @@ enable_testing()
 
 add_executable(
     medit_tests
-    basichighlighting_test.cpp
-    buffer_test.cpp
-    bufferkeymap_test.cpp
-    cursorops_test.cpp
-    cursorrangeops_test.cpp
-    fstring_test.cpp
-    history_test.cpp
-    keysettings_test.cpp
-    mode_test.cpp
-    palette_test.cpp
-    project_test.cpp
-    utf8char_test.cpp
-    wordsiterator_test.cpp
-    serializescreen_test.cpp
-    archive_test.cpp
+    tests.cpp
+#    basichighlighting_test.cpp
+#    buffer_test.cpp
+#    bufferkeymap_test.cpp
+#    cursorops_test.cpp
+#    cursorrangeops_test.cpp
+#    fstring_test.cpp
+#    history_test.cpp
+#    keysettings_test.cpp
+#    mode_test.cpp
+#    palette_test.cpp
+#    project_test.cpp
+#    utf8char_test.cpp
+#    wordsiterator_test.cpp
+#    serializescreen_test.cpp
+#    archive_test.cpp
     mls-unit-test/test_main.cpp
 )
 

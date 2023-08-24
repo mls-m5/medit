@@ -4,7 +4,7 @@
 #include "script/ienvironment.h"
 #include "text/cursorrange.h"
 #include "text/cursorrangeops.h"
-#include "views/mainwindow.h"
+#include <ostream>
 #include <regex>
 
 void Changes::serialize(std::ostream &out) const {
@@ -18,8 +18,7 @@ void Changes::serialize(std::ostream &out) const {
     }
 }
 
-Changes::FileChanges &Changes::operator[](
-    const std::filesystem::__cxx11::path &path) {
+Changes::FileChanges &Changes::operator[](const std::filesystem::path &path) {
     auto it = std::find_if(
         changes.begin(), changes.end(), [&](const FileChanges &fileChanges) {
             return fileChanges.file == path;
