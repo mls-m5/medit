@@ -3,7 +3,7 @@
 #pragma once
 
 #include "archive.h"
-#include "nlohmann/json.hpp"
+#include <memory>
 #include <ostream>
 #include <string_view>
 #include <vector>
@@ -29,14 +29,6 @@ public:
     void finalize();
 
 private:
-    template <typename T>
-    bool handleInternal(Sv name, T &value);
-
-    std::ostream *stream = nullptr;
-
-    nlohmann::json json;
-
-    std::vector<nlohmann::json *> stack = {&json};
-
-    nlohmann::json &current();
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };

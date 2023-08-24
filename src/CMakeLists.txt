@@ -1,17 +1,5 @@
 
-function(setup_pch TARGET)
-    set(PCH_HEADER "src/pch.hpp")
 
-    # Use the header as a precompiled header
-    target_precompile_headers(${TARGET} PRIVATE ${PCH_HEADER})
-
-    # Force include the header in every source file
-    if(MSVC)
-        target_compile_options(${TARGET} PRIVATE /FI "${PCH_HEADER}")
-    else()
-        target_compile_options(${TARGET} PRIVATE -include ${PCH_HEADER})
-    endif()
-endfunction()
 
 add_subdirectory(plugin)
 
@@ -40,6 +28,7 @@ add_library(
     screen/guiscreen.cpp
     files/fontlocator.cpp
     )
+
 
 target_link_libraries(
     medit_sdl_screen

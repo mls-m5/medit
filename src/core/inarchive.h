@@ -1,8 +1,8 @@
 #pragma once
 
 #include "archive.h"
-#include "nlohmann/json.hpp"
 #include <istream>
+#include <memory>
 #include <vector>
 
 class InArchive : public Archive {
@@ -24,18 +24,6 @@ public:
     ~InArchive() override;
 
 private:
-    template <typename T>
-    bool handleInternal(Sv, T &t);
-
-    nlohmann::json json;
-
-    struct StackElement {
-        nlohmann::json *ptr = nullptr;
-        size_t arrayIndex = 0;
-    };
-
-    std::vector<StackElement> stack = {{&json}};
-
-    nlohmann::json &current() const;
-    size_t currentIndex() const;
+    struct Impl; // For hiding json.hpp
+    std::unique_ptr<Impl> _impl;
 };
