@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/threadvalidation.h"
-#include "linux/inotify.h"
+#include "files/directorynotifications.h"
 #include "meditfwd.h"
 #include "text/diagnostics.h"
 #include <filesystem>

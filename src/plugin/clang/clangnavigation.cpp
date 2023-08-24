@@ -1,16 +1,16 @@
 #include "clang/clangnavigation.h"
 #include "clangcontext.h"
-#include "core/plugins.h"
-#include "files/file.h"
+// #include "core/plugins.h"
+// #include "files/file.h"
 #include "script/iscope.h"
 #include "script/scope.h"
 #include "text/cursor.h"
 #include "text/cursorrangeops.h"
-#include "views/editor.h"
+// #include "views/editor.h"
 #include "clang/clangmodel.h"
 #include <optional>
 
-using namespace std::literals;
+// using namespace std::literals;
 
 bool ClangNavigation::gotoSymbol(std::shared_ptr<IScope> env) {
     auto context = ClangContext{env, *getClangModel()};

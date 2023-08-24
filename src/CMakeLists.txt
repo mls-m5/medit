@@ -1,4 +1,18 @@
 
+function(setup_pch TARGET)
+    set(PCH_HEADER "src/pch.hpp")
+
+    # Use the header as a precompiled header
+    target_precompile_headers(${TARGET} PRIVATE ${PCH_HEADER})
+
+    # Force include the header in every source file
+    if(MSVC)
+        target_compile_options(${TARGET} PRIVATE /FI "${PCH_HEADER}")
+    else()
+        target_compile_options(${TARGET} PRIVATE -include ${PCH_HEADER})
+    endif()
+endfunction()
+
 add_subdirectory(plugin)
 
 # ------------- shared files ----------------------------
@@ -6,23 +20,8 @@ add_library(
     medit_core
     STATIC
     core/coreenvironment.cpp
-    core/os.cpp
-    core/jsjobqueue.cpp
-    core/timer.cpp
-    core/threadvalidation.cpp
-    core/registers.cpp
-    core/jstimer.cpp
     core/files.cpp
-    core/threadname.cpp
-    core/inarchive.cpp
-    core/outarchive.cpp
-    syntax/palette.cpp
-    linux/inotify.cpp
-    keys/event.cpp
-    text/utf8char.cpp
-    text/fchar.cpp
-    text/fstring.cpp
-    text/fstringview.cpp
+    core.cpp
     )
 
 target_link_libraries(
@@ -105,7 +104,6 @@ add_library(
     files/file.cpp
     files/project.cpp
     keys/keymap.cpp
-#    keys/event.cpp
     syntax/basichighligting.cpp
     text/cursorrangeops.cpp
     text/cursorops.cpp
@@ -117,19 +115,20 @@ add_library(
     text/bufferedit.cpp
     text/changes.cpp
     text/utf8caseconversion.cpp
-    views/messagebox.cpp
-    views/editor.cpp
-    views/locator.cpp
-    views/mainwindow.cpp
-    views/inputbox.cpp
-    views/scrollview.cpp
-    views/completeview.cpp
-    views/listview.cpp
-    views/bufferview.cpp
-    views/interactionhandling.cpp
-    views/quicklist.cpp
-    views/commandpalette.cpp
-    views/console.cpp
+#    views/messagebox.cpp
+#    views/editor.cpp
+#    views/locator.cpp
+#    views/mainwindow.cpp
+#    views/inputbox.cpp
+#    views/scrollview.cpp
+#    views/completeview.cpp
+#    views/listview.cpp
+#    views/bufferview.cpp
+#    views/interactionhandling.cpp
+#    views/quicklist.cpp
+#    views/commandpalette.cpp
+#    views/console.cpp
+    views.cpp
     modes/normalmode.cpp
     modes/insertmode.cpp
     modes/parentmode.cpp
