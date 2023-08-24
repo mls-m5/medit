@@ -1,7 +1,10 @@
 #pragma once
 
 #include "fchar.h"
+#include "text/fstringview.h"
 #include <vector>
+
+class FStringView;
 
 /// Formatted string; string with formatted characters
 class FString {
@@ -51,7 +54,7 @@ public:
         return _content.end();
     }
 
-    [[nodiscard]] FChar at(size_t index) const {
+    [[nodiscard]] const FChar &at(size_t index) const {
         return _content.at(index);
     }
 
@@ -144,15 +147,7 @@ public:
         return _content;
     }
 
-    FString substr(size_t start, size_t length = size_t(-1)) {
-        if (start >= _content.size()) {
-            return {};
-        }
-
-        length = std::min(_content.size() - start, length);
-
-        return {_content.begin() + start, _content.begin() + (start + length)};
-    }
+    FStringView substr(size_t start, size_t length = size_t(-1)) const;
 
     std::vector<FString> split(Utf8Char c = '\n') const;
 

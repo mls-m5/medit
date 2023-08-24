@@ -63,6 +63,20 @@ FString::operator std::string() const {
     return str;
 }
 
+FStringView FString::substr(size_t start, size_t length) const {
+    if (start >= _content.size()) {
+        return {};
+    }
+
+    length = std::min(_content.size() - start, length);
+
+    //        return {_content.begin() + start, _content.begin() + (start +
+    //        length)}; return {_content.begin() + start, _content.begin() +
+    //        (start + length)};
+
+    return FStringView{_content.data() + start, length};
+}
+
 std::vector<FString> FString::split(Utf8Char c) const {
     auto ret = std::vector<FString>{};
 

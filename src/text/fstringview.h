@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cursor.h"
 #include "fchar.h"
 #include "fstring.h"
 #include <algorithm>
@@ -11,13 +12,14 @@ class FStringView {
     size_t _size = 0;
 
 public:
-    FStringView(const FString &str)
-        : _data{str.data()}
-        , _size{str.size()} {}
+    FStringView(const FString &str);
 
     constexpr FStringView(const FChar *data, size_t size)
         : _data{data}
         , _size{size} {}
+
+    /// Only supports single line ranges
+    FStringView(const Cursor begin, Cursor end);
 
     FStringView() = default;
     FStringView(const FStringView &) = default;
@@ -100,9 +102,7 @@ public:
         return str;
     }
 
-    explicit operator FString() const {
-        return FString{begin(), end()};
-    }
+    explicit operator FString() const;
 };
 
 inline bool operator==(const FString &a, const FStringView &b) {

@@ -44,7 +44,7 @@ void BufferView::draw(IScreen &screen) {
 
             auto &line = _buffer->lines().at(l);
 
-            screen.draw(x() + _numberWidth, y() + ty, line);
+            screen.draw(x() + _numberWidth, y() + ty, line.substr(xScroll()));
 
             if (hasLineDiagnostics) {
                 /// TODO: Fix this, just testing
@@ -72,14 +72,6 @@ void BufferView::draw(IScreen &screen) {
             }
         }
     }
-
-    //    for (auto &item : buffer().diagnostics().list()) {
-    //        drawSpecial(screen,
-    //                    CursorRange{buffer(), item.range.begin,
-    //                    item.range.end}, IPalette::selection);
-
-    //        break;
-    //    }
 }
 
 void BufferView::drawSpecial(IScreen &screen,
@@ -172,6 +164,7 @@ void BufferView::unsubscribe() {
 
 void BufferView::bufferChangedEvent() {
     contentHeight(_buffer->lines().size());
+
     if (auto w = window()) {
         w->triggerRedraw();
     }

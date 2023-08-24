@@ -201,8 +201,10 @@ void Editor::updateCursor(IScreen &screen) const {
     // position between longer lines
     auto tmpCursor = fix(_cursor);
 
-    screen.cursor(_bufferView.x() + _bufferView.numberWidth() + tmpCursor.x(),
-                  _bufferView.y() + tmpCursor.y() - _bufferView.yScroll());
+    screen.cursor(_bufferView.x() + _bufferView.numberWidth() + tmpCursor.x() -
+                      _bufferView.xScroll(),
+                  _bufferView.y() + tmpCursor.y() - _bufferView.yScroll() -
+                      _bufferView.yScroll());
 }
 
 void Editor::draw(IScreen &screen) {

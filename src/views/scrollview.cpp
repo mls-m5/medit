@@ -3,10 +3,15 @@
 
 void ScrollView::fitPosition(Position localPosition) {
     if (localPosition.x() < xScroll() + _xScrollMargin) {
-        xScroll(localPosition.x());
+        if (localPosition.x() < _xScrollMargin) {
+            xScroll(0);
+        }
+        else {
+            xScroll(localPosition.x() - _xScrollMargin);
+        }
     }
-    else if (localPosition.x() + 1 + _xScrollMargin >= height() + xScroll()) {
-        xScroll(localPosition.x() - height() + 1);
+    else if (localPosition.x() + 1 + _xScrollMargin >= width() + xScroll()) {
+        xScroll(localPosition.x() - width() + 1 + _xScrollMargin);
     }
 
     if (localPosition.y() < yScroll() + _yScrollMargin) {

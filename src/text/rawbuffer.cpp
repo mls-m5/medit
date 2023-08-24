@@ -100,10 +100,11 @@ Cursor RawBuffer::apply(BufferEdit edit) {
 
     auto newLines = edit.to.split('\n');
 
-    auto startStr = _lines.at(edit.position.y()).substr(0, edit.position.x());
-    auto endStr =
+    auto startStr =
+        FString{_lines.at(edit.position.y()).substr(0, edit.position.x())};
+    auto endStr = FString{
         _lines.at(edit.position.y() + oldNumLines)
-            .substr((oldNumLines ? 0 : edit.position.x()) + lastOldLineLength);
+            .substr((oldNumLines ? 0 : edit.position.x()) + lastOldLineLength)};
 
     auto ret = edit.position;
     ret.y(ret.y() + newLines.size() - oldNumLines - 1);

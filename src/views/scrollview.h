@@ -36,10 +36,9 @@ public:
 private:
     size_t _yScroll = 0;
     size_t _contentHeight = 0;
-
-    size_t _xScroll = 0;
-    size_t _contentWidth = 0;
-
     size_t _yScrollMargin = 3;
-    size_t _xScrollMargin = 3;
+
+    size_t _xScroll = 4;
+    size_t _contentWidth = 0;
+    size_t _xScrollMargin = 5;
 };

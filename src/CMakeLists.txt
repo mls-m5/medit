@@ -10,6 +10,8 @@ add_library(
     core/coreenvironment.cpp
     core/files.cpp # Cannot be put in core.cpp for some reason
     core.cpp
+    text.cpp
+    files/file.cpp
     )
 
 target_link_libraries(
@@ -83,11 +85,11 @@ add_library(
     STATIC
     files/config.cpp
     files/popenstream.cpp
-    files/file.cpp
+#    files/file.cpp
     files/project.cpp
     keys/keymap.cpp
     syntax/basichighligting.cpp
-    text.cpp
+#    text.cpp
     views.cpp
     modes.cpp
     script.cpp
