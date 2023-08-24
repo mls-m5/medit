@@ -1,7 +1,7 @@
 #include "tcpconnection.h"
-#include "boost/asio.hpp"
-#include "core/debugoutput.h"
 #include "core/threadname.h"
+#include <boost/asio/connect.hpp>
+#include <boost/asio/read.hpp>
 
 using namespace boost::asio;
 using namespace boost::asio::ip;

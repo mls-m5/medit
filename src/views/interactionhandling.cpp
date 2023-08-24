@@ -43,7 +43,7 @@ bool InteractionHandling::keyPress(std::shared_ptr<IEnvironment> env) {
 
     /// This is when the user has edited the response and wants to accept it
     if (env->key().symbol == "\n") {
-        auto interaction = Interaction{.text = content(*buffer)};
+        auto interaction = Interaction{.text = content(CursorRange{*buffer})};
         env->context().guiQueue().addTask(
             [callback = _callback, interaction, env]() {
                 callback(env, interaction);

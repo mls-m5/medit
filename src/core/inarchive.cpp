@@ -41,26 +41,6 @@ bool InArchive::beginList(Sv name, size_t &size) {
 
     size = current().size();
     return true;
-
-    //    auto &c = current();
-
-    //    if (name.empty()) {
-    //        if (c.is_array()) {
-    //            stack.push_back({&(c.get_ptr<std::vector<nlohmann::json>
-    //            *>()->at(
-    //                currentIndex()))});
-    //            ++stack.at(stack.size() - 2).arrayIndex;
-    //            size = current().size();
-    //            return true;
-    //        }
-    //    }
-
-    //    if (auto f = c.find(name); f != c.end()) {
-    //        stack.push_back({&current().at(name)});
-    //        size = current().size();
-    //        return true;
-    //    }
-    //    return false;
 }
 
 void InArchive::endChild() {
