@@ -65,13 +65,7 @@ endif()
 add_library(
     medit_remote_screen
     STATIC
-    screen/serializescreen.cpp
-    screen/deserializescreen.cpp
-    remote/fifoconnection.cpp
-    remote/fifofile.cpp
-    remote/tcpconnection.cpp
-    remote/tcpserver.cpp
-    thinmain.cpp
+    remote_screen.cpp
     )
 
 target_link_libraries(

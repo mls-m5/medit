@@ -4,12 +4,7 @@ enable_testing()
 add_library(
     medit_plugins
     STATIC
-    jsonformat.cpp
-    build.cpp
-    run.cpp
-    git.cpp
-    clangformat.cpp
-    lsp/headerdetection.cpp
+    plugin.cpp
     )
 
 
@@ -32,7 +27,6 @@ if (NOT EMSCRIPTEN)
         medit_plugins
         PRIVATE
         lsp/lspplugin.cpp
-
         )
 
 endif()
