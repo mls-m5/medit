@@ -1,5 +1,3 @@
-// #include "core/coreenvironment.cpp"
-// #include "core/files.cpp"
 #include "core/inarchive.cpp"
 #include "core/jsjobqueue.cpp"
 #include "core/jstimer.cpp"
@@ -12,7 +10,3 @@
 #include "keys/event.cpp"
 #include "linux/inotify.cpp"
 #include "syntax/palette.cpp"
-#include "text/fchar.cpp"
-#include "text/fstring.cpp"
-#include "text/fstringview.cpp"
-#include "text/utf8char.cpp"

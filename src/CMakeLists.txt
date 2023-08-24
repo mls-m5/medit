@@ -85,11 +85,9 @@ add_library(
     STATIC
     files/config.cpp
     files/popenstream.cpp
-#    files/file.cpp
     files/project.cpp
     keys/keymap.cpp
     syntax/basichighligting.cpp
-#    text.cpp
     views.cpp
     modes.cpp
     script.cpp

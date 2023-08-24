@@ -203,8 +203,7 @@ void Editor::updateCursor(IScreen &screen) const {
 
     screen.cursor(_bufferView.x() + _bufferView.numberWidth() + tmpCursor.x() -
                       _bufferView.xScroll(),
-                  _bufferView.y() + tmpCursor.y() - _bufferView.yScroll() -
-                      _bufferView.yScroll());
+                  _bufferView.y() + tmpCursor.y() - _bufferView.yScroll());
 }
 
 void Editor::draw(IScreen &screen) {
