@@ -1,6 +1,5 @@
 
 #include "project.h"
-#include "core/files.h"
 #include "files/directorynotifications.h"
 #include "files/extensions.h"
 #include "text/startswith.h"

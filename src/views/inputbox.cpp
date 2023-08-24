@@ -31,7 +31,8 @@ InputBox::~InputBox() = default;
 bool InputBox::keyPress(std::shared_ptr<IEnvironment> env) {
     auto key = env->key();
 
-#warning "make sure that this works after removing scope"
+    // This seems to work, no need for a warning all thet ime
+    // #warning "make sure that this works after removing scope"
 
     switch (key.key) {
     case Key::Escape:
