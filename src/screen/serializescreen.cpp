@@ -75,11 +75,6 @@ void SerializeScreen::palette(const Palette &palette) {
         arch.set("value", palette);
     }
     send(std::string_view{ss.str()});
-
-    //    send({
-    //        {"method", "palette"},
-    //        {"value", palette},
-    //    });
 }
 
 size_t SerializeScreen::addStyle(const Color &foreground,
@@ -108,10 +103,6 @@ void SerializeScreen::cursorStyle(CursorStyle style) {
         arch("value", style);
     }
     send(std::string_view{ss.str()});
-    //    send({
-    //        {"method", "cursorStyle"},
-    //        {"value", static_cast<double>(style)},
-    //    });
 }
 
 void SerializeScreen::subscribe(CallbackT f) {
@@ -134,17 +125,7 @@ void SerializeScreen::clipboardData(std::string text) {
         arch("value", text);
     }
     send(std::string_view{ss.str()});
-    //    send({
-    //        {"method", "set/clipboard"},
-    //        {"value", text},
-    //    });
 }
-
-// void SerializeScreen::send(const nlohmann::json &json) {
-//     auto ss = std::stringstream{};
-//     ss << json;
-//     _connection->write(ss.str());
-// }
 
 void SerializeScreen::send(std::string_view str) {
     _connection->write(str);
