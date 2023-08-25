@@ -1,5 +1,6 @@
 #include "build.cpp"
 #include "clangformat.cpp"
+#include "gdbdebugger.cpp"
 #include "git.cpp"
 #include "jsonformat.cpp"
 #include "run.cpp"

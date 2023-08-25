@@ -2,6 +2,7 @@
 #include "core/plugins.h"
 #include "navigation/headernavigation.h"
 #include "plugin/clangformat.h"
+#include "plugin/gdbdebugger.h"
 #include "plugin/git.h"
 #include "plugin/jsonformat.h"
 #include "plugin/lsp/lspplugin.h"
@@ -29,6 +30,7 @@ void registerDefaultPlugins(Plugins &container) {
 
 #ifndef __EMSCRIPTEN__
     LspPlugin::registerPlugin(container);
+    container.loadPlugin<GdbDebugger>();
 #endif
 
     registerGitCommands(StandardCommands::get());

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "plugin/idebugger.h"
 #include "syntax/iannotation.h"
 #include "syntax/ihighlight.h"
 #include "syntax/irename.h"
@@ -21,7 +22,8 @@ private:
                ListT<IAnnotation>,
                ListT<INavigation>,
                ListT<ICompletionSource>,
-               ListT<IRename>>
+               ListT<IRename>,
+               ListT<IDebugger>>
         lists;
 
     template <typename T, typename V>
@@ -60,7 +62,8 @@ public:
                     INavigation,
                     ICompletionSource,
                     IHighlight,
-                    IRename>(ptr);
+                    IRename,
+                    IDebugger>(ptr);
     }
 
     template <typename T>

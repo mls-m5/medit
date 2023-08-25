@@ -50,6 +50,8 @@ class ICompletionSource;
 class IAnnotation;
 class IFormat;
 class INavigation;
+class IDebugger;
+class IRename;
 struct Changes;
 
 class IConnection;
