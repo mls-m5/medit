@@ -1,7 +1,9 @@
 #pragma once
 
+#include "lsp/connection.h"
 #include "plugin/idebugger.h"
 #include <functional>
+#include <iosfwd>
 
 class GdbDebugger : public IDebugger {
 public:
@@ -27,4 +29,8 @@ public:
 
 private:
     std::function<void(DebuggerState state)> _callback;
+
+    void inputThread(std::istream &in);
+
+    lsp::Connection _connection;
 };

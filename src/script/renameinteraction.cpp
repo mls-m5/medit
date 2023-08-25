@@ -5,6 +5,7 @@
 #include "syntax/irename.h"
 #include "text/changes.h"
 #include "text/cursorrangeops.h"
+#include "text/fstring.h"
 #include "views/editor.h"
 #include "views/interactionhandling.h"
 #include "views/mainwindow.h"
@@ -112,7 +113,9 @@ void beginRenameInteraction(std::shared_ptr<IEnvironment> env) {
         if (rename->prepare(env, [env](IRename::PrepareCallbackArgs args) {
                 renameVerifiedCallback(env, std::move(args));
             })) {
-            break;
+            return;
         }
     }
+
+    env->statusMessage(FString{"no rename plugin supports this file type"});
 }

@@ -16,7 +16,6 @@ target_link_libraries(
     )
 
 if (NOT EMSCRIPTEN)
-
     target_link_libraries(
         medit_plugins
         PUBLIC

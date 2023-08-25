@@ -8,6 +8,7 @@
 #include "modes/normalmode.h"
 #include "modes/visualmode.h"
 #include "plugin/build.h"
+#include "plugin/idebugger.h"
 #include "plugin/run.h"
 #include "renameinteraction.h"
 #include "saveinteraction.h"
@@ -332,6 +333,26 @@ StandardCommands create() {
         }
         env->mainWindow().open(path, x, y);
     };
+
+    // --- debugger ----------------------
+
+#define MAP_DEBUG(x, y)                                                        \
+    DEF(x) {                                                                   \
+        if (env->core().debugger()) {                                          \
+            env->core().debugger()->y();                                       \
+        }                                                                      \
+    };
+
+    MAP_DEBUG(debug_run, run);
+    MAP_DEBUG(debug_pause, pause);
+    MAP_DEBUG(debug_quit, quit);
+
+    MAP_DEBUG(debug_continue, cont);
+    MAP_DEBUG(debug_step_into, stepInto);
+    MAP_DEBUG(debug_step_over, stepOver);
+    MAP_DEBUG(debug_step_out, stepOut);
+
+#undef MAP_DEBUG
 
     return commands;
 }

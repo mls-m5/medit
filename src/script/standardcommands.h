@@ -57,7 +57,15 @@
     STD_DEF(select_all);                                                       \
     STD_DEF(command_palette);                                                  \
     STD_DEF(new_file);                                                         \
-    STD_DEF(rename_file);
+    STD_DEF(rename_file);                                                      \
+    STD_DEF(debug_run);                                                        \
+    STD_DEF(debug_pause);                                                      \
+    STD_DEF(debug_quit);                                                       \
+    STD_DEF(debug_continue);                                                   \
+    STD_DEF(debug_step_into);                                                  \
+    STD_DEF(debug_step_over);                                                  \
+    STD_DEF(debug_step_out);                                                   \
+    STD_DEF(debug_toggle_breakpoint);
 
 #define STD_DEF(name) std::function<void(EnvPtrT env)> name
 

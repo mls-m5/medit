@@ -35,6 +35,8 @@ public:
         return _files;
     }
 
+    IDebugger *debugger();
+
 private:
     ThreadContext *_context =
         nullptr; // TODO: Handle lifetime of CoreEnvironment better

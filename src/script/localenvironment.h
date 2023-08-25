@@ -16,6 +16,7 @@ class LocalEnvironment : public IEnvironment {
     bool _showConsole = false;
     ThreadContext &_context;
     Registers _registers;
+    IDebugger *_currentDebugger = nullptr;
 
 public:
     LocalEnvironment(MainWindow &mw, ThreadContext &context);
