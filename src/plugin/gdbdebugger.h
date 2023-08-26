@@ -14,9 +14,11 @@ public:
     GdbDebugger &operator=(const GdbDebugger &) = delete;
     GdbDebugger &operator=(GdbDebugger &&) = delete;
 
+    void command(std::string_view command) override;
+
     void run() override;
     void pause() override;
-    void quit() override;
+    void stop() override;
 
     void cont() override;
     void stepInto() override;
@@ -33,4 +35,6 @@ private:
     void inputThread(std::istream &in);
 
     lsp::Connection _connection;
+
+    std::string _debugCommand;
 };

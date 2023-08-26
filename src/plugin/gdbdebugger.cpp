@@ -7,21 +7,37 @@
 GdbDebugger::GdbDebugger()
     : _connection{"gdb --interpreter=mi3",
                   [this](std::istream &in) { inputThread(in); }} {
-    run();
-    quit();
+
+    // TODO this is for testing only. Remove this
+    GdbDebugger::command("./test/medit_tests Utf8Char");
+    //    GdbDebugger::run();
 }
 
-GdbDebugger::~GdbDebugger() = default;
+void GdbDebugger::command(std::string_view c) {
+    std::string command{c};
+    auto args = std::string{};
+
+    if (auto f = command.find(' '); f != std::string::npos) {
+        args = command.substr(f + 1);
+        command = command.substr(0, f);
+    }
+    _connection.send("file " + command + "\n");
+    _connection.send("set args " + args);
+}
+
+GdbDebugger::~GdbDebugger() {
+    _connection.send("quit\n");
+}
 
 void GdbDebugger::run() {
-    _connection.send("run\n");
+    _connection.send("run " + _debugCommand + "\n");
 }
 
 void GdbDebugger::pause() {
-    _connection.send("pouse\n");
+    _connection.send("pause\n");
 }
 
-void GdbDebugger::quit() {
+void GdbDebugger::stop() {
     _connection.send("quit\n");
 }
 

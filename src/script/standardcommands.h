@@ -60,7 +60,7 @@
     STD_DEF(rename_file);                                                      \
     STD_DEF(debug_run);                                                        \
     STD_DEF(debug_pause);                                                      \
-    STD_DEF(debug_quit);                                                       \
+    STD_DEF(debug_stop);                                                       \
     STD_DEF(debug_continue);                                                   \
     STD_DEF(debug_step_into);                                                  \
     STD_DEF(debug_step_over);                                                  \

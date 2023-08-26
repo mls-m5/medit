@@ -3,6 +3,7 @@
 #include "text/position.h"
 #include <filesystem>
 #include <functional>
+#include <string_view>
 
 struct DebuggerState {
     using Path = std::filesystem::path;
@@ -32,9 +33,12 @@ public:
 
     virtual void stateCallback(std::function<void(DebuggerState)>) = 0;
 
+    /// Set the command to be run
+    virtual void command(std::string_view command) = 0;
+
     virtual void run() = 0;
     virtual void pause() = 0;
-    virtual void quit() = 0;
+    virtual void stop() = 0;
     /// Note: continue is a keyword
     virtual void cont() = 0;
     virtual void stepInto() = 0;

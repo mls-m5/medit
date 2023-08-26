@@ -345,7 +345,7 @@ StandardCommands create() {
 
     MAP_DEBUG(debug_run, run);
     MAP_DEBUG(debug_pause, pause);
-    MAP_DEBUG(debug_quit, quit);
+    MAP_DEBUG(debug_stop, stop);
 
     MAP_DEBUG(debug_continue, cont);
     MAP_DEBUG(debug_step_into, stepInto);
