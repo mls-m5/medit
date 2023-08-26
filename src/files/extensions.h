@@ -68,10 +68,14 @@ inline bool isPhp(const std::filesystem::path &path) {
     return path.extension() == ".php";
 }
 
+inline bool isGo(const std::filesystem::path &path) {
+    return path.extension() == ".go";
+}
+
 inline bool isKnownExtension(const std::filesystem::path &path) {
     return isCppHeader(path) || isCppSource(path) || isCSource(path) ||
            isCpp(path) || isJson(path) || isMarkdown(path) || isMake(path) ||
            isMatmake(path) || isCmakeLists(path) || isTextFile(path) ||
            isHtml(path) || isJs(path) || isPython(path) || isJava(path) ||
-           isCSharp(path) || isPhp(path);
+           isCSharp(path) || isPhp(path) || isGo(path);
 }
