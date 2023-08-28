@@ -1,6 +1,7 @@
 // Copyright Mattias Larsson Sköld
 
 #include "parentmode.h"
+#include "keys/event.h"
 #include "mode.h"
 #include "script/standardcommands.h"
 #include "views/mainwindow.h"
@@ -15,6 +16,9 @@ std::shared_ptr<IMode> createParentMode() {
         {KeyEvent{Key::F5}, sc.debug_run},
         {KeyEvent{Key::F9}, sc.debug_toggle_breakpoint},
         {KeyEvent{Key::F10}, sc.debug_step_over},
+        {KeyEvent{Key::F11}, sc.debug_step_into},
+        //        {KeyEvent{Key::F11, {}, Modifiers::Ctrl}, sc.debug_step_out},
+        //        // TODO: This does not work
         {KeyEvent{Key::Home}, {sc.home}},
         {KeyEvent{Key::End}, {sc.end}},
         {KeyEvent{Key::PageUp}, {sc.page_up}},

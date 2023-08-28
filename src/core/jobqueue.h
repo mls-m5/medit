@@ -5,6 +5,7 @@
 #include <functional>
 #include <mutex>
 #include <queue>
+#include <stdexcept>
 #include <thread>
 
 class JobQueue : public IJobQueue {
@@ -21,6 +22,9 @@ public:
     }
 
     void addTask(std::function<void()> f) override {
+        if (!f) {
+            throw std::runtime_error{"trying to add empty function"};
+        }
         _queue.push(std::move(f));
         _waitMutex.try_lock();
         _waitMutex.unlock();
