@@ -5,8 +5,22 @@
 #include <functional>
 #include <string_view>
 
-struct DebuggerState {
+/// Specify a line in a file
+struct SourceLocation {
     using Path = std::filesystem::path;
+
+    Path path;
+
+    /// Note: Medit positions starts at line 0 and column 0. conversion may be
+    /// neded when interfacing with other programs
+    Position position = {}; // Only used when paused
+
+    operator bool() const {
+        return path.empty();
+    }
+};
+
+struct DebuggerState {
 
     enum State {
         Stopped,
@@ -15,8 +29,8 @@ struct DebuggerState {
     };
 
     State state = Stopped;
-    Path path;
-    Position position = {}; // Only used when paused
+
+    SourceLocation location;
 };
 
 /// Abstraction for debuggers like gdb or pdb
@@ -34,6 +48,7 @@ public:
     virtual void applicationOutputCallback(
         std::function<void(std::string_view)>) = 0;
     virtual void stateCallback(std::function<void(DebuggerState)>) = 0;
+    virtual void gdbStatusCallback(std::function<void(std::string_view)>) = 0;
 
     /// Set the command to be run
     virtual void command(std::string_view command) = 0;

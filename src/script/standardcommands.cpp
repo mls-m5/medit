@@ -358,7 +358,10 @@ StandardCommands create() {
 
     MAP_DEBUG(debug_step_out, stepOut);
 
-    MAP_DEBUG(debug_toggle_breakpoint, toggleBreakpoint, "main.cpp", {1, 1});
+    MAP_DEBUG(debug_toggle_breakpoint,
+              toggleBreakpoint,
+              "test/utf8char_test.cpp",
+              {0, 9});
 
 #undef MAP_DEBUG
 

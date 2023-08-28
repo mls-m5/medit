@@ -23,6 +23,8 @@ public:
     void applicationOutputCallback(
         std::function<void(std::string_view)>) override;
 
+    void gdbStatusCallback(std::function<void(std::string_view)>) override;
+
     void run() override;
     void pause() override;
     void stop() override;
@@ -40,8 +42,11 @@ public:
 private:
     void waitForDone();
 
+    void changeState(DebuggerState state);
+
     std::function<void(DebuggerState state)> _callback;
     std::function<void(std::string_view)> _applicationOutputCallback;
+    std::function<void(std::string_view)> _gdbStatusCallback;
 
     void inputThread(std::istream &in);
 
@@ -59,4 +64,8 @@ private:
     bool _isWaiting = false;
     std::mutex _waitMutex;
     std::condition_variable _waitVar;
+
+    DebuggerState::State _currentState = DebuggerState::Stopped;
+
+    bool _isRunning = true;
 };
