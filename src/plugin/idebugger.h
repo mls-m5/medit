@@ -39,12 +39,13 @@ public:
     virtual void run() = 0;
     virtual void pause() = 0;
     virtual void stop() = 0;
-    /// Note: continue is a keyword
+    /// Note: continue is a c++ keyword
     virtual void cont() = 0;
     virtual void stepInto() = 0;
     virtual void stepOver() = 0;
     virtual void stepOut() = 0;
 
+    virtual void toggleBreakpoint(Path file, Position) = 0;
     virtual void setBreakpoint(Path file, Position) = 0;
     virtual void deleteBreakpoint(Path file, Position) = 0;
     //    virtual void toggleBreakpoint(File &file, Position);

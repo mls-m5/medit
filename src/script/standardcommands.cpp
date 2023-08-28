@@ -336,10 +336,10 @@ StandardCommands create() {
 
     // --- debugger ----------------------
 
-#define MAP_DEBUG(x, y)                                                        \
+#define MAP_DEBUG(x, y, ...)                                                   \
     DEF(x) {                                                                   \
         if (env->core().debugger()) {                                          \
-            env->core().debugger()->y();                                       \
+            env->core().debugger()->y(__VA_ARGS__);                            \
         }                                                                      \
     };
 
@@ -351,6 +351,10 @@ StandardCommands create() {
     MAP_DEBUG(debug_step_into, stepInto);
     MAP_DEBUG(debug_step_over, stepOver);
     MAP_DEBUG(debug_step_out, stepOut);
+
+    MAP_DEBUG(debug_step_out, stepOut);
+
+    MAP_DEBUG(debug_toggle_breakpoint, toggleBreakpoint, "main.cpp", {1, 1});
 
 #undef MAP_DEBUG
 

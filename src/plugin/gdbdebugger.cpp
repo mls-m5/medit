@@ -1,8 +1,10 @@
 #include "gdbdebugger.h"
 #include <iostream>
 #include <istream>
+#include <mutex>
 #include <ostream>
 #include <string>
+#include <string_view>
 
 GdbDebugger::GdbDebugger()
     : _connection{"gdb --interpreter=mi3",
@@ -30,39 +32,76 @@ GdbDebugger::~GdbDebugger() {
 }
 
 void GdbDebugger::run() {
-    _connection.send("run " + _debugCommand + "\n");
+    _connection.send("run " + _debugCommand + "&");
 }
 
 void GdbDebugger::pause() {
-    _connection.send("pause\n");
+    _connection.send("interrupt");
 }
 
 void GdbDebugger::stop() {
-    _connection.send("quit\n");
+    _connection.send("quit");
+    _connection.closePipes();
 }
 
 void GdbDebugger::cont() {
-    _connection.send("c\n");
+    _connection.send("c &");
 }
 
-void GdbDebugger::stepInto() {}
+void GdbDebugger::stepInto() {
+    _connection.send("step &");
+}
 
 void GdbDebugger::stepOver() {
-    _connection.send("n");
+    _connection.send("n &");
 }
 
-void GdbDebugger::stepOut() {}
+void GdbDebugger::stepOut() {
+    _connection.send("finish &");
+}
+
+void GdbDebugger::toggleBreakpoint(Path file, Position pos) {
+    // TODO: Handle unsetting
+    setBreakpoint(file, pos);
+}
 
 void GdbDebugger::stateCallback(std::function<void(DebuggerState)> f) {
     _callback = f;
 }
 
-void GdbDebugger::setBreakpoint(Path file, Position) {}
+void GdbDebugger::setBreakpoint(Path file, Position pos) {
+    _connection.send("b " + file.string() + ":" + std::to_string(pos.y() + 1));
+    waitForDone();
+    _connection.send("info b"); // Request information about all set breakpoints
+}
 
 void GdbDebugger::deleteBreakpoint(Path file, Position) {}
 
+void GdbDebugger::waitForDone() {
+    _isWaiting = true;
+    auto lock = std::unique_lock{_waitMutex};
+    _waitVar.wait(lock);
+}
+
 void GdbDebugger::inputThread(std::istream &in) {
     for (std::string line; std::getline(in, line);) {
+        if (line.empty()) {
+            continue;
+        }
+        if (line.back() == '\r') {
+            line.pop_back();
+        }
+        if (line == "^done") {
+            if (_isWaiting) {
+                _isWaiting = false;
+                _waitVar.notify_one();
+            }
+        }
+
+        constexpr auto breakpointStr = std::string_view{"~\"Breakpoint "};
+        if (line.rfind(breakpointStr, 0) == 0) {
+            line = line.substr(breakpointStr.size());
+        }
         std::cout << line << std::endl;
     }
 }
