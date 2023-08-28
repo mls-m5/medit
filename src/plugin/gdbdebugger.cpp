@@ -27,7 +27,14 @@ void GdbDebugger::command(std::string_view c) {
     _connection.send("set args " + args);
 }
 
+void GdbDebugger::applicationOutputCallback(
+    std::function<void(std::string_view)> f) {
+    _applicationOutputCallback = f;
+}
+
 GdbDebugger::~GdbDebugger() {
+    _applicationOutputCallback = {};
+    _callback = {};
     _connection.send("quit\n");
 }
 
@@ -102,6 +109,12 @@ void GdbDebugger::inputThread(std::istream &in) {
         if (line.rfind(breakpointStr, 0) == 0) {
             line = line.substr(breakpointStr.size());
         }
-        std::cout << line << std::endl;
+        //        std::cout << line << std::endl;
+
+        if (_applicationOutputCallback) {
+            // TODO: Separate applcation output from gdb output with gdb tty
+            // command and special pipes
+            _applicationOutputCallback(line);
+        }
     }
 }

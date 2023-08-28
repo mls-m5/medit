@@ -4,3 +4,4 @@
 #include "git.cpp"
 #include "jsonformat.cpp"
 #include "run.cpp"
+#include "rundebug.cpp"

@@ -6,6 +6,7 @@
 #include <functional>
 #include <iosfwd>
 #include <mutex>
+#include <string_view>
 
 class GdbDebugger : public IDebugger {
 public:
@@ -17,6 +18,10 @@ public:
     GdbDebugger &operator=(GdbDebugger &&) = delete;
 
     void command(std::string_view command) override;
+
+    /// Application output
+    void applicationOutputCallback(
+        std::function<void(std::string_view)>) override;
 
     void run() override;
     void pause() override;
@@ -36,6 +41,7 @@ private:
     void waitForDone();
 
     std::function<void(DebuggerState state)> _callback;
+    std::function<void(std::string_view)> _applicationOutputCallback;
 
     void inputThread(std::istream &in);
 

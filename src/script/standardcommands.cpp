@@ -10,6 +10,7 @@
 #include "plugin/build.h"
 #include "plugin/idebugger.h"
 #include "plugin/run.h"
+#include "plugin/rundebug.h"
 #include "renameinteraction.h"
 #include "saveinteraction.h"
 #include "script/renamefileinteraction.h"
@@ -343,7 +344,10 @@ StandardCommands create() {
         }                                                                      \
     };
 
-    MAP_DEBUG(debug_run, run);
+    DEF(debug_run) {
+        debug(env);
+    };
+    //    MAP_DEBUG(debug_run, run);
     MAP_DEBUG(debug_pause, pause);
     MAP_DEBUG(debug_stop, stop);
 
