@@ -147,9 +147,19 @@ std::vector<std::filesystem::path> Project::findProjectFiles(
     std::vector<std::filesystem::path> paths;
 
     size_t i = 0;
-    for (auto &path : std::filesystem::recursive_directory_iterator{
-             root,
-             std::filesystem::directory_options::skip_permission_denied}) {
+    for (auto it =
+             std::filesystem::recursive_directory_iterator{
+                 root,
+                 std::filesystem::directory_options::skip_permission_denied};
+         it != std::filesystem::recursive_directory_iterator{};
+         ++it) {
+        auto &path = it->path();
+
+        if (std::filesystem::exists(path / "CMakeCache.txt")) {
+            it.disable_recursion_pending();
+            continue;
+        }
+
         if (!isKnownExtension(path)) {
             continue;
         }
