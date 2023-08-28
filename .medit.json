@@ -2,7 +2,7 @@
     "build": "cd build/default ; cmake ../..  -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ; cmake --build .",
     "run": "cd build/default ; ./medit",
     "debug": {
-        "path": "build/default/test",
-        "executable": "medit_tests"
+        "working_dir": "build/default/test",
+        "command": "medit_tests"
     }
 }

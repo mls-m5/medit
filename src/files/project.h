@@ -2,6 +2,7 @@
 
 #include "meditfwd.h"
 #include <filesystem>
+#include <string>
 #include <vector>
 
 class Project {
@@ -14,6 +15,13 @@ public:
         std::string runCommand;
         std::vector<std::string> flags;
         std::string formatCommand;
+
+        struct DebugInfo {
+            std::string command;
+            std::filesystem::path workingDir;
+        };
+
+        DebugInfo debug;
     };
 
     /// Set the current root

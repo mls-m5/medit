@@ -214,6 +214,15 @@ void Project::loadProjectFile() {
             }
         }
     }
+
+    if (auto it = json.find("debug"); it != json.end()) {
+        if (auto command = it->find("command"); command != it->end()) {
+            _settings.debug.command = command->string();
+        }
+        if (auto dir = it->find("working_dir"); dir != it->end()) {
+            _settings.debug.workingDir = dir->string();
+        }
+    }
 }
 
 void Project::addCachedFile(std::filesystem::path path) {

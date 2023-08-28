@@ -53,11 +53,20 @@ void GdbDebugger::run() {
         return;
     }
 
-    _connection.send(
-        "cd " + std::filesystem::absolute(_workingDirectory).string() + "");
+    if (_debugCommand.empty()) {
+        if (_applicationOutputCallback) {
+            _applicationOutputCallback(
+                "no debug.command specified in .medit file");
+        }
+    }
 
-    if (waitForDone() == Error) {
-        return;
+    if (!_workingDirectory.empty()) {
+        _connection.send(
+            "cd " + std::filesystem::absolute(_workingDirectory).string() + "");
+
+        if (waitForDone() == Error) {
+            return;
+        }
     }
     _connection.send("file " + _debugCommand);
     if (waitForDone() == Error) {

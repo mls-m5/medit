@@ -50,8 +50,8 @@ void debug(std::shared_ptr<IEnvironment> env) {
         return;
     }
 
-    debugger->command("./medit_tests");
-    debugger->workingDirectory("build/default/test");
+    debugger->command(env->project().settings().debug.command);
+    debugger->workingDirectory(env->project().settings().debug.workingDir);
     debugger->applicationOutputCallback(print);
     debugger->gdbStatusCallback(statusMessage);
     debugger->stateCallback(stateCallback);
