@@ -110,23 +110,24 @@ void GdbDebugger::stepOut() {
     _connection.send("finish &");
 }
 
-void GdbDebugger::toggleBreakpoint(Path file, Position pos) {
+void GdbDebugger::toggleBreakpoint(SourceLocation loc) {
     // TODO: Handle unsetting
-    setBreakpoint(file, pos);
+    setBreakpoint(loc);
 }
 
 void GdbDebugger::stateCallback(std::function<void(DebuggerState)> f) {
     _callback = f;
 }
 
-void GdbDebugger::setBreakpoint(Path file, Position pos) {
-    _connection.send("b " + file.string() + ":" + std::to_string(pos.y() + 1));
+void GdbDebugger::setBreakpoint(SourceLocation loc) {
+    _connection.send("b " + loc.path.string() + ":" +
+                     std::to_string(loc.position.y() + 1));
     waitForDone();
     _connection.send("info b"); // Request information about all set breakpoints
     waitForDone();
 }
 
-void GdbDebugger::deleteBreakpoint(Path file, Position) {}
+void GdbDebugger::deleteBreakpoint(SourceLocation loc) {}
 
 GdbDebugger::WaitResult GdbDebugger::waitForDone() {
     _isWaiting = true;

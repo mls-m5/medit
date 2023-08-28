@@ -13,6 +13,7 @@
 #include "plugin/rundebug.h"
 #include "renameinteraction.h"
 #include "saveinteraction.h"
+#include "script/ienvironment.h"
 #include "script/renamefileinteraction.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
@@ -30,8 +31,8 @@ StandardCommands create() {
     using Ptr = StandardCommands::EnvPtrT;
 
 #define DEF(name)                                                              \
-    commands.namedCommands[#name] = commands.name =                            \
-        [](StandardCommands::EnvPtrT env)
+    commands.namedCommands[#name] =                                            \
+        commands.name = [=](StandardCommands::EnvPtrT env)
 
     StandardCommands commands{};
     DEF(left) {
@@ -358,12 +359,18 @@ StandardCommands create() {
 
     MAP_DEBUG(debug_step_out, stepOut);
 
-    MAP_DEBUG(debug_toggle_breakpoint,
-              toggleBreakpoint,
-              "test/utf8char_test.cpp",
-              {0, 9});
+    auto currentFileLocation = [](IEnvironment &env) {
+        auto source = SourceLocation{};
+        source.path = env.editor().path();
+        source.position = env.editor().cursor();
+        return source;
+    };
+
+    MAP_DEBUG(
+        debug_toggle_breakpoint, toggleBreakpoint, currentFileLocation(*env));
 
 #undef MAP_DEBUG
+#undef DEF
 
     return commands;
 }

@@ -30,6 +30,7 @@ public:
         std::function<void(std::string_view)>) override;
 
     void gdbStatusCallback(std::function<void(std::string_view)>) override;
+    void stateCallback(std::function<void(DebuggerState)>) override;
 
     void run() override;
     void pause() override;
@@ -40,10 +41,9 @@ public:
     void stepOver() override;
     void stepOut() override;
 
-    void toggleBreakpoint(Path file, Position) override;
-    void stateCallback(std::function<void(DebuggerState)>) override;
-    void setBreakpoint(Path file, Position) override;
-    void deleteBreakpoint(Path file, Position) override;
+    void toggleBreakpoint(SourceLocation) override;
+    void setBreakpoint(SourceLocation) override;
+    void deleteBreakpoint(SourceLocation) override;
 
 private:
     enum WaitResult {

@@ -65,10 +65,9 @@ public:
     virtual void stepOver() = 0;
     virtual void stepOut() = 0;
 
-    virtual void toggleBreakpoint(Path file, Position) = 0;
-    virtual void setBreakpoint(Path file, Position) = 0;
-    virtual void deleteBreakpoint(Path file, Position) = 0;
-    //    virtual void toggleBreakpoint(File &file, Position);
+    virtual void toggleBreakpoint(SourceLocation) = 0;
+    virtual void setBreakpoint(SourceLocation) = 0;
+    virtual void deleteBreakpoint(SourceLocation) = 0;
 
     // Watchpoints
     // Conditions
