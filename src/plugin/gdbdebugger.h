@@ -3,10 +3,13 @@
 #include "lsp/connection.h"
 #include "plugin/idebugger.h"
 #include <condition_variable>
+#include <filesystem>
 #include <functional>
 #include <iosfwd>
 #include <mutex>
+#include <string>
 #include <string_view>
+#include <vector>
 
 class GdbDebugger : public IDebugger {
 public:
@@ -18,6 +21,9 @@ public:
     GdbDebugger &operator=(GdbDebugger &&) = delete;
 
     void command(std::string_view command) override;
+
+    /// Specify where to run the command
+    void workingDirectory(std::filesystem::path) override;
 
     /// Application output
     void applicationOutputCallback(
@@ -40,7 +46,12 @@ public:
     void deleteBreakpoint(Path file, Position) override;
 
 private:
-    void waitForDone();
+    enum WaitResult {
+        Done,
+        Error,
+    };
+
+    WaitResult waitForDone();
 
     void changeState(DebuggerState state);
 
@@ -53,6 +64,8 @@ private:
     lsp::Connection _connection;
 
     std::string _debugCommand;
+    std::string _debugArgs;
+    std::filesystem::path _workingDirectory;
 
     enum RequestedInfo {
         None,
@@ -64,6 +77,8 @@ private:
     bool _isWaiting = false;
     std::mutex _waitMutex;
     std::condition_variable _waitVar;
+
+    WaitResult _waitResult = Done;
 
     DebuggerState::State _currentState = DebuggerState::Stopped;
 

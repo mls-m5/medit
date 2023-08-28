@@ -50,6 +50,9 @@ public:
     virtual void stateCallback(std::function<void(DebuggerState)>) = 0;
     virtual void gdbStatusCallback(std::function<void(std::string_view)>) = 0;
 
+    /// Specify where to run the command
+    virtual void workingDirectory(std::filesystem::path) = 0;
+
     /// Set the command to be run
     virtual void command(std::string_view command) = 0;
 

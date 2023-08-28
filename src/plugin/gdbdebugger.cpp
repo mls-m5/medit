@@ -1,5 +1,6 @@
 #include "gdbdebugger.h"
 #include "plugin/idebugger.h"
+#include <filesystem>
 #include <iostream>
 #include <istream>
 #include <mutex>
@@ -10,21 +11,23 @@
 
 GdbDebugger::GdbDebugger()
     : _connection{"gdb --interpreter=mi3",
-                  [this](std::istream &in) { inputThread(in); }} {
-
-    GdbDebugger::command("./test/medit_tests Utf8Char");
-}
+                  [this](std::istream &in) { inputThread(in); }} {}
 
 void GdbDebugger::command(std::string_view c) {
     std::string command{c};
-    auto args = std::string{};
+    _debugArgs = {};
 
     if (auto f = command.find(' '); f != std::string::npos) {
-        args = command.substr(f + 1);
-        command = command.substr(0, f);
+        _debugArgs = command.substr(f + 1);
+        _debugCommand = command.substr(0, f);
     }
-    _connection.send("file " + command + "\n");
-    _connection.send("set args " + args);
+    else {
+        _debugCommand = command;
+    }
+}
+
+void GdbDebugger::workingDirectory(std::filesystem::path path) {
+    _workingDirectory = path;
 }
 
 void GdbDebugger::applicationOutputCallback(
@@ -49,7 +52,28 @@ void GdbDebugger::run() {
         cont();
         return;
     }
-    _connection.send("run " + _debugCommand + "&");
+
+    _connection.send(
+        "cd " + std::filesystem::absolute(_workingDirectory).string() + "");
+
+    if (waitForDone() == Error) {
+        return;
+    }
+    _connection.send("file " + _debugCommand);
+    if (waitForDone() == Error) {
+        return;
+    }
+    if (_debugArgs.empty()) {
+        _connection.send("set args");
+    }
+    else {
+        _connection.send("set args " + _debugArgs);
+    }
+    if (waitForDone() == Error) {
+        return;
+    }
+
+    _connection.send("run &");
 }
 
 void GdbDebugger::pause() {
@@ -95,10 +119,11 @@ void GdbDebugger::setBreakpoint(Path file, Position pos) {
 
 void GdbDebugger::deleteBreakpoint(Path file, Position) {}
 
-void GdbDebugger::waitForDone() {
+GdbDebugger::WaitResult GdbDebugger::waitForDone() {
     _isWaiting = true;
     auto lock = std::unique_lock{_waitMutex};
     _waitVar.wait(lock);
+    return _waitResult;
 }
 
 void GdbDebugger::changeState(DebuggerState state) {
@@ -125,6 +150,14 @@ void GdbDebugger::inputThread(std::istream &in) {
         if (line == "^done") {
             if (_isWaiting) {
                 _isWaiting = false;
+                _waitResult = Done;
+                _waitVar.notify_one();
+            }
+        }
+        if (line.rfind("^error", 0) == 0) {
+            if (_isWaiting) {
+                _isWaiting = false;
+                _waitResult = Error;
                 _waitVar.notify_one();
             }
         }

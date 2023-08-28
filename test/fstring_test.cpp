@@ -5,7 +5,7 @@
 #include "text/fstring.h"
 #include "text/fstringview.h"
 
-TEST_SUIT_BEGIN(FString_test)
+TEST_SUIT_BEGIN(FString)
 
 TEST_CASE("create from std::string") {
     auto s = std::string{"hello där"};
