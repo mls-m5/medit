@@ -21,8 +21,6 @@ public:
     CoreEnvironment &operator=(const CoreEnvironment &) = delete;
     CoreEnvironment &operator=(CoreEnvironment &&) = delete;
 
-    static CoreEnvironment &instance();
-
     ThreadContext &context();
 
     Plugins &plugins();

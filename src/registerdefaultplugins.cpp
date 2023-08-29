@@ -1,8 +1,9 @@
 #include "registerdefaultplugins.h"
+#include "core/coreenvironment.h"
 #include "core/plugins.h"
 #include "navigation/headernavigation.h"
-#include "plugin/genericformat.h"
 #include "plugin/gdbdebugger.h"
+#include "plugin/genericformat.h"
 #include "plugin/git.h"
 #include "plugin/jsonformat.h"
 #include "plugin/lsp/lspplugin.h"
@@ -15,7 +16,8 @@
 #include "clang/clangnavigation.h"
 #endif
 
-void registerDefaultPlugins(Plugins &container) {
+void registerDefaultPlugins(CoreEnvironment &core) {
+    auto &container = core.plugins();
     container.loadPlugin<GenericFormat>();
     container.loadPlugin<BasicHighlighting>();
     container.loadPlugin<JsonFormat>();
@@ -29,7 +31,7 @@ void registerDefaultPlugins(Plugins &container) {
 #endif
 
 #ifndef __EMSCRIPTEN__
-    LspPlugin::registerPlugin(container);
+    LspPlugin::registerPlugin(core, container);
     container.loadPlugin<GdbDebugger>();
 #endif
 

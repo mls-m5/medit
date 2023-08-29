@@ -85,7 +85,7 @@ Position clangPositionToMeditPosition(lsp::Position pos) {
 
 using namespace lsp;
 
-LspPlugin::LspPlugin() {
+void LspPlugin::init() {
     auto args = std::string{"--log=error "}; //   std::string{"--log=info "};
 
     auto compileCommandsPath = locateCompileCommands();
@@ -99,7 +99,7 @@ LspPlugin::LspPlugin() {
 
     _client = std::make_unique<LspClient>(command);
 
-    CoreEnvironment::instance().files().subscribeToBufferEvents(
+    _core->files().subscribeToBufferEvents(
         [this](BufferEvent e) { bufferEvent(e); }, nullptr, this);
 
     _client->request(InitializeParams{}, [](const nlohmann::json &j) {
@@ -108,7 +108,7 @@ LspPlugin::LspPlugin() {
     });
 
     _client->subscribe(
-        std::function{[](const PublishDiagnosticsParams &params) {
+        std::function{[this](const PublishDiagnosticsParams &params) {
             auto bufferDiagnostics = std::vector<Diagnostics::Diagnostic>{};
 
             for (auto &item : params.diagnostics) {
@@ -121,9 +121,9 @@ LspPlugin::LspPlugin() {
                 });
             }
 
-            CoreEnvironment::instance().context().guiQueue().addTask(
-                [path = uriToPath(params.uri), bufferDiagnostics] {
-                    CoreEnvironment::instance().files().publishDiagnostics(
+            _core->context().guiQueue().addTask(
+                [this, path = uriToPath(params.uri), bufferDiagnostics] {
+                    _core->files().publishDiagnostics(
                         path,
                         "clangd",
                         //                params.diagnostics.front().source,
@@ -131,6 +131,8 @@ LspPlugin::LspPlugin() {
                 });
         }});
 }
+
+LspPlugin::LspPlugin() = default;
 
 LspPlugin::~LspPlugin() {
     _client->shutdown().get();
@@ -174,8 +176,10 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
     }
 }
 
-void LspPlugin::registerPlugin(Plugins &plugins) {
-    LspPlugin::instance();
+void LspPlugin::registerPlugin(CoreEnvironment &core, Plugins &plugins) {
+    // TODO: Fix this someday, its ugly
+    LspPlugin::instance()._core = &core;
+    LspPlugin::instance().init();
     plugins.loadPlugin<LspNavigation>();
     plugins.loadPlugin<LspHighlight>();
     plugins.loadPlugin<LspComplete>();
@@ -275,10 +279,9 @@ void LspPlugin::requestSemanticsToken(std::shared_ptr<Buffer> buffer) {
     params.textDocument.uri = pathToUri(buffer->path());
 
     _client->request(params, [this, buffer](SemanticTokens data) {
-        CoreEnvironment::instance().context().guiQueue().addTask(
-            [buffer, data, this] {
-                handleSemanticsTokens(buffer, std::move(data.data));
-            });
+        _core->context().guiQueue().addTask([buffer, data, this] {
+            handleSemanticsTokens(buffer, std::move(data.data));
+        });
     });
 }
 

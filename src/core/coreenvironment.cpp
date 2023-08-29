@@ -9,10 +9,6 @@ CoreEnvironment::CoreEnvironment(ThreadContext &context)
 }
 CoreEnvironment::~CoreEnvironment() = default;
 
-CoreEnvironment &CoreEnvironment::instance() {
-    return *_instance;
-}
-
 IDebugger *CoreEnvironment::debugger() {
     auto &debuggers = _plugins.get<IDebugger>();
 

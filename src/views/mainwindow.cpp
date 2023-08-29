@@ -21,18 +21,19 @@
 #include <filesystem>
 #include <memory>
 
-MainWindow::MainWindow(IScreen &screen, ThreadContext &context)
+MainWindow::MainWindow(CoreEnvironment &core,
+                       IScreen &screen,
+                       ThreadContext &context)
     : Window{nullptr}
     , View(nullptr, 100, 100)
     , _screen{screen}
     , _editors{}
     , _interactions{*this}
-    , _env(std::make_unique<LocalEnvironment>(*this, context))
+    , _env(std::make_unique<LocalEnvironment>(core, *this, context))
     , _console(this, _env->core().files().create())
     , _locator(this, _project)
     , _commandPalette(this, StandardCommands::get())
-    , _completeView(
-          this, CoreEnvironment::instance().plugins().get<ICompletionSource>())
+    , _completeView(this, core.plugins().get<ICompletionSource>())
     , _project{_env->core().files().directoryNotifications()}
     , _currentEditor(0) {
 

@@ -33,7 +33,7 @@ struct MainWindow : public Window {
     FString _statusMessage;
     int _statusTimerHandle = 0;
 
-    MainWindow(IScreen &screen, ThreadContext &context);
+    MainWindow(CoreEnvironment &core, IScreen &screen, ThreadContext &context);
 
     ~MainWindow() override;
 

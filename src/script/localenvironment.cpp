@@ -4,12 +4,15 @@
 #include "views/mainwindow.h"
 #include <stdexcept>
 
-LocalEnvironment::LocalEnvironment(MainWindow &mw, ThreadContext &context)
-    : _mainWindow{mw}
+LocalEnvironment::LocalEnvironment(CoreEnvironment &core,
+                                   MainWindow &mw,
+                                   ThreadContext &context)
+    : _core{core}
+    , _mainWindow{mw}
     , _context{context} {}
 
 CoreEnvironment &LocalEnvironment::core() {
-    return CoreEnvironment::instance();
+    return _core;
 }
 
 const StandardCommands &LocalEnvironment::standardCommands() const {

@@ -1,5 +1,6 @@
 
 #include "completion/icompletionsource.h"
+#include "core/coreenvironment.h"
 #include "navigation/inavigation.h"
 #include "script/ienvironment.h"
 #include "syntax/ihighlight.h"
@@ -17,11 +18,19 @@ class LspClient;
 class LspPlugin {
 public:
     LspPlugin();
+
+    void init();
+
+    LspPlugin(const LspPlugin &) = delete;
+    LspPlugin(LspPlugin &&) = delete;
+    LspPlugin &operator=(const LspPlugin &) = delete;
+    LspPlugin &operator=(LspPlugin &&) = delete;
+
     ~LspPlugin();
 
     void bufferEvent(BufferEvent &event);
 
-    static void registerPlugin(Plugins &);
+    static void registerPlugin(CoreEnvironment &core, Plugins &);
 
     void handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
                                std::vector<long>);
@@ -40,6 +49,8 @@ public:
 
     void updateBuffer(Buffer &);
 
+    CoreEnvironment *_core = nullptr;
+
 private:
     std::unique_ptr<lsp::LspClient> _client;
     std::unordered_map<std::string, long> _bufferVersions;
@@ -56,7 +67,9 @@ public:
 
 class LspNavigation : public INavigation {
 public:
-    bool gotoSymbol(std::shared_ptr<IEnvironment> scope) override;
+    /// Goto symbol,
+    /// @return true if symbol was found
+    bool gotoSymbol(std::shared_ptr<IEnvironment> env) override;
 };
 
 class LspHighlight : public IHighlight {

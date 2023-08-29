@@ -9,17 +9,20 @@
 
 /// Environment data for a single user
 class LocalEnvironment : public IEnvironment {
+    CoreEnvironment &_core;
     MainWindow &_mainWindow;
     KeyEvent _lastKeyEvent;
-    Editor *_console;
-    Project *_project;
+    Editor *_console = nullptr;
+    Project *_project = nullptr;
     bool _showConsole = false;
     ThreadContext &_context;
     Registers _registers;
     IDebugger *_currentDebugger = nullptr;
 
 public:
-    LocalEnvironment(MainWindow &mw, ThreadContext &context);
+    LocalEnvironment(CoreEnvironment &core,
+                     MainWindow &mw,
+                     ThreadContext &context);
 
     void key(KeyEvent e) {
         _lastKeyEvent = e;

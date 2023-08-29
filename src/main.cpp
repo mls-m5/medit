@@ -48,12 +48,14 @@ struct User {
     std::shared_ptr<MainWindow> mainWindow;
 
 #ifdef __EMSCRIPTEN__
-    User(const Settings &settings, Context &context) {
+    User(const Settings &settings, CoreEnvironment &core, Context &context) {
         nativesScreen = std::make_unique<ScreenType>();
     }
 #else
 
-    User(const Settings &settings, ThreadContext &context) {
+    User(const Settings &settings,
+         CoreEnvironment &core,
+         ThreadContext &context) {
         if (settings.style == UiStyle::Terminal) {
             nativeScreen = std::make_unique<NCursesScreen>();
         }
@@ -75,17 +77,20 @@ struct User {
         else {
             nativeScreen = std::make_unique<ScreenType>();
         }
-        setup(settings, context);
+        setup(settings, core, context);
     }
 
     User(std::shared_ptr<IConnection> conn,
+         CoreEnvironment &core,
          const Settings &settings,
          ThreadContext &context) {
         nativeScreen = std::make_unique<SerializeScreen>(conn);
-        setup(settings, context);
+        setup(settings, core, context);
     }
 
-    void setup(const Settings &settings, ThreadContext &context) {
+    void setup(const Settings &settings,
+               CoreEnvironment &core,
+               ThreadContext &context) {
         screen = std::make_unique<BufferedScreen>(nativeScreen.get());
         screen->subscribe([this, &context](IScreen::EventListT list) {
             context.guiQueue().addTask([e = list, this] {
@@ -96,7 +101,7 @@ struct User {
             });
         });
 
-        mainWindow = std::make_shared<MainWindow>(*screen, context);
+        mainWindow = std::make_shared<MainWindow>(core, *screen, context);
 
         if (settings.file.empty()) {
             mainWindow->updateLocatorBuffer();
@@ -186,8 +191,8 @@ void MainData::start(const Settings &settings) {
 
     mainData.core = std::make_unique<CoreEnvironment>(*context);
 
-    registerDefaultPlugins(CoreEnvironment::instance().plugins());
-    CoreEnvironment::instance().plugins().sort();
+    registerDefaultPlugins(*core);
+    core->plugins().sort();
 
     timer->start();
     jobQueue->start();
@@ -199,13 +204,13 @@ void MainData::start(const Settings &settings) {
         server->callback([this, settings](std::shared_ptr<IConnection> conn) {
             guiQueue->addTask([this, conn, settings] {
                 users.push_back(
-                    std::make_unique<User>(conn, settings, *context));
+                    std::make_unique<User>(conn, *core, settings, *context));
             });
             std::cout << "client connectied..." << std::endl;
         });
     }
     else {
-        users.push_back(std::make_unique<User>(settings, *context));
+        users.push_back(std::make_unique<User>(settings, *core, *context));
     }
 }
 
