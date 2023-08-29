@@ -23,17 +23,11 @@ public:
 
     static CoreEnvironment &instance();
 
-    ThreadContext &context() {
-        return *_context;
-    }
+    ThreadContext &context();
 
-    Plugins &plugins() {
-        return _plugins;
-    }
+    Plugins &plugins();
 
-    Files &files() {
-        return _files;
-    }
+    Files &files();
 
     IDebugger *debugger();
 

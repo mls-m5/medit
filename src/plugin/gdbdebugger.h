@@ -20,6 +20,8 @@ public:
     GdbDebugger &operator=(const GdbDebugger &) = delete;
     GdbDebugger &operator=(GdbDebugger &&) = delete;
 
+    bool doesSupport(std::filesystem::path extension) override;
+
     void command(std::string_view command) override;
 
     /// Specify where to run the command

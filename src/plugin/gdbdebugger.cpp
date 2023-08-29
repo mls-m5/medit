@@ -13,6 +13,10 @@ GdbDebugger::GdbDebugger()
     : _connection{"gdb --interpreter=mi3",
                   [this](std::istream &in) { inputThread(in); }} {}
 
+bool GdbDebugger::doesSupport(std::filesystem::path extension) {
+    return extension == ".cpp";
+}
+
 void GdbDebugger::command(std::string_view c) {
     std::string command{c};
     _debugArgs = {};

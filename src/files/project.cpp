@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include <string_view>
+#include <unordered_map>
 
 namespace {
 
@@ -27,7 +28,8 @@ std::string translateInclude(std::string flag,
 
 } // namespace
 
-Project::Project(DirectoryNotifications &directoryNotifications) {
+Project::Project(DirectoryNotifications &directoryNotifications)
+    : _tv{"Project"} {
     directoryNotifications.subscribe(
         [this](DirectoryNotifications::EventType type,
                std::filesystem::path path,
@@ -43,6 +45,7 @@ Project::Project(DirectoryNotifications &directoryNotifications) {
 }
 
 std::filesystem::path Project::root(std::filesystem::path arg) const {
+    _tv();
 
     if (std::filesystem::is_directory(arg)) {
         return arg;
@@ -72,6 +75,7 @@ std::filesystem::path Project::root(std::filesystem::path arg) const {
 
 void Project::updateCache(const std::filesystem::path &pathInProject,
                           size_t max) {
+    _tv();
     _fileCache = findProjectFiles(pathInProject, max);
     loadProjectFile();
     if (_settings.buildCommand.empty()) {
@@ -80,6 +84,7 @@ void Project::updateCache(const std::filesystem::path &pathInProject,
 }
 
 std::filesystem::path Project::findSwitchHeader(std::filesystem::path path) {
+    _tv();
     if (path.empty()) {
         return {};
     }
@@ -115,7 +120,24 @@ std::filesystem::path Project::findSwitchHeader(std::filesystem::path path) {
     return {};
 }
 
+Project::ProjectLanguage Project::getProjectLanguage() const {
+    return guessProjectLanguage();
+}
+
+Project::ProjectLanguage Project::guessProjectLanguage() const {
+    for (auto &ext : _extensions) {
+        if (isCpp(ext.first) || isC(ext.first)) {
+            return Cpp;
+        }
+        if (isGo(ext.first)) {
+            return Go;
+        }
+    }
+    return Unknown;
+}
+
 std::string Project::guessBuildCommand() {
+    _tv();
     if (std::filesystem::exists(_settings.root / "CMakeLists.txt")) {
         auto ss = std::ostringstream{};
         ss << "cd " << _settings.root << " ; "
@@ -131,6 +153,7 @@ std::string Project::guessBuildCommand() {
 
 std::vector<std::filesystem::path> Project::findProjectFiles(
     const std::filesystem::path &pathInProject, size_t max) {
+    _tv();
 
 #ifdef __EMSCRIPTEN__
 
@@ -145,6 +168,8 @@ std::vector<std::filesystem::path> Project::findProjectFiles(
     }
 
     std::vector<std::filesystem::path> paths;
+
+    auto extensions = std::unordered_map<std::filesystem::path, size_t>{};
 
     size_t i = 0;
     for (auto it =
@@ -164,16 +189,26 @@ std::vector<std::filesystem::path> Project::findProjectFiles(
             continue;
         }
         paths.push_back(path);
+        if (path.has_extension()) {
+            ++extensions[path.extension()];
+        }
         ++i;
         if (i > max) {
             return paths;
         }
     }
 
+    _extensions.clear();
+    _extensions.assign(extensions.begin(), extensions.end());
+    std::sort(_extensions.begin(), _extensions.end(), [](auto &a, auto &b) {
+        return a.second > b.second;
+    });
+
     return paths;
 }
 
 void Project::loadProjectFile() {
+    _tv();
     auto projectFile = _settings.root / projectFileName;
     if (!std::filesystem::exists(projectFile)) {
         return;
@@ -226,6 +261,7 @@ void Project::loadProjectFile() {
 }
 
 void Project::addCachedFile(std::filesystem::path path) {
+    _tv();
     if (std::find(_fileCache.begin(), _fileCache.end(), path) !=
         _fileCache.end()) {
         return;
@@ -234,5 +270,6 @@ void Project::addCachedFile(std::filesystem::path path) {
 }
 
 void Project::removeCachedFile(std::filesystem::path path) {
+    _tv();
     _fileCache.erase(std::remove(_fileCache.begin(), _fileCache.end(), path));
 }

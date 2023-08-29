@@ -23,3 +23,15 @@ IDebugger *CoreEnvironment::debugger() {
     // TODO: Make more generic for more debuggers in the futures
     return debuggers.front().get();
 }
+
+Files &CoreEnvironment::files() {
+    return _files;
+}
+
+Plugins &CoreEnvironment::plugins() {
+    return _plugins;
+}
+
+ThreadContext &CoreEnvironment::context() {
+    return *_context;
+}

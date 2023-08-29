@@ -5,6 +5,7 @@
 #include "core/plugins.h"
 #include "files/extensions.h"
 #include "files/project.h"
+#include "lsp/clangversion.h"
 #include "lsp/clientnotifications.h"
 #include "lsp/lspclient.h"
 #include "lsp/requests.h"
@@ -84,8 +85,7 @@ Position clangPositionToMeditPosition(lsp::Position pos) {
 
 using namespace lsp;
 
-LspPlugin::LspPlugin()
-    : _core{CoreEnvironment::instance()} {
+LspPlugin::LspPlugin() {
     auto args = std::string{"--log=error "}; //   std::string{"--log=info "};
 
     auto compileCommandsPath = locateCompileCommands();
@@ -93,10 +93,11 @@ LspPlugin::LspPlugin()
     if (!compileCommandsPath.empty()) {
         args += " --compile-commands-dir=\"" +
                 locateCompileCommands().string() + "\"";
-        //        filesystem::current_path(compileCommandsPath);
     }
 
-    _client = std::make_unique<LspClient>(args);
+    auto command = getClangVersion().string() + " " + args;
+
+    _client = std::make_unique<LspClient>(command);
 
     CoreEnvironment::instance().files().subscribeToBufferEvents(
         [this](BufferEvent e) { bufferEvent(e); }, nullptr, this);

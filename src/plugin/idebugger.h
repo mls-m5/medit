@@ -45,6 +45,8 @@ public:
     IDebugger &operator=(IDebugger &&) = delete;
     IDebugger() = default;
 
+    virtual bool doesSupport(std::filesystem::path) = 0;
+
     virtual void applicationOutputCallback(
         std::function<void(std::string_view)>) = 0;
     virtual void stateCallback(std::function<void(DebuggerState)>) = 0;

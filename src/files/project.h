@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/threadvalidation.h"
 #include "meditfwd.h"
 #include <filesystem>
 #include <string>
@@ -7,6 +8,12 @@
 
 class Project {
 public:
+    enum ProjectLanguage {
+        Cpp,
+        Go,
+        Unknown,
+    };
+
     Project(DirectoryNotifications &files);
 
     struct Settings {
@@ -24,9 +31,6 @@ public:
         DebugInfo debug;
     };
 
-    /// Set the current root
-    std::filesystem::path root(std::filesystem::path) const;
-
     void updateCache(const std::filesystem::path &pathInProject,
                      size_t max = 100000);
 
@@ -42,7 +46,32 @@ public:
     //! @return path to file if found or empty path if not found
     std::filesystem::path findSwitchHeader(std::filesystem::path);
 
+    /// Get a list of most common used extensions sorted from most used to last
+    /// Used to guess debugger and lsp
+    const std::vector<std::pair<std::filesystem::path, size_t>> extensions()
+        const {
+        return _extensions;
+    }
+
+    std::filesystem::path projectExtension() {
+        switch (getProjectLanguage()) {
+        case Cpp:
+            return ".cpp";
+        case Go:
+            return ".go";
+        case Unknown:
+            return {};
+        }
+    }
+
+    ProjectLanguage getProjectLanguage() const;
+
 private:
+    ProjectLanguage guessProjectLanguage() const;
+
+    // Set the current root
+    std::filesystem::path root(std::filesystem::path) const;
+
     /// When there is no build command provided. Try to guess what it could be
     /// based on what files are in the project
     std::string guessBuildCommand();
@@ -58,4 +87,8 @@ private:
 
     void addCachedFile(std::filesystem::path);
     void removeCachedFile(std::filesystem::path);
+
+    std::vector<std::pair<std::filesystem::path, size_t>> _extensions;
+
+    ThreadValidation _tv;
 };
