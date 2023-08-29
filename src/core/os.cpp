@@ -1,6 +1,7 @@
 
 #include "os.h"
 #include <array>
+#include <cstdlib>
 
 namespace {
 
@@ -33,4 +34,8 @@ std::filesystem::path getPath() {
 
 std::filesystem::path executablePath() {
     return getPath();
+}
+
+int runCommand(const std::string &command) {
+    return std::system(command.c_str());
 }

@@ -6,6 +6,4 @@ class JsonFormat : public IFormat {
 public:
     //! @see IFormat
     bool format(Editor &);
-
-    //    static void registerPlugin();
 };

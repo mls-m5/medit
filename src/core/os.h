@@ -38,3 +38,5 @@ inline bool hasCommand(std::string command) {
 }
 
 std::filesystem::path executablePath();
+
+int runCommand(const std::string &command);
