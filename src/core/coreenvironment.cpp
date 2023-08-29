@@ -1,12 +1,12 @@
 #include "coreenvironment.h"
+#include "files/project.h"
+#include "meditfwd.h"
 #include "plugin/idebugger.h"
-
-CoreEnvironment *CoreEnvironment::_instance = nullptr;
+#include <memory>
 
 CoreEnvironment::CoreEnvironment(ThreadContext &context)
-    : _context{&context} {
-    _instance = this;
-}
+    : _context{&context}
+    , _project{std::make_unique<Project>(files().directoryNotifications())} {}
 CoreEnvironment::~CoreEnvironment() = default;
 
 IDebugger *CoreEnvironment::debugger() {
@@ -18,6 +18,10 @@ IDebugger *CoreEnvironment::debugger() {
 
     // TODO: Make more generic for more debuggers in the futures
     return debuggers.front().get();
+}
+
+Project &CoreEnvironment::project() {
+    return *_project;
 }
 
 Files &CoreEnvironment::files() {

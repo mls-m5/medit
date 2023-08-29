@@ -29,13 +29,15 @@ public:
 
     IDebugger *debugger();
 
+    Project &project();
+
 private:
     ThreadContext *_context =
         nullptr; // TODO: Handle lifetime of CoreEnvironment better
     Plugins _plugins;
     Files _files{*this};
 
-    static CoreEnvironment *_instance;
+    std::unique_ptr<Project> _project;
 
     ThreadValidation _tv{"core thread (gui thread)"};
 };

@@ -83,9 +83,6 @@ target_link_libraries(
 add_library(
     lib_medit
     STATIC
-    files/config.cpp
-    files/popenstream.cpp
-    files/project.cpp
     keys/keymap.cpp
     syntax/basichighligting.cpp
     views.cpp

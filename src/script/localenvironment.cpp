@@ -1,6 +1,7 @@
 
 #include "localenvironment.h"
 #include "core/coreenvironment.h"
+#include "files/project.h"
 #include "views/mainwindow.h"
 #include <stdexcept>
 
@@ -10,6 +11,10 @@ LocalEnvironment::LocalEnvironment(CoreEnvironment &core,
     : _core{core}
     , _mainWindow{mw}
     , _context{context} {}
+
+Project &LocalEnvironment::project() {
+    return _core.project();
+}
 
 CoreEnvironment &LocalEnvironment::core() {
     return _core;

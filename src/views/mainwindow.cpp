@@ -31,10 +31,10 @@ MainWindow::MainWindow(CoreEnvironment &core,
     , _interactions{*this}
     , _env(std::make_unique<LocalEnvironment>(core, *this, context))
     , _console(this, _env->core().files().create())
-    , _locator(this, _project)
+    , _locator(this, core.project())
     , _commandPalette(this, StandardCommands::get())
     , _completeView(this, core.plugins().get<ICompletionSource>())
-    , _project{_env->core().files().directoryNotifications()}
+    //    , _project{_env->core().files().directoryNotifications()}
     , _currentEditor(0) {
 
     //    for (int i = 0; i < 2; ++i) {
@@ -48,7 +48,7 @@ MainWindow::MainWindow(CoreEnvironment &core,
     }
     _console.showLines(false);
     _env->console(&_console);
-    _env->project(&_project);
+    //    _env->project(&_project);
 
     {
         auto palette = Palette{};
@@ -66,7 +66,7 @@ MainWindow::MainWindow(CoreEnvironment &core,
         if (path.empty()) {
             return;
         }
-        open(_project.settings().root / path);
+        open(env().project().settings().root / path);
     });
 
     _commandPalette.visible(false);
@@ -221,9 +221,10 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
 }
 
 void MainWindow::updateLocatorBuffer() {
-    _project.updateCache(std::filesystem::current_path());
+    auto &project = _env->core().project();
+    project.updateCache(std::filesystem::current_path());
     _env->core().files().directoryNotifications().path(
-        _project.settings()
+        project.settings()
             .root); // TODO: This should probably be handled somewhere else
 }
 
@@ -376,8 +377,8 @@ void MainWindow::updateTitle() {
     }
 
     if (auto file = editor->file()) {
-        auto path =
-            std::filesystem::relative(file->path(), _project.settings().root);
+        auto path = std::filesystem::relative(
+            file->path(), _env->core().project().settings().root);
         auto title = path.string() + " - medit";
         if (editor->buffer().isChanged()) {
             title += "*";

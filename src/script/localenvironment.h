@@ -13,7 +13,7 @@ class LocalEnvironment : public IEnvironment {
     MainWindow &_mainWindow;
     KeyEvent _lastKeyEvent;
     Editor *_console = nullptr;
-    Project *_project = nullptr;
+    //    Project *_project = nullptr;
     bool _showConsole = false;
     ThreadContext &_context;
     Registers _registers;
@@ -50,9 +50,9 @@ public:
         return _showConsole;
     }
 
-    void project(Project *project) {
-        _project = project;
-    }
+    //    void project(Project *project) {
+    //        _project = project;
+    //    }
 
     ThreadContext &context() override {
         return _context;
@@ -62,12 +62,7 @@ public:
         return _registers;
     }
 
-    Project &project() override {
-        if (!_project) {
-            throw std::runtime_error("no project defined");
-        }
-        return *_project;
-    }
+    Project &project() override;
 
     CoreEnvironment &core() override;
 

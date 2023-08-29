@@ -1,8 +1,4 @@
 #include "headernavigation.h"
-#include "core/plugins.h"
-// #include "files/extensions.h"
-// #include "files/file.h"
-// #include "files/project.h"
 #include "script/ienvironment.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
