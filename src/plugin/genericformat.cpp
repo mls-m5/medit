@@ -1,4 +1,4 @@
-#include "plugin/clangformat.h"
+#include "plugin/genericformat.h"
 #include "core/os.h"
 #include "files/extensions.h"
 #include "files/ifile.h"
@@ -21,7 +21,7 @@ std::string findLatestClangFormat() {
 }
 
 bool formatClang(std::filesystem::path path, Editor &editor) {
-    if (!isCpp(path) && !isCSource(path) && !isJs(path) && !isJava(path) &&
+    if (!isCpp(path) && !isC(path) && !isJs(path) && !isJava(path) &&
         !isCSharp(path)) {
         return false;
     }
@@ -55,9 +55,25 @@ bool formatHtml(std::filesystem::path path, Editor &editor) {
     return true;
 }
 
+bool formatGo(std::filesystem::path path, Editor &editor) {
+    if (!isGo(path)) {
+        return false;
+    }
+
+    if (!hasCommand("gofmt")) {
+        return false;
+    }
+
+    editor.save();
+    runCommand("gofmt -w " + std::string{std::filesystem::absolute(path)});
+    editor.load();
+
+    return true;
+}
+
 } // namespace
 
-bool ClangFormat::format(Editor &editor) {
+bool GenericFormat::format(Editor &editor) {
     auto path = editor.path();
     if (path.empty()) {
         return false;
@@ -67,6 +83,9 @@ bool ClangFormat::format(Editor &editor) {
         return true;
     }
     if (formatHtml(path, editor)) {
+        return true;
+    }
+    if (formatGo(path, editor)) {
         return true;
     }
 

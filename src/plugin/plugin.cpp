@@ -1,5 +1,5 @@
 #include "build.cpp"
-#include "clangformat.cpp"
+#include "genericformat.cpp"
 #include "gdbdebugger.cpp"
 #include "git.cpp"
 #include "jsonformat.cpp"

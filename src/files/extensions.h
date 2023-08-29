@@ -16,6 +16,8 @@ inline bool isCSource(const std::filesystem::path &path) {
     return path.extension() == ".c";
 }
 
+inline constexpr auto isC = isCSource;
+
 inline bool isCpp(const std::filesystem::path &path) {
     return isCppHeader(path) || isCppSource(path);
 }

@@ -1,7 +1,7 @@
 #include "registerdefaultplugins.h"
 #include "core/plugins.h"
 #include "navigation/headernavigation.h"
-#include "plugin/clangformat.h"
+#include "plugin/genericformat.h"
 #include "plugin/gdbdebugger.h"
 #include "plugin/git.h"
 #include "plugin/jsonformat.h"
@@ -16,7 +16,7 @@
 #endif
 
 void registerDefaultPlugins(Plugins &container) {
-    container.loadPlugin<ClangFormat>();
+    container.loadPlugin<GenericFormat>();
     container.loadPlugin<BasicHighlighting>();
     container.loadPlugin<JsonFormat>();
     container.loadPlugin<HeaderNavigation>();
