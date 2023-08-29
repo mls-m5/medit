@@ -26,7 +26,7 @@ constexpr Os getOs() {
 #endif
 }
 
-inline bool hasCommand(std::string command) {
+[[nodiscard]] inline bool hasCommand(std::string command) {
     if constexpr (getOs() == Os::Linux) {
         return !system(("command -v " + command + " > /dev/null").c_str());
     }
@@ -37,6 +37,6 @@ inline bool hasCommand(std::string command) {
     }
 }
 
-std::filesystem::path executablePath();
+[[nodiscard]] std::filesystem::path executablePath();
 
 int runCommand(const std::string &command);

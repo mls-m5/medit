@@ -1,7 +1,6 @@
 #include "plugin/genericformat.h"
 #include "core/os.h"
 #include "files/extensions.h"
-#include "files/ifile.h"
 #include "views/editor.h"
 #include <array>
 
@@ -10,8 +9,9 @@ namespace {
 std::string findLatestClangFormat() {
     for (int i = 30; i > 5; --i) {
         auto command = "clang-format-" + std::to_string(i);
-        hasCommand(command);
-        return command;
+        if (hasCommand(command)) {
+            return command;
+        }
     }
 
     if (hasCommand("clang-format")) {
