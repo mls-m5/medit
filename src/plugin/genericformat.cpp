@@ -38,8 +38,8 @@ bool formatClang(std::filesystem::path path, Editor &editor) {
     return true;
 }
 
-bool formatHtml(std::filesystem::path path, Editor &editor) {
-    if (!isHtml(path)) {
+bool formatHtmlAndXml(std::filesystem::path path, Editor &editor) {
+    if (!isHtml(path) && !isXml(path)) {
         return false;
     }
 
@@ -82,7 +82,7 @@ bool GenericFormat::format(Editor &editor) {
     if (formatClang(path, editor)) {
         return true;
     }
-    if (formatHtml(path, editor)) {
+    if (formatHtmlAndXml(path, editor)) {
         return true;
     }
     if (formatGo(path, editor)) {

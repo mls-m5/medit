@@ -50,6 +50,14 @@ inline bool isHtml(const std::filesystem::path &path) {
     return path.extension() == ".html";
 }
 
+inline bool isXhtml(const std::filesystem::path &path) {
+    return path.extension() == ".html";
+}
+
+inline bool isXml(const std::filesystem::path &path) {
+    return path.extension() == ".xml";
+}
+
 inline bool isJs(const std::filesystem::path &path) {
     return path.extension() == ".js";
 }
@@ -79,5 +87,6 @@ inline bool isKnownExtension(const std::filesystem::path &path) {
            isCpp(path) || isJson(path) || isMarkdown(path) || isMake(path) ||
            isMatmake(path) || isCmakeLists(path) || isTextFile(path) ||
            isHtml(path) || isJs(path) || isPython(path) || isJava(path) ||
-           isCSharp(path) || isPhp(path) || isGo(path);
+           isCSharp(path) || isPhp(path) || isGo(path) || isXml(path) ||
+           isXhtml(path);
 }
