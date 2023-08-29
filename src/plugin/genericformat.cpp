@@ -3,6 +3,7 @@
 #include "files/extensions.h"
 #include "files/ifile.h"
 #include "views/editor.h"
+#include <array>
 
 namespace {
 
@@ -71,6 +72,23 @@ bool formatGo(std::filesystem::path path, Editor &editor) {
     return true;
 }
 
+bool formatCMake(std::filesystem::path path, Editor &editor) {
+    if (!isCmakeLists(path)) {
+        return false;
+    }
+
+    if (!hasCommand("cmake-format")) {
+        return false;
+    }
+
+    editor.save();
+    runCommand("cmake-format -i " +
+               std::string{std::filesystem::absolute(path)});
+    editor.load();
+
+    return true;
+}
+
 } // namespace
 
 bool GenericFormat::format(Editor &editor) {
@@ -79,14 +97,13 @@ bool GenericFormat::format(Editor &editor) {
         return false;
     }
 
-    if (formatClang(path, editor)) {
-        return true;
-    }
-    if (formatHtmlAndXml(path, editor)) {
-        return true;
-    }
-    if (formatGo(path, editor)) {
-        return true;
+    constexpr auto functions =
+        std::array{formatClang, formatHtmlAndXml, formatGo, formatCMake};
+
+    for (auto &f : functions) {
+        if (f(path, editor)) {
+            return true;
+        }
     }
 
     return false;
