@@ -1,11 +1,15 @@
 #include "coreenvironment.h"
 #include "files/project.h"
 #include "plugin/idebugger.h"
+#include <filesystem>
 #include <memory>
 
 CoreEnvironment::CoreEnvironment(ThreadContext &context)
     : _context{&context}
-    , _project{std::make_unique<Project>(files().directoryNotifications())} {}
+    , _project{std::make_unique<Project>(files().directoryNotifications())} {
+    _project->updateCache(std::filesystem::current_path());
+}
+
 CoreEnvironment::~CoreEnvironment() = default;
 
 IDebugger *CoreEnvironment::debugger() {

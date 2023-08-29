@@ -26,6 +26,7 @@ if (NOT EMSCRIPTEN)
         medit_plugins
         PRIVATE
         lsp/lspplugin.cpp
+        lsp/lspconfiguration.cpp
         )
 
 endif()
