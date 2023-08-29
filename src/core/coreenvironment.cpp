@@ -1,6 +1,5 @@
 #include "coreenvironment.h"
 #include "files/project.h"
-#include "meditfwd.h"
 #include "plugin/idebugger.h"
 #include <memory>
 
@@ -16,8 +15,15 @@ IDebugger *CoreEnvironment::debugger() {
         return nullptr;
     }
 
-    // TODO: Make more generic for more debuggers in the futures
-    return debuggers.front().get();
+    auto lang = _project->projectExtension();
+
+    for (auto &debugger : debuggers) {
+        if (debugger->doesSupport(lang)) {
+            return debugger.get();
+        }
+    }
+
+    return {};
 }
 
 Project &CoreEnvironment::project() {

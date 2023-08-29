@@ -48,12 +48,12 @@ public:
 
     /// Get a list of most common used extensions sorted from most used to last
     /// Used to guess debugger and lsp
-    const std::vector<std::pair<std::filesystem::path, size_t>> extensions()
+    const std::vector<std::pair<std::filesystem::path, size_t>> &extensions()
         const {
         return _extensions;
     }
 
-    std::filesystem::path projectExtension() {
+    std::filesystem::path projectExtension() const {
         switch (getProjectLanguage()) {
         case Cpp:
             return ".cpp";
@@ -62,6 +62,7 @@ public:
         case Unknown:
             return {};
         }
+        return {};
     }
 
     ProjectLanguage getProjectLanguage() const;

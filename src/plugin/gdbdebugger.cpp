@@ -14,7 +14,7 @@ GdbDebugger::GdbDebugger()
                   [this](std::istream &in) { inputThread(in); }} {}
 
 bool GdbDebugger::doesSupport(std::filesystem::path extension) {
-    return extension == ".cpp";
+    return extension == ".cpp" || extension == ".go";
 }
 
 void GdbDebugger::command(std::string_view c) {

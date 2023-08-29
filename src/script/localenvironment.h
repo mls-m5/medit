@@ -13,11 +13,9 @@ class LocalEnvironment : public IEnvironment {
     MainWindow &_mainWindow;
     KeyEvent _lastKeyEvent;
     Editor *_console = nullptr;
-    //    Project *_project = nullptr;
     bool _showConsole = false;
     ThreadContext &_context;
     Registers _registers;
-    IDebugger *_currentDebugger = nullptr;
 
 public:
     LocalEnvironment(CoreEnvironment &core,

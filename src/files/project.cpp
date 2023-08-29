@@ -126,10 +126,12 @@ Project::ProjectLanguage Project::getProjectLanguage() const {
 
 Project::ProjectLanguage Project::guessProjectLanguage() const {
     for (auto &ext : _extensions) {
-        if (isCpp(ext.first) || isC(ext.first)) {
+        auto testFile = std::filesystem::path{"x"};
+        testFile.replace_extension(ext.first);
+        if (isCpp(testFile) || isC(testFile)) {
             return Cpp;
         }
-        if (isGo(ext.first)) {
+        if (isGo(testFile)) {
             return Go;
         }
     }
