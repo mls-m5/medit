@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/ijobqueue.h"
 #include "core/threadvalidation.h"
 #include "meditfwd.h"
 #include <filesystem>
@@ -14,7 +15,7 @@ public:
         Unknown,
     };
 
-    Project(DirectoryNotifications &files);
+    Project(DirectoryNotifications &files, IJobQueue &guiQueue);
 
     struct Settings {
         std::filesystem::path root;
@@ -92,4 +93,6 @@ private:
     std::vector<std::pair<std::filesystem::path, size_t>> _extensions;
 
     ThreadValidation _tv;
+
+    IJobQueue *_guiQueue = nullptr;
 };

@@ -1,4 +1,5 @@
 
+#include "core/jobqueue.h"
 #include "files/project.h"
 #include "mls-unit-test/unittest.h"
 #include "mock/files/mockdirectorynotifications.h"
@@ -14,7 +15,9 @@ TEST_CASE("load") {
 
     dirNotifications.mock_subscribe_2.expectNum(1);
 
-    auto project = Project{dirNotifications};
+    auto jobQueue = JobQueue{};
+
+    auto project = Project{dirNotifications, jobQueue};
 
     project.updateCache(path);
 

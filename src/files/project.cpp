@@ -1,5 +1,6 @@
 
 #include "project.h"
+#include "core/ijobqueue.h"
 #include "files/directorynotifications.h"
 #include "files/extensions.h"
 #include "text/startswith.h"
@@ -28,18 +29,24 @@ std::string translateInclude(std::string flag,
 
 } // namespace
 
-Project::Project(DirectoryNotifications &directoryNotifications)
-    : _tv{"Project"} {
+Project::Project(DirectoryNotifications &directoryNotifications,
+                 IJobQueue &guiQueue)
+    : _tv{"Project"}
+    , _guiQueue{&guiQueue} {
     directoryNotifications.subscribe(
         [this](DirectoryNotifications::EventType type,
                std::filesystem::path path,
                std::filesystem::file_time_type) {
-            if (type == DirectoryNotifications::Added) {
-                addCachedFile(path);
-            }
-            else if (type == DirectoryNotifications::Removed) {
-                removeCachedFile(path);
-            }
+            _guiQueue->addTask([this, path, type] {
+                _tv();
+                // #warning this is called on the wrong thread
+                if (type == DirectoryNotifications::Added) {
+                    addCachedFile(path);
+                }
+                else if (type == DirectoryNotifications::Removed) {
+                    removeCachedFile(path);
+                }
+            });
         },
         this);
 }

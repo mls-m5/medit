@@ -21,4 +21,5 @@ public:
 private:
     std::thread::id _threadId = std::this_thread::get_id();
     std::string _name;
+    std::string _threadName;
 };
