@@ -3,9 +3,7 @@
 #include "core/coreenvironment.h"
 #include "core/ijobqueue.h"
 #include "core/plugins.h"
-#include "files/extensions.h"
 #include "files/project.h"
-#include "lsp/clangversion.h"
 #include "lsp/clientnotifications.h"
 #include "lsp/lspclient.h"
 #include "lsp/requests.h"
@@ -19,6 +17,7 @@
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
 #include <filesystem>
+#include <future>
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
@@ -26,10 +25,6 @@
 // TODO: Tidy up this file
 
 namespace {
-
-bool shouldProcessFileWithClang(std::filesystem::path path) {
-    return isCpp(path) || isCSource(path);
-}
 
 std::string pathToUri(std::filesystem::path path) {
     if (path.empty()) {
@@ -74,17 +69,28 @@ Position clangPositionToMeditPosition(lsp::Position pos) {
 using namespace lsp;
 
 void LspPlugin::init() {
-    auto command = getLspConfigForLanguage(_core->project().projectExtension());
+    _config = LspConfiguration{_core->project().projectExtension()};
 
-    _client = std::make_unique<LspClient>(command);
+    _client = std::make_unique<LspClient>(_config.command);
 
     _core->files().subscribeToBufferEvents(
         [this](BufferEvent e) { bufferEvent(e); }, nullptr, this);
 
-    _client->request(InitializeParams{}, [](const nlohmann::json &j) {
-        //        std::cout << "initialization response:\n";
-        //        std::cout << std::setw(2) << j << std::endl;
-    });
+    auto initializedPromise = std::promise<void>{};
+    auto initializedFuture = initializedPromise.get_future();
+
+    _client->request(
+        InitializeParams{},
+        [&initializedPromise](const nlohmann::json &j) {
+            //            std::cout << "initialization response:\n";
+            //            std::cout << std::setw(2) << j << std::endl;
+            initializedPromise.set_value();
+        },
+        [&initializedPromise](auto &&j) {
+            std::cerr << "error\n";
+            std::cerr << j << "\n";
+            initializedPromise.set_value();
+        });
 
     _client->subscribe(
         std::function{[this](const PublishDiagnosticsParams &params) {
@@ -109,6 +115,13 @@ void LspPlugin::init() {
                         std::move(bufferDiagnostics));
                 });
         }});
+
+    _client->callback([](auto j) {
+        std::cerr << "Unhandled callback\n";
+        std::cerr << std::setw(4) << j << "\n";
+    });
+
+    initializedFuture.get();
 }
 
 LspPlugin::LspPlugin() = default;
@@ -119,7 +132,7 @@ LspPlugin::~LspPlugin() {
 
 void LspPlugin::bufferEvent(BufferEvent &event) {
     if (event.type == BufferEvent::Open) {
-        if (!shouldProcessFileWithClang(event.buffer->path())) {
+        if (!_config.isFileSupported(event.buffer->path())) {
             return;
         }
 
@@ -139,7 +152,7 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
         requestSemanticsToken(event.buffer);
     }
     if (event.type == BufferEvent::Close) {
-        if (!shouldProcessFileWithClang(event.path)) {
+        if (!_config.isFileSupported(event.path)) {
             return;
         }
 
@@ -157,12 +170,15 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
 
 void LspPlugin::registerPlugin(CoreEnvironment &core, Plugins &plugins) {
     // TODO: Fix this someday, its ugly
-    LspPlugin::instance()._core = &core;
-    LspPlugin::instance().init();
-    plugins.loadPlugin<LspNavigation>();
-    plugins.loadPlugin<LspHighlight>();
-    plugins.loadPlugin<LspComplete>();
-    plugins.loadPlugin<LspRename>();
+    auto lsp = std::make_shared<LspPlugin>();
+    lsp->_core = &core; // Replace for with constructor
+    lsp->init();
+    //    LspPlugin::instance()._core = &core;
+    //    LspPlugin::instance().init();
+    plugins.loadPlugin<LspNavigation>(lsp);
+    plugins.loadPlugin<LspHighlight>(lsp);
+    plugins.loadPlugin<LspComplete>(lsp);
+    plugins.loadPlugin<LspRename>(lsp);
 }
 
 void LspPlugin::handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
@@ -267,7 +283,7 @@ void LspPlugin::requestSemanticsToken(std::shared_ptr<Buffer> buffer) {
 void LspPlugin::updateBuffer(Buffer &buffer) {
     // TODO: Only update buffers with changed revision
 
-    if (!shouldProcessFileWithClang(buffer.path())) {
+    if (!_config.isFileSupported(buffer.path())) {
         return;
     }
 
@@ -293,7 +309,7 @@ void LspPlugin::updateBuffer(Buffer &buffer) {
 void LspComplete::list(std::shared_ptr<IEnvironment> scope,
                        CompleteCallbackT callback) {
 
-    if (!shouldProcessFileWithClang(scope->editor().buffer().path())) {
+    if (!_lsp->config().isFileSupported(scope->editor().buffer().path())) {
         callback({});
         return;
     }
@@ -305,56 +321,55 @@ void LspComplete::list(std::shared_ptr<IEnvironment> scope,
     params.position.line = cursor.y(); // + 1;
     params.position.character = cursor.x() + 1;
 
-    LspPlugin::instance().updateBuffer(scope->editor().buffer());
+    _lsp->updateBuffer(scope->editor().buffer());
 
-    LspPlugin::instance().client().request(
-        params, [callback](lsp::CompletionList result) {
-            auto ret = CompletionList{};
-            for (auto &item : result.items) {
+    _lsp->client().request(params, [callback](lsp::CompletionList result) {
+        auto ret = CompletionList{};
+        for (auto &item : result.items) {
 
-                auto range = TextEdit::Range{
-                    .begin = ::Position(item.textEdit.range.start.character - 1,
-                                        item.textEdit.range.start.line - 1),
-                    .end = ::Position(item.textEdit.range.end.character - 1,
-                                      item.textEdit.range.end.line - 1),
-                };
+            auto range = TextEdit::Range{
+                .begin = ::Position(item.textEdit.range.start.character - 1,
+                                    item.textEdit.range.start.line - 1),
+                .end = ::Position(item.textEdit.range.end.character - 1,
+                                  item.textEdit.range.end.line - 1),
+            };
 
-                ret.push_back(ICompletionSource::CompletionItem{
-                    .name = item.label, // TODO: Redo this class
-                    .description = item.detail,
-                    .filterText = item.filterText,
-                    .edit =
-                        {
-                            .range = range,
-                            .text = item.textEdit.newText,
-                        },
-                });
-            }
-            callback(std::move(ret));
-        });
+            ret.push_back(ICompletionSource::CompletionItem{
+                .name = item.label, // TODO: Redo this class
+                .description = item.detail,
+                .filterText = item.filterText,
+                .edit =
+                    {
+                        .range = range,
+                        .text = item.textEdit.newText,
+                    },
+            });
+        }
+        callback(std::move(ret));
+    });
 }
 
 bool LspComplete::shouldComplete(std::shared_ptr<IEnvironment> env) {
-    return shouldProcessFileWithClang(env->editor().path());
+    return _lsp->config().isFileSupported(env->editor().path());
 }
 
 bool LspHighlight::shouldEnable(std::filesystem::path path) {
-    return shouldProcessFileWithClang(path);
+    return _lsp->config().isFileSupported(path);
 }
 
 void LspHighlight::highlight(Buffer &buffer) {
-    LspPlugin::instance().updateBuffer(buffer);
+    _lsp->updateBuffer(buffer);
 }
 
 bool LspNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
-    if (!shouldProcessFileWithClang(env->editor().path())) {
+    if (!_lsp->config().isFileSupported(env->editor().path())) {
         return false;
     }
 
     auto params = TypeDefinitionParams{};
     params.textDocument.uri = pathToUri(env->editor().buffer().path());
     params.position = meditCursorToPosition(env->editor().cursor());
-    LspPlugin::instance().client().request(
+    _lsp->client().request(
         params, [env](const std::vector<Location> &locations) {
             if (locations.empty()) {
                 return;
@@ -375,7 +390,7 @@ bool LspNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
 }
 
 bool LspRename::shouldEnable(std::filesystem::path path) const {
-    return (shouldProcessFileWithClang(path));
+    return (_lsp->config().isFileSupported(path));
 }
 
 bool LspRename::doesSupportPrepapre() {
@@ -385,7 +400,7 @@ bool LspRename::doesSupportPrepapre() {
 
 bool LspRename::prepare(std::shared_ptr<IEnvironment> env,
                         std::function<void(PrepareCallbackArgs)> callback) {
-    if (!shouldProcessFileWithClang(env->editor().path())) {
+    if (!_lsp->config().isFileSupported(env->editor().path())) {
         return false;
     }
 
@@ -393,7 +408,7 @@ bool LspRename::prepare(std::shared_ptr<IEnvironment> env,
     params.textDocument.uri = pathToUri(env->editor().buffer().path());
     params.position = meditCursorToPosition(env->editor().cursor());
 
-    LspPlugin::instance().client().request(
+    _lsp->client().request(
         params,
         [env, callback](const Range &range) {
             env->context().guiQueue().addTask([env, range, callback] {
@@ -416,7 +431,7 @@ bool LspRename::prepare(std::shared_ptr<IEnvironment> env,
 bool LspRename::rename(std::shared_ptr<IEnvironment> env,
                        RenameArgs args,
                        std::function<void(const Changes &)> callback) {
-    if (!shouldProcessFileWithClang(env->editor().path())) {
+    if (!_lsp->config().isFileSupported(env->editor().path())) {
         return false;
     }
 
@@ -425,36 +440,35 @@ bool LspRename::rename(std::shared_ptr<IEnvironment> env,
     params.position = meditCursorToPosition(env->editor().cursor());
     params.newName = args.newName;
 
-    LspPlugin::instance().client().request(
-        params, [env, callback](const WorkspaceEdit &edits) {
-            if (edits.changes.empty()) {
-                return;
+    _lsp->client().request(params, [env, callback](const WorkspaceEdit &edits) {
+        if (edits.changes.empty()) {
+            return;
+        }
+
+        auto changes = Changes{};
+
+        for (auto &file : edits.changes) {
+            auto fileChanges = decltype(Changes::FileChanges::changes){};
+
+            for (auto &lspChange : file.second) {
+                auto change = Changes::Change{};
+                change.begin = toMeditPosition(lspChange.range.start);
+                change.end = toMeditPosition(lspChange.range.end);
+                change.newText = lspChange.newText;
+
+                fileChanges.push_back(change);
             }
+            changes.changes.emplace_back(Changes::FileChanges{
+                .file = std::filesystem::relative(
+                    uriToPath(file.first), env->project().settings().root),
+                .changes = std::move(fileChanges),
+            });
+        }
 
-            auto changes = Changes{};
-
-            for (auto &file : edits.changes) {
-                auto fileChanges = decltype(Changes::FileChanges::changes){};
-
-                for (auto &lspChange : file.second) {
-                    auto change = Changes::Change{};
-                    change.begin = toMeditPosition(lspChange.range.start);
-                    change.end = toMeditPosition(lspChange.range.end);
-                    change.newText = lspChange.newText;
-
-                    fileChanges.push_back(change);
-                }
-                changes.changes.emplace_back(Changes::FileChanges{
-                    .file = std::filesystem::relative(
-                        uriToPath(file.first), env->project().settings().root),
-                    .changes = std::move(fileChanges),
-                });
-            }
-
-            env->context().guiQueue().addTask(
-                [env, changes = std::move(changes), callback] {
-                    callback(std::move(changes));
-                });
-        });
+        env->context().guiQueue().addTask(
+            [env, changes = std::move(changes), callback] {
+                callback(std::move(changes));
+            });
+    });
     return true;
 }

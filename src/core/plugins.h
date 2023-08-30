@@ -53,9 +53,9 @@ private:
     }
 
 public:
-    template <typename T>
-    void loadPlugin() {
-        auto ptr = std::make_shared<T>();
+    template <typename T, typename... Args>
+    void loadPlugin(Args &&...args) {
+        auto ptr = std::make_shared<T>(std::forward<Args>(args)...);
 
         addMultiple<IAnnotation,
                     IFormat,

@@ -1,6 +1,21 @@
 #pragma once
 
 #include <filesystem>
+#include <functional>
 #include <string>
 
-std::string getLspConfigForLanguage(std::filesystem::path extension);
+struct LspConfiguration {
+    LspConfiguration(const LspConfiguration &) = default;
+    LspConfiguration(LspConfiguration &&) = default;
+    LspConfiguration &operator=(const LspConfiguration &) = default;
+    LspConfiguration &operator=(LspConfiguration &&) = default;
+    LspConfiguration() = default;
+    ~LspConfiguration() = default;
+
+    /// Get the lsp configuration for the typical extension
+    LspConfiguration(std::filesystem::path extension);
+
+    std::string command;
+
+    std::function<bool(std::filesystem::path)> isFileSupported;
+};

@@ -1,4 +1,5 @@
 #include "lspconfiguration.h"
+#include "files/extensions.h"
 #include "lsp/clangversion.h"
 #include <string>
 
@@ -38,14 +39,18 @@ std::string getGoLspCommand() {
 
 } // namespace
 
-std::string getLspConfigForLanguage(std::filesystem::path extension) {
+LspConfiguration::LspConfiguration(std::filesystem::path extension) {
     if (extension == ".cpp") {
-        return getClangLspCommand();
+        command = getClangLspCommand();
+        isFileSupported = [](auto path) {
+            return isCpp(path) || isCSource(path);
+        };
+        return;
     }
 
     if (extension == ".go") {
-        return getGoLspCommand();
+        command = getGoLspCommand();
+        isFileSupported = [](auto path) { return isGo(path); };
+        return;
     }
-
-    return {};
 }
