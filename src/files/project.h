@@ -68,6 +68,10 @@ public:
 
     ProjectLanguage getProjectLanguage() const;
 
+    size_t indentWidth() const {
+        return 4;
+    }
+
 private:
     ProjectLanguage guessProjectLanguage() const;
 

@@ -14,6 +14,7 @@
 #include "renameinteraction.h"
 #include "saveinteraction.h"
 #include "script/ienvironment.h"
+#include "script/indent.h"
 #include "script/renamefileinteraction.h"
 #include "text/cursorops.h"
 #include "text/cursorrangeops.h"
@@ -285,6 +286,13 @@ StandardCommands create() {
             return;
         }
         env->mainWindow().updateTitle();
+    };
+
+    DEF(indent) {
+        indent(env);
+    };
+    DEF(deindent) {
+        deindent(env);
     };
 
     // -----------------------

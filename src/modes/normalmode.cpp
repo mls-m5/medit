@@ -54,6 +54,8 @@ std::shared_ptr<IMode> createNormalMode() {
             {{"e"}, sc.combine(sc.right, sc.word_end)},
             {{"w"},
              sc.combine(sc.word_end, sc.right, sc.word_end, sc.word_begin)},
+            {{">"}, {sc.indent}},
+            {{"<"}, {sc.deindent}},
         },
     };
     map.defaultAction({});

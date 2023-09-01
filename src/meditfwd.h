@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstddef>
-
 class IMode;
 class KeyEvent;
 class RawBuffer;

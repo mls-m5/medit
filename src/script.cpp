@@ -1,3 +1,4 @@
+#include "script/indent.cpp"
 #include "script/interaction.cpp"
 #include "script/localenvironment.cpp"
 #include "script/luastate.cpp"
