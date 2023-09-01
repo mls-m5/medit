@@ -17,13 +17,18 @@ void TcpConnection::inLoop() {
             auto b = std::array<char, sizeof(size_t)>{};
             error_code ec;
             size_t len = 0;
-            read(_socket, buffer(b));
-            std::memcpy(&len, b.data(), sizeof(len));
-            _buffer.resize(len);
-            read(_socket, buffer(_buffer));
+            try {
+                read(_socket, buffer(b));
+                std::memcpy(&len, b.data(), sizeof(len));
+                _buffer.resize(len);
+                read(_socket, buffer(_buffer));
 
-            handleInput(_buffer);
-            //            debugOutput("got", _buffer);
+                handleInput(_buffer);
+            }
+            catch (boost::wrapexcept<boost::system::system_error> &) {
+                // Probably closed for shutdown
+                break;
+            }
         }
     }
 }
@@ -76,6 +81,7 @@ std::shared_ptr<TcpConnection> TcpConnection::connect(std::string address,
 
 TcpConnection::~TcpConnection() {
     _socket.close();
+    _inThread.join();
 }
 
 void TcpConnection::waitForClose() {

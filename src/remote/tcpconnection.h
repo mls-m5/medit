@@ -29,7 +29,7 @@ public:
     void close() override;
 
     /// Stop execution from this thread until pipes is closed
-    void waitForClose();
+    void waitForClose() override;
 
 private:
     static boost::asio::io_context &context();

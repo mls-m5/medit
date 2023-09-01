@@ -22,6 +22,7 @@ public:
     void close() override;
     void write(std::string_view data) override;
     void unsubscribe() override;
+    void waitForClose() override{};
 
 private:
     void handle(std::string_view);

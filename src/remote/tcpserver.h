@@ -9,11 +9,12 @@ public:
     using CallbackT = std::function<void(std::shared_ptr<IConnection>)>;
 
     TcpServer(int port);
+    ~TcpServer();
 
     void callback(CallbackT f);
 
 private:
-    CallbackT _callback;
+    struct Impl;
 
-    std::thread _serverThread;
+    std::unique_ptr<Impl> _impl;
 };

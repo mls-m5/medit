@@ -1,27 +1,15 @@
 #include "fifofile.h"
+#include "files/config.h"
 
-const std::filesystem::path FifoFile::clientInPath =
-    std::filesystem::temp_directory_path() / "medit-fifo-client-in";
-const std::filesystem::path FifoFile::clientOutPath =
-    std::filesystem::temp_directory_path() / "medit-fifo-client-out";
-
-FifoFile::FifoFile(std::filesystem::path path)
-    : _path{path} {
-
+std::filesystem::path createFifo(std::filesystem::path path) {
     if (std::filesystem::exists(path)) {
-        if (std::filesystem::is_fifo(path)) {
-            std::filesystem::remove(_path);
-        }
+        std::filesystem::remove(path);
     }
 
     if (std::system(("mkfifo \"" + path.string() + "\"").c_str())) {
-        _path.clear();
+        path.clear();
         throw std::runtime_error{"could not create fifo file " + path.string()};
     }
-}
 
-FifoFile::~FifoFile() {
-    if (!_path.empty()) {
-        std::filesystem::remove(_path);
-    }
+    return path;
 }

@@ -6,11 +6,21 @@
 namespace {
 
 #ifdef MEDIT_USING_WINDOWS
+
+#include <windows.h>
+
 filesystem::Path getPath() {
     return {}; // Not implemented
 }
 
+int getPid() {
+    GetCurrentProcessId();
+}
+
 #else
+
+#include <unistd.h>
+
 std::filesystem::path getPath() {
     auto possibleLinks = std::array<std::filesystem::path, 3>{
         "/proc/self/exe",
@@ -26,6 +36,10 @@ std::filesystem::path getPath() {
     }
 
     return {};
+}
+
+int getPid() {
+    return getpid();
 }
 
 #endif

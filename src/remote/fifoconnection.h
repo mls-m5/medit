@@ -19,7 +19,7 @@ public:
     void close() override;
 
     /// Stop execution from this thread until pipes is closed
-    void waitForClose();
+    void waitForClose() override;
 
 private:
     void inLoop();

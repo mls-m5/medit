@@ -40,3 +40,5 @@ constexpr Os getOs() {
 [[nodiscard]] std::filesystem::path executablePath();
 
 int runCommand(const std::string &command);
+
+int getPid();

@@ -4,6 +4,7 @@
 #include "core/jobqueue.h"
 #include "core/threadname.h"
 #include "core/timer.h"
+#include "files/config.h"
 #include "registerdefaultplugins.h"
 #include "screen/bufferedscreen.h"
 #include "settings.h"
@@ -68,10 +69,12 @@ struct User {
         else if (settings.style == UiStyle::FifoServer) {
             std::cout << "starting fifo server..." << std::endl;
             auto fifo = std::make_shared<FifoConnection>(
-                FifoFile::standardClientOut(), FifoFile::standardClientIn());
+                createFifo(clientOutPath), createFifo(clientInPath));
             nativeScreen = std::make_unique<SerializeScreen>(fifo);
         }
         else if (settings.style == UiStyle::TcpServer) {
+            /// Since a tcp server can host multiple clients it needs to be
+            /// handled differently
             throw std::runtime_error{"server should be handled differently"};
         }
         else {
@@ -206,7 +209,7 @@ void MainData::start(const Settings &settings) {
                 users.push_back(
                     std::make_unique<User>(conn, *core, settings, *context));
             });
-            std::cout << "client connectied..." << std::endl;
+            std::cout << "client connected..." << std::endl;
         });
     }
     else {

@@ -16,4 +16,13 @@ public:
     virtual void close() = 0;
 
     virtual void write(std::string_view data) = 0;
+
+    /// For the object that owns the connection, if the object does not own the
+    ///  connection it should just return immediately
+    virtual void waitForClose() = 0;
 };
+
+inline void connect(IConnection &a, IConnection &b) {
+    a.subscribe([&b](auto data) { b.write(data); });
+    b.subscribe([&a](auto data) { a.write(data); });
+}
