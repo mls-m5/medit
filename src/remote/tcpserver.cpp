@@ -74,6 +74,6 @@ TcpServer::~TcpServer() {
     _impl->serverThread.join();
 }
 
-void TcpServer::callback(CallbackT f) {
+void TcpServer::accept(CallbackT f) {
     _impl->callback = f;
 }

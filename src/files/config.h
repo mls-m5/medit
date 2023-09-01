@@ -10,9 +10,10 @@ std::optional<std::filesystem::path> localConfigDirectory(
 /// Look for files in some directory medit looks in
 std::filesystem::path findConfig(std::filesystem::path file);
 
-std::filesystem::path standardFifoDirectory();
+/// Paths for where to put fifos that handles things that is local to the
+/// current process. For example ttys for consoles or lsp-paths
+std::filesystem::path standardLocalFifoDirectory();
 
-inline const std::filesystem::path clientInPath =
-    standardFifoDirectory() / "fifo-client-in";
-inline const std::filesystem::path clientOutPath =
-    standardFifoDirectory() / "fifo-client-out";
+/// Fifo paths for the fifo server/server
+std::filesystem::path fifoClientInPath();
+std::filesystem::path fifoClientOutPath();

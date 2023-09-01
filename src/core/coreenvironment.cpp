@@ -1,13 +1,19 @@
 #include "coreenvironment.h"
+#include "core/fifofile.h"
+#include "files/config.h"
 #include "files/project.h"
 #include "plugin/idebugger.h"
 #include <filesystem>
+#include <fstream>
 #include <memory>
 
 CoreEnvironment::CoreEnvironment(ThreadContext &context)
     : _context{&context}
     , _project{std::make_unique<Project>(files().directoryNotifications(),
-                                         context.guiQueue())} {
+                                         context.guiQueue())}
+    , _consoleTty{createFifo(standardLocalFifoDirectory() / "console-tty-in")}
+    , _consoleInFile{std::make_unique<std::ifstream>()} {
+
     _project->updateCache(std::filesystem::current_path());
 }
 

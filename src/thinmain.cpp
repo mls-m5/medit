@@ -12,8 +12,8 @@ int thinMain(const Settings &settings) {
 
     auto connection = [&settings]() -> std::shared_ptr<IConnection> {
         if (settings.style == UiStyle::FifoClient) {
-            return std::make_shared<FifoConnection>(clientInPath,
-                                                    clientOutPath);
+            return std::make_shared<FifoConnection>(fifoClientInPath(),
+                                                    fifoClientOutPath());
         }
         else if (settings.style == UiStyle::TcpClient) {
             return TcpConnection::connect(settings.address, settings.port);

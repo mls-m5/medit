@@ -27,8 +27,8 @@ using TimerType = JsTimer;
 
 #else
 
+#include "core/fifofile.h"
 #include "remote/fifoconnection.h"
-#include "remote/fifofile.h"
 #include "remote/tcpserver.h"
 #include "screen/deserializescreen.h"
 #include "screen/guiscreen.h"
@@ -69,7 +69,8 @@ struct User {
         else if (settings.style == UiStyle::FifoServer) {
             std::cout << "starting fifo server..." << std::endl;
             auto fifo = std::make_shared<FifoConnection>(
-                createFifo(clientOutPath), createFifo(clientInPath));
+                createFifo(fifoClientOutPath()),
+                createFifo(fifoClientInPath()));
             nativeScreen = std::make_unique<SerializeScreen>(fifo);
         }
         else if (settings.style == UiStyle::TcpServer) {
@@ -204,7 +205,7 @@ void MainData::start(const Settings &settings) {
         server = std::make_unique<TcpServer>(settings.port);
 
         std::cout << "starting tcp server..." << std::endl;
-        server->callback([this, settings](std::shared_ptr<IConnection> conn) {
+        server->accept([this, settings](std::shared_ptr<IConnection> conn) {
             guiQueue->addTask([this, conn, settings] {
                 users.push_back(
                     std::make_unique<User>(conn, *core, settings, *context));

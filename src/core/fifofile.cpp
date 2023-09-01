@@ -1,5 +1,4 @@
 #include "fifofile.h"
-#include "files/config.h"
 
 std::filesystem::path createFifo(std::filesystem::path path) {
     if (std::filesystem::exists(path)) {

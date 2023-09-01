@@ -11,7 +11,8 @@ public:
     TcpServer(int port);
     ~TcpServer();
 
-    void callback(CallbackT f);
+    /// Callback function for when a user is connected
+    void accept(CallbackT f);
 
 private:
     struct Impl;

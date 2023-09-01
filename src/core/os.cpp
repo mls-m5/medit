@@ -3,8 +3,6 @@
 #include <array>
 #include <cstdlib>
 
-namespace {
-
 #ifdef MEDIT_USING_WINDOWS
 
 #include <windows.h>
@@ -43,8 +41,6 @@ int getPid() {
 }
 
 #endif
-
-} // namespace
 
 std::filesystem::path executablePath() {
     return getPath();

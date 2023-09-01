@@ -3,9 +3,11 @@
 #include "core/context.h"
 #include "core/plugins.h"
 #include "files.h"
+#include "files/uniquefile.h"
 #include "threadvalidation.h"
 #include <filesystem>
 #include <functional>
+#include <iosfwd>
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -40,4 +42,7 @@ private:
     std::unique_ptr<Project> _project;
 
     ThreadValidation _tv{"core thread (gui thread)"};
+
+    UniqueFile _consoleTty;
+    std::unique_ptr<std::ifstream> _consoleInFile;
 };

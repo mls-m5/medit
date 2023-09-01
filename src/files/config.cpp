@@ -50,9 +50,26 @@ std::filesystem::path findConfig(std::filesystem::path file) {
     return {};
 }
 
-std::filesystem::path standardFifoDirectory() {
+std::filesystem::path standardLocalFifoDirectory() {
+    auto pidStr = std::filesystem::path{std::to_string(getPid())};
+    if (auto path = localConfigDirectory("process" / pidStr / "fifo", true)) {
+        return *path;
+    }
+    throw std::runtime_error{"could not create shared fifo path"};
+}
+
+/// Directory for where to put files for for example fifos used for the remote
+/// fifo client and server
+std::filesystem::path standardSharedFifoDirectory() {
     if (auto path = localConfigDirectory("fifos", true)) {
         return *path;
     }
-    throw std::runtime_error{"could not create fifo path"};
+    throw std::runtime_error{"could not create shared fifo path"};
+}
+std::filesystem::path fifoClientInPath() {
+    return standardSharedFifoDirectory() / "fifo-client-in";
+}
+
+std::filesystem::path fifoClientOutPath() {
+    return standardSharedFifoDirectory() / "fifo-client-out";
 }
