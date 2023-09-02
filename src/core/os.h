@@ -42,3 +42,5 @@ constexpr Os getOs() {
 int runCommand(const std::string &command);
 
 int getPid();
+
+bool isProcessRunning(int pid);

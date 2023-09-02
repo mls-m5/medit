@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <utility>
 
 //! Handles a specified file
 //! Behaves like a unique_ptr. Removes file in owning destructor
@@ -11,16 +12,14 @@ public:
         : _path{path} {}
 
     ~UniqueFile() {
-        if (!_path.empty()) {
-            std::filesystem::remove(_path);
-        }
+        clear();
     }
 
     UniqueFile(const UniqueFile &) = delete;
     UniqueFile &operator=(UniqueFile &other) = delete;
 
-    UniqueFile(UniqueFile &&other) {
-        _path = std::move(other._path);
+    UniqueFile(UniqueFile &&other)
+        : _path{std::move(other._path)} {
         other._path.clear();
     }
 
@@ -34,8 +33,19 @@ public:
         return _path;
     }
 
+    std::filesystem::path path() const {
+        return _path;
+    }
+
     std::filesystem::path release() {
         return std::exchange(_path, {});
+    }
+
+    void clear() {
+        if (!_path.empty()) {
+            std::filesystem::remove(_path);
+        }
+        _path.clear();
     }
 
 private:

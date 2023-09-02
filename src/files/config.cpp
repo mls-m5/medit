@@ -1,6 +1,9 @@
 #include "files/config.h"
 #include "core/os.h"
 #include <cstdlib>
+#include <filesystem>
+#include <stdexcept>
+#include <string>
 
 std::optional<std::filesystem::path> localConfigDirectory(
     std::filesystem::path relativePath, bool shouldCreate) {
@@ -72,4 +75,21 @@ std::filesystem::path fifoClientInPath() {
 
 std::filesystem::path fifoClientOutPath() {
     return standardSharedFifoDirectory() / "fifo-client-out";
+}
+
+void cleanUpLocalPipes() {
+    auto confPath = localConfigDirectory("process");
+    if (!confPath) {
+        return;
+    }
+    for (auto &it : std::filesystem::directory_iterator{*confPath}) {
+        if (isProcessRunning(std::stol(it.path().filename().string()))) {
+            continue;
+        }
+        std::filesystem::remove_all(it.path());
+    }
+}
+
+std::filesystem::path standardConsoleTtyPipePath() {
+    return standardLocalFifoDirectory() / "console-tty-in";
 }

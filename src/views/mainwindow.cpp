@@ -20,6 +20,7 @@
 #include "views/inputbox.h"
 #include <filesystem>
 #include <memory>
+#include <string_view>
 
 MainWindow::MainWindow(CoreEnvironment &core,
                        IScreen &screen,
@@ -34,7 +35,6 @@ MainWindow::MainWindow(CoreEnvironment &core,
     , _locator(this, core.project())
     , _commandPalette(this, StandardCommands::get())
     , _completeView(this, core.plugins().get<ICompletionSource>())
-    //    , _project{_env->core().files().directoryNotifications()}
     , _currentEditor(0) {
 
     //    for (int i = 0; i < 2; ++i) {
@@ -48,7 +48,14 @@ MainWindow::MainWindow(CoreEnvironment &core,
     }
     _console.showLines(false);
     _env->console(&_console);
-    //    _env->project(&_project);
+    _env->core().consoleCalback([this](std::string data) {
+        _env->context().guiQueue().addTask([this, data = std::move(data)] {
+            showConsole();
+            _console.buffer().pushBack(FString{data});
+            _console.cursor(Cursor(
+                _console.buffer(), 0, _console.buffer().lines().size() - 1));
+        });
+    });
 
     {
         auto palette = Palette{};
