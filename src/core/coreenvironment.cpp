@@ -5,20 +5,34 @@
 #include "plugin/idebugger.h"
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <memory>
+#include <ostream>
 
 CoreEnvironment::CoreEnvironment(ThreadContext &context)
     : _context{&context}
     , _project{std::make_unique<Project>(files().directoryNotifications(),
                                          context.guiQueue())}
-    , _consoleTtyPath{createFifo(standardLocalFifoDirectory() /
-                                 "console-tty-in")}
-    , _consoleInFile{_consoleTtyPath, [](std::string_view data) {}} {
+    , _consoleTtyPath{createFifo(standardConsoleTtyPipePath())}
+    , _consoleInFile{_consoleTtyPath, [this](std::string data) {
+                         if (_consoleCallback) {
+                             _consoleCallback(std::move(data));
+                         }
+                     }} {
+    cleanUpLocalPipes();
+
+    std::ofstream{_consoleTtyPath.path()}
+        << std::endl; // Prevent the listen file from waiting
 
     _project->updateCache(std::filesystem::current_path());
 }
 
-CoreEnvironment::~CoreEnvironment() = default;
+CoreEnvironment::~CoreEnvironment() {
+    _consoleTtyPath.clear();
+    _consoleInFile.close();
+    std::ofstream{_consoleTtyPath.path()}
+        << std::endl; // Prevent the listen file from waiting
+}
 
 IDebugger *CoreEnvironment::debugger() {
     auto &debuggers = _plugins.get<IDebugger>();

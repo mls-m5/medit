@@ -5,9 +5,16 @@
 #include <string_view>
 
 class FileListener {
-    using CallbackT = std::function<void(std::string_view)>;
+public:
+    using CallbackT = std::function<void(std::string)>;
+
+    FileListener(const FileListener &) = delete;
+    FileListener(FileListener &&) = delete;
+    FileListener &operator=(const FileListener &) = delete;
+    FileListener &operator=(FileListener &&) = delete;
 
     FileListener(std::filesystem::path, CallbackT);
+    ~FileListener();
 
     void close();
 

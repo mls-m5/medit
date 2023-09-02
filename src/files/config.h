@@ -13,6 +13,9 @@ std::filesystem::path findConfig(std::filesystem::path file);
 /// Paths for where to put fifos that handles things that is local to the
 /// current process. For example ttys for consoles or lsp-paths
 std::filesystem::path standardLocalFifoDirectory();
+std::filesystem::path standardConsoleTtyPipePath();
+
+void cleanUpLocalPipes();
 
 /// Fifo paths for the fifo server/server
 std::filesystem::path fifoClientInPath();

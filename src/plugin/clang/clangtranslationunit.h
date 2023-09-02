@@ -4,6 +4,7 @@
 #include "clangunsavedfiles.h"
 #include "files/project.h"
 #include "clang-c/Index.h"
+#include <utility>
 
 struct ClangTranslationUnit {
     CXTranslationUnit translationUnit = 0;
@@ -33,8 +34,8 @@ struct ClangTranslationUnit {
     }
     ClangTranslationUnit(ClangTranslationUnit &&other)
         : translationUnit(
-              std::exchange(other.translationUnit, CXTranslationUnit{})),
-          clangFlags(std::move(other.clangFlags)) {}
+              std::exchange(other.translationUnit, CXTranslationUnit{}))
+        , clangFlags(std::move(other.clangFlags)) {}
 
     operator CXTranslationUnit() {
         return translationUnit;

@@ -20,6 +20,7 @@
 #include "views/inputbox.h"
 #include <filesystem>
 #include <memory>
+#include <string_view>
 
 MainWindow::MainWindow(CoreEnvironment &core,
                        IScreen &screen,
@@ -47,6 +48,11 @@ MainWindow::MainWindow(CoreEnvironment &core,
     }
     _console.showLines(false);
     _env->console(&_console);
+    _env->core().consoleCalback([this](std::string data) {
+        _env->context().guiQueue().addTask([this, data = std::move(data)] {
+            _console.buffer().pushBack(FString{data});
+        });
+    });
 
     {
         auto palette = Palette{};

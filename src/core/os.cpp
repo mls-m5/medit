@@ -17,6 +17,7 @@ int getPid() {
 
 #else
 
+#include <filesystem>
 #include <unistd.h>
 
 std::filesystem::path getPath() {
@@ -38,6 +39,11 @@ std::filesystem::path getPath() {
 
 int getPid() {
     return getpid();
+}
+
+bool isProcessRunning(int pid) {
+    auto path = std::filesystem::path{"/proc/" + std::to_string(pid)};
+    return std::filesystem::exists(path);
 }
 
 #endif
