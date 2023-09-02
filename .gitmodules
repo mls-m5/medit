@@ -4,9 +4,6 @@
 [submodule "lib/json.h"]
 	path = lib/json.h
 	url = https://github.com/mls-m5/json.h.git
-[submodule "matmake2"]
-	path = matmake2
-	url = https://github.com/Laserskold/matmake2
 [submodule "lib/matrix-screen"]
 	path = lib/matrix-screen
 	url = https://github.com/mls-m5/matrix-screen
