@@ -11,8 +11,9 @@ CoreEnvironment::CoreEnvironment(ThreadContext &context)
     : _context{&context}
     , _project{std::make_unique<Project>(files().directoryNotifications(),
                                          context.guiQueue())}
-    , _consoleTty{createFifo(standardLocalFifoDirectory() / "console-tty-in")}
-    , _consoleInFile{std::make_unique<std::ifstream>()} {
+    , _consoleTtyPath{createFifo(standardLocalFifoDirectory() /
+                                 "console-tty-in")}
+    , _consoleInFile{_consoleTtyPath, [](std::string_view data) {}} {
 
     _project->updateCache(std::filesystem::current_path());
 }

@@ -21,7 +21,6 @@ struct MainWindow : public Window {
     Locator _locator;
     CommandPalette _commandPalette;
     CompleteView _completeView;
-    //    Project _project;
     size_t _split = 10;
     FString _splitString;
     IKeySink *_inputFocus = nullptr;

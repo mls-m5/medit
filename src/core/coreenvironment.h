@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/context.h"
+#include "core/filelistener.h"
 #include "core/plugins.h"
 #include "files.h"
 #include "files/uniquefile.h"
@@ -43,6 +44,6 @@ private:
 
     ThreadValidation _tv{"core thread (gui thread)"};
 
-    UniqueFile _consoleTty;
-    std::unique_ptr<std::ifstream> _consoleInFile;
+    UniqueFile _consoleTtyPath;
+    FileListener _consoleInFile;
 };

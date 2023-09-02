@@ -48,10 +48,6 @@ public:
         return _showConsole;
     }
 
-    //    void project(Project *project) {
-    //        _project = project;
-    //    }
-
     ThreadContext &context() override {
         return _context;
     }

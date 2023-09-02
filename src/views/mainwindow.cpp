@@ -34,7 +34,6 @@ MainWindow::MainWindow(CoreEnvironment &core,
     , _locator(this, core.project())
     , _commandPalette(this, StandardCommands::get())
     , _completeView(this, core.plugins().get<ICompletionSource>())
-    //    , _project{_env->core().files().directoryNotifications()}
     , _currentEditor(0) {
 
     //    for (int i = 0; i < 2; ++i) {
@@ -48,7 +47,6 @@ MainWindow::MainWindow(CoreEnvironment &core,
     }
     _console.showLines(false);
     _env->console(&_console);
-    //    _env->project(&_project);
 
     {
         auto palette = Palette{};
