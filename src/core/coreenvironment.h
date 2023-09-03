@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/context.h"
-#include "core/filelistener.h"
+#include "core/fifofilelistener.h"
 #include "core/plugins.h"
 #include "files.h"
 #include "files/uniquefile.h"
@@ -52,6 +52,6 @@ private:
     /// Move this out in the future and when there is more terminals that is
     /// handled this way
     UniqueFile _consoleTtyPath;
-    FileListener _consoleInFile;
+    FifoFileListener _consoleInFile;
     std::function<void(std::string)> _consoleCallback;
 };

@@ -28,10 +28,7 @@ CoreEnvironment::CoreEnvironment(ThreadContext &context)
 }
 
 CoreEnvironment::~CoreEnvironment() {
-    _consoleTtyPath.clear();
-    _consoleInFile.close();
-    std::ofstream{_consoleTtyPath.path()}
-        << std::endl; // Prevent the listen file from waiting
+    _consoleCallback = {};
 }
 
 IDebugger *CoreEnvironment::debugger() {

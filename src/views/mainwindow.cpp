@@ -50,7 +50,10 @@ MainWindow::MainWindow(CoreEnvironment &core,
     _env->console(&_console);
     _env->core().consoleCalback([this](std::string data) {
         _env->context().guiQueue().addTask([this, data = std::move(data)] {
+            showConsole();
             _console.buffer().pushBack(FString{data});
+            _console.cursor(Cursor(
+                _console.buffer(), 0, _console.buffer().lines().size() - 1));
         });
     });
 
