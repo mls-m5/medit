@@ -178,7 +178,14 @@ std::vector<std::filesystem::path> Project::findProjectFiles(
 
     std::vector<std::filesystem::path> paths;
 
-    auto extensions = std::unordered_map<std::filesystem::path, size_t>{};
+    struct PathHash {
+        std::size_t operator()(const std::filesystem::path &p) const {
+            return std::hash<std::string>{}(p.string());
+        }
+    };
+
+    auto extensions =
+        std::unordered_map<std::filesystem::path, size_t, PathHash>{};
 
     size_t i = 0;
     for (auto it =
