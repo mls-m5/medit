@@ -85,6 +85,7 @@ add_library(
     STATIC
     keys/keymap.cpp
     syntax/basichighligting.cpp
+    syntax/markdownhighlighting.cpp
     views.cpp
     modes.cpp
     script.cpp

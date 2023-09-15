@@ -2,6 +2,7 @@
 
 #include "fchar.h"
 #include "text/fstringview.h"
+#include "text/utf8char.h"
 #include <vector>
 
 class FStringView;
@@ -12,6 +13,8 @@ public:
     using VectorT = std::vector<FChar>;
     using iterator = VectorT::iterator;
     using const_iterator = VectorT::const_iterator;
+
+    static constexpr size_t npos = static_cast<size_t>(-1);
 
     FString() = default;
     FString(const FString &) = default;
@@ -69,6 +72,8 @@ public:
     [[nodiscard]] FChar back() const {
         return _content.back();
     }
+
+    [[nodiscard]] size_t find(Utf8Char c, size_t start = 0) const;
 
     auto erase(size_t pos, size_t size) {
         return _content.erase(_content.begin() + pos,

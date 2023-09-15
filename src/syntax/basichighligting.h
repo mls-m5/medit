@@ -9,7 +9,12 @@ public:
     struct Format;
 
     BasicHighlighting();
-    ~BasicHighlighting();
+    BasicHighlighting(const BasicHighlighting &) = delete;
+    BasicHighlighting(BasicHighlighting &&) = delete;
+    BasicHighlighting &operator=(const BasicHighlighting &) = delete;
+    BasicHighlighting &operator=(BasicHighlighting &&) = delete;
+
+    ~BasicHighlighting() override;
 
     //! @see IHighlight
     bool shouldEnable(std::filesystem::path) override;

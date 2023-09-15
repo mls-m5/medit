@@ -9,6 +9,7 @@
 #include "plugin/lsp/lspplugin.h"
 #include "script/standardcommands.h"
 #include "syntax/basichighligting.h"
+#include "syntax/markdownhighlighting.h"
 
 #ifdef ENABLE_LEGACY_CLANG_PLUGIN
 #include "clang/clangannotation.h"
@@ -20,6 +21,7 @@ void registerDefaultPlugins(CoreEnvironment &core) {
     auto &container = core.plugins();
     container.loadPlugin<GenericFormat>();
     container.loadPlugin<BasicHighlighting>();
+    container.loadPlugin<MarkdownHighlighting>();
     container.loadPlugin<JsonFormat>();
     container.loadPlugin<HeaderNavigation>();
 

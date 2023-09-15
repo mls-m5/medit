@@ -63,16 +63,22 @@ FString::operator std::string() const {
     return str;
 }
 
+size_t FString::find(Utf8Char c, size_t start) const {
+    for (size_t i = start; i < size(); ++i) {
+        if (at(i) == c) {
+            return i;
+        }
+    }
+
+    return npos;
+}
+
 FStringView FString::substr(size_t start, size_t length) const {
     if (start >= _content.size()) {
         return {};
     }
 
     length = std::min(_content.size() - start, length);
-
-    //        return {_content.begin() + start, _content.begin() + (start +
-    //        length)}; return {_content.begin() + start, _content.begin() +
-    //        (start + length)};
 
     return FStringView{_content.data() + start, length};
 }
