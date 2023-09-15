@@ -4,6 +4,7 @@
 #include "meditfwd.h"
 #include "mls-unit-test/mock.h"
 #include "script/ienvironment.h"
+#include <functional>
 
 class MockEnvironment : public IEnvironment {
 public:
@@ -21,4 +22,5 @@ public:
                  (),
                  const override);
     MOCK_METHOD1(void, statusMessage, (FStringView string), override);
+    MOCK_METHOD1(void, guiTask, (std::function<void()>), override);
 };

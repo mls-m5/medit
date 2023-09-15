@@ -33,6 +33,8 @@ public:
 
     virtual const StandardCommands &standardCommands() const = 0;
 
+    virtual void guiTask(std::function<void()> f) = 0;
+
     IEnvironment() = default;
     IEnvironment(const IEnvironment &) = delete;
     IEnvironment &operator=(const IEnvironment &) = delete;

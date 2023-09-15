@@ -6,6 +6,7 @@
 #include "meditfwd.h"
 #include "script/standardcommands.h"
 #include "views/editor.h"
+#include <functional>
 
 /// Environment data for a single user
 class LocalEnvironment : public IEnvironment {
@@ -72,4 +73,7 @@ public:
     void redrawScreen();
 
     void statusMessage(FStringView str) override;
+
+    /// Shorthand function for context().guiQueue.addTask
+    void guiTask(std::function<void()> f) override;
 };

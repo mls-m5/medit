@@ -1,12 +1,15 @@
 #include "markdownnavigation.h"
 #include "files/extensions.h"
+#include "files/project.h"
 #include "script/ienvironment.h"
+#include "script/standardcommands.h"
 #include "text/fstring.h"
 #include "views/editor.h"
 
 namespace {}
 
 bool MarkdownNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
+    _tv();
     auto &e = env->editor();
     auto path = e.path();
     if (!isMarkdown(path)) {
@@ -52,9 +55,25 @@ bool MarkdownNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
         return false;
     }
 
+    auto name =
+        std::string{line.substr(leftBracket, rightBracket - leftBracket)};
+
     // TODO: Implement navigation jump to file without path and without
     // extension
-    env->statusMessage(line.substr(leftBracket, rightBracket - leftBracket));
+    env->statusMessage(FString{"opening " + name});
+
+    auto &project = env->project();
+
+    for (auto &file : project.files()) {
+        if (!file.has_stem()) {
+            continue;
+        }
+        if (file.stem() == name) {
+            env->guiTask([env, file] {
+                env->standardCommands().open(env, file, {}, {});
+            });
+        }
+    }
 
     return false;
 }

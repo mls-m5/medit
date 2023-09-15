@@ -104,4 +104,6 @@ void MarkdownHighlighting::highlight(Buffer &buffer) {
 
     tryFormat(buffer, '`', '`', Palette::comment);
     tryFormatLink(buffer);
+
+    buffer.emitChangeSignal();
 }

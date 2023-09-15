@@ -40,3 +40,7 @@ void LocalEnvironment::redrawScreen() {
 void LocalEnvironment::statusMessage(FStringView str) {
     _mainWindow.statusMessage(str);
 }
+
+void LocalEnvironment::guiTask(std::function<void()> f) {
+    _context.guiQueue().addTask(f);
+}

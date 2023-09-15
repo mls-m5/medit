@@ -10,6 +10,7 @@
 #include "script/standardcommands.h"
 #include "syntax/basichighligting.h"
 #include "syntax/markdownhighlighting.h"
+#include "syntax/markdownnavigation.h"
 
 #ifdef ENABLE_LEGACY_CLANG_PLUGIN
 #include "clang/clangannotation.h"
@@ -24,6 +25,7 @@ void registerDefaultPlugins(CoreEnvironment &core) {
     container.loadPlugin<MarkdownHighlighting>();
     container.loadPlugin<JsonFormat>();
     container.loadPlugin<HeaderNavigation>();
+    container.loadPlugin<MarkdownNavigation>();
 
 #ifdef ENABLE_LEGACY_CLANG_PLUGIN
     ClangCompletion::registerPlugin();

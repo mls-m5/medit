@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/threadvalidation.h"
 #include "navigation/inavigation.h"
 
 class MarkdownNavigation : public INavigation {
@@ -14,4 +15,7 @@ public:
 
     // @see INavigation
     bool gotoSymbol(std::shared_ptr<IEnvironment> env) override;
+
+private:
+    ThreadValidation _tv = {"MarkdownNavigation - GuiThread"};
 };
