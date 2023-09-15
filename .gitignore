@@ -10,3 +10,4 @@ bin/
 *.files
 *.includes
 
+.qtc_clangd/
