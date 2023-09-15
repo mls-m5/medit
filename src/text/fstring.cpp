@@ -1,6 +1,7 @@
 
 #include "text/fstring.h"
 #include "core/archive.h"
+#include "text/fstringview.h"
 #include <algorithm>
 
 FString::FString(const std::string &str, FormatType f)
@@ -81,6 +82,20 @@ FStringView FString::substr(size_t start, size_t length) const {
     length = std::min(_content.size() - start, length);
 
     return FStringView{_content.data() + start, length};
+}
+
+bool FString::startsWith(FStringView str) {
+    if (size() < str.size()) {
+        return false;
+    }
+
+    for (size_t i = 0; i < str.size(); ++i) {
+        if (str.at(i) != at(i)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 std::vector<FString> FString::split(Utf8Char c) const {

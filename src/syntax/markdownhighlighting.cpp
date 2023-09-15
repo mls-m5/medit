@@ -80,6 +80,30 @@ void tryFormatLink(Buffer &buffer) {
     }
 }
 
+void formatCodeContent(Buffer &buffer, size_t begin, size_t end) {
+    auto range = CursorRange{buffer, {0, begin}, {1000, end}};
+    format(range, Palette::comment);
+}
+
+void formatCodeBlocks(Buffer &buffer) {
+    auto lines = buffer.lines();
+    const auto codeStart = FString{"```"};
+    for (size_t i = 0; i < lines.size(); ++i) {
+        auto &line = lines.at(i);
+        if (line.startsWith(codeStart)) {
+            for (size_t j = i + 1; j < lines.size(); ++j) {
+                auto &line2 = lines.at(j);
+
+                if (line2.startsWith(codeStart)) {
+                    formatCodeContent(buffer, i, j + 1);
+                    i = j + 1;
+                    break;
+                }
+            }
+        }
+    }
+}
+
 } // namespace
 
 MarkdownHighlighting::MarkdownHighlighting() = default;
@@ -106,4 +130,6 @@ void MarkdownHighlighting::highlight(Buffer &buffer) {
     tryFormatLink(buffer);
 
     buffer.emitChangeSignal();
+
+    formatCodeBlocks(buffer);
 }

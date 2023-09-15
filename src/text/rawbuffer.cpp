@@ -133,11 +133,11 @@ Cursor RawBuffer::apply(BufferEdit edit) {
 void RawBuffer::format(CursorRange range, FormatType f) {
     range = fix(range);
 
-    if (range.end().x() < range.begin().x()) {
-        return;
-    }
-
     if (range.end().y() == range.begin().y()) {
+        if (range.end().x() < range.begin().x()) {
+            return;
+        }
+
         auto &line = _lines.at(range.begin().y());
 
         for (size_t i = range.begin().x(); i < range.end().x(); ++i) {
@@ -156,6 +156,13 @@ void RawBuffer::format(CursorRange range, FormatType f) {
         auto &line2 = _lines.at(range.end().y());
         for (size_t i = 0; i < range.end().x(); ++i) {
             line2.at(i).f = f;
+        }
+    }
+    {
+        for (size_t i = range.begin().y() + 1; i < range.end().y(); ++i) {
+            for (auto &c : _lines.at(i)) {
+                c.f = f;
+            }
         }
     }
 }

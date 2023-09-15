@@ -91,6 +91,8 @@ Todo:
     - [ ] Fix: Lsp urli-s with special characters is not handled properly
     - [ ] Add refactor function (alt+return)
 - [ ] Distraction free mode, where you are only allowed to edit the end or the last lines
+- [ ] Word wrap
+- [ ] Standard commands that is only available to certain file types
 
 # Prioritized changes
 - [ ] Faster navigation

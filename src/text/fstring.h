@@ -1,8 +1,10 @@
 #pragma once
 
 #include "fchar.h"
+#include "syntax/palette.h"
 #include "text/fstringview.h"
 #include "text/utf8char.h"
+#include <ostream>
 #include <vector>
 
 class FStringView;
@@ -153,6 +155,8 @@ public:
     }
 
     FStringView substr(size_t start, size_t length = size_t(-1)) const;
+
+    bool startsWith(FStringView str);
 
     std::vector<FString> split(Utf8Char c = '\n') const;
 
