@@ -135,6 +135,7 @@ void BufferView::buffer(std::shared_ptr<Buffer> buffer) {
     unsubscribe();
     _buffer = std::move(buffer);
     subscribeToBuffer();
+    contentHeight(_buffer->lines().size());
 
     //    if (auto w = window()) { // Why does this not work?
     //        w->triggerRedraw();
