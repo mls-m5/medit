@@ -173,8 +173,6 @@ void LspPlugin::registerPlugin(CoreEnvironment &core, Plugins &plugins) {
     auto lsp = std::make_shared<LspPlugin>();
     lsp->_core = &core; // Replace for with constructor
     lsp->init();
-    //    LspPlugin::instance()._core = &core;
-    //    LspPlugin::instance().init();
     plugins.loadPlugin<LspNavigation>(lsp);
     plugins.loadPlugin<LspHighlight>(lsp);
     plugins.loadPlugin<LspComplete>(lsp);

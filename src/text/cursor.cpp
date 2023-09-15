@@ -1,6 +1,6 @@
 
 #include "cursor.h"
-#include "buffer.h"
+#include "fchar.h"
 #include "text/cursorops.h"
 
 Cursor &Cursor::operator++() {
