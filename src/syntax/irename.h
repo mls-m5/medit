@@ -33,7 +33,7 @@ public:
                         RenameArgs,
                         std::function<void(const Changes &)> callback) = 0;
 
-    virtual bool shouldEnable(std::filesystem::path) const = 0;
+    //    virtual bool shouldEnable(std::filesystem::path) const = 0;
 
     virtual int priority() const = 0;
 };

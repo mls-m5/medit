@@ -114,13 +114,16 @@ bool BasicHighlighting::shouldEnable(std::filesystem::path) {
     return true;
 }
 
-void BasicHighlighting::highlight(Buffer &buffer) {
-    highlightStatic(buffer);
+bool BasicHighlighting::highlight(Buffer &buffer) {
+    return highlightStatic(buffer);
 }
 
-void BasicHighlighting::highlightStatic(Buffer &buffer) {
+bool BasicHighlighting::highlightStatic(Buffer &buffer) {
+    if (!shouldEnable(buffer.path())) {
+        return false;
+    }
     if (buffer.empty()) {
-        return;
+        return true;
     }
 
     decltype(wordListCpp) *wordList = [&buffer] {
@@ -131,7 +134,7 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
     }();
 
     if (!wordList) {
-        return;
+        return true;
     }
 
     format(all(buffer), Palette::standard);
@@ -210,4 +213,5 @@ void BasicHighlighting::highlightStatic(Buffer &buffer) {
     buffer.isColorsOld(false);
 
     buffer.emitChangeSignal();
+    return true;
 }

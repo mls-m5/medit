@@ -178,8 +178,7 @@ void Files::updateHighlighting() {
                 continue;
             }
             for (auto &highlight : _core.plugins().get<IHighlight>()) {
-                if (highlight->shouldEnable(buffer->path())) {
-                    highlight->highlight(*buffer);
+                if (highlight->highlight(*buffer)) {
 
                     buffer->isColorsOld(false);
                     break;

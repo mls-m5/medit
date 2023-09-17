@@ -114,7 +114,11 @@ bool MarkdownHighlighting::shouldEnable(std::filesystem::path path) {
     return isMarkdown(path);
 }
 
-void MarkdownHighlighting::highlight(Buffer &buffer) {
+bool MarkdownHighlighting::highlight(Buffer &buffer) {
+    if (!shouldEnable(buffer.path())) {
+        return false;
+    }
+
     auto &lines = buffer.lines();
     for (size_t i = 0; i < lines.size(); ++i) {
         auto line = lines.at(i);
@@ -132,4 +136,6 @@ void MarkdownHighlighting::highlight(Buffer &buffer) {
     buffer.emitChangeSignal();
 
     formatCodeBlocks(buffer);
+
+    return true;
 }

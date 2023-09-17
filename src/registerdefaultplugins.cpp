@@ -6,7 +6,7 @@
 #include "plugin/genericformat.h"
 #include "plugin/git.h"
 #include "plugin/jsonformat.h"
-#include "plugin/lsp/lspplugin.h"
+#include "plugin/lsp/lspplugininstance.h"
 #include "script/standardcommands.h"
 #include "syntax/basichighligting.h"
 #include "syntax/markdownhighlighting.h"
@@ -27,17 +27,11 @@ void registerDefaultPlugins(CoreEnvironment &core) {
     container.loadPlugin<HeaderNavigation>();
     container.loadPlugin<MarkdownNavigation>();
 
-#ifdef ENABLE_LEGACY_CLANG_PLUGIN
-    ClangCompletion::registerPlugin();
-    ClangAnnotation::registerPlugin();
-    ClangNavigation::registerPlugin();
-#else
-#endif
-
 #ifndef __EMSCRIPTEN__
-    LspPlugin::registerPlugin(core, container);
+    LspPluginInstance::registerPlugin(core, container);
     container.loadPlugin<GdbDebugger>();
 #endif
 
+    // TODO: Move standardcommands to live in core environment
     registerGitCommands(StandardCommands::get());
 }

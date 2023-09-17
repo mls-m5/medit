@@ -37,5 +37,5 @@ public:
     virtual bool shouldComplete(std::shared_ptr<IEnvironment>) = 0;
 
     //! High priority means that it should be selected first
-    virtual int priority() = 0;
+    [[nodiscard]] virtual int priority() = 0;
 };
