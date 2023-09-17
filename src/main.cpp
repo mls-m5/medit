@@ -2,6 +2,7 @@
 #include "core/context.h"
 #include "core/coreenvironment.h"
 #include "core/jobqueue.h"
+#include "core/os.h"
 #include "core/threadname.h"
 #include "core/timer.h"
 #include "files/config.h"
@@ -244,6 +245,7 @@ int main(int argc, char **argv) {
     auto settings = Settings{argc, argv};
 
     setThreadName("main");
+    setupSignals();
 
 #ifndef __EMSCRIPTEN__
     if (settings.style == UiStyle::FifoClient ||

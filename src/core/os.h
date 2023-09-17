@@ -44,3 +44,5 @@ int runCommand(const std::string &command);
 int getPid();
 
 bool isProcessRunning(int pid);
+
+void setupSignals();

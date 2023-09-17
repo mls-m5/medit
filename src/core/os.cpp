@@ -15,9 +15,14 @@ int getPid() {
     GetCurrentProcessId();
 }
 
+void setupSignals() {
+    static_static_assert(false, "not implemented");
+}
+
 #else
 
 #include <filesystem>
+#include <signal.h>
 #include <unistd.h>
 
 std::filesystem::path getPath() {
@@ -44,6 +49,10 @@ int getPid() {
 bool isProcessRunning(int pid) {
     auto path = std::filesystem::path{"/proc/" + std::to_string(pid)};
     return std::filesystem::exists(path);
+}
+
+void setupSignals() {
+    signal(SIGPIPE, SIG_IGN);
 }
 
 #endif
