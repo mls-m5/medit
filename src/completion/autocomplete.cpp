@@ -5,6 +5,7 @@
 #include "core/ijobqueue.h"
 #include "core/plugins.h"
 #include "script/ienvironment.h"
+#include "text/fstring.h"
 #include <algorithm>
 
 AutoComplete::AutoComplete(Plugins::ListT<ICompletionSource> sources) {
@@ -43,7 +44,10 @@ void AutoComplete::populate(std::shared_ptr<IEnvironment> env,
                     });
                 };
             source->list(env, cb);
-            break;
+            return;
         }
     }
+
+    env->statusMessage(
+        FString{"no completeon source active for the current document"});
 }

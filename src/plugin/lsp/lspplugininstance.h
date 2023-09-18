@@ -20,8 +20,6 @@ class LspPluginInstance {
 public:
     LspPluginInstance(CoreEnvironment *core);
 
-    void init();
-
     LspPluginInstance(const LspPluginInstance &) = delete;
     LspPluginInstance(LspPluginInstance &&) = delete;
     LspPluginInstance &operator=(const LspPluginInstance &) = delete;
@@ -50,27 +48,42 @@ public:
         return nullptr;
     }
 
-    void updateBuffer(Buffer &);
+    bool updateBuffer(Buffer &);
 
     static void registerPlugin(CoreEnvironment &core, Plugins &);
 
-    //    bool isEnabled() {}
+    //        bool isEnabled() {}
 
     struct Instance {
+        Instance(LspConfiguration, LspPluginInstance *parent);
+
+        Instance(Instance &&) = default;
+        ~Instance() = default;
+
         LspConfiguration _config;
         std::unique_ptr<lsp::LspClient> _client;
     };
 
     [[nodiscard]] Instance *instance(std::filesystem::path path) {
+        for (auto &ext : _unsupportedExtensions) {
+            if (path.extension() == ext) {
+                return nullptr;
+            }
+        }
+
         for (auto &instance : _instances) {
             if (instance->_config.isFileSupported(path)) {
                 return instance.get();
             }
         }
-        return nullptr;
+
+        return createInstance(path);
+        //        return nullptr;
     }
 
 private:
+    [[nodiscard]] Instance *createInstance(std::filesystem::path path);
+
     void bufferEvent(BufferEvent &event);
 
     void handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
@@ -93,6 +106,7 @@ private:
     }
 
     std::vector<std::unique_ptr<Instance>> _instances;
+    std::vector<std::filesystem::path> _unsupportedExtensions;
 };
 
 class LspComplete : public ICompletionSource {

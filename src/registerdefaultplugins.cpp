@@ -28,7 +28,7 @@ void registerDefaultPlugins(CoreEnvironment &core) {
     container.loadPlugin<MarkdownNavigation>();
 
 #ifndef __EMSCRIPTEN__
-    //    LspPluginInstance::registerPlugin(core, container);
+    LspPluginInstance::registerPlugin(core, container);
     container.loadPlugin<GdbDebugger>();
 #endif
 
