@@ -1,5 +1,6 @@
 #pragma once
 
+#include "completion/icompletionsource.h"
 #include <filesystem>
 #include <memory>
 #include <vector>
@@ -22,3 +23,5 @@ public:
 
     std::vector<std::unique_ptr<LspPluginInstance>> _instances;
 };
+
+class LspComplete public ICompletionSource{public : };

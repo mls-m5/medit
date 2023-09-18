@@ -16,11 +16,9 @@ class LspClient;
 }
 
 /// TODO: Make more generic to handle other languages language servers
-#warning                                                                       \
-    "Create a separate class called LspInstance (rename this class) and make a class that creates a class for each language and calls functions for all"
 class LspPluginInstance {
 public:
-    LspPluginInstance();
+    LspPluginInstance(CoreEnvironment *core);
 
     void init();
 
@@ -31,21 +29,46 @@ public:
 
     ~LspPluginInstance();
 
-    lsp::LspClient &client() {
-        return *_client;
+    [[nodiscard]] lsp::LspClient *client(std::filesystem::path path) {
+        if (auto i = instance(path)) {
+            return i->_client.get();
+        }
+
+        /// Create new client here if it does not exist
+        return nullptr;
     }
 
-    CoreEnvironment &core() {
+    [[nodiscard]] CoreEnvironment &core() {
         return *_core;
     }
 
-    [[nodiscard]] const LspConfiguration &config() const {
-        return _config;
+    [[nodiscard]] const LspConfiguration *config(
+        std::filesystem::path path) const {
+        if (auto i = instance(path)) {
+            return &i->_config;
+        }
+        return nullptr;
     }
 
     void updateBuffer(Buffer &);
 
     static void registerPlugin(CoreEnvironment &core, Plugins &);
+
+    //    bool isEnabled() {}
+
+    struct Instance {
+        LspConfiguration _config;
+        std::unique_ptr<lsp::LspClient> _client;
+    };
+
+    [[nodiscard]] Instance *instance(std::filesystem::path path) {
+        for (auto &instance : _instances) {
+            if (instance->_config.isFileSupported(path)) {
+                return instance.get();
+            }
+        }
+        return nullptr;
+    }
 
 private:
     void bufferEvent(BufferEvent &event);
@@ -53,14 +76,23 @@ private:
     void handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
                                std::vector<long>);
 
-    void requestSemanticsToken(std::shared_ptr<Buffer> buffer);
-
     CoreEnvironment *_core = nullptr;
 
-    std::unique_ptr<lsp::LspClient> _client;
     std::unordered_map<std::string, long> _bufferVersions;
 
-    LspConfiguration _config;
+    void requestSemanticsToken(std::shared_ptr<Buffer> buffer,
+                               Instance &instance);
+
+    [[nodiscard]] Instance *instance(std::filesystem::path path) const {
+        for (auto &instance : _instances) {
+            if (instance->_config.isFileSupported(path)) {
+                return instance.get();
+            }
+        }
+        return nullptr;
+    }
+
+    std::vector<std::unique_ptr<Instance>> _instances;
 };
 
 class LspComplete : public ICompletionSource {
@@ -100,13 +132,13 @@ public:
     }
 
 private:
-    bool shouldEnable(std::filesystem::path);
+    //    bool shouldEnable(std::filesystem::path);
     std::shared_ptr<LspPluginInstance> _lsp;
 };
 
 class LspRenameInstance : public IRename {
 public:
-    bool shouldEnable(std::filesystem::path path) const;
+    //    bool shouldEnable(std::filesystem::path path) const;
 
     bool doesSupportPrepapre() override;
 
