@@ -52,11 +52,13 @@ public:
 
     static void registerPlugin(CoreEnvironment &core, Plugins &);
 
-    //        bool isEnabled() {}
-
     struct Instance {
+        Instance(const Instance &) = delete;
+        Instance &operator=(const Instance &) = delete;
+
         Instance(LspConfiguration, LspPlugin *parent);
 
+        Instance &operator=(Instance &&) = default;
         Instance(Instance &&) = default;
         ~Instance() = default;
 
@@ -78,7 +80,6 @@ public:
         }
 
         return createInstance(path);
-        //        return nullptr;
     }
 
 private:
@@ -146,7 +147,6 @@ public:
     }
 
 private:
-    //    bool shouldEnable(std::filesystem::path);
     std::shared_ptr<LspPlugin> _lsp;
 };
 

@@ -72,9 +72,6 @@ using namespace lsp;
 
 LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
     : _config{std::move(config)} {
-    // TODO : Create instance when requested
-    //    _config = LspConfiguration{_core->project().projectExtension()};
-
     _client = std::make_unique<LspClient>(_config.command);
 
     auto initializedPromise = std::promise<void>{};
@@ -90,7 +87,6 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
         [&initializedPromise](auto &&j) {
             std::cerr << "error\n";
             std::cerr << j << "\n";
-            //            std::terminate();
             initializedPromise.set_value();
         });
 
@@ -194,14 +190,11 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
         };
 
         _client->notify(params);
-        //        requestSemanticsToken(event.buffer);
     }
 }
 
 void LspPlugin::registerPlugin(CoreEnvironment &core, Plugins &plugins) {
-    // TODO: Fix this someday, its ugly
     auto lsp = std::make_shared<LspPlugin>(&core);
-    //    lsp->init();
     plugins.loadPlugin<LspNavigation>(lsp);
     plugins.loadPlugin<LspHighlight>(lsp);
     plugins.loadPlugin<LspComplete>(lsp);
@@ -216,9 +209,6 @@ LspPlugin::Instance *LspPlugin::createInstance(std::filesystem::path path) {
     }
 
     _instances.push_back(std::make_unique<Instance>(std::move(*config), this));
-
-    //    auto instance = _instances.back().get();
-    //    instance->_client = std::make_unique();
 
     return _instances.back().get();
 }
@@ -368,8 +358,6 @@ void LspComplete::list(std::shared_ptr<IEnvironment> scope,
                        CompleteCallbackT callback) {
     auto client = _lsp->client(scope->editor().buffer().path());
 
-    //    if (!_lsp->config().isFileSupported(scope->editor().buffer().path()))
-    //    {
     if (!client) {
         callback({});
         return;
@@ -412,16 +400,10 @@ void LspComplete::list(std::shared_ptr<IEnvironment> scope,
 
 bool LspComplete::shouldComplete(std::shared_ptr<IEnvironment> env) {
     return static_cast<bool>(_lsp->instance(env->editor().path()));
-    //    return _lsp->config().isFileSupported(env->editor().path());
 }
 
 bool LspHighlight::highlight(Buffer &buffer) {
-    //    auto path = buffer.path();
-    //    if (!_lsp->config().isFileSupported(path)) {
-    //        return false;
-    //    }
     return _lsp->updateBuffer(buffer);
-    //    return true;
 }
 
 bool LspNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
@@ -430,9 +412,6 @@ bool LspNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     if (!i) {
         return false;
     }
-    //    if (!_lsp->config().isFileSupported(env->editor().path())) {
-    //        return false;
-    //    }
 
     auto params = TypeDefinitionParams{};
     params.textDocument.uri = pathToUri(env->editor().buffer().path());
@@ -456,10 +435,6 @@ bool LspNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     return true;
 }
 
-// bool LspRenameInstance::shouldEnable(std::filesystem::path path) const {
-//     return (_lsp->config().isFileSupported(path));
-// }
-
 bool LspRenameInstance::doesSupportPrepapre() {
     // TODO: Depend on servercapabilities in the future
     return true;
@@ -473,9 +448,6 @@ bool LspRenameInstance::prepare(
     if (!instance) {
         return false;
     }
-    //    if (!_lsp->config().isFileSupported(env->editor().path())) {
-    //        return false;
-    //    }
 
     auto params = PrepareRenameParams{};
     params.textDocument.uri = pathToUri(env->editor().buffer().path());
@@ -512,10 +484,6 @@ bool LspRenameInstance::rename(std::shared_ptr<IEnvironment> env,
     }
 
     auto client = instance->_client.get();
-
-    //    if (!_lsp->config().isFileSupported(env->editor().path())) {
-    //        return false;
-    //    }
 
     auto params = RenameParams{};
     params.textDocument.uri = pathToUri(env->editor().buffer().path());
