@@ -29,7 +29,7 @@ public:
 
     [[nodiscard]] lsp::LspClient *client(std::filesystem::path path) {
         if (auto i = instance(path)) {
-            return i->_client.get();
+            return i->client.get();
         }
 
         /// Create new client here if it does not exist
@@ -63,7 +63,7 @@ public:
         ~Instance() = default;
 
         LspConfiguration _config;
-        std::unique_ptr<lsp::LspClient> _client;
+        std::unique_ptr<lsp::LspClient> client;
     };
 
     [[nodiscard]] Instance *instance(std::filesystem::path path) {

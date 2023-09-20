@@ -72,12 +72,12 @@ using namespace lsp;
 
 LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
     : _config{std::move(config)} {
-    _client = std::make_unique<LspClient>(_config.command);
+    client = std::make_unique<LspClient>(_config.command);
 
     auto initializedPromise = std::promise<void>{};
     auto initializedFuture = initializedPromise.get_future();
 
-    _client->request(
+    client->request(
         InitializeParams{},
         [&initializedPromise](const nlohmann::json &j) {
             //            std::cout << "initialization response:\n";
@@ -90,7 +90,7 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
             initializedPromise.set_value();
         });
 
-    _client->subscribe(
+    client->subscribe(
         std::function{[this, parent](const PublishDiagnosticsParams &params) {
             auto bufferDiagnostics = std::vector<Diagnostics::Diagnostic>{};
 
@@ -117,7 +117,7 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
                 });
         }});
 
-    _client->callback([](auto j) {
+    client->callback([](auto j) {
         std::cerr << "Unhandled callback\n";
         std::cerr << std::setw(4) << j << "\n";
     });
@@ -137,7 +137,7 @@ LspPlugin::~LspPlugin() {
     auto futures = std::vector<std::future<void>>{};
 
     for (auto &instance : _instances) {
-        futures.push_back(instance->_client->shutdown());
+        futures.push_back(instance->client->shutdown());
     }
 
     for (auto &f : futures) {
@@ -151,14 +151,14 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
         return;
     }
 
-    auto _client = ins->_client.get();
-    auto &_config = ins->_config;
+    auto client = ins->client.get();
+    auto &config = ins->_config;
 
     if (event.type == BufferEvent::Open) {
-        if (!_config.isFileSupported) {
+        if (!config.isFileSupported) {
             return;
         }
-        if (!_config.isFileSupported(event.buffer->path())) {
+        if (!config.isFileSupported(event.buffer->path())) {
             return;
         }
 
@@ -174,11 +174,11 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
                 },
         };
 
-        _client->notify(params);
+        client->notify(params);
         requestSemanticsToken(event.buffer, *ins);
     }
     if (event.type == BufferEvent::Close) {
-        if (!_config.isFileSupported(event.path)) {
+        if (!config.isFileSupported(event.path)) {
             return;
         }
 
@@ -189,7 +189,7 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
                 },
         };
 
-        _client->notify(params);
+        client->notify(params);
     }
 }
 
@@ -306,7 +306,7 @@ void LspPlugin::requestSemanticsToken(std::shared_ptr<Buffer> buffer,
     auto params = SemanticTokensParams{};
     params.textDocument.uri = pathToUri(buffer->path());
 
-    instance._client->request(
+    instance.client->request(
         params,
         [this, buffer](SemanticTokens data) {
             _core->context().guiQueue().addTask([buffer, data, this] {
@@ -330,7 +330,7 @@ bool LspPlugin::updateBuffer(Buffer &buffer) {
         return false;
     }
 
-    auto &_config = i->_config;
+    auto &config = i->_config;
 
     auto &oldVersion = _bufferVersions[buffer.path().string()];
 
@@ -347,7 +347,7 @@ bool LspPlugin::updateBuffer(Buffer &buffer) {
         .text = buffer.text(), // TODO: Only do partial updates
     });
 
-    i->_client->notify(params);
+    i->client->notify(params);
 
     requestSemanticsToken(buffer.shared_from_this(), *i);
 
@@ -416,7 +416,7 @@ bool LspNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     auto params = TypeDefinitionParams{};
     params.textDocument.uri = pathToUri(env->editor().buffer().path());
     params.position = meditCursorToPosition(env->editor().cursor());
-    i->_client->request(params, [env](const std::vector<Location> &locations) {
+    i->client->request(params, [env](const std::vector<Location> &locations) {
         if (locations.empty()) {
             return;
         }
@@ -453,7 +453,7 @@ bool LspRenameInstance::prepare(
     params.textDocument.uri = pathToUri(env->editor().buffer().path());
     params.position = meditCursorToPosition(env->editor().cursor());
 
-    instance->_client->request(
+    instance->client->request(
         params,
         [env, callback](const Range &range) {
             env->context().guiQueue().addTask([env, range, callback] {
@@ -483,7 +483,7 @@ bool LspRenameInstance::rename(std::shared_ptr<IEnvironment> env,
         return false;
     }
 
-    auto client = instance->_client.get();
+    auto client = instance->client.get();
 
     auto params = RenameParams{};
     params.textDocument.uri = pathToUri(env->editor().buffer().path());
