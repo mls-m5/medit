@@ -25,7 +25,7 @@ if (NOT EMSCRIPTEN)
     target_sources(
         medit_plugins
         PRIVATE
-        lsp/lspplugininstance.cpp
+        lsp/lspplugin.cpp
         lsp/lspconfiguration.cpp
         )
 

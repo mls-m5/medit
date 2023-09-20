@@ -6,7 +6,7 @@
 #include "plugin/genericformat.h"
 #include "plugin/git.h"
 #include "plugin/jsonformat.h"
-#include "plugin/lsp/lspplugininstance.h"
+#include "plugin/lsp/lspplugin.h"
 #include "script/standardcommands.h"
 #include "syntax/basichighligting.h"
 #include "syntax/markdownhighlighting.h"
@@ -28,7 +28,7 @@ void registerDefaultPlugins(CoreEnvironment &core) {
     container.loadPlugin<MarkdownNavigation>();
 
 #ifndef __EMSCRIPTEN__
-    LspPluginInstance::registerPlugin(core, container);
+    LspPlugin::registerPlugin(core, container);
     container.loadPlugin<GdbDebugger>();
 #endif
 
