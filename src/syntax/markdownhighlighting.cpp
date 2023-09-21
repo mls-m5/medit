@@ -9,9 +9,10 @@
 
 namespace {
 
-std::optional<CursorRange> match(Buffer &buffer, size_t l, char a, char b) {
+std::optional<CursorRange> match(
+    Buffer &buffer, size_t l, size_t start, char a, char b) {
     auto line = buffer.lineAt(l);
-    auto f1 = line.find(a);
+    auto f1 = line.find(a, start);
 
     if (f1 == FString::npos) {
         return std::nullopt;
@@ -32,8 +33,10 @@ void tryFormat(Buffer &buffer, char a, char b, FormatType f) {
         auto line = lines.at(i);
 
         // Todo: Allow for multiple matches per line
-        if (auto m = match(buffer, i, a, b)) {
+        size_t start = 0;
+        while (auto m = match(buffer, i, start, a, b)) {
             format(*m, f);
+            start = m->end().x() + 1;
         }
     }
 }
@@ -119,6 +122,8 @@ bool MarkdownHighlighting::highlight(Buffer &buffer) {
     if (!shouldEnable(buffer.path())) {
         return false;
     }
+
+    format({buffer.begin(), buffer.end()}, Palette::standard);
 
     auto &lines = buffer.lines();
     for (size_t i = 0; i < lines.size(); ++i) {
