@@ -23,7 +23,7 @@ std::optional<CursorRange> match(Buffer &buffer, size_t l, char a, char b) {
         return std::nullopt;
     }
 
-    return CursorRange{buffer, {f1, l}, {f2, l}};
+    return CursorRange{buffer, {f1, l}, {f2 + 1, l}};
 }
 
 void tryFormat(Buffer &buffer, char a, char b, FormatType f) {
@@ -31,6 +31,7 @@ void tryFormat(Buffer &buffer, char a, char b, FormatType f) {
     for (size_t i = 0; i < lines.size(); ++i) {
         auto line = lines.at(i);
 
+        // Todo: Allow for multiple matches per line
         if (auto m = match(buffer, i, a, b)) {
             format(*m, f);
         }
@@ -131,6 +132,7 @@ bool MarkdownHighlighting::highlight(Buffer &buffer) {
     }
 
     tryFormat(buffer, '`', '`', Palette::comment);
+    tryFormat(buffer, '[', ']', Palette::comment);
     tryFormatLink(buffer);
 
     buffer.emitChangeSignal();

@@ -16,6 +16,7 @@
 
 namespace {
 
+/// Make the textual changes after the user has accepted them
 void applyRenameChanges(std::shared_ptr<IEnvironment> env,
                         const Interaction &i) {
 
@@ -36,6 +37,8 @@ void applyRenameChanges(std::shared_ptr<IEnvironment> env,
         changes.changes.front().changes.front().newText + " complete...");
 }
 
+/// The lsp provides a list of text changes that you are expected to apply to
+/// finish the rename.
 void lspRenameResponse(std::shared_ptr<IEnvironment> env, Changes changes) {
 
     auto i = Interaction{"apply rename"};
