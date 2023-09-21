@@ -1,8 +1,11 @@
 #include "plugin/genericformat.h"
 #include "core/os.h"
+#include "files/config.h"
 #include "files/extensions.h"
 #include "views/editor.h"
 #include <array>
+#include <filesystem>
+#include <string>
 
 namespace {
 
@@ -89,6 +92,20 @@ bool formatCMake(std::filesystem::path path, Editor &editor) {
     return true;
 }
 
+bool formatPython(std::filesystem::path path, Editor &editor) {
+    if (!isPython(path)) {
+        return false;
+    }
+
+    editor.save();
+    /// Use popenstream to parse error messages and annotate on line
+    runCommand("black -q " + std::string{std::filesystem::absolute(path)} +
+               " 2> " + standardConsoleTtyPipePath().string());
+    editor.load();
+
+    return true;
+}
+
 } // namespace
 
 bool GenericFormat::format(Editor &editor) {
@@ -97,8 +114,8 @@ bool GenericFormat::format(Editor &editor) {
         return false;
     }
 
-    constexpr auto functions =
-        std::array{formatClang, formatHtmlAndXml, formatGo, formatCMake};
+    constexpr auto functions = std::array{
+        formatClang, formatHtmlAndXml, formatGo, formatCMake, formatPython};
 
     for (auto &f : functions) {
         if (f(path, editor)) {

@@ -74,6 +74,14 @@ const auto wordlistGo = std::vector<std::string_view>{
     "continue", "for",         "import", "return",    "var",
 };
 
+const auto wordlistPython = std::vector<std::string_view>{
+    "False", "class",  "finally", "is",     "return", "None", "continue",
+    "for",   "lambda", "try",     "True",   "def",    "from", "nonlocal",
+    "while", "and",    "del",     "global", "not",    "with", "as",
+    "elif",  "if",     "or",      "yield",  "assert", "else", "import",
+    "pass",  "break",  "except",  "in",     "raise",
+};
+
 template <typename ListT>
 void highlightWord(CursorRange word, const ListT &list) {
     for (auto &w : list) {
@@ -96,7 +104,7 @@ const std::vector<std::string_view> *getWordList(
         return &wordlistJavascript;
     }
     if (isPython(extension)) {
-        return &wordlistJavascript;
+        return &wordlistPython;
     }
     if (isGo(extension)) {
         return &wordlistGo;

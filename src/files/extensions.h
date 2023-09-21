@@ -63,7 +63,7 @@ inline bool isJs(const std::filesystem::path &path) {
 }
 
 inline bool isPython(const std::filesystem::path &path) {
-    return path.extension() == ".js";
+    return path.extension() == ".py";
 }
 
 inline bool isJava(const std::filesystem::path &path) {
