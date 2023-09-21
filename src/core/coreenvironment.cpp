@@ -3,6 +3,7 @@
 #include "files/config.h"
 #include "files/project.h"
 #include "plugin/idebugger.h"
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -14,11 +15,8 @@ CoreEnvironment::CoreEnvironment(ThreadContext &context)
     , _project{std::make_unique<Project>(files().directoryNotifications(),
                                          context.guiQueue())}
     , _consoleTtyPath{createFifo(standardConsoleTtyPipePath())}
-    , _consoleInFile{_consoleTtyPath, [this](std::string data) {
-                         if (_consoleCallback) {
-                             _consoleCallback(std::move(data));
-                         }
-                     }} {
+    , _consoleInFile{_consoleTtyPath,
+                     [this](std::string data) { printToAllConsoles(data); }} {
     cleanUpLocalPipes();
 
     std::ofstream{_consoleTtyPath.path()}
@@ -51,6 +49,22 @@ IDebugger *CoreEnvironment::debugger() {
 
 Project &CoreEnvironment::project() {
     return *_project;
+}
+
+void CoreEnvironment::unsubscribeToConsoleCallback(void *ref) {
+    auto it = std::remove_if(_consoleCallback.begin(),
+                             _consoleCallback.end(),
+                             [ref](auto &&a) { return a.second == ref; });
+
+    _consoleCallback.erase(it);
+}
+
+void CoreEnvironment::printToAllConsoles(std::string text) {
+    for (auto &cb : _consoleCallback) {
+        if (cb.first) {
+            cb.first(text);
+        }
+    }
 }
 
 Files &CoreEnvironment::files() {

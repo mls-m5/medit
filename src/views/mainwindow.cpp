@@ -48,14 +48,17 @@ MainWindow::MainWindow(CoreEnvironment &core,
     }
     _console.showLines(false);
     _env->console(&_console);
-    _env->core().consoleCalback([this](std::string data) {
-        _env->context().guiQueue().addTask([this, data = std::move(data)] {
-            showConsole();
-            _console.buffer().pushBack(FString{data});
-            _console.cursor(Cursor(
-                _console.buffer(), 0, _console.buffer().lines().size() - 1));
-        });
-    });
+    _env->core().subscribeToConsoleCallback(
+        [this](std::string data) {
+            _env->context().guiQueue().addTask([this, data = std::move(data)] {
+                showConsole();
+                _console.buffer().pushBack(FString{data});
+                _console.cursor(Cursor(_console.buffer(),
+                                       0,
+                                       _console.buffer().lines().size() - 1));
+            });
+        },
+        this);
 
     {
         auto palette = Palette{};
@@ -101,7 +104,9 @@ MainWindow::MainWindow(CoreEnvironment &core,
     updateLocatorBuffer();
 }
 
-MainWindow::~MainWindow() = default;
+MainWindow::~MainWindow() {
+    _env->core().unsubscribeToConsoleCallback(this);
+}
 
 void MainWindow::resize(size_t w, size_t h) {
     //! Todo: Handle layouts better in the future

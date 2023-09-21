@@ -11,6 +11,7 @@
 #include <iosfwd>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -35,9 +36,14 @@ public:
 
     Project &project();
 
-    void consoleCalback(std::function<void(std::string)> f) {
-        _consoleCallback = f;
+    void subscribeToConsoleCallback(std::function<void(std::string)> f,
+                                    void *ref) {
+        _consoleCallback.push_back({f, ref});
     }
+
+    void unsubscribeToConsoleCallback(void *ref);
+
+    void printToAllConsoles(std::string text);
 
 private:
     ThreadContext *_context =
@@ -53,5 +59,6 @@ private:
     /// handled this way
     UniqueFile _consoleTtyPath;
     FifoFileListener _consoleInFile;
-    std::function<void(std::string)> _consoleCallback;
+    std::vector<std::pair<std::function<void(std::string)>, void *>>
+        _consoleCallback;
 };
