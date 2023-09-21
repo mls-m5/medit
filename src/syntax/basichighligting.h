@@ -17,9 +17,9 @@ public:
     ~BasicHighlighting() override;
 
     //! @see IHighlight
-    bool shouldEnable(std::filesystem::path) override;
-    static void highlightStatic(Buffer &buffer);
-    void highlight(Buffer &buffer) override;
+    static bool shouldEnable(std::filesystem::path);
+    static bool highlightStatic(Buffer &buffer);
+    bool highlight(Buffer &buffer) override;
 
     //! @see IHighlight
     int priority() override {

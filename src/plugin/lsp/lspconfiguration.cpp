@@ -1,6 +1,7 @@
 #include "lspconfiguration.h"
 #include "files/extensions.h"
 #include "lsp/clangversion.h"
+#include <optional>
 #include <string>
 
 namespace {
@@ -39,18 +40,47 @@ std::string getGoLspCommand() {
 
 } // namespace
 
-LspConfiguration::LspConfiguration(std::filesystem::path extension) {
-    if (extension == ".cpp") {
-        command = getClangLspCommand();
-        isFileSupported = [](auto path) {
+// LspConfiguration::LspConfiguration(std::filesystem::path extension) {
+//     if (extension == ".cpp") {
+//         command = getClangLspCommand();
+//         isFileSupported = [](auto path) {
+//             return isCpp(path) || isCSource(path);
+//         };
+//         return;
+//     }
+
+//    if (extension == ".go") {
+//        command = getGoLspCommand();
+//        isFileSupported = [](auto path) { return isGo(path); };
+//        return;
+//    }
+//}
+
+std::optional<LspConfiguration> LspConfiguration::getConfiguration(
+    std::filesystem::path path) {
+    auto extension = path.extension();
+
+    auto ret = std::optional<LspConfiguration>{};
+
+    {
+        auto isAnyCpp = [](auto path) {
             return isCpp(path) || isCSource(path);
         };
-        return;
+
+        if (isAnyCpp(path)) {
+            ret = LspConfiguration{};
+            ret->command = getClangLspCommand();
+            ret->isFileSupported = isAnyCpp;
+            return ret;
+        }
     }
 
     if (extension == ".go") {
-        command = getGoLspCommand();
-        isFileSupported = [](auto path) { return isGo(path); };
-        return;
+        ret = LspConfiguration{};
+        ret->command = getGoLspCommand();
+        ret->isFileSupported = [](auto path) { return isGo(path); };
+        return ret;
     }
+
+    return ret;
 }

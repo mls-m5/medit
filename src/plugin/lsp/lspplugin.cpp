@@ -20,6 +20,8 @@
 #include <future>
 #include <iomanip>
 #include <iostream>
+#include <memory>
+#include <ostream>
 #include <stdexcept>
 
 // TODO: Tidy up this file
@@ -68,18 +70,14 @@ Position clangPositionToMeditPosition(lsp::Position pos) {
 
 using namespace lsp;
 
-void LspPlugin::init() {
-    _config = LspConfiguration{_core->project().projectExtension()};
-
-    _client = std::make_unique<LspClient>(_config.command);
-
-    _core->files().subscribeToBufferEvents(
-        [this](BufferEvent e) { bufferEvent(e); }, nullptr, this);
+LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
+    : _config{std::move(config)} {
+    client = std::make_unique<LspClient>(_config.command);
 
     auto initializedPromise = std::promise<void>{};
     auto initializedFuture = initializedPromise.get_future();
 
-    _client->request(
+    client->request(
         InitializeParams{},
         [&initializedPromise](const nlohmann::json &j) {
             //            std::cout << "initialization response:\n";
@@ -92,8 +90,11 @@ void LspPlugin::init() {
             initializedPromise.set_value();
         });
 
-    _client->subscribe(
-        std::function{[this](const PublishDiagnosticsParams &params) {
+    /// Todo: If the instance is created some time after the project is created
+    /// the old files will not be tracked. Make sure to feed in all the old
+    /// files into the instance once started
+    client->subscribe(
+        std::function{[this, parent](const PublishDiagnosticsParams &params) {
             auto bufferDiagnostics = std::vector<Diagnostics::Diagnostic>{};
 
             for (auto &item : params.diagnostics) {
@@ -106,9 +107,12 @@ void LspPlugin::init() {
                 });
             }
 
-            _core->context().guiQueue().addTask(
-                [this, path = uriToPath(params.uri), bufferDiagnostics] {
-                    _core->files().publishDiagnostics(
+            parent->_core->context().guiQueue().addTask(
+                [this,
+                 parent,
+                 path = uriToPath(params.uri),
+                 bufferDiagnostics] {
+                    parent->_core->files().publishDiagnostics(
                         path,
                         "clangd",
                         //                params.diagnostics.front().source,
@@ -116,7 +120,7 @@ void LspPlugin::init() {
                 });
         }});
 
-    _client->callback([](auto j) {
+    client->callback([](auto j) {
         std::cerr << "Unhandled callback\n";
         std::cerr << std::setw(4) << j << "\n";
     });
@@ -124,15 +128,40 @@ void LspPlugin::init() {
     initializedFuture.get();
 }
 
-LspPlugin::LspPlugin() = default;
+LspPlugin::LspPlugin(CoreEnvironment *core)
+    : _core{core} {
+
+    _core->files().subscribeToBufferEvents(
+        [this](BufferEvent e) { bufferEvent(e); }, nullptr, this);
+}
 
 LspPlugin::~LspPlugin() {
-    _client->shutdown().get();
+    _core->files().unsubscribeToBufferEvents(this);
+    auto futures = std::vector<std::future<void>>{};
+
+    for (auto &instance : _instances) {
+        futures.push_back(instance->client->shutdown());
+    }
+
+    for (auto &f : futures) {
+        f.get();
+    }
 }
 
 void LspPlugin::bufferEvent(BufferEvent &event) {
+    auto ins = instance(event.path);
+    if (!ins) {
+        return;
+    }
+
+    auto client = ins->client.get();
+    auto &config = ins->_config;
+
     if (event.type == BufferEvent::Open) {
-        if (!_config.isFileSupported(event.buffer->path())) {
+        if (!config.isFileSupported) {
+            return;
+        }
+        if (!config.isFileSupported(event.buffer->path())) {
             return;
         }
 
@@ -148,11 +177,11 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
                 },
         };
 
-        _client->notify(params);
-        requestSemanticsToken(event.buffer);
+        client->notify(params);
+        requestSemanticsToken(event.buffer, *ins);
     }
     if (event.type == BufferEvent::Close) {
-        if (!_config.isFileSupported(event.path)) {
+        if (!config.isFileSupported(event.path)) {
             return;
         }
 
@@ -163,20 +192,28 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
                 },
         };
 
-        _client->notify(params);
-        //        requestSemanticsToken(event.buffer);
+        client->notify(params);
     }
 }
 
 void LspPlugin::registerPlugin(CoreEnvironment &core, Plugins &plugins) {
-    // TODO: Fix this someday, its ugly
-    auto lsp = std::make_shared<LspPlugin>();
-    lsp->_core = &core; // Replace for with constructor
-    lsp->init();
+    auto lsp = std::make_shared<LspPlugin>(&core);
     plugins.loadPlugin<LspNavigation>(lsp);
     plugins.loadPlugin<LspHighlight>(lsp);
     plugins.loadPlugin<LspComplete>(lsp);
     plugins.loadPlugin<LspRename>(lsp);
+}
+
+LspPlugin::Instance *LspPlugin::createInstance(std::filesystem::path path) {
+    auto config = LspConfiguration::getConfiguration(path);
+    if (!config) {
+        _unsupportedExtensions.push_back(path.extension());
+        return nullptr;
+    }
+
+    _instances.push_back(std::make_unique<Instance>(std::move(*config), this));
+
+    return _instances.back().get();
 }
 
 void LspPlugin::handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
@@ -267,28 +304,41 @@ void LspPlugin::handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
     //    buffer->emitChangeSignal();
 }
 
-void LspPlugin::requestSemanticsToken(std::shared_ptr<Buffer> buffer) {
+void LspPlugin::requestSemanticsToken(std::shared_ptr<Buffer> buffer,
+                                      Instance &instance) {
     auto params = SemanticTokensParams{};
     params.textDocument.uri = pathToUri(buffer->path());
 
-    _client->request(params, [this, buffer](SemanticTokens data) {
-        _core->context().guiQueue().addTask([buffer, data, this] {
-            handleSemanticsTokens(buffer, std::move(data.data));
+    instance.client->request(
+        params,
+        [this, buffer](SemanticTokens data) {
+            _core->context().guiQueue().addTask([buffer, data, this] {
+                handleSemanticsTokens(buffer, std::move(data.data));
+            });
+        },
+        [](auto &&json) {
+            auto error = ResponseError{};
+            from_json(json, error);
+            //            std::cerr << json << std::endl; //
+            std::cerr << "Lsp error: " << getErrorCodeName(error.code) << ": ";
+            std::cerr << error.message << std::endl;
         });
-    });
 }
 
-void LspPlugin::updateBuffer(Buffer &buffer) {
+bool LspPlugin::updateBuffer(Buffer &buffer) {
     // TODO: Only update buffers with changed revision
 
-    if (!_config.isFileSupported(buffer.path())) {
-        return;
+    auto i = instance(buffer.path());
+    if (!i) {
+        return false;
     }
+
+    auto &config = i->_config;
 
     auto &oldVersion = _bufferVersions[buffer.path().string()];
 
     if (oldVersion == buffer.history().revision()) {
-        return;
+        return true;
     }
 
     oldVersion = buffer.history().revision();
@@ -299,15 +349,19 @@ void LspPlugin::updateBuffer(Buffer &buffer) {
     params.contentChanges.push_back(TextDocumentContentChangeEvent{
         .text = buffer.text(), // TODO: Only do partial updates
     });
-    _client->notify(params);
 
-    requestSemanticsToken(buffer.shared_from_this());
+    i->client->notify(params);
+
+    requestSemanticsToken(buffer.shared_from_this(), *i);
+
+    return true;
 }
 
 void LspComplete::list(std::shared_ptr<IEnvironment> scope,
                        CompleteCallbackT callback) {
+    auto client = _lsp->client(scope->editor().buffer().path());
 
-    if (!_lsp->config().isFileSupported(scope->editor().buffer().path())) {
+    if (!client) {
         callback({});
         return;
     }
@@ -321,7 +375,7 @@ void LspComplete::list(std::shared_ptr<IEnvironment> scope,
 
     _lsp->updateBuffer(scope->editor().buffer());
 
-    _lsp->client().request(params, [callback](lsp::CompletionList result) {
+    client->request(params, [callback](lsp::CompletionList result) {
         auto ret = CompletionList{};
         for (auto &item : result.items) {
 
@@ -348,47 +402,40 @@ void LspComplete::list(std::shared_ptr<IEnvironment> scope,
 }
 
 bool LspComplete::shouldComplete(std::shared_ptr<IEnvironment> env) {
-    return _lsp->config().isFileSupported(env->editor().path());
+    return static_cast<bool>(_lsp->instance(env->editor().path()));
 }
 
-bool LspHighlight::shouldEnable(std::filesystem::path path) {
-    return _lsp->config().isFileSupported(path);
-}
-
-void LspHighlight::highlight(Buffer &buffer) {
-    _lsp->updateBuffer(buffer);
+bool LspHighlight::highlight(Buffer &buffer) {
+    return _lsp->updateBuffer(buffer);
 }
 
 bool LspNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
-    if (!_lsp->config().isFileSupported(env->editor().path())) {
+
+    auto i = _lsp->instance(env->editor().path());
+    if (!i) {
         return false;
     }
 
     auto params = TypeDefinitionParams{};
     params.textDocument.uri = pathToUri(env->editor().buffer().path());
     params.position = meditCursorToPosition(env->editor().cursor());
-    _lsp->client().request(
-        params, [env](const std::vector<Location> &locations) {
-            if (locations.empty()) {
-                return;
-            }
+    i->client->request(params, [env](const std::vector<Location> &locations) {
+        if (locations.empty()) {
+            return;
+        }
 
-            env->context().guiQueue().addTask([env, locations] {
-                auto pos =
-                    clangPositionToMeditPosition(locations.front().range.start);
+        env->context().guiQueue().addTask([env, locations] {
+            auto pos =
+                clangPositionToMeditPosition(locations.front().range.start);
 
-                env->standardCommands().open(
-                    env->shared_from_this(),
-                    uriToPath(locations.front().uri).string(),
-                    pos.x(),
-                    pos.y());
-            });
+            env->standardCommands().open(
+                env->shared_from_this(),
+                uriToPath(locations.front().uri).string(),
+                pos.x(),
+                pos.y());
         });
+    });
     return true;
-}
-
-bool LspRename::shouldEnable(std::filesystem::path path) const {
-    return (_lsp->config().isFileSupported(path));
 }
 
 bool LspRename::doesSupportPrepapre() {
@@ -398,7 +445,9 @@ bool LspRename::doesSupportPrepapre() {
 
 bool LspRename::prepare(std::shared_ptr<IEnvironment> env,
                         std::function<void(PrepareCallbackArgs)> callback) {
-    if (!_lsp->config().isFileSupported(env->editor().path())) {
+    auto instance = _lsp->instance(env->editor().path());
+
+    if (!instance) {
         return false;
     }
 
@@ -406,7 +455,7 @@ bool LspRename::prepare(std::shared_ptr<IEnvironment> env,
     params.textDocument.uri = pathToUri(env->editor().buffer().path());
     params.position = meditCursorToPosition(env->editor().cursor());
 
-    _lsp->client().request(
+    instance->client->request(
         params,
         [env, callback](const Range &range) {
             env->context().guiQueue().addTask([env, range, callback] {
@@ -429,16 +478,21 @@ bool LspRename::prepare(std::shared_ptr<IEnvironment> env,
 bool LspRename::rename(std::shared_ptr<IEnvironment> env,
                        RenameArgs args,
                        std::function<void(const Changes &)> callback) {
-    if (!_lsp->config().isFileSupported(env->editor().path())) {
+
+    auto instance = _lsp->instance(env->editor().path());
+
+    if (!instance) {
         return false;
     }
+
+    auto client = instance->client.get();
 
     auto params = RenameParams{};
     params.textDocument.uri = pathToUri(env->editor().buffer().path());
     params.position = meditCursorToPosition(env->editor().cursor());
     params.newName = args.newName;
 
-    _lsp->client().request(params, [env, callback](const WorkspaceEdit &edits) {
+    client->request(params, [env, callback](const WorkspaceEdit &edits) {
         if (edits.changes.empty()) {
             return;
         }

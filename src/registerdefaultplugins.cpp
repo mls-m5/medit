@@ -27,17 +27,11 @@ void registerDefaultPlugins(CoreEnvironment &core) {
     container.loadPlugin<HeaderNavigation>();
     container.loadPlugin<MarkdownNavigation>();
 
-#ifdef ENABLE_LEGACY_CLANG_PLUGIN
-    ClangCompletion::registerPlugin();
-    ClangAnnotation::registerPlugin();
-    ClangNavigation::registerPlugin();
-#else
-#endif
-
 #ifndef __EMSCRIPTEN__
     LspPlugin::registerPlugin(core, container);
     container.loadPlugin<GdbDebugger>();
 #endif
 
+    // TODO: Move standardcommands to live in core environment
     registerGitCommands(StandardCommands::get());
 }

@@ -53,6 +53,7 @@ private:
     }
 
 public:
+    /// Create a plugin and add it to all matching lists
     template <typename T, typename... Args>
     void loadPlugin(Args &&...args) {
         auto ptr = std::make_shared<T>(std::forward<Args>(args)...);
@@ -63,7 +64,7 @@ public:
                     ICompletionSource,
                     IHighlight,
                     IRename,
-                    IDebugger>(ptr);
+                    IDebugger>(std::move(ptr));
     }
 
     template <typename T>

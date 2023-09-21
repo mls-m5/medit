@@ -18,9 +18,9 @@ public:
     ~MarkdownHighlighting() override;
 
     //! @see IHighlight
-    bool shouldEnable(std::filesystem::path) override;
+    static bool shouldEnable(std::filesystem::path) ;
 
-    void highlight(Buffer &buffer) override;
+    bool highlight(Buffer &buffer) override;
 
     //! @see IHighlight
     int priority() override {

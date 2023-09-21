@@ -18,9 +18,7 @@ class LspClient;
 /// TODO: Make more generic to handle other languages language servers
 class LspPlugin {
 public:
-    LspPlugin();
-
-    void init();
+    LspPlugin(CoreEnvironment *core);
 
     LspPlugin(const LspPlugin &) = delete;
     LspPlugin(LspPlugin &&) = delete;
@@ -29,42 +27,87 @@ public:
 
     ~LspPlugin();
 
-    void bufferEvent(BufferEvent &event);
+    [[nodiscard]] lsp::LspClient *client(std::filesystem::path path) {
+        if (auto i = instance(path)) {
+            return i->client.get();
+        }
+
+        /// Create new client here if it does not exist
+        return nullptr;
+    }
+
+    [[nodiscard]] CoreEnvironment &core() {
+        return *_core;
+    }
+
+    [[nodiscard]] const LspConfiguration *config(
+        std::filesystem::path path) const {
+        if (auto i = instance(path)) {
+            return &i->_config;
+        }
+        return nullptr;
+    }
+
+    bool updateBuffer(Buffer &);
 
     static void registerPlugin(CoreEnvironment &core, Plugins &);
+
+    struct Instance {
+        Instance(const Instance &) = delete;
+        Instance &operator=(const Instance &) = delete;
+
+        Instance(LspConfiguration, LspPlugin *parent);
+
+        Instance &operator=(Instance &&) = default;
+        Instance(Instance &&) = default;
+        ~Instance() = default;
+
+        LspConfiguration _config;
+        std::unique_ptr<lsp::LspClient> client;
+    };
+
+    [[nodiscard]] Instance *instance(std::filesystem::path path) {
+        for (auto &ext : _unsupportedExtensions) {
+            if (path.extension() == ext) {
+                return nullptr;
+            }
+        }
+
+        for (auto &instance : _instances) {
+            if (instance->_config.isFileSupported(path)) {
+                return instance.get();
+            }
+        }
+
+        return createInstance(path);
+    }
+
+private:
+    [[nodiscard]] Instance *createInstance(std::filesystem::path path);
+
+    void bufferEvent(BufferEvent &event);
 
     void handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
                                std::vector<long>);
 
-    void requestSemanticsToken(std::shared_ptr<Buffer> buffer);
-
-    //    /// TODO: Should probably be owned by the sub-plugins via shared_ptrs
-    //    static LspPlugin &instance() {
-    //        static LspPlugin plugin;
-    //        return plugin;
-    //    }
-
-    lsp::LspClient &client() {
-        return *_client;
-    }
-
-    void updateBuffer(Buffer &);
-
-    CoreEnvironment &core() {
-        return *_core;
-    }
-
-    [[nodiscard]] const LspConfiguration &config() const {
-        return _config;
-    }
-
-private:
     CoreEnvironment *_core = nullptr;
 
-    std::unique_ptr<lsp::LspClient> _client;
     std::unordered_map<std::string, long> _bufferVersions;
 
-    LspConfiguration _config;
+    void requestSemanticsToken(std::shared_ptr<Buffer> buffer,
+                               Instance &instance);
+
+    [[nodiscard]] Instance *instance(std::filesystem::path path) const {
+        for (auto &instance : _instances) {
+            if (instance->_config.isFileSupported(path)) {
+                return instance.get();
+            }
+        }
+        return nullptr;
+    }
+
+    std::vector<std::unique_ptr<Instance>> _instances;
+    std::vector<std::filesystem::path> _unsupportedExtensions;
 };
 
 class LspComplete : public ICompletionSource {
@@ -98,8 +141,7 @@ public:
     explicit LspHighlight(std::shared_ptr<LspPlugin> lsp)
         : _lsp(std::move(lsp)) {}
 
-    bool shouldEnable(std::filesystem::path) override;
-    void highlight(Buffer &) override;
+    bool highlight(Buffer &) override;
     int priority() override {
         return 100;
     }
@@ -110,7 +152,7 @@ private:
 
 class LspRename : public IRename {
 public:
-    bool shouldEnable(std::filesystem::path path) const override;
+    //    bool shouldEnable(std::filesystem::path path) const;
 
     bool doesSupportPrepapre() override;
 
