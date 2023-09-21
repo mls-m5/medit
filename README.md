@@ -91,12 +91,16 @@ Todo:
     - [ ] Fix: Lsp urli-s with special characters is not handled properly
     - [ ] Add refactor function (alt+return)
 - [ ] Distraction free mode, where you are only allowed to edit the end or the last lines
-- [ ] Word wrap
+- [ ] Word wrap (soft)
 - [ ] Standard commands that is only available to certain file types
+- [ ] Handle problems with separate sources, 
+      make it so that each source replace its content when there is something new
+      for example lsp-plugin, the compiler or formatter (if it emits error messages)
+- [ ] Show error if formatting does not work
 
 # Prioritized changes
 - [ ] Faster navigation
-   - [ ] Move between opened files in editor
+   - [ ] Move between opened files in editor (ctrl+tab) show list of opened editors
 - [x] Highlighting 
 
 
@@ -134,6 +138,7 @@ Todo:
 - [ ] Maybe sessions that reopens files when project is closed
 - [x] Build before running
 - [ ] Locator performance is really bad when opening large project
+- [ ] Make ctrl+c work again
       
 ## Bugs
 - [x] When open a file where there is no project/.git, the program freezes
