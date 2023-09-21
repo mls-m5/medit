@@ -198,7 +198,7 @@ void LspPlugin::registerPlugin(CoreEnvironment &core, Plugins &plugins) {
     plugins.loadPlugin<LspNavigation>(lsp);
     plugins.loadPlugin<LspHighlight>(lsp);
     plugins.loadPlugin<LspComplete>(lsp);
-    plugins.loadPlugin<LspRenameInstance>(lsp);
+    plugins.loadPlugin<LspRename>(lsp);
 }
 
 LspPlugin::Instance *LspPlugin::createInstance(std::filesystem::path path) {
@@ -435,12 +435,12 @@ bool LspNavigation::gotoSymbol(std::shared_ptr<IEnvironment> env) {
     return true;
 }
 
-bool LspRenameInstance::doesSupportPrepapre() {
+bool LspRename::doesSupportPrepapre() {
     // TODO: Depend on servercapabilities in the future
     return true;
 }
 
-bool LspRenameInstance::prepare(
+bool LspRename::prepare(
     std::shared_ptr<IEnvironment> env,
     std::function<void(PrepareCallbackArgs)> callback) {
     auto instance = _lsp->instance(env->editor().path());
@@ -473,7 +473,7 @@ bool LspRenameInstance::prepare(
     return true;
 }
 
-bool LspRenameInstance::rename(std::shared_ptr<IEnvironment> env,
+bool LspRename::rename(std::shared_ptr<IEnvironment> env,
                                RenameArgs args,
                                std::function<void(const Changes &)> callback) {
 

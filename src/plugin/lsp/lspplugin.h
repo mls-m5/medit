@@ -150,7 +150,7 @@ private:
     std::shared_ptr<LspPlugin> _lsp;
 };
 
-class LspRenameInstance : public IRename {
+class LspRename : public IRename {
 public:
     //    bool shouldEnable(std::filesystem::path path) const;
 
@@ -169,7 +169,7 @@ public:
         return 100;
     }
 
-    explicit LspRenameInstance(std::shared_ptr<LspPlugin> lsp)
+    explicit LspRename(std::shared_ptr<LspPlugin> lsp)
         : _lsp(std::move(lsp)) {}
 
 private:
