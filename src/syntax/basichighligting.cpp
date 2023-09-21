@@ -82,6 +82,14 @@ const auto wordlistPython = std::vector<std::string_view>{
     "pass",  "break",  "except",  "in",     "raise",
 };
 
+const auto wordlistRust = std::vector<std::string_view>{
+    "as",     "break", "const", "else", "enum",   "extern", "false", "fn",
+    "for",    "if",    "impl",  "in",   "let",    "loop",   "match", "mod",
+    "move",   "mut",   "pub",   "ref",  "return", "self",   "Self",  "static",
+    "struct", "super", "trait", "true", "type",   "unsafe", "use",   "where",
+    "while",  "async", "await", "dyn",
+};
+
 template <typename ListT>
 void highlightWord(CursorRange word, const ListT &list) {
     for (auto &w : list) {
@@ -108,6 +116,9 @@ const std::vector<std::string_view> *getWordList(
     }
     if (isGo(extension)) {
         return &wordlistGo;
+    }
+    if (isRust(extension)) {
+        return &wordlistRust;
     }
     return nullptr;
 }

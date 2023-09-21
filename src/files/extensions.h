@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <filesystem>
 
 inline bool isCppHeader(const std::filesystem::path &path) {
@@ -82,11 +83,22 @@ inline bool isGo(const std::filesystem::path &path) {
     return path.extension() == ".go";
 }
 
+inline bool isRust(const std::filesystem::path &path) {
+    return path.extension() == ".rs";
+}
+
 inline bool isKnownExtension(const std::filesystem::path &path) {
-    return isCppHeader(path) || isCppSource(path) || isCSource(path) ||
-           isCpp(path) || isJson(path) || isMarkdown(path) || isMake(path) ||
-           isMatmake(path) || isCmakeLists(path) || isTextFile(path) ||
-           isHtml(path) || isJs(path) || isPython(path) || isJava(path) ||
-           isCSharp(path) || isPhp(path) || isGo(path) || isXml(path) ||
-           isXhtml(path);
+    const auto checks = std::to_array(
+        {isCppHeader, isCppSource, isCSource, isCpp,        isJson,
+         isMarkdown,  isMake,      isMatmake, isCmakeLists, isTextFile,
+         isHtml,      isJs,        isPython,  isJava,       isCSharp,
+         isPhp,       isGo,        isXml,     isXhtml,      isRust});
+
+    for (const auto &check : checks) {
+        if (check(path)) {
+            return true;
+        }
+    }
+
+    return false;
 }

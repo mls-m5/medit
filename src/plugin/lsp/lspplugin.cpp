@@ -99,8 +99,10 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
 
             for (auto &item : params.diagnostics) {
                 bufferDiagnostics.push_back(Diagnostics::Diagnostic{
-                    .source =
-                        "clangd", // item.source, could not get this to work
+                    .source = "clangd",
+                    //                        "lsp-" +
+                    //                        item.source, // item.source, could
+                    //                        not get this to work
                     .message = item.message,
                     .range = {toMeditPosition(item.range.start, true),
                               toMeditPosition(item.range.end, true)},

@@ -152,8 +152,6 @@ private:
 
 class LspRename : public IRename {
 public:
-    //    bool shouldEnable(std::filesystem::path path) const;
-
     bool doesSupportPrepapre() override;
 
     bool prepare(std::shared_ptr<IEnvironment> env,
