@@ -90,6 +90,9 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
             initializedPromise.set_value();
         });
 
+    /// Todo: If the instance is created some time after the project is created
+    /// the old files will not be tracked. Make sure to feed in all the old
+    /// files into the instance once started
     client->subscribe(
         std::function{[this, parent](const PublishDiagnosticsParams &params) {
             auto bufferDiagnostics = std::vector<Diagnostics::Diagnostic>{};
@@ -440,9 +443,8 @@ bool LspRename::doesSupportPrepapre() {
     return true;
 }
 
-bool LspRename::prepare(
-    std::shared_ptr<IEnvironment> env,
-    std::function<void(PrepareCallbackArgs)> callback) {
+bool LspRename::prepare(std::shared_ptr<IEnvironment> env,
+                        std::function<void(PrepareCallbackArgs)> callback) {
     auto instance = _lsp->instance(env->editor().path());
 
     if (!instance) {
@@ -474,8 +476,8 @@ bool LspRename::prepare(
 }
 
 bool LspRename::rename(std::shared_ptr<IEnvironment> env,
-                               RenameArgs args,
-                               std::function<void(const Changes &)> callback) {
+                       RenameArgs args,
+                       std::function<void(const Changes &)> callback) {
 
     auto instance = _lsp->instance(env->editor().path());
 
