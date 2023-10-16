@@ -112,5 +112,6 @@ target_link_libraries(
     PRIVATE
     medit_common
     lib_medit
+    medit_plugins ## Should not be required.. Well well
     )
 

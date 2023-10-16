@@ -1,6 +1,8 @@
 
 #include "text/cursorops.h"
 #include "views/editor.h"
+#include "views/iwindow.h"
+#include "views/view.h"
 #include "views/window.h"
 #include <iostream>
 #include <thread>
@@ -27,60 +29,77 @@ int main() {
 
 )_"sv;
 
+struct PlaybackWindow : public Window {
+public:
+    PlaybackWindow(size_t width, size_t height)
+        : Window{nullptr}
+        , View{nullptr, width, height} {}
+
+    bool keyPress(std::shared_ptr<IEnvironment> env) override {
+        return true;
+    }
+    void updateCursor(IScreen &screen) const override {}
+    bool mouseDown(int x, int y) override {
+        return true;
+    }
+
+    void draw(IScreen &) override {}
+};
+
 int main(int argc, char *argv[]) {
     auto screen = ScreenType{};
 
     std::cout << "hello\n";
 
-    //    auto window = Window{};
+    auto window = PlaybackWindow{screen.width(), screen.height()};
 
-    //    auto editor = Editor{std::make_shared<Buffer>()};
+    auto editor = Editor{&window, std::make_shared<Buffer>()};
 
-    //    auto &buffer = editor.buffer();
-    //    insert(buffer.begin(), "hello");
+    auto &buffer = editor.buffer();
+    insert(buffer.begin(), "hello");
 
-    //    editor.width(screen.width());
-    //    editor.height(screen.height() - 1);
+    editor.width(screen.width());
+    editor.height(screen.height() - 1);
 
-    //    auto wasAlpha = false;
+    auto wasAlpha = false;
 
-    //    bool isRunning = true;
-    //    screen.subscribe([&isRunning](IScreen::EventListT list) {
-    //        for (auto e : list) {
-    //            if (auto k = std::get_if<KeyEvent>(&e)) {
-    //                if (k->key == Key::Quit) {
-    //                    isRunning = false;
-    //                }
-    //            }
-    //        }
-    //    });
+    bool isRunning = true;
+    screen.subscribe([&isRunning](IScreen::EventListT list) {
+        for (auto e : list) {
+            if (auto k = std::get_if<KeyEvent>(&e)) {
+                if (k->key == Key::Quit) {
+                    isRunning = false;
+                }
+            }
+        }
+    });
 
-    //    for (; isRunning;) {
-    //        screen.cursorStyle(CursorStyle::Block);
+    for (; isRunning;) {
+        screen.cursorStyle(CursorStyle::Block);
 
-    //        for (auto c : testText) {
-    //            screen.cursorStyle(CursorStyle::Beam);
-    //            insert(c, buffer.end());
-    //            editor.draw(screen);
-    //            // editor.bufferView().cursorPosition(buffer.end());
-    //            editor.cursor(buffer.end());
-    //            editor.updateCursor(screen);
-    //            screen.refresh();
-    //            auto a = isalpha(c);
-    //            //                if (!isalpha(c) && c != lastChar) {
-    //            if (!a && a != wasAlpha) {
-    //                std::this_thread::sleep_for(100ms);
-    //            }
-    //            else {
-    //                std::this_thread::sleep_for(20ms);
-    //            }
-    //            wasAlpha = a;
-    //        }
-    //        screen.cursorStyle(CursorStyle::Block);
-    //        screen.refresh();
-    //    }
+        for (auto c : testText) {
+            screen.cursorStyle(CursorStyle::Beam);
+            insert(c, buffer.end());
+            editor.draw(screen);
+            // editor.bufferView().cursorPosition(buffer.end());
+            editor.cursor(buffer.end());
+            editor.updateCursor(screen);
+            screen.refresh();
+            auto a = isalpha(c);
+            //                if (!isalpha(c) && c != lastChar) {
+            if (!a && a != wasAlpha) {
+                std::this_thread::sleep_for(100ms);
+            }
+            else {
+                std::this_thread::sleep_for(20ms);
+            }
+            wasAlpha = a;
+        }
+        screen.cursorStyle(CursorStyle::Block);
+        screen.refresh();
+    }
 
-    //    screen.unsubscribe();
+    screen.unsubscribe();
 
     return 0;
 }
