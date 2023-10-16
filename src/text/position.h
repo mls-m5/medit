@@ -52,4 +52,17 @@ public:
                                      const Position &other) {
         return self.x() == other.x() && self.y() == other.y();
     }
+
+    /// Move position one step forward. Only check if character is newspace or
+    /// not, therefore not whole utf-character is needed
+    constexpr Position &operator+=(char c) {
+        if (c == '\n') {
+            _x = 0;
+            ++_y;
+        }
+        else {
+            ++_x;
+        }
+        return *this;
+    }
 };

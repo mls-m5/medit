@@ -7,7 +7,8 @@ void BufferEdit::trim() {
 
     for (size_t i = 0; i < minLen; ++i) {
         if (to.at(i) == from.at(i)) {
-            ++position;
+            position += to.at(i).c.front();
+            //            ++position;
             ++erasedChars;
             continue;
         }
