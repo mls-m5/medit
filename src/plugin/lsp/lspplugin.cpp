@@ -22,6 +22,7 @@
 #include <iostream>
 #include <memory>
 #include <ostream>
+#include <sstream>
 #include <stdexcept>
 
 // TODO: Tidy up this file
@@ -77,8 +78,12 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
     auto initializedPromise = std::promise<void>{};
     auto initializedFuture = initializedPromise.get_future();
 
+    auto rootPath = parent->_core->project().settings().root;
+    auto rootUri = pathToUri(rootPath);
+
     client->request(
-        InitializeParams{},
+        InitializeParams{.workspaceFolders = {WorkspaceFolder{
+                             .uri = rootUri, .name = rootPath.stem()}}},
         [&initializedPromise](const nlohmann::json &j) {
             //            std::cout << "initialization response:\n";
             //            std::cout << std::setw(2) << j << std::endl;
@@ -120,6 +125,11 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
                         //                params.diagnostics.front().source,
                         std::move(bufferDiagnostics));
                 });
+        }});
+
+    client->subscribe(
+        std::function{[this, parent](const ShowMessageParams &params) {
+            parent->_core->printToAllConsoles(params.message);
         }});
 
     client->callback([](auto j) {
@@ -318,12 +328,15 @@ void LspPlugin::requestSemanticsToken(std::shared_ptr<Buffer> buffer,
                 handleSemanticsTokens(buffer, std::move(data.data));
             });
         },
-        [](auto &&json) {
+        [this](auto &&json) {
             auto error = ResponseError{};
             from_json(json, error);
             //            std::cerr << json << std::endl; //
-            std::cerr << "Lsp error: " << getErrorCodeName(error.code) << ": ";
-            std::cerr << error.message << std::endl;
+
+            auto ss = std::ostringstream{};
+            ss << "Lsp error: " << getErrorCodeName(error.code) << ": ";
+            ss << error.message << std::endl;
+            _core->printToAllConsoles(ss.str());
         });
 }
 

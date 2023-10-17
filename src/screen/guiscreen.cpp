@@ -1,5 +1,7 @@
 #include "guiscreen.h"
 #include "core/threadname.h"
+#include "sdlpp/rect.hpp"
+#include "sdlpp/surface.hpp"
 #include <algorithm>
 #include <mutex>
 
@@ -497,6 +499,25 @@ struct GuiScreen::Buffer {
 
         return NullEvent{};
     }
+
+    sdl::Surface readPixels() {
+        auto rect = sdl::Rect{
+            0, 0, static_cast<int>(pixelWidth), static_cast<int>(pixelHeight)};
+        auto surface = sdl::Surface::create(0,
+                                            pixelWidth,
+                                            pixelHeight,
+                                            32,
+                                            0x00FF0000,
+                                            0x0000FF00,
+                                            0x000000FF,
+                                            0xFF000000);
+
+        if (renderer.readPixels(sdl::SurfaceView{surface})) {
+            return nullptr;
+        }
+
+        return surface;
+    }
 };
 
 void GuiScreen::draw(size_t x, size_t y, FStringView str) {
@@ -574,6 +595,10 @@ std::string GuiScreen::clipboardData() {
 
 void GuiScreen::clipboardData(std::string text) {
     SDL_SetClipboardText(text.data());
+}
+
+sdl::Surface GuiScreen::readPixels() {
+    return _buffer->readPixels();
 }
 
 #endif

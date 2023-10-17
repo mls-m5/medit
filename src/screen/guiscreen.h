@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef __EMSCRIPTEN__
+
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
 #include "text/fstringview.h"
@@ -7,7 +9,10 @@
 #include <mutex>
 #include <thread>
 
-#ifndef __EMSCRIPTEN__
+#if __has_include("sdlpp/surface.hpp")
+#include "sdlpp/surface.hpp"
+#define HAS_READ_PIXELS
+#endif
 
 /// The rendering and gui is running on one thread and assumes the application
 /// calls from one single thread
@@ -40,6 +45,14 @@ public:
 
     std::string clipboardData() override;
     void clipboardData(std::string) override;
+
+#ifdef HAS_READ_PIXELS
+    sdl::Surface readPixels();
+#else
+    void readPixels() {
+        static_assert("remember to link to sdlpp");
+    }
+#endif
 
 private:
     Palette _palette;

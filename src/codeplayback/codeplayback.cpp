@@ -1,6 +1,7 @@
 
 #include "files/config.h"
 #include "files/file.h"
+#include "sdlpp/image.hpp"
 #include "syntax/basichighligting.h"
 #include "text/bufferedit.h"
 #include "text/cursorops.h"
@@ -281,6 +282,14 @@ int main(int argc, char *argv[]) {
         wasAlpha = a;
     };
 
+    int imgNum = 0;
+    auto dumpScreen = [&]() {
+        auto surface = screen.readPixels();
+        img::savePng(surface,
+                     ("/tmp/img-dump" + std::to_string(imgNum)).c_str());
+        ++imgNum;
+    };
+
     auto drawBufferEdit = [&](const BufferEdit edit) {
         for (auto &e : splitEdit(edit)) {
             auto cursor = apply(e);
@@ -289,6 +298,7 @@ int main(int argc, char *argv[]) {
             editor.draw(screen);
             editor.updateCursor(screen);
             screen.refresh();
+            dumpScreen();
             std::this_thread::sleep_for(20ms);
         }
     };
@@ -315,10 +325,9 @@ int main(int argc, char *argv[]) {
             std::this_thread::sleep_for(400ms);
         }
 
-        //        std::this_thread::sleep_for(1000ms);
-
         screen.cursorStyle(CursorStyle::Block);
         screen.refresh();
+        dumpScreen();
     }
 
     screen.unsubscribe();

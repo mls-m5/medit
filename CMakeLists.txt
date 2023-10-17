@@ -113,5 +113,7 @@ target_link_libraries(
     medit_common
     lib_medit
     medit_plugins ## Should not be required.. Well well
+    sdlpp
+    SDL2_image
     )
 

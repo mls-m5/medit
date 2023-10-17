@@ -40,22 +40,6 @@ std::string getGoLspCommand() {
 
 } // namespace
 
-// LspConfiguration::LspConfiguration(std::filesystem::path extension) {
-//     if (extension == ".cpp") {
-//         command = getClangLspCommand();
-//         isFileSupported = [](auto path) {
-//             return isCpp(path) || isCSource(path);
-//         };
-//         return;
-//     }
-
-//    if (extension == ".go") {
-//        command = getGoLspCommand();
-//        isFileSupported = [](auto path) { return isGo(path); };
-//        return;
-//    }
-//}
-
 std::optional<LspConfiguration> LspConfiguration::getConfiguration(
     std::filesystem::path path) {
     auto extension = path.extension();
@@ -81,6 +65,12 @@ std::optional<LspConfiguration> LspConfiguration::getConfiguration(
         ret->isFileSupported = [](auto path) { return isGo(path); };
         return ret;
     }
+
+    //    if (extension == ".rs") {
+    //        ret = LspConfiguration{};
+    //        ret->command = getRustLspCommand();
+    //        ret->isFileSupported = [](auto path) { return isRust(path); };
+    //    }
 
     return ret;
 }
