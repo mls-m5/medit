@@ -10,9 +10,16 @@
 #include "views/iwindow.h"
 #include "views/view.h"
 #include "views/window.h"
+#include <algorithm>
+#include <cctype>
 #include <iostream>
+#include <limits>
 #include <memory>
+#include <optional>
+#include <sstream>
+#include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #ifdef __EMSCRIPTEN__
@@ -45,6 +52,14 @@ auto testText3 = R"_(
 int main() {
     std::cout << "hello there\n";
     std::cout << "zup\n";
+}
+)_"sv;
+
+auto testText4 = R"_(
+int main() {
+1-2:    std::cout << "hello, world\n";
+2:    std::cout << "hello there\n";
+3:    std::cout << "zup\n";
 }
 )_"sv;
 
@@ -103,6 +118,112 @@ std::vector<BufferEdit> splitEdit(const BufferEdit &old) {
         else {
             position.x(position.x() + 1);
         }
+    }
+
+    return ret;
+}
+
+struct FrameNumLineDescription {
+    FrameNumLineDescription(const std::string fullLine) {
+        auto line = fullLine;
+        std::string beginStr = std::string{};
+        while (!line.empty() && std::isdigit(line.front())) {
+            beginStr += line.front();
+            line.erase(0, 1);
+        }
+
+        if (line.empty() || (line.front() != '-' && line.front() != ':')) {
+            begin = -1;
+            end = std::numeric_limits<int>::max();
+            this->line = fullLine;
+            return;
+        }
+
+        begin = std::stoi(beginStr);
+        end = std::numeric_limits<int>::max();
+
+        if (line.front() == ':') {
+            this->line = line.substr(1);
+            return;
+        }
+
+        std::string endStr;
+        // line.front must be '-'
+        line.erase(0, 1); // remove '-'
+        while (!line.empty() && std::isdigit(line.front())) {
+            endStr += line.front();
+            line.erase(0, 1);
+        }
+
+        if (line.empty() || line.front() != ':') {
+            begin = -1;
+            end = std::numeric_limits<int>::max();
+            this->line = fullLine;
+            return;
+        }
+
+        line.erase(0, 1); // Remove ':'
+
+        end = stoi(endStr);
+        this->line = line;
+    }
+
+    std::string line; // The line without the line
+    int begin = -1;
+    int end = std::numeric_limits<int>::max();
+
+    bool isInside(int i) const {
+        return i >= begin && i < end;
+    }
+
+    operator bool() const {
+        return begin >= 0;
+    }
+
+    bool hasEnd() const {
+        return end < std::numeric_limits<int>::max();
+    }
+};
+
+std::string extractSingleFrame(
+    const std::vector<FrameNumLineDescription> &descriptions, int frameNum) {
+    auto res = std::ostringstream{};
+
+    for (auto &d : descriptions) {
+        if (d.isInside(frameNum)) {
+            res << d.line << "\n";
+        }
+    }
+
+    return res.str();
+}
+
+std::vector<BufferEdit> extractEditsFromString(Buffer &buffer, std::string in) {
+    auto descriptions = std::vector<FrameNumLineDescription>{};
+
+    {
+        auto ss = std::istringstream{std::move(in)};
+
+        for (std::string line; std::getline(ss, line);) {
+            auto descriptor = FrameNumLineDescription{line};
+            descriptions.push_back(std::move(descriptor));
+        }
+    }
+
+    int max = 0;
+    for (auto &d : descriptions) {
+        if (d.hasEnd()) {
+            max = std::max(d.end, max);
+        }
+        max = std::max(d.begin + 1, max);
+    }
+
+    auto ret = std::vector<BufferEdit>{};
+    auto lastFrame = std::string{};
+    for (int i = 0; i < max; ++i) {
+        auto newFrame = extractSingleFrame(descriptions, i);
+        ret.push_back(createEdit(buffer, lastFrame, newFrame));
+        lastFrame = newFrame;
     }
 
     return ret;
@@ -172,22 +293,29 @@ int main(int argc, char *argv[]) {
         }
     };
 
+    auto edits = std::vector<BufferEdit>{};
+
+    if (false) {
+        edits.push_back(createEdit(buffer, "", testText));
+        edits.push_back(createEdit(buffer, testText, testText2));
+        edits.push_back(createEdit(buffer, testText2, testText3));
+        edits.push_back(createEdit(buffer, testText3, ""));
+    }
+    else {
+        edits = extractEditsFromString(buffer, std::string{testText4});
+    }
+
     for (; isRunning;) {
         screen.cursorStyle(CursorStyle::Block);
 
-        //        for (auto c : testText) {
-        //            insertCharacter(Position(buffer.end()), c);
-        //        }
-
         screen.cursorStyle(CursorStyle::Beam);
 
-        drawBufferEdit(createEdit(buffer, "", testText));
-        std::this_thread::sleep_for(400ms);
-        drawBufferEdit(createEdit(buffer, testText, testText2));
-        std::this_thread::sleep_for(400ms);
-        drawBufferEdit(createEdit(buffer, testText2, testText3));
-        std::this_thread::sleep_for(1000ms);
-        drawBufferEdit(createEdit(buffer, testText3, ""));
+        for (auto &edit : edits) {
+            drawBufferEdit(edit);
+            std::this_thread::sleep_for(400ms);
+        }
+
+        //        std::this_thread::sleep_for(1000ms);
 
         screen.cursorStyle(CursorStyle::Block);
         screen.refresh();
