@@ -13,6 +13,7 @@
 #include "views/window.h"
 #include <algorithm>
 #include <cctype>
+#include <filesystem>
 #include <iostream>
 #include <limits>
 #include <memory>
@@ -283,10 +284,15 @@ int main(int argc, char *argv[]) {
     };
 
     int imgNum = 0;
+
+    auto paths = std::vector<std::filesystem::path>{};
+
     auto dumpScreen = [&]() {
         auto surface = screen.readPixels();
-        img::savePng(surface,
-                     ("/tmp/img-dump" + std::to_string(imgNum)).c_str());
+        img::savePng(
+            surface,
+            ("/tmp/playback-img-dump-" + std::to_string(imgNum) + ".png")
+                .c_str());
         ++imgNum;
     };
 
@@ -299,7 +305,7 @@ int main(int argc, char *argv[]) {
             editor.updateCursor(screen);
             screen.refresh();
             dumpScreen();
-            std::this_thread::sleep_for(20ms);
+            //            std::this_thread::sleep_for(20ms);
         }
     };
 
@@ -315,6 +321,9 @@ int main(int argc, char *argv[]) {
         edits = extractEditsFromString(buffer, std::string{testText4});
     }
 
+    std::filesystem::remove("output.mp4");
+    std::system("rm /tmp/playback-img-dump-*.png");
+
     for (; isRunning;) {
         screen.cursorStyle(CursorStyle::Block);
 
@@ -322,15 +331,23 @@ int main(int argc, char *argv[]) {
 
         for (auto &edit : edits) {
             drawBufferEdit(edit);
-            std::this_thread::sleep_for(400ms);
+            //            std::this_thread::sleep_for(400ms);
         }
 
         screen.cursorStyle(CursorStyle::Block);
         screen.refresh();
         dumpScreen();
+
+        isRunning = false;
     }
 
     screen.unsubscribe();
 
-    return 0;
+    auto returnCode =
+        std::system("ffmpeg -framerate 24 -i /tmp/playback-img-dump-%d.png "
+                    "-c:v libx264 -pix_fmt yuv420p output.mp4");
+
+    std::system("xdg-open output.mp4");
+
+    return returnCode;
 }
