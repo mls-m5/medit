@@ -46,6 +46,13 @@ public:
     std::string clipboardData() override;
     void clipboardData(std::string) override;
 
+    /////////////////////////////////////////////////////////////////
+    /// Functions that is specific to the GuiScreen implementation //
+    /////////////////////////////////////////////////////////////////
+    void fontSize(int fontSize);
+
+    void resize(int width, int height);
+
 #ifdef HAS_READ_PIXELS
     sdl::Surface readPixels();
 #else

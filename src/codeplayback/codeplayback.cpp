@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <limits>
 #include <memory>
@@ -233,6 +234,9 @@ std::vector<BufferEdit> extractEditsFromString(Buffer &buffer, std::string in) {
 
 int main(int argc, char *argv[]) {
     auto screen = ScreenType{};
+    screen.fontSize(40);
+
+    screen.resize(80, 10);
 
     {
         auto palette = Palette{};
@@ -289,10 +293,9 @@ int main(int argc, char *argv[]) {
 
     auto dumpScreen = [&]() {
         auto surface = screen.readPixels();
-        img::savePng(
-            surface,
-            ("/tmp/playback-img-dump-" + std::to_string(imgNum) + ".png")
-                .c_str());
+        auto path = "/tmp/playback-img-dump-" + std::to_string(imgNum) + ".png";
+        img::savePng(surface, path.c_str());
+        paths.push_back(path);
         ++imgNum;
     };
 
@@ -343,9 +346,28 @@ int main(int argc, char *argv[]) {
 
     screen.unsubscribe();
 
+    auto listFile = std::filesystem::path{"frame-list.txt"};
+
+    {
+
+        auto file = std::ofstream{listFile};
+
+        auto putFile = [&](auto path) {
+            file << "file '" << path.string() << "'\n";
+        };
+        for (auto &path : paths) {
+            putFile(path);
+        }
+
+        for (int i = 0; i < 48; ++i) {
+            putFile(paths.back());
+        }
+    }
+
     auto returnCode =
-        std::system("ffmpeg -framerate 24 -i /tmp/playback-img-dump-%d.png "
-                    "-c:v libx264 -pix_fmt yuv420p output.mp4");
+        std::system(("ffmpeg -f concat -safe 0 -r 24 -i " + listFile.string() +
+                     " -c:v libx264 -pix_fmt yuv420p output.mp4")
+                        .c_str());
 
     std::system("xdg-open output.mp4");
 

@@ -137,15 +137,17 @@ struct GuiScreen::Buffer {
 
     ThreadValidation _tv{"gui screen"};
 
-    Buffer(int width, int height)
+    Buffer(int width, int height, int fontSize)
         : window{"medit",
                  SDL_WINDOWPOS_CENTERED,
                  SDL_WINDOWPOS_CENTERED,
                  width * 8,
                  height * 8,
                  SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN}
-        , renderer{window, SDL_RENDERER_ACCELERATED, SDL_RENDERER_PRESENTVSYNC}
-        , screen{width, height, fontPath(), 14} {
+        , renderer{window,
+                   SDL_RENDERER_ACCELERATED,
+                   0 * SDL_RENDERER_PRESENTVSYNC}
+        , screen{width, height, fontPath(), fontSize} {
         sdl::startTextInput();
         _styles.resize(16);
         resize(width, height);
@@ -227,6 +229,12 @@ struct GuiScreen::Buffer {
         }
 
         screen.resize(width, height);
+    }
+
+    void fontSize(int size) {
+        screen.resizeFont(size);
+        pixelWidth = screen.cache.charWidth * width;
+        pixelHeight = screen.cache.charHeight * height;
     }
 
     void fill(FChar color) {
@@ -545,7 +553,7 @@ GuiScreen::GuiScreen() {
 
     _thread = std::thread([this, &cv] {
         setThreadName("gui screen");
-        _buffer = std::make_unique<Buffer>(80, 40);
+        _buffer = std::make_unique<Buffer>(80, 40, 14);
         cv.notify_one();
         _buffer->loop();
     });
@@ -595,6 +603,14 @@ std::string GuiScreen::clipboardData() {
 
 void GuiScreen::clipboardData(std::string text) {
     SDL_SetClipboardText(text.data());
+}
+
+void GuiScreen::fontSize(int fontSize) {
+    _buffer->fontSize(fontSize);
+}
+
+void GuiScreen::resize(int width, int height) {
+    _buffer->resize(width, height);
 }
 
 sdl::Surface GuiScreen::readPixels() {
