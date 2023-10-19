@@ -252,7 +252,7 @@ std::vector<BufferEdit> loadEditsFromFile(Buffer &buffer,
     return descriptionsToBufferEdit(buffer, descriptions);
 }
 
-auto helpStr = R"_(
+constexpr auto helpStr = R"_(
 usage
 code_playback scriptfile.txt [options]
 
@@ -266,7 +266,7 @@ struct CodePlaybackSettings {
     CodePlaybackSettings(int argc, char **argv) {
         auto args = std::vector<std::string>{argv + 1, argv + argc};
 
-        for (int i = 0; i < args.size(); ++i) {
+        for (size_t i = 0; i < args.size(); ++i) {
             auto arg = args.at(i);
 
             if (arg == "--help") {
@@ -367,7 +367,6 @@ int main(int argc, char *argv[]) {
     std::filesystem::remove(outputPath);
     std::system("rm /tmp/playback-img-dump-*.png");
 
-    //    for (; isRunning;) {
     screen.cursorStyle(CursorStyle::Block);
 
     screen.cursorStyle(CursorStyle::Beam);
@@ -384,7 +383,6 @@ int main(int argc, char *argv[]) {
     dumpScreen();
 
     isRunning = false;
-    //    }
 
     screen.unsubscribe();
 
