@@ -252,9 +252,37 @@ std::vector<BufferEdit> loadEditsFromFile(Buffer &buffer,
     return descriptionsToBufferEdit(buffer, descriptions);
 }
 
-struct CodePlaybackSettings {};
+auto helpStr = R"_(
+usage
+code_playback scriptfile.txt [options]
+
+flags:
+--help                 print this text
+)_";
+
+struct CodePlaybackSettings {
+    std::filesystem::path scriptFile;
+
+    CodePlaybackSettings(int argc, char **argv) {
+        auto args = std::vector<std::string>{argv + 1, argv + argc};
+
+        for (int i = 0; i < args.size(); ++i) {
+            auto arg = args.at(i);
+
+            if (arg == "--help") {
+                std::cout << helpStr << std::endl;
+                std::exit(0);
+            }
+            else {
+                scriptFile = arg;
+            }
+        }
+    }
+};
 
 int main(int argc, char *argv[]) {
+    const auto settings = CodePlaybackSettings{argc, argv};
+
     auto screen = ScreenType{};
     screen.fontSize(30);
 
@@ -266,7 +294,7 @@ int main(int argc, char *argv[]) {
         screen.palette(palette);
     }
 
-    std::cout << "hello\n";
+    std::cout << "medit code playback" << std::endl;
 
     auto window = PlaybackWindow{screen.width(), screen.height()};
 
@@ -279,8 +307,6 @@ int main(int argc, char *argv[]) {
     editor.width(screen.width());
     editor.height(screen.height() - 1);
 
-    //    auto wasAlpha = false;
-
     bool isRunning = true;
     screen.subscribe([&isRunning](IScreen::EventListT list) {
         for (auto e : list) {
@@ -291,23 +317,6 @@ int main(int argc, char *argv[]) {
             }
         }
     });
-
-    //    auto insertCharacter = [&](Position position, Utf8Char c) {
-    //        screen.cursorStyle(CursorStyle::Beam);
-    //        insert(c, {buffer, position});
-    //        editor.draw(screen);
-    //        editor.cursor({buffer, position += c});
-    //        editor.updateCursor(screen);
-    //        screen.refresh();
-    //        auto a = isalpha(c);
-    //        if (!a && a != wasAlpha) {
-    //            std::this_thread::sleep_for(100ms);
-    //        }
-    //        else {
-    //            std::this_thread::sleep_for(20ms);
-    //        }
-    //        wasAlpha = a;
-    //    };
 
     int imgNum = 0;
 
@@ -336,7 +345,10 @@ int main(int argc, char *argv[]) {
 
     auto edits = std::vector<BufferEdit>{};
 
-    if (false) {
+    if (!settings.scriptFile.empty()) {
+        edits = loadEditsFromFile(buffer, settings.scriptFile);
+    }
+    else if (false) {
         edits.push_back(createEdit(buffer, "", testText));
         edits.push_back(createEdit(buffer, testText, testText2));
         edits.push_back(createEdit(buffer, testText2, testText3));

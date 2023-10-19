@@ -1,0 +1,5 @@
+int main() {
+1-2:    std::cout << "hello, world\n";
+2:    std::cout << "hello there\n";
+3:    std::cout << "zup\n";
+}
