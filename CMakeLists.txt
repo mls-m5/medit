@@ -81,6 +81,7 @@ file(
 file(
     COPY
     data/oblivion.json
+    data/oblivion-bg-black.json
     data/init.lua
     data/mode.lua
     data/UbuntuMono-Regular.ttf

@@ -240,7 +240,7 @@ int main(int argc, char *argv[]) {
 
     {
         auto palette = Palette{};
-        palette.load(findConfig("data/oblivion.json"));
+        palette.load(findConfig("data/oblivion-bg-black.json"));
         screen.palette(palette);
     }
 
