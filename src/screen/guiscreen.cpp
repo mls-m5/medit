@@ -174,9 +174,17 @@ struct GuiScreen::Buffer {
     }
 
     std::string fontPath() {
-        auto path = findFont("UbuntuMono-Regular");
-        if (!path.empty()) {
-            return path.string();
+        {
+            auto path = findFont("SourceCodePro-Regular");
+            if (!path.empty()) {
+                return path.string();
+            }
+        }
+        {
+            auto path = findFont("UbuntuMono-Regular");
+            if (!path.empty()) {
+                return path.string();
+            }
         }
         return findFont("UbuntuMono-R"); // Try to find system font
     }
@@ -232,6 +240,8 @@ struct GuiScreen::Buffer {
     }
 
     void fontSize(int size) {
+        auto l = std::lock_guard{
+            refreshMutex}; /// Make sure the lines is not currently being drawn
         screen.resizeFont(size);
         pixelWidth = screen.cache.charWidth * width;
         pixelHeight = screen.cache.charHeight * height;
@@ -554,6 +564,7 @@ GuiScreen::GuiScreen() {
     _thread = std::thread([this, &cv] {
         setThreadName("gui screen");
         _buffer = std::make_unique<Buffer>(80, 40, 14);
+        //        _buffer = std::make_unique<Buffer>(60, 10, 30);
         cv.notify_one();
         _buffer->loop();
     });

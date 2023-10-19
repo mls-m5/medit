@@ -85,6 +85,7 @@ file(
     data/init.lua
     data/mode.lua
     data/UbuntuMono-Regular.ttf
+    data/Source_Code_Pro
     DESTINATION
     ${CMAKE_BINARY_DIR}/data
     )

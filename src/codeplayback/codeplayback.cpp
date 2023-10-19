@@ -234,9 +234,9 @@ std::vector<BufferEdit> extractEditsFromString(Buffer &buffer, std::string in) {
 
 int main(int argc, char *argv[]) {
     auto screen = ScreenType{};
-    screen.fontSize(40);
+    screen.fontSize(30);
 
-    screen.resize(80, 10);
+    screen.resize(60, 10);
 
     {
         auto palette = Palette{};
