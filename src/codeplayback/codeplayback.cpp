@@ -201,18 +201,19 @@ std::string extractSingleFrame(
     return res.str();
 }
 
-std::vector<BufferEdit> extractEditsFromString(Buffer &buffer, std::string in) {
+std::vector<FrameNumLineDescription> streamToDescriptions(std::istream &ss) {
     auto descriptions = std::vector<FrameNumLineDescription>{};
 
-    {
-        auto ss = std::istringstream{std::move(in)};
-
-        for (std::string line; std::getline(ss, line);) {
-            auto descriptor = FrameNumLineDescription{line};
-            descriptions.push_back(std::move(descriptor));
-        }
+    for (std::string line; std::getline(ss, line);) {
+        auto descriptor = FrameNumLineDescription{line};
+        descriptions.push_back(std::move(descriptor));
     }
 
+    return descriptions;
+}
+
+std::vector<BufferEdit> descriptionsToBufferEdit(
+    Buffer &buffer, const std::vector<FrameNumLineDescription> &descriptions) {
     int max = 0;
     for (auto &d : descriptions) {
         if (d.hasEnd()) {
@@ -231,6 +232,27 @@ std::vector<BufferEdit> extractEditsFromString(Buffer &buffer, std::string in) {
 
     return ret;
 }
+
+std::vector<BufferEdit> extractEditsFromString(Buffer &buffer, std::string in) {
+    auto descriptions = [&] {
+        auto ss = std::istringstream{std::move(in)};
+        return streamToDescriptions(ss);
+    }();
+
+    return descriptionsToBufferEdit(buffer, descriptions);
+}
+
+std::vector<BufferEdit> loadEditsFromFile(Buffer &buffer,
+                                          std::filesystem::path path) {
+    auto descriptions = [&] {
+        auto file = std::ifstream{path};
+        return streamToDescriptions(file);
+    }();
+
+    return descriptionsToBufferEdit(buffer, descriptions);
+}
+
+struct CodePlaybackSettings {};
 
 int main(int argc, char *argv[]) {
     auto screen = ScreenType{};
@@ -257,7 +279,7 @@ int main(int argc, char *argv[]) {
     editor.width(screen.width());
     editor.height(screen.height() - 1);
 
-    auto wasAlpha = false;
+    //    auto wasAlpha = false;
 
     bool isRunning = true;
     screen.subscribe([&isRunning](IScreen::EventListT list) {
@@ -270,22 +292,22 @@ int main(int argc, char *argv[]) {
         }
     });
 
-    auto insertCharacter = [&](Position position, Utf8Char c) {
-        screen.cursorStyle(CursorStyle::Beam);
-        insert(c, {buffer, position});
-        editor.draw(screen);
-        editor.cursor({buffer, position += c});
-        editor.updateCursor(screen);
-        screen.refresh();
-        auto a = isalpha(c);
-        if (!a && a != wasAlpha) {
-            std::this_thread::sleep_for(100ms);
-        }
-        else {
-            std::this_thread::sleep_for(20ms);
-        }
-        wasAlpha = a;
-    };
+    //    auto insertCharacter = [&](Position position, Utf8Char c) {
+    //        screen.cursorStyle(CursorStyle::Beam);
+    //        insert(c, {buffer, position});
+    //        editor.draw(screen);
+    //        editor.cursor({buffer, position += c});
+    //        editor.updateCursor(screen);
+    //        screen.refresh();
+    //        auto a = isalpha(c);
+    //        if (!a && a != wasAlpha) {
+    //            std::this_thread::sleep_for(100ms);
+    //        }
+    //        else {
+    //            std::this_thread::sleep_for(20ms);
+    //        }
+    //        wasAlpha = a;
+    //    };
 
     int imgNum = 0;
 
@@ -327,22 +349,24 @@ int main(int argc, char *argv[]) {
     std::filesystem::remove("output.mp4");
     std::system("rm /tmp/playback-img-dump-*.png");
 
-    for (; isRunning;) {
-        screen.cursorStyle(CursorStyle::Block);
+    //    for (; isRunning;) {
+    screen.cursorStyle(CursorStyle::Block);
 
-        screen.cursorStyle(CursorStyle::Beam);
+    screen.cursorStyle(CursorStyle::Beam);
 
-        for (auto &edit : edits) {
-            drawBufferEdit(edit);
-            //            std::this_thread::sleep_for(400ms);
+    for (auto &edit : edits) {
+        drawBufferEdit(edit);
+        if (!isRunning) {
+            break;
         }
-
-        screen.cursorStyle(CursorStyle::Block);
-        screen.refresh();
-        dumpScreen();
-
-        isRunning = false;
     }
+
+    screen.cursorStyle(CursorStyle::Block);
+    screen.refresh();
+    dumpScreen();
+
+    isRunning = false;
+    //    }
 
     screen.unsubscribe();
 
