@@ -358,7 +358,13 @@ int main(int argc, char *argv[]) {
         edits = extractEditsFromString(buffer, std::string{testText4});
     }
 
-    std::filesystem::remove("output.mp4");
+    auto outputPath = settings.scriptFile;
+    if (settings.scriptFile.empty()) {
+        outputPath = "output";
+    }
+    outputPath.replace_extension(".mp4");
+
+    std::filesystem::remove(outputPath);
     std::system("rm /tmp/playback-img-dump-*.png");
 
     //    for (; isRunning;) {
@@ -402,10 +408,10 @@ int main(int argc, char *argv[]) {
 
     auto returnCode =
         std::system(("ffmpeg -f concat -safe 0 -r 24 -i " + listFile.string() +
-                     " -c:v libx264 -pix_fmt yuv420p output.mp4")
+                     " -c:v libx264 -pix_fmt yuv420p " + outputPath.string())
                         .c_str());
 
-    std::system("xdg-open output.mp4");
+    std::system(("xdg-open " + outputPath.string()).c_str());
 
     return returnCode;
 }
