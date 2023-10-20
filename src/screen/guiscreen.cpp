@@ -519,6 +519,7 @@ struct GuiScreen::Buffer {
     }
 
     sdl::Surface readPixels() {
+        auto l = std::lock_guard{refreshMutex};
         auto rect = sdl::Rect{
             0, 0, static_cast<int>(pixelWidth), static_cast<int>(pixelHeight)};
         auto surface = sdl::Surface::create(0,

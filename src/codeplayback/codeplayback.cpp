@@ -7,6 +7,7 @@
 #include "text/cursorops.h"
 #include "text/fstring.h"
 #include "text/utf8char.h"
+#include "videodump.h"
 #include "views/editor.h"
 #include "views/iwindow.h"
 #include "views/view.h"
@@ -318,17 +319,7 @@ int main(int argc, char *argv[]) {
         }
     });
 
-    int imgNum = 0;
-
-    auto paths = std::vector<std::filesystem::path>{};
-
-    auto dumpScreen = [&]() {
-        auto surface = screen.readPixels();
-        auto path = "/tmp/playback-img-dump-" + std::to_string(imgNum) + ".png";
-        img::savePng(surface, path.c_str());
-        paths.push_back(path);
-        ++imgNum;
-    };
+    auto videoDump = VideoDump{screen};
 
     auto drawBufferEdit = [&](const BufferEdit edit) {
         for (auto &e : splitEdit(edit)) {
@@ -338,8 +329,7 @@ int main(int argc, char *argv[]) {
             editor.draw(screen);
             editor.updateCursor(screen);
             screen.refresh();
-            dumpScreen();
-            //            std::this_thread::sleep_for(20ms);
+            videoDump.dump();
         }
     };
 
@@ -358,14 +348,13 @@ int main(int argc, char *argv[]) {
         edits = extractEditsFromString(buffer, std::string{testText4});
     }
 
-    auto outputPath = settings.scriptFile;
+    auto outputPath = std::filesystem::absolute(settings.scriptFile);
     if (settings.scriptFile.empty()) {
         outputPath = "output";
     }
     outputPath.replace_extension(".mp4");
 
-    std::filesystem::remove(outputPath);
-    std::system("rm /tmp/playback-img-dump-*.png");
+    videoDump.outputPath = outputPath;
 
     screen.cursorStyle(CursorStyle::Block);
 
@@ -380,36 +369,15 @@ int main(int argc, char *argv[]) {
 
     screen.cursorStyle(CursorStyle::Block);
     screen.refresh();
-    dumpScreen();
+    videoDump.dump();
 
     isRunning = false;
 
     screen.unsubscribe();
 
-    auto listFile = std::filesystem::path{"frame-list.txt"};
+    auto returnCode = videoDump.finish();
 
-    {
-
-        auto file = std::ofstream{listFile};
-
-        auto putFile = [&](auto path) {
-            file << "file '" << path.string() << "'\n";
-        };
-        for (auto &path : paths) {
-            putFile(path);
-        }
-
-        for (int i = 0; i < 48; ++i) {
-            putFile(paths.back());
-        }
-    }
-
-    auto returnCode =
-        std::system(("ffmpeg -f concat -safe 0 -r 24 -i " + listFile.string() +
-                     " -c:v libx264 -pix_fmt yuv420p " + outputPath.string())
-                        .c_str());
-
-    std::system(("xdg-open " + outputPath.string()).c_str());
+    std::system(("xdg-open " + videoDump.outputPath.string()).c_str());
 
     return returnCode;
 }
