@@ -4,6 +4,7 @@
 #include "sdlpp/surface.hpp"
 #include <algorithm>
 #include <mutex>
+#include <thread>
 
 #ifndef __EMSCRIPTEN__
 
@@ -519,6 +520,10 @@ struct GuiScreen::Buffer {
     }
 
     sdl::Surface readPixels() {
+        using namespace std::chrono_literals;
+        while (_shouldRefresh) {
+            std::this_thread::sleep_for(1ms);
+        }
         auto l = std::lock_guard{refreshMutex};
         auto rect = sdl::Rect{
             0, 0, static_cast<int>(pixelWidth), static_cast<int>(pixelHeight)};
@@ -575,6 +580,9 @@ GuiScreen::GuiScreen() {
 }
 
 GuiScreen::~GuiScreen() noexcept {
+    // Just make the guiloop run and exit, and class is
+    // specified to avoid virtual function call in destructor
+    GuiScreen::refresh();
     _buffer->stop();
     _thread.join();
     _buffer.reset();

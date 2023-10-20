@@ -369,17 +369,9 @@ int main(int argc, char *argv[]) {
         videoDump.finish();
     }
 
-    //    screen.cursorStyle(CursorStyle::Block);
-    //    screen.refresh();
-    //    videoDump.dump();
-
-    //    isRunning = false;
-
     screen.unsubscribe();
 
     auto returnCode = videoDump.finish();
-
-    //    std::system(("xdg-open " + videoDump.outputPath.string()).c_str());
 
     return returnCode;
 }
