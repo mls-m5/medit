@@ -68,9 +68,10 @@ struct VideoDump {
                 putFile(path);
             }
 
-            for (int i = 0; i < 48; ++i) {
-                putFile(paths.back());
-            }
+            putFile(paths.back());
+            //            for (int i = 0; i < 48; ++i) {
+            //                putFile(paths.back());
+            //            }
         }
 
         std::filesystem::remove_all(currentOutputPath);

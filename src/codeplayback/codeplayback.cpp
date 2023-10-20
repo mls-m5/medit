@@ -20,6 +20,7 @@
 #include <limits>
 #include <memory>
 #include <optional>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -127,8 +128,10 @@ std::vector<BufferEdit> splitEdit(const BufferEdit &old) {
     return ret;
 }
 
+// Struct that extract the numbers that is put before a line or after
 struct FrameNumLineDescription {
-    FrameNumLineDescription(const std::string fullLine) {
+
+    bool tryPrefix(const std::string fullLine) {
         auto line = fullLine;
         std::string beginStr = std::string{};
         while (!line.empty() && std::isdigit(line.front())) {
@@ -140,7 +143,7 @@ struct FrameNumLineDescription {
             begin = -1;
             end = std::numeric_limits<int>::max();
             this->line = fullLine;
-            return;
+            return false;
         }
 
         begin = std::stoi(beginStr);
@@ -148,7 +151,7 @@ struct FrameNumLineDescription {
 
         if (line.front() == ':') {
             this->line = line.substr(1);
-            return;
+            return true;
         }
 
         std::string endStr;
@@ -163,13 +166,44 @@ struct FrameNumLineDescription {
             begin = -1;
             end = std::numeric_limits<int>::max();
             this->line = fullLine;
-            return;
+            return false;
         }
 
         line.erase(0, 1); // Remove ':'
 
         end = stoi(endStr);
         this->line = line;
+        return true;
+    }
+
+    bool tryComments(const std::string &line) {
+        // Regex for range number
+        std::regex rangeRegex(R"(\s*//\s*(\d+)-(\d+)\s*$)");
+        // Regex for single number
+        std::regex singleRegex(R"(\s*//\s*(\d+)\s*$)");
+
+        std::smatch match;
+        if (std::regex_search(line, match, rangeRegex)) {
+            begin = std::stoi(match[1]);
+            end = std::stoi(match[2]);
+            this->line = line.substr(0, match.position());
+            return true;
+        }
+        else if (std::regex_search(line, match, singleRegex)) {
+            begin = std::stoi(match[1]);
+            this->line = line.substr(0, match.position());
+            return true;
+        }
+        this->line = line;
+        return false;
+    }
+
+    FrameNumLineDescription(const std::string &fullLine) {
+        if (tryPrefix(fullLine)) {
+            return;
+        }
+
+        tryComments(fullLine);
     }
 
     std::string line; // The line without the line
