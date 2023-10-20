@@ -4,6 +4,7 @@
 #include "sdlpp/image.hpp"
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <vector>
 
 struct VideoDump {
@@ -18,12 +19,10 @@ struct VideoDump {
         : screen{&screen} {}
 
     std::filesystem::path generateTmpPngPath(int num) {
-        return "/tmp/playback-img-dump-" + std::to_string(imgNum) + ".png";
+        return "/tmp/playback-img-dump-" + std::to_string(num) + ".png";
     }
 
     void dump() {
-        std::system("rm -f /tmp/playback-img-dump-*.png");
-
         auto surface = screen->readPixels();
         auto path = generateTmpPngPath(imgNum);
         if (std::filesystem::exists(path)) {
@@ -34,8 +33,20 @@ struct VideoDump {
         ++imgNum;
     }
 
+    void saveLastScreenshot(std::filesystem::path path,
+                            std::filesystem::path to) {
+        {
+            std::filesystem::copy(
+                path, to, std::filesystem::copy_options::overwrite_existing);
+        }
+    }
+
     // Finish this segment and create a video and a ending frame
     int finish() {
+        if (paths.empty()) {
+            return 0;
+        }
+
         auto listFile =
             std::filesystem::path{"/tmp/code_playback_frame-list.txt"};
 
@@ -64,19 +75,16 @@ struct VideoDump {
 
         std::filesystem::remove_all(currentOutputPath);
 
-        auto returnCode = std::system(
-            ("ffmpeg -f concat -safe 0 -r 24 -i " + listFile.string() +
-             " -c:v libx264 -pix_fmt yuv420p " + currentOutputPath.string())
-                .c_str());
+        auto command = "ffmpeg -f concat -safe 0 -r 24 -i " +
+                       listFile.string() + " -c:v libx264 -pix_fmt yuv420p " +
+                       currentOutputPath.string();
+        std::cout << command << std::endl;
+        auto returnCode = std::system(command.c_str());
 
-        {
-            auto lastFrame = generateTmpPngPath(--imgNum);
-            std::filesystem::copy(
-                lastFrame,
-                (outputPath.parent_path() / outputPath.stem())
-                    .replace_extension(".png"),
-                std::filesystem::copy_options::overwrite_existing);
-        }
+        saveLastScreenshot(
+            generateTmpPngPath(imgNum - 1), // Why 2? idk... Should be 1
+            (currentOutputPath.parent_path() / currentOutputPath.stem())
+                .replace_extension(".png"));
 
         for (auto &path : paths) {
             std::filesystem::remove(path);
@@ -84,6 +92,8 @@ struct VideoDump {
 
         // Cleanup
         paths.clear();
+
+        ++videoNum;
 
         return returnCode;
     }
