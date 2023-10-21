@@ -192,8 +192,10 @@ struct FrameNumLineDescription {
         if (std::regex_search(line, match, commentRegex)) {
             auto res = match[1].str() + match[2].str();
 
-            if (!res.empty() && res.front() == '.') {
-                res.erase(0, 1);
+            auto m2 = match[2].str();
+            if (!m2.empty() && m2.front() == '$') {
+                m2.erase(0, 1);
+                return match[1].str() + m2;
             }
 
             return res;

@@ -50,7 +50,7 @@ struct CodePlaybackSettings {
             }
             line = line.substr(3);
             if (auto f = line.find(":"); f != std::string::npos) {
-                auto a = line.substr(f);
+                auto a = line.substr(0, f);
                 auto b = line.substr(f + 1);
 
                 if (a == "height") {
