@@ -176,6 +176,23 @@ struct FrameNumLineDescription {
         return true;
     }
 
+    /// For formating sake i sometimes comment out some of the versions
+    /// so that you could run clang-format on the file without it being messed
+    /// up, but then you need to remove the comment
+    /// This function only removes comments that has only spaces (indentation)
+    /// before them
+    std::string removeInitialComment(const std::string &line) {
+        // Regex pattern to match lines that start with spaces followed by a
+        // comment
+        std::regex commentRegex(R"_(^(\s*)//\s*(.*))_");
+
+        std::smatch match;
+        if (std::regex_search(line, match, commentRegex)) {
+            return match[1].str() + match[2].str();
+        }
+        return line;
+    }
+
     bool tryComments(const std::string &line) {
         // Regex for range number
         std::regex rangeRegex(R"(\s*//\s*(\d+)-(\d+)\s*$)");
@@ -186,12 +203,12 @@ struct FrameNumLineDescription {
         if (std::regex_search(line, match, rangeRegex)) {
             begin = std::stoi(match[1]);
             end = std::stoi(match[2]);
-            this->line = line.substr(0, match.position());
+            this->line = removeInitialComment(line.substr(0, match.position()));
             return true;
         }
         else if (std::regex_search(line, match, singleRegex)) {
             begin = std::stoi(match[1]);
-            this->line = line.substr(0, match.position());
+            this->line = removeInitialComment(line.substr(0, match.position()));
             return true;
         }
         this->line = line;
