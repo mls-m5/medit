@@ -324,9 +324,9 @@ int main(int argc, char *argv[]) {
     const auto settings = CodePlaybackSettings{argc, argv};
 
     auto screen = ScreenType{};
-    screen.fontSize(30);
+    screen.fontSize(settings.fontSize);
 
-    screen.resize(60, settings.viewportHeight);
+    screen.resize(settings.viewportWidth, settings.viewportHeight);
 
     {
         auto palette = Palette{};

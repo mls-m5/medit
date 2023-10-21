@@ -15,7 +15,9 @@ flags:
 
 struct CodePlaybackSettings {
     std::filesystem::path scriptFile;
+    int viewportWidth = 60;
     int viewportHeight = 15;
+    int fontSize = 30;
 
     CodePlaybackSettings(int argc, char **argv) {
         auto args = std::vector<std::string>{argv + 1, argv + argc};
@@ -53,6 +55,12 @@ struct CodePlaybackSettings {
 
                 if (a == "height") {
                     viewportHeight = std::stoi(b);
+                }
+                if (a == "width") {
+                    viewportWidth = std::stoi(b);
+                }
+                if (a == "size") {
+                    fontSize = std::stoi(b);
                 }
             }
         }
