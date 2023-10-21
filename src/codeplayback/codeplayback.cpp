@@ -190,7 +190,13 @@ struct FrameNumLineDescription {
 
         std::smatch match;
         if (std::regex_search(line, match, commentRegex)) {
-            return match[1].str() + match[2].str();
+            auto res = match[1].str() + match[2].str();
+
+            if (!res.empty() && res.front() == '.') {
+                res.erase(0, 1);
+            }
+
+            return res;
         }
         return line;
     }
@@ -362,7 +368,11 @@ int main(int argc, char *argv[]) {
     auto videoDump = VideoDump{screen};
 
     auto drawBufferEdit = [&](const BufferEdit edit) {
-        for (auto &e : splitEdit(edit)) {
+        auto splits = splitEdit(edit);
+        int num = 1;
+        for (auto &e : splits) {
+            std::cout << "subframe " << num << "/" << splits.size()
+                      << std::endl;
             auto cursor = apply(e);
             BasicHighlighting::highlightStatic(buffer);
             editor.cursor(cursor);
@@ -370,6 +380,7 @@ int main(int argc, char *argv[]) {
             editor.updateCursor(screen);
             screen.refresh();
             videoDump.dump();
+            ++num;
         }
     };
 
