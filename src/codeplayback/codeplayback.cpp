@@ -1,6 +1,7 @@
 
 #include "files/config.h"
 #include "files/file.h"
+#include "playbacksettings.h"
 #include "sdlpp/image.hpp"
 #include "syntax/basichighligting.h"
 #include "text/bufferedit.h"
@@ -17,6 +18,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <istream>
 #include <limits>
 #include <memory>
 #include <optional>
@@ -27,40 +29,40 @@
 #include <utility>
 #include <vector>
 
-#ifdef __EMSCRIPTEN__
+// #ifdef __EMSCRIPTEN__
 
-#include "screen/htmlscreen.h"
-using ScreenType = HtmlScreen;
+// #include "screen/htmlscreen.h"
+// using ScreenType = HtmlScreen;
 
-#else
+// #else
 
 #include "screen/guiscreen.h"
 using ScreenType = GuiScreen;
 
-#endif
+// #endif
 
 using namespace std::literals;
 
-auto testText = R"_(
+constexpr auto testText = R"_(
 int main() {
     std::cout << "hello, world\n";
 }
 )_"sv;
 
-auto testText2 = R"_(
+constexpr auto testText2 = R"_(
 int main() {
     std::cout << "hello there\n";
 }
 )_"sv;
 
-auto testText3 = R"_(
+constexpr auto testText3 = R"_(
 int main() {
     std::cout << "hello there\n";
     std::cout << "zup\n";
 }
 )_"sv;
 
-auto testText4 = R"_(
+constexpr auto testText4 = R"_(
 int main() {
 1-2:    std::cout << "hello, world\n";
 2:    std::cout << "hello there\n";
@@ -256,7 +258,21 @@ std::string extractSingleFrame(
 std::vector<FrameNumLineDescription> streamToDescriptions(std::istream &ss) {
     auto descriptions = std::vector<FrameNumLineDescription>{};
 
+    int isHead = 2; // 2 = Comments at beginning of file, 1 = spaces after this
     for (std::string line; std::getline(ss, line);) {
+        if (isHead == 2) {
+            if (line.rfind("//", 0) == 0) {
+                continue;
+            }
+            isHead = 1;
+        }
+        if (isHead == 1) {
+            if (line.empty()) {
+                continue;
+            }
+
+            isHead = 0;
+        }
         auto descriptor = FrameNumLineDescription{line};
         descriptions.push_back(std::move(descriptor));
     }
@@ -304,41 +320,13 @@ std::vector<BufferEdit> loadEditsFromFile(Buffer &buffer,
     return descriptionsToBufferEdit(buffer, descriptions);
 }
 
-constexpr auto helpStr = R"_(
-usage
-code_playback scriptfile.txt [options]
-
-flags:
---help                 print this text
-)_";
-
-struct CodePlaybackSettings {
-    std::filesystem::path scriptFile;
-
-    CodePlaybackSettings(int argc, char **argv) {
-        auto args = std::vector<std::string>{argv + 1, argv + argc};
-
-        for (size_t i = 0; i < args.size(); ++i) {
-            auto arg = args.at(i);
-
-            if (arg == "--help") {
-                std::cout << helpStr << std::endl;
-                std::exit(0);
-            }
-            else {
-                scriptFile = arg;
-            }
-        }
-    }
-};
-
 int main(int argc, char *argv[]) {
     const auto settings = CodePlaybackSettings{argc, argv};
 
     auto screen = ScreenType{};
     screen.fontSize(30);
 
-    screen.resize(60, 10);
+    screen.resize(60, settings.viewportHeight);
 
     {
         auto palette = Palette{};
@@ -354,6 +342,7 @@ int main(int argc, char *argv[]) {
     editor.showLines(true);
 
     auto &buffer = editor.buffer();
+    /// Assigning for highlighting to be correct
     buffer.assignFile(std::make_unique<File>("/tmp/trashasthoeu.cpp"));
 
     editor.width(screen.width());
@@ -411,7 +400,11 @@ int main(int argc, char *argv[]) {
 
     screen.cursorStyle(CursorStyle::Beam);
 
+    auto count = edits.size();
+    auto currentEdit = 0;
     for (auto &edit : edits) {
+        std::cout << currentEdit << "/" << count << std::endl;
+        ++currentEdit;
         drawBufferEdit(edit);
         if (!isRunning) {
             break;
