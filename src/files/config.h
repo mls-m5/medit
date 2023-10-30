@@ -14,6 +14,8 @@ std::filesystem::path findConfig(std::filesystem::path file);
 /// current process. For example ttys for consoles or lsp-paths
 std::filesystem::path standardLocalFifoDirectory();
 std::filesystem::path standardProcessFifoDirectory();
+
+/// A file that other processes can print to to write to the log
 std::filesystem::path standardConsoleTtyPipePath();
 
 void cleanUpLocalPipes();

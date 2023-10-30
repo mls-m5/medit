@@ -32,7 +32,7 @@ flags:
 
 --gui                 force start with graphic interface
 --cli                 start in terminal
---help                print this string
+--help -h             print this string
 --connect [fifo|tcp]  connect to server selected protocol
 --host [fifo|tcp]     start server on selected protocol
 --remote              test serialize screen
@@ -93,7 +93,7 @@ flags:
             else if (arg == "--port" || arg == "-p") {
                 port = std::stoi(args.at(++i));
             }
-            else if (arg == "--help") {
+            else if (arg == "--help" || arg == "-h") {
                 std::cout << helpStr << std::endl;
                 std::exit(0);
             }
