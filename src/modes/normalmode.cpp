@@ -3,6 +3,7 @@
 #include "normalmode.h"
 #include "modes/mode.h"
 #include "modes/parentmode.h"
+#include "screen/cursorstyle.h"
 #include "script/standardcommands.h"
 #include "views/mainwindow.h"
 
@@ -80,9 +81,11 @@ std::shared_ptr<IMode> createNormalMode() {
         {{"gd"}, {[](Ptr env) { env->mainWindow().gotoDefinition(); }}},
     }};
 
-    return std::make_shared<Mode>("normal",
-                                  std::move(map),
-                                  CursorStyle::Block,
-                                  createParentMode(),
-                                  std::move(bufferMap));
+    auto mode =
+        std::make_shared<Mode>("normal", std::move(map), createParentMode());
+
+    mode->bufferMap(std::move(bufferMap));
+    mode->shouldEnableNumbers(true);
+
+    return mode;
 }

@@ -53,5 +53,5 @@ std::shared_ptr<IMode> createParentMode() {
 
     map.defaultAction({});
 
-    return std::make_shared<Mode>("parent", std::move(map), CursorStyle::Block);
+    return std::make_shared<Mode>("parent", std::move(map));
 }

@@ -58,15 +58,16 @@ std::shared_ptr<IMode> createVisualMode(IEnvironment &env,
         {{"a("}, {sc.select_around_paren}},
     }};
 
-    auto mode = std::make_shared<Mode>("visual",
-                                       std::move(map),
-                                       CursorStyle::Block,
-                                       createParentMode(),
-                                       std::move(bufferMap),
-                                       blockSelection);
+    auto mode =
+        std::make_shared<Mode>("visual", std::move(map), createParentMode());
+
+    mode->bufferMap(std::move(bufferMap));
+    mode->isBlockSelection(blockSelection);
 
     mode->startCallback([](Editor &e) { e.anchor(e.cursor()); });
     mode->exitCallback([](Editor &e) { e.clearSelection(); });
+
+    mode->shouldEnableNumbers(true);
 
     return mode;
 }

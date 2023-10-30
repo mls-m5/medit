@@ -4,7 +4,7 @@
 #include "keys/keymap.h"
 #include "meditfwd.h"
 #include "modes/imode.h"
-// #include "sol/sol.hpp"
+#include "screen/cursorstyle.h"
 #include <memory>
 #include <string>
 
@@ -19,14 +19,11 @@ class Mode : public IMode, public std::enable_shared_from_this<Mode> {
     std::function<void(Editor &)> _exit;
     CursorStyle _cursorStyle = CursorStyle::Block;
     bool _isBlockSelection = false;
+    bool _shouldEnableNumbers = false;
+    int _repetitions = 0;
 
 public:
-    Mode(std::string name,
-         KeyMap map,
-         CursorStyle cursorStyle = CursorStyle::Block,
-         std::shared_ptr<IMode> parent = {},
-         BufferKeyMap bufferMap = {},
-         bool isBlockSelection = false);
+    Mode(std::string name, KeyMap map, std::shared_ptr<IMode> parent = {});
 
     bool keyPress(std::shared_ptr<IEnvironment>) override;
 
@@ -58,5 +55,29 @@ public:
 
     bool isBlockSelection() const override {
         return _isBlockSelection;
+    }
+
+    int repetitions() const {
+        return _repetitions;
+    }
+
+    Mode &cursorStyle(CursorStyle style) {
+        _cursorStyle = style;
+        return *this;
+    }
+
+    Mode &bufferMap(BufferKeyMap map) {
+        _bufferMap = std::move(map);
+        return *this;
+    }
+
+    Mode &isBlockSelection(bool value) {
+        _isBlockSelection = value;
+        return *this;
+    }
+
+    Mode &shouldEnableNumbers(bool value) {
+        _shouldEnableNumbers = value;
+        return *this;
     }
 };

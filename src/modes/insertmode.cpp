@@ -2,6 +2,7 @@
 #include "insertmode.h"
 #include "modes/mode.h"
 #include "modes/parentmode.h"
+#include "screen/cursorstyle.h"
 #include "script/standardcommands.h"
 
 std::shared_ptr<IMode> createInsertMode() {
@@ -22,6 +23,10 @@ std::shared_ptr<IMode> createInsertMode() {
     }};
     map.defaultAction({sc.insert});
 
-    return std::make_shared<Mode>(
-        "insert", std::move(map), CursorStyle::Beam, createParentMode());
+    auto mode =
+        std::make_shared<Mode>("insert", std::move(map), createParentMode());
+
+    mode->cursorStyle(CursorStyle::Beam);
+
+    return mode;
 }

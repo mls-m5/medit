@@ -2,18 +2,10 @@
 
 #include "script/ienvironment.h"
 
-Mode::Mode(std::string name,
-           KeyMap map,
-           CursorStyle cursorStyle,
-           std::shared_ptr<IMode> parent,
-           BufferKeyMap bufferMap,
-           bool isBlockSelection)
+Mode::Mode(std::string name, KeyMap map, std::shared_ptr<IMode> parent)
     : _name(std::move(name))
     , _keyMap(std::move(map))
-    , _bufferMap(std::move(bufferMap))
-    , _parent(std::move(parent))
-    , _cursorStyle(cursorStyle)
-    , _isBlockSelection{isBlockSelection} {}
+    , _parent(std::move(parent)) {}
 
 bool Mode::keyPress(std::shared_ptr<IEnvironment> env) {
     auto lock = shared_from_this();
@@ -28,7 +20,25 @@ bool Mode::keyPress(std::shared_ptr<IEnvironment> env) {
         bufferText.emplace_back(key.symbol);
         auto m = _bufferMap.match(bufferText);
 
-        if (m.first == BufferKeyMap::PartialMatch) {
+        auto intRep = static_cast<uint32_t>(key.symbol);
+        if (_shouldEnableNumbers && (intRep >= '0' && intRep <= '9')) {
+            auto number = intRep - '0';
+            if (_repetitions) {
+                _repetitions = _repetitions * 10 + number;
+            }
+            else {
+                _repetitions = number;
+            }
+
+            if (_repetitions > 99999) {
+                _repetitions = 99999;
+            }
+
+            env->statusMessage(
+                FString{"repeat " + std::to_string(_repetitions)});
+            return true;
+        }
+        else if (m.first == BufferKeyMap::PartialMatch) {
             _buffer = bufferText;
             return true;
         }

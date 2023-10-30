@@ -10,6 +10,7 @@ struct KeyMatch {
     KeyMatch(KeyMatch &&) = default;
     KeyMatch &operator=(const KeyMatch &) = default;
     KeyMatch &operator=(KeyMatch &&) = default;
+    ~KeyMatch() = default;
 
     KeyMatch(KeyEvent key)
         : event(key) {}
@@ -32,6 +33,7 @@ public:
     KeyMap(KeyMap &&) = default;
     KeyMap &operator=(const KeyMap &) = delete;
     KeyMap &operator=(KeyMap &&) = default;
+    ~KeyMap() = default;
 
     KeyMap(std::vector<std::pair<KeyMatch, CommandBlock>> map)
         : _map(std::move(map)) {}
