@@ -124,6 +124,8 @@ public:
         return *this;
     }
 
+    bool operator<(const FString &other) const;
+
     void reserve(size_t size) {
         _content.reserve(size);
     }

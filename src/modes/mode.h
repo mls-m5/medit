@@ -57,8 +57,8 @@ public:
         return _isBlockSelection;
     }
 
-    int repetitions() const {
-        return _repetitions;
+    int repetitions() const override {
+        return std::max(1, _repetitions);
     }
 
     Mode &cursorStyle(CursorStyle style) {
@@ -79,5 +79,9 @@ public:
     Mode &shouldEnableNumbers(bool value) {
         _shouldEnableNumbers = value;
         return *this;
+    }
+
+    const FString &buffer() const override {
+        return _buffer;
     }
 };

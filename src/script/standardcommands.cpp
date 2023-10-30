@@ -267,10 +267,10 @@ StandardCommands create() {
         env->editor().mode(createNormalMode());
     };
     DEF(visual_mode) {
-        env->editor().mode(createVisualMode(*env));
+        env->editor().mode(createVisualMode());
     };
     DEF(visual_block_mode) {
-        env->editor().mode(createVisualMode(*env, true));
+        env->editor().mode(createVisualMode(true));
     };
     DEF(toggle_comment) {
         ::toggleComments(env);
@@ -305,7 +305,7 @@ StandardCommands create() {
 
     DEF(select_all) {
         auto &e = env->editor();
-        e.mode(createVisualMode(*env, true));
+        e.mode(createVisualMode(true));
         e.selection(all(e.buffer()));
     };
 

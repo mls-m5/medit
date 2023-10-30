@@ -5,11 +5,10 @@
 #include "modes/parentmode.h"
 #include "script/ienvironment.h"
 #include "script/standardcommands.h"
+#include "script/vimcommands.h"
 #include "views/editor.h"
 
-std::shared_ptr<IMode> createVisualMode(IEnvironment &env,
-                                        bool blockSelection) {
-    using Ptr = StandardCommands::EnvPtrT;
+std::shared_ptr<IMode> createVisualMode(bool blockSelection) {
     auto &sc = StandardCommands::get();
 
     auto map = KeyMap{
@@ -50,6 +49,8 @@ std::shared_ptr<IMode> createVisualMode(IEnvironment &env,
         map.bind({{"y"}, {sc.combine(sc.yank, sc.normal_mode)}});
     }
     map.defaultAction({});
+
+    //    using select = vim::select;
 
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
         {{"iw"}, {sc.select_inner_word}},

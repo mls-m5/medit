@@ -2,6 +2,7 @@
 #include "bufferedit.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
+#include "text/cursorrange.h"
 #include <iostream>
 #include <sstream>
 
@@ -138,4 +139,25 @@ Cursor replace(CursorRange range, FString str) {
         std::move(str),
         range.begin(),
     });
+}
+
+CursorRange extendRight(CursorRange range, size_t num, bool allowLineChanges) {
+    auto r = range.end();
+    for (size_t i = 0; i < num; ++i) {
+        r = right(r, allowLineChanges);
+    }
+    return CursorRange{range.begin(), r};
+}
+
+CursorRange extendLeft(CursorRange range, size_t num, bool allowLineChanges) {
+    auto l = range.begin();
+    for (size_t i = 0; i < num; ++i) {
+        l = left(l, allowLineChanges);
+    }
+    return CursorRange{l, range.end()};
+}
+
+CursorRange extend(CursorRange range, size_t num, bool allowLineChanges) {
+    return extendRight(
+        extendLeft(range, num, allowLineChanges), num, allowLineChanges);
 }

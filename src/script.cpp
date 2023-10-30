@@ -8,3 +8,4 @@
 #include "script/saveinteraction.cpp"
 #include "script/standardcommands.cpp"
 #include "script/togglecomments.cpp"
+#include "script/vimcommands.cpp"
