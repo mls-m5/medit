@@ -61,6 +61,7 @@ void GdbDebugger::run() {
         if (_applicationOutputCallback) {
             _applicationOutputCallback(
                 "no debug.command specified in .medit file");
+            return;
         }
     }
 

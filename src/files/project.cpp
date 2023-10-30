@@ -150,7 +150,7 @@ std::string Project::guessBuildCommand() {
     if (std::filesystem::exists(_settings.root / "CMakeLists.txt")) {
         auto ss = std::ostringstream{};
         ss << "cd " << _settings.root << " ; "
-           << " mkdir build/default ; "
+           << " mkdir -p build/default ; "
            << "cd build/default ; "
               "cmake ../..  -DCMAKE_BUILD_TYPE=Debug "
               "-DCMAKE_EXPORT_COMPILE_COMMANDS=1 ;"
