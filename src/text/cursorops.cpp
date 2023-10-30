@@ -274,9 +274,9 @@ Cursor autocompleteWordBegin(const Cursor cursor) {
     return begin;
 }
 
-std::optional<Cursor> find(Cursor cursor, Utf8Char c) {
-    auto end = ::end(cursor);
-    for (auto cur = cursor; cur != end; cur = right(cur, false)) {
+std::optional<Cursor> find(Cursor cursor, Utf8Char c, bool allowLineChange) {
+    auto end = allowLineChange ? cursor.buffer().end() : ::end(cursor);
+    for (auto cur = cursor; cur != end; cur = right(cur, allowLineChange)) {
         if (content(cur) == c) {
             return cur;
         }
@@ -284,13 +284,20 @@ std::optional<Cursor> find(Cursor cursor, Utf8Char c) {
     return {};
 }
 
-std::optional<Cursor> rfind(Cursor cursor, Utf8Char c) {
-    for (auto cur = cursor;; cur = left(cur, false)) {
+std::optional<Cursor> rfind(Cursor cursor, Utf8Char c, bool allowLineChange) {
+    for (auto cur = cursor;; cur = left(cur, allowLineChange)) {
         if (content(cur) == c) {
             return cur;
         }
         if (cur.x() == 0) {
-            return {};
+            if (allowLineChange) {
+                if (cur.y() == 0) {
+                    return {};
+                }
+            }
+            else {
+                return {};
+            }
         }
     }
 

@@ -54,6 +54,8 @@ std::shared_ptr<IMode> createVisualMode(IEnvironment &env,
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
         {{"iw"}, {sc.select_inner_word}},
         {{"aw"}, {sc.select_inner_word}},
+        {{"i("}, {sc.select_inner_paren}},
+        {{"a("}, {sc.select_around_paren}},
     }};
 
     auto mode = std::make_shared<Mode>("visual",

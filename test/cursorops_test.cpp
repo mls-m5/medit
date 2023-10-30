@@ -319,6 +319,23 @@ TEST_CASE("find()") {
     }
 }
 
+TEST_CASE("find() - multiline") {
+    auto buffer = Buffer{"apa bepa\ncepa depa"};
+
+    {
+        auto f = find({buffer, 0, 0}, "d", true);
+        EXPECT_TRUE(f);
+        ASSERT_EQ(f->x(), 5);
+        ASSERT_EQ(f->y(), 1);
+    }
+
+    {
+        // If not found return same as before
+        auto f = find({buffer, 8, 0}, "b", true);
+        EXPECT_FALSE(f);
+    }
+}
+
 TEST_CASE("rfind()") {
     auto buffer = Buffer{"apa bepa cepa depa"};
 
@@ -332,6 +349,22 @@ TEST_CASE("rfind()") {
     {
         // If not found return same as before
         auto f = rfind({buffer, 5, 0}, "d");
+        EXPECT_FALSE(f);
+    }
+}
+
+TEST_CASE("rfind() - multiline") {
+    auto buffer = Buffer{"apa bepa\ncepa depa"};
+
+    {
+        auto f = rfind({buffer, 2, 1}, "b", true);
+        EXPECT_TRUE(f);
+        ASSERT_EQ(f->x(), 4);
+        ASSERT_EQ(f->y(), 0);
+    }
+
+    {
+        auto f = rfind({buffer, 5, 0}, "d", true);
         EXPECT_FALSE(f);
     }
 }

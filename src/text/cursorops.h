@@ -20,8 +20,12 @@
 [[nodiscard]] Cursor wordEnd(Cursor);
 
 //! Find stuff
-[[nodiscard]] std::optional<Cursor> find(Cursor, Utf8Char);
-[[nodiscard]] std::optional<Cursor> rfind(Cursor, Utf8Char);
+[[nodiscard]] std::optional<Cursor> find(Cursor,
+                                         Utf8Char,
+                                         bool allowLineChange = false);
+[[nodiscard]] std::optional<Cursor> rfind(Cursor,
+                                          Utf8Char,
+                                          bool allowLineChange = false);
 
 // TODO: change this order, cursor should really be first
 Cursor insert(Utf8Char, Cursor);

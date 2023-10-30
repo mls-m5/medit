@@ -328,6 +328,22 @@ StandardCommands create() {
         e.selection(range);
     };
 
+    DEF(select_inner_paren) {
+        auto &e = env->editor();
+        auto cursor = e.cursor();
+        auto range = inner(cursor, "(", ")");
+        range.endPosition(left(range.end()));
+        e.selection(range);
+    };
+
+    DEF(select_around_paren) {
+        auto &e = env->editor();
+        auto cursor = e.cursor();
+        auto range = inner(cursor, "(", ")");
+        range.beginPosition(left(range.begin()));
+        e.selection(range);
+    };
+
     DEF(command_palette) {
         env->mainWindow().showCommandPalette();
     };
