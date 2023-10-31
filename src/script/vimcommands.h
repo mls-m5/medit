@@ -5,6 +5,7 @@
 #include "text/cursor.h"
 #include "text/cursorrange.h"
 #include "text/fstring.h"
+#include "text/fstringview.h"
 #include <functional>
 #include <meditfwd.h>
 #include <memory>
@@ -38,6 +39,12 @@ constexpr char matching(char c) {
     return 0;
 }
 
+enum MatchType {
+    PartialMatch,
+    Match,
+    NoMatch,
+};
+
 } // namespace vim
 
 enum class VimCommandType {
@@ -47,6 +54,8 @@ enum class VimCommandType {
     Yank,
     Other,
 };
+
+vim::MatchType matchVimMotion(FStringView str);
 
 VimCommandType getType(VimMode modeName, FString &buffer);
 

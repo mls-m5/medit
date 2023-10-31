@@ -102,6 +102,13 @@ public:
         return str;
     }
 
+    FStringView substr(size_t pos, size_t size = static_cast<size_t>(-1)) {
+        pos = std::min(pos, _size);
+        auto available = _size - pos;
+        size = std::min(available, size);
+        return FStringView{_data + pos, size};
+    }
+
     explicit operator FString() const;
 };
 

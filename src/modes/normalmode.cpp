@@ -96,8 +96,28 @@ std::shared_ptr<IMode> createNormalMode() {
         {{"gd"}, {[](Ptr env) { env->mainWindow().gotoDefinition(); }}},
     }};
 
-    bufferMap.customMatchFunction([](FStringView) -> BufferKeyMap::ReturnT {
-        return {BufferKeyMap::Match, [](auto) {}};
+    bufferMap.customMatchFunction([](FStringView str) -> BufferKeyMap::ReturnT {
+        auto m = matchVimMotion(str);
+        if (m == vim::MatchType::PartialMatch) {
+            return {BufferKeyMap::PartialMatch, {}};
+        }
+        if (m == vim::MatchType::Match) {
+            auto motion = getMotion(FString{str});
+            if (motion) {
+                auto wrapper =
+                    [motion = *motion](std::shared_ptr<IEnvironment> env) {
+                        auto &editor = env->editor();
+                        auto num = editor.mode().repetitions();
+                        auto cursor = editor.cursor();
+                        cursor = motion(cursor, num);
+                        editor.cursor(cursor);
+                    };
+
+                return {BufferKeyMap::Match, wrapper};
+            }
+        }
+
+        return {BufferKeyMap::NoMatch, {}};
     });
 
     auto mode =
