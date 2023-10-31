@@ -9,11 +9,15 @@
 #include "text/cursorops.h"
 #include "text/cursorrange.h"
 #include "text/cursorrangeops.h"
+#include "text/fstring.h"
+#include "text/utf8char.h"
 #include "views/editor.h"
+#include <functional>
 #include <meditfwd.h>
 #include <memory>
+#include <optional>
 
-enum VimMode {
+enum class VimMode {
     Normal,
     Insert,
     Visual,
@@ -72,8 +76,7 @@ void change(std::shared_ptr<IEnvironment> env) {
     e.mode(createMode<resultMode>());
 }
 
-template <char c>
-constexpr char matching() {
+constexpr char matching(char c) {
     switch (c) {
     case '"':
         return '"';
@@ -90,37 +93,39 @@ constexpr char matching() {
     return 0;
 }
 
-template <char Char>
-CursorRange inner(Cursor cursor) {
-    static constexpr auto matchingChar = ::vim::matching<Char>();
-    // TODO: Handle special case for ""
+CursorRange inner(char c, Cursor cursor);
 
-    // TODO: Handle when there is numbers in the mode
-
-    return ::inner(cursor, Char, matchingChar);
-}
-
-template <char Char>
-CursorRange around(Cursor cursor) {
-    auto range = inner<Char>(cursor);
-
-    range.beginPosition(left(range.begin()));
-    range.endPosition(right(range.end()));
-
-    return range;
-}
+CursorRange around(char c, Cursor cursor);
 
 } // namespace vim
 
-void hello() {
-    /// Testing instantiations
-    auto selectionFunction = vim::select<VimMode::Normal, vim::inner<'"'>>;
-    auto ciq = vim::change<VimMode::Insert, vim::inner<'"'>, true, true>;
-    auto caq = vim::change<VimMode::Insert, vim::around<'"'>, true, true>;
-    ciq({});
+enum class VimCommandType {
+    Change,
+    Visual,
+    Delete,
+    Yank,
+    Other,
+};
 
-    auto yiw = vim::change<VimMode::Insert, vim::inner<'"'>, true, false>;
-    yiw({});
+VimCommandType getType(VimMode modeName, FString &buffer);
 
-    selectionFunction({});
+std::optional<std::function<Cursor(Cursor, int)>> getMotion(FString);
+
+std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
+    const FString &buffer);
+
+template <VimMode modeName>
+std::optional<std::function<void(std::shared_ptr<IEnvironment>)>>
+standardVimCommand(std::shared_ptr<IEnvironment> env) {
+    auto &editor = env->editor();
+    auto &mode = editor.mode();
+
+    auto buffer = mode.buffer();
+
+    auto commandType = getType(modeName, buffer);
+
+    auto repetitions = mode.repetitions();
+    auto movement = buffer;
+
+    return std::nullopt;
 }

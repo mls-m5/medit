@@ -57,7 +57,7 @@ public:
         return _isBlockSelection;
     }
 
-    int repetitions() const {
+    int repetitions() const override {
         return _repetitions;
     }
 
@@ -79,5 +79,9 @@ public:
     Mode &shouldEnableNumbers(bool value) {
         _shouldEnableNumbers = value;
         return *this;
+    }
+
+    const FString &buffer() const override {
+        return _buffer;
     }
 };
