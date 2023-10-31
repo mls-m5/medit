@@ -4,4 +4,4 @@
 #include <functional>
 #include <memory>
 
-using CommandBlock = std::function<void(std::shared_ptr<IEnvironment>)>;
+using CommandT = std::function<void(std::shared_ptr<IEnvironment>)>;

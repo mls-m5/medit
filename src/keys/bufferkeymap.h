@@ -7,7 +7,7 @@
 
 class BufferKeyMap {
 public:
-    using MapType = std::vector<std::pair<FString, CommandBlock>>;
+    using MapType = std::vector<std::pair<FString, CommandT>>;
 
     enum MatchType {
         NoMatch,
@@ -17,7 +17,7 @@ public:
 
     //! @returns second = CommandBlock pointing to matching commandblock if
     //! match else second = nullptr, first = kind of match
-    std::pair<MatchType, CommandBlock *> match(FStringView str) {
+    std::pair<MatchType, CommandT *> match(FStringView str) {
         auto best = NoMatch;
         for (auto &item : _map) {
             auto m = match(item.first, str);

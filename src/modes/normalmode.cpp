@@ -35,12 +35,6 @@ std::shared_ptr<IMode> createNormalMode() {
             {{Key::Right}, sc.right},
             {{Key::Down}, sc.down},
             {{Key::Up}, sc.up},
-            {{"h"}, vimMotion},
-            {{"l"}, vimMotion},
-            //            {{"h"}, sc.left},
-            //            {{"l"}, sc.right},
-            {{"j"}, sc.down},
-            {{"k"}, sc.up},
             {{"J"}, sc.join},
             {{"p"}, sc.paste},
             {{"P"}, sc.paste_before},
@@ -71,15 +65,11 @@ std::shared_ptr<IMode> createNormalMode() {
             {{"I"}, sc.combine(sc.home, sc.insert_mode)},
             {{"a"}, sc.combine(sc.right, sc.insert_mode)},
             {{"A"}, sc.combine(sc.end, sc.insert_mode)},
-            {{"b"}, sc.combine(sc.left, sc.word_begin)},
-            {{"e"}, sc.combine(sc.right, sc.word_end)},
-            {{"w"},
-             sc.combine(sc.word_end, sc.right, sc.word_end, sc.word_begin)},
             {{">"}, {sc.indent}},
             {{"<"}, {sc.deindent}},
         },
     };
-    map.defaultAction({});
+    map.defaultAction(vimMotion);
 
     auto action = createVimAction(VimMode::Normal);
 

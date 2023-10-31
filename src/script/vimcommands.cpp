@@ -1,9 +1,11 @@
 #include "script/vimcommands.h"
+#include "meditfwd.h"
 #include "text/cursorops.h"
 #include "text/cursorrange.h"
 #include "text/cursorrangeops.h"
 #include "text/fstring.h"
 #include "text/utf8char.h"
+#include <array>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -58,17 +60,40 @@ std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
     return std::nullopt;
 }
 
+// Wrapper functions for handling functions with default arguments
 template <typename F, typename... Args>
 auto wrap(F f, Args... args) {
     return [=](Cursor cursor) { return f(cursor, args...); };
 }
 
+// template <typename F>
+// auto wrap(F f) {
+//     return [=](Cursor cursor) { return f(cursor); };
+// }
+
+template <typename... Args>
+std::function<Cursor(Cursor)> combine(Args... args) {
+    return [=](Cursor cursor) -> Cursor {
+        auto functions =
+            std::array<std::function<Cursor(Cursor)>, sizeof...(args)>{
+                wrap(args)...};
+        for (auto f : functions) {
+            cursor = f(cursor);
+        }
+        return cursor;
+    };
+}
+
 std::optional<std::function<Cursor(Cursor, int)>> getMotion(FString buffer) {
     const static auto map = std::map<FString, std::function<Cursor(Cursor)>>{
-        {"h", wrap(::left, false)},
-        {"l", wrap(::right, false)},
-        {"w", ::wordEnd},
-        {"b", ::wordBegin},
+        {"h", wrap(left, false)},
+        {"l", wrap(right, false)},
+        {"j", down},
+        {"k", up},
+        {"b", combine(wrap(left, true), wordBegin)},
+        {"w", combine(wordEnd, wrap(right, true), wordEnd, wordBegin)},
+        {"e", combine(wrap(right, true), wordEnd)},
+        {"b", wordBegin},
     };
 
     if (auto single = map.find(buffer); single != map.end()) {
