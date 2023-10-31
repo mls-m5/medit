@@ -1,5 +1,7 @@
 #include "keys/bufferkeymap.h"
+#include "mls-unit-test/expect.h"
 #include "mls-unit-test/unittest.h"
+#include "text/fstringview.h"
 
 TEST_SUIT_BEGIN(BufferKeyMap)
 
@@ -43,7 +45,7 @@ TEST_CASE("partial match") {
 TEST_CASE("match") {
     auto map = BufferKeyMap{BufferKeyMap::MapType{
         {
-            {"hello"},
+            {"hello", [](auto) {}},
             {},
         },
     }};
@@ -52,6 +54,26 @@ TEST_CASE("match") {
 
     ASSERT_EQ(m.first, map.Match);
     EXPECT(m.second);
+}
+
+TEST_CASE("custom function") {
+    auto map = BufferKeyMap{BufferKeyMap::MapType{}};
+
+    {
+        auto m = map.match(FString{"hello"});
+        ASSERT_EQ(m.first, map.NoMatch);
+        EXPECT_FALSE(m.second);
+    }
+
+    map.customMatchFunction([](FStringView str) -> BufferKeyMap::ReturnT {
+        return {BufferKeyMap::Match, [](auto) {}};
+    });
+
+    {
+        auto m = map.match(FString{"hello"});
+        ASSERT_EQ(m.first, map.Match);
+        EXPECT_TRUE(m.second);
+    }
 }
 
 TEST_SUIT_END

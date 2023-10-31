@@ -24,8 +24,8 @@ struct KeyMatch {
 };
 
 class KeyMap {
-    CommandBlock _defaultAction;
-    std::vector<std::pair<KeyMatch, CommandBlock>> _map;
+    CommandT _defaultAction;
+    std::vector<std::pair<KeyMatch, CommandT>> _map;
 
 public:
     KeyMap() = default;
@@ -35,20 +35,20 @@ public:
     KeyMap &operator=(KeyMap &&) = default;
     ~KeyMap() = default;
 
-    KeyMap(std::vector<std::pair<KeyMatch, CommandBlock>> map)
+    KeyMap(std::vector<std::pair<KeyMatch, CommandT>> map)
         : _map(std::move(map)) {}
 
-    const CommandBlock &find(const KeyEvent &event) const;
+    const CommandT &find(const KeyEvent &event) const;
 
-    void defaultAction(CommandBlock action) {
+    void defaultAction(CommandT action) {
         _defaultAction = std::move(action);
     }
 
-    CommandBlock defaultAction() const {
+    CommandT defaultAction() const {
         return _defaultAction;
     }
 
-    void bind(std::pair<KeyMatch, CommandBlock> bind) {
+    void bind(std::pair<KeyMatch, CommandT> bind) {
         _map.push_back(std::move(bind));
     }
 };

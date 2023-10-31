@@ -44,7 +44,7 @@ bool Mode::keyPress(std::shared_ptr<IEnvironment> env) {
             return true;
         }
         else if (m.first == BufferKeyMap::Match) {
-            const auto &block = *m.second;
+            const auto &block = m.second;
             block(env);
             _buffer.clear();
             _repetitions = 0;

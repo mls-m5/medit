@@ -1,12 +1,13 @@
 // Copyright Mattias Larsson Sköld
 
 #include "normalmode.h"
+#include "keys/bufferkeymap.h"
 #include "modes/mode.h"
 #include "modes/parentmode.h"
-#include "screen/cursorstyle.h"
 #include "script/ienvironment.h"
 #include "script/standardcommands.h"
 #include "script/vimcommands.h"
+#include "text/fstringview.h"
 #include "views/mainwindow.h"
 #include <memory>
 
@@ -35,12 +36,6 @@ std::shared_ptr<IMode> createNormalMode() {
             {{Key::Right}, sc.right},
             {{Key::Down}, sc.down},
             {{Key::Up}, sc.up},
-            {{"h"}, vimMotion},
-            {{"l"}, vimMotion},
-            //            {{"h"}, sc.left},
-            //            {{"l"}, sc.right},
-            {{"j"}, sc.down},
-            {{"k"}, sc.up},
             {{"J"}, sc.join},
             {{"p"}, sc.paste},
             {{"P"}, sc.paste_before},
@@ -71,15 +66,11 @@ std::shared_ptr<IMode> createNormalMode() {
             {{"I"}, sc.combine(sc.home, sc.insert_mode)},
             {{"a"}, sc.combine(sc.right, sc.insert_mode)},
             {{"A"}, sc.combine(sc.end, sc.insert_mode)},
-            {{"b"}, sc.combine(sc.left, sc.word_begin)},
-            {{"e"}, sc.combine(sc.right, sc.word_end)},
-            {{"w"},
-             sc.combine(sc.word_end, sc.right, sc.word_end, sc.word_begin)},
             {{">"}, {sc.indent}},
             {{"<"}, {sc.deindent}},
         },
     };
-    map.defaultAction({});
+    map.defaultAction(vimMotion);
 
     auto action = createVimAction(VimMode::Normal);
 
@@ -104,6 +95,30 @@ std::shared_ptr<IMode> createNormalMode() {
 
         {{"gd"}, {[](Ptr env) { env->mainWindow().gotoDefinition(); }}},
     }};
+
+    bufferMap.customMatchFunction([](FStringView str) -> BufferKeyMap::ReturnT {
+        auto m = matchVimMotion(str);
+        if (m == vim::MatchType::PartialMatch) {
+            return {BufferKeyMap::PartialMatch, {}};
+        }
+        if (m == vim::MatchType::Match) {
+            auto motion = getMotion(FString{str});
+            if (motion) {
+                auto wrapper =
+                    [motion = *motion](std::shared_ptr<IEnvironment> env) {
+                        auto &editor = env->editor();
+                        auto num = editor.mode().repetitions();
+                        auto cursor = editor.cursor();
+                        cursor = motion(cursor, num);
+                        editor.cursor(cursor);
+                    };
+
+                return {BufferKeyMap::Match, wrapper};
+            }
+        }
+
+        return {BufferKeyMap::NoMatch, {}};
+    });
 
     auto mode =
         std::make_shared<Mode>("normal", std::move(map), createParentMode());
