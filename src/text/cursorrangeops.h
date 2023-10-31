@@ -27,3 +27,15 @@ std::ostream &operator<<(std::ostream &, CursorRange);
 
 //! The whole buffer
 [[nodiscard]] CursorRange all(Buffer &buffer);
+
+//! Both directions
+[[nodiscard]] CursorRange extend(CursorRange,
+                                 size_t num = 1,
+                                 bool allowLineChanges = true);
+
+[[nodiscard]] CursorRange extendRight(CursorRange,
+                                      size_t num = 1,
+                                      bool allowLineChanges = true);
+[[nodiscard]] CursorRange extendLeft(CursorRange,
+                                     size_t num = 1,
+                                     bool allowLineChanges = true);

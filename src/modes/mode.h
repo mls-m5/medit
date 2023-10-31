@@ -58,7 +58,7 @@ public:
     }
 
     int repetitions() const override {
-        return _repetitions;
+        return std::max(1, _repetitions);
     }
 
     Mode &cursorStyle(CursorStyle style) {

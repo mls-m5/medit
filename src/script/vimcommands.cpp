@@ -1,9 +1,11 @@
 #include "script/vimcommands.h"
 #include "text/cursorops.h"
 #include "text/cursorrange.h"
+#include "text/cursorrangeops.h"
 #include "text/fstring.h"
 #include "text/utf8char.h"
 #include <optional>
+#include <stdexcept>
 #include <string>
 
 // @param buffer. Note that this parameter changes the value sent in by erasing
@@ -56,36 +58,136 @@ std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
     return std::nullopt;
 }
 
+template <typename F, typename... Args>
+auto wrap(F f, Args... args) {
+    return [=](Cursor cursor) { return f(cursor, args...); };
+}
+
 std::optional<std::function<Cursor(Cursor, int)>> getMotion(FString buffer) {
-    static auto map = std::map<FString, std::function<Cursor(Cursor)>>{
+    const static auto map = std::map<FString, std::function<Cursor(Cursor)>>{
+        {"h", wrap(::left, false)},
+        {"l", wrap(::right, false)},
         {"w", ::wordEnd},
         {"b", ::wordBegin},
     };
 
-    auto single = map.at(buffer);
+    if (auto single = map.find(buffer); single != map.end()) {
+        return [single = single->second](Cursor cur, int num) {
+            for (int i = 0; i < num; ++i) {
+                cur = single(cur);
+            }
+            return cur;
+        };
+    }
 
-    return [single](Cursor cur, int num) {
-        for (int i = 0; i < num; ++i) {
-            cur = single(cur);
-        }
-        return cur;
+    return std::nullopt;
+}
+
+std::optional<std::function<Cursor(Cursor, int)>> getInnerFunction(
+    FString buffer) {
+    const static auto map = std::map<FString, std::function<Cursor(Cursor)>>{
+        {"w", ::wordEnd},
+        {"(", ::wordBegin},
+    };
+
+    if (auto single = map.find(buffer); single != map.end()) {
+        return [single = single->second](Cursor cur, int num) {
+            for (int i = 0; i < num; ++i) {
+                cur = single(cur);
+            }
+            return cur;
+        };
+    }
+
+    return std::nullopt;
+}
+
+// CursorRange vim::inner(char c, Cursor cursor) {
+//     const auto matchingChar = ::vim::matching(c);
+//     // TODO: Handle special case for ""
+
+//    // TODO: Handle when there is numbers in the mode
+
+//    return ::inner(cursor, c, matchingChar);
+//}
+
+// CursorRange vim::around(char c, Cursor cursor) {
+//     auto range = inner(c, cursor);
+
+//    range.beginPosition(left(range.begin()));
+//    range.endPosition(right(range.end()));
+
+//    return range;
+//}
+
+VimMode applyAction(VimCommandType type,
+                    CursorRange range,
+                    Registers &registers) {
+    using T = VimCommandType;
+    switch (type) {
+    case T::Change:
+        registers.save(standardRegister, content(range));
+        erase(extendRight(range));
+        return VimMode::Insert;
+    case T::Yank:
+        registers.save(standardRegister, content(range));
+        return VimMode::Normal;
+    case T::Delete:
+        registers.save(standardRegister, content(range));
+        erase(extendRight(range));
+        return VimMode::Normal;
+    default:
+        throw std::runtime_error{"invalid action command type"};
+    }
+
+    throw std::runtime_error{"hello"};
+    return VimMode::Normal;
+}
+
+std::shared_ptr<IMode> vim::createMode(VimMode resultMode) {
+    switch (resultMode) {
+    case VimMode::Normal:
+        return createNormalMode();
+    case VimMode::Insert:
+        return createInsertMode();
+    case VimMode::Visual:
+        return createVisualMode();
+    }
+    throw std::runtime_error{"cannot create mode: This should never happend"};
+}
+
+void doVimAction(std::shared_ptr<IEnvironment> env, VimMode modeName) {
+    auto &editor = env->editor();
+    auto &mode = editor.mode();
+    auto cursor = editor.cursor();
+    auto buffer = mode.buffer();
+
+    auto commandType = getType(modeName, buffer);
+    auto repetitions = mode.repetitions();
+    auto selection =
+        getSelection(buffer, cursor, modeName, std::max(1, repetitions));
+
+    applyAction(commandType, selection, env->registers());
+}
+
+std::function<void(std::shared_ptr<IEnvironment>)> createVimAction(
+    VimMode modeName) {
+    return [modeName](std::shared_ptr<IEnvironment> env) {
+        doVimAction(env, modeName);
     };
 }
 
-CursorRange vim::inner(char c, Cursor cursor) {
-    const auto matchingChar = ::vim::matching(c);
-    // TODO: Handle special case for ""
+CursorRange getSelection(const FString &buffer,
+                         Cursor cursor,
+                         VimMode modeName,
+                         int repetitions) {
 
-    // TODO: Handle when there is numbers in the mode
+    auto motion = getMotion(buffer);
 
-    return ::inner(cursor, c, matchingChar);
-}
+    if (motion) {
+        // TODO: Handle when motion is backwards
+        return CursorRange{cursor, (*motion)(cursor, repetitions)};
+    }
 
-CursorRange vim::around(char c, Cursor cursor) {
-    auto range = inner(c, cursor);
-
-    range.beginPosition(left(range.begin()));
-    range.endPosition(right(range.end()));
-
-    return range;
+    throw std::runtime_error{"hsaothesut"};
 }

@@ -4,12 +4,30 @@
 #include "modes/mode.h"
 #include "modes/parentmode.h"
 #include "screen/cursorstyle.h"
+#include "script/ienvironment.h"
 #include "script/standardcommands.h"
+#include "script/vimcommands.h"
 #include "views/mainwindow.h"
+#include <memory>
 
 std::shared_ptr<IMode> createNormalMode() {
     using Ptr = StandardCommands::EnvPtrT;
     auto &sc = StandardCommands::get();
+
+    auto vimMotion = [](std::shared_ptr<IEnvironment> env) {
+        auto &editor = env->editor();
+        auto &mode = editor.mode();
+        auto motion = getMotion(mode.buffer());
+
+        if (!motion) {
+            return; /// Failed
+        }
+
+        auto cursor = editor.cursor();
+
+        cursor = (*motion)(cursor, mode.repetitions());
+        editor.cursor(cursor);
+    };
 
     auto map = KeyMap{
         {
@@ -17,8 +35,10 @@ std::shared_ptr<IMode> createNormalMode() {
             {{Key::Right}, sc.right},
             {{Key::Down}, sc.down},
             {{Key::Up}, sc.up},
-            {{"h"}, sc.left},
-            {{"l"}, sc.right},
+            {{"h"}, vimMotion},
+            {{"l"}, vimMotion},
+            //            {{"h"}, sc.left},
+            //            {{"l"}, sc.right},
             {{"j"}, sc.down},
             {{"k"}, sc.up},
             {{"J"}, sc.join},
@@ -61,10 +81,14 @@ std::shared_ptr<IMode> createNormalMode() {
     };
     map.defaultAction({});
 
+    auto action = createVimAction(VimMode::Normal);
+
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
         {{"dd"}, sc.delete_line},
-        {{"dw"}, sc.combine(sc.select_word, sc.erase)},
-        {{"diw"}, sc.combine(sc.select_inner_word, sc.erase)},
+        //        {{"dw"}, sc.combine(sc.select_word, sc.erase)},
+        {{"dw"}, action},
+        {{"diw"}, action},
+        //        {{"diw"}, sc.combine(sc.select_inner_word, sc.erase)},
 
         {{"cc"}, sc.combine(sc.clear_line, sc.copy, sc.copy_indentation)},
         {{"cw"}, sc.combine(sc.select_word, sc.erase, sc.insert_mode)},

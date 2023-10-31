@@ -74,6 +74,23 @@ size_t FString::find(Utf8Char c, size_t start) const {
     return npos;
 }
 
+bool FString::operator<(const FString &other) const {
+    auto size = std::min(this->size(), other.size());
+    for (size_t i = 0; i < size; ++i) {
+        auto c1 = static_cast<uint32_t>(at(i).c);
+        auto c2 = static_cast<uint32_t>(other.at(i).c);
+
+        if (c1 < c2) {
+            return true;
+        }
+        else if (c1 > c2) {
+            return false;
+        }
+    }
+
+    return this->size() < other.size();
+}
+
 FStringView FString::substr(size_t start, size_t length) const {
     if (start >= _content.size()) {
         return {};
