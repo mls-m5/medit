@@ -8,8 +8,23 @@
 #include "script/vimcommands.h"
 #include "views/editor.h"
 
-std::shared_ptr<IMode> createVisualMode(bool blockSelection) {
+std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
     auto &sc = StandardCommands::get();
+
+    auto vimCommand = [](std::shared_ptr<IEnvironment> env) {
+        auto &editor = env->editor();
+        auto &mode = editor.mode();
+        auto motion = getMotion(mode.buffer());
+
+        if (!motion) {
+            return; /// Failed
+        }
+
+        auto cursor = editor.cursor();
+
+        cursor = (*motion)(cursor, mode.repetitions());
+        editor.cursor(cursor);
+    };
 
     auto map = KeyMap{
         {
@@ -17,10 +32,6 @@ std::shared_ptr<IMode> createVisualMode(bool blockSelection) {
             {{Key::Right}, {sc.right}},
             {{Key::Down}, {sc.down}},
             {{Key::Up}, {sc.up}},
-            {{"h"}, {sc.left}},
-            {{"l"}, {sc.right}},
-            {{"j"}, {sc.down}},
-            {{"k"}, {sc.up}},
             {{Key::Backspace}, {sc.left}},
             {{"X"}, {sc.erase}},
             {{Key::Delete}, {sc.combine(sc.erase, sc.normal_mode)}},
@@ -32,25 +43,19 @@ std::shared_ptr<IMode> createVisualMode(bool blockSelection) {
             {{Key::Escape}, {sc.normal_mode}},
             {{"\n"}, {sc.down}},
             {{Key::Space}, {sc.right}},
-
-            {{"b"}, {sc.combine(sc.left, sc.word_begin)}},
-            {{"e"}, {sc.combine(sc.right, sc.word_end)}},
-            {{"w"},
-             {sc.combine(sc.word_end, sc.right, sc.word_end, sc.word_begin)}},
             {{">"}, {sc.indent}},
             {{"<"}, {sc.deindent}},
         },
     };
 
-    if (blockSelection) {
+    if (isBlockSelection) {
         map.bind({{"y"}, {sc.combine(sc.yank_block, sc.normal_mode)}});
     }
     else {
         map.bind({{"y"}, {sc.combine(sc.yank, sc.normal_mode)}});
     }
-    map.defaultAction({});
 
-    //    using select = vim::select;
+    map.defaultAction(vimCommand);
 
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
         {{"iw"}, {sc.select_inner_word}},
@@ -60,10 +65,12 @@ std::shared_ptr<IMode> createVisualMode(bool blockSelection) {
     }};
 
     auto mode =
-        std::make_shared<Mode>("visual", std::move(map), createParentMode());
+        std::make_shared<Mode>(isBlockSelection ? "visual block" : "visual",
+                               std::move(map),
+                               createParentMode());
 
     mode->bufferMap(std::move(bufferMap));
-    mode->isBlockSelection(blockSelection);
+    mode->isBlockSelection(isBlockSelection);
 
     mode->startCallback([](Editor &e) { e.anchor(e.cursor()); });
     mode->exitCallback([](Editor &e) { e.clearSelection(); });

@@ -3,7 +3,6 @@
 #include "normalmode.h"
 #include "modes/mode.h"
 #include "modes/parentmode.h"
-#include "screen/cursorstyle.h"
 #include "script/ienvironment.h"
 #include "script/standardcommands.h"
 #include "script/vimcommands.h"
