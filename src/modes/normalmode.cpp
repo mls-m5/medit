@@ -1,11 +1,13 @@
 // Copyright Mattias Larsson Sköld
 
 #include "normalmode.h"
+#include "keys/bufferkeymap.h"
 #include "modes/mode.h"
 #include "modes/parentmode.h"
 #include "script/ienvironment.h"
 #include "script/standardcommands.h"
 #include "script/vimcommands.h"
+#include "text/fstringview.h"
 #include "views/mainwindow.h"
 #include <memory>
 
@@ -93,6 +95,10 @@ std::shared_ptr<IMode> createNormalMode() {
 
         {{"gd"}, {[](Ptr env) { env->mainWindow().gotoDefinition(); }}},
     }};
+
+    bufferMap.customMatchFunction([](FStringView) -> BufferKeyMap::ReturnT {
+        return {BufferKeyMap::Match, [](auto) {}};
+    });
 
     auto mode =
         std::make_shared<Mode>("normal", std::move(map), createParentMode());
