@@ -6,6 +6,8 @@
 #include <optional>
 #include <string>
 
+// @param buffer. Note that this parameter changes the value sent in by erasing
+// the information that is aquired through this function
 VimCommandType getType(VimMode modeName, FString &buffer) {
     auto commandType = VimCommandType::Visual;
 
@@ -74,7 +76,7 @@ CursorRange vim::inner(char c, Cursor cursor) {
     const auto matchingChar = ::vim::matching(c);
     // TODO: Handle special case for ""
 
-           // TODO: Handle when there is numbers in the mode
+    // TODO: Handle when there is numbers in the mode
 
     return ::inner(cursor, c, matchingChar);
 }

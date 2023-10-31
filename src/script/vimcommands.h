@@ -16,6 +16,7 @@
 #include <meditfwd.h>
 #include <memory>
 #include <optional>
+#include <stdexcept>
 
 enum class VimMode {
     Normal,
@@ -97,6 +98,29 @@ CursorRange inner(char c, Cursor cursor);
 
 CursorRange around(char c, Cursor cursor);
 
+inline VimMode changeAction(CursorRange range,
+                            IMode &mode,
+                            Registers &registers) {
+    registers.save(standardRegister, content(range));
+    erase(range);
+    return VimMode::Insert;
+}
+
+inline VimMode yankAction(CursorRange range,
+                          IMode &mode,
+                          Registers &registers) {
+    registers.save(standardRegister, content(range));
+    return VimMode::Normal;
+}
+
+inline VimMode deleteAction(CursorRange range,
+                            IMode &mode,
+                            Registers &registers) {
+    registers.save(standardRegister, content(range));
+    erase(range);
+    return VimMode::Normal;
+}
+
 } // namespace vim
 
 enum class VimCommandType {
@@ -111,21 +135,65 @@ VimCommandType getType(VimMode modeName, FString &buffer);
 
 std::optional<std::function<Cursor(Cursor, int)>> getMotion(FString);
 
-std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
-    const FString &buffer);
+// std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
+//     const FString &buffer);
+
+CursorRange getSelection(const FString &buffer, Cursor, VimMode, int);
+
+// using ActionType = std::function<decltype(vim::changeAction)>;
+
+// ActionType getAction(VimCommandType type) {
+//     using T = VimCommandType;
+//     switch (type) {
+//     case T::Change:
+//         return vim::changeAction;
+//     case T::Yank:
+//         return vim::yankAction;
+//     case T::Delete:
+//         return vim::deleteAction;
+//     default:
+//         throw std::runtime_error{"invalid action command type"};
+//     }
+
+//    throw std::runtime_error{"hello"};
+//    return {};
+//}
+
+VimMode applyAction(VimCommandType type,
+                    CursorRange range,
+                    Registers &registers) {
+    using T = VimCommandType;
+    switch (type) {
+    case T::Change:
+        registers.save(standardRegister, content(range));
+        erase(range);
+        return VimMode::Insert;
+    case T::Yank:
+        registers.save(standardRegister, content(range));
+        return VimMode::Normal;
+    case T::Delete:
+        registers.save(standardRegister, content(range));
+        erase(range);
+        return VimMode::Normal;
+    default:
+        throw std::runtime_error{"invalid action command type"};
+    }
+
+    throw std::runtime_error{"hello"};
+    return VimMode::Normal;
+}
 
 template <VimMode modeName>
-std::optional<std::function<void(std::shared_ptr<IEnvironment>)>>
-standardVimCommand(std::shared_ptr<IEnvironment> env) {
+void doVimAction(std::shared_ptr<IEnvironment> env) {
     auto &editor = env->editor();
     auto &mode = editor.mode();
-
+    auto cursor = editor.cursor();
     auto buffer = mode.buffer();
 
     auto commandType = getType(modeName, buffer);
-
     auto repetitions = mode.repetitions();
-    auto movement = buffer;
+    auto movement = getMotion(buffer);
+    auto selection = getSelection(buffer, cursor, modeName, repetitions);
 
-    return std::nullopt;
+    applyAction(commandType, selection, env->registers());
 }
