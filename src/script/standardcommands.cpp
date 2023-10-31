@@ -79,15 +79,6 @@ StandardCommands create() {
         e.cursor(c);
     };
 
-    DEF(word_begin) {
-        auto &e = env->editor();
-        e.cursor(::wordBegin(e.cursor()));
-    };
-    DEF(word_end) {
-        auto &e = env->editor();
-        e.cursor(::wordEnd(e.cursor()));
-    };
-
     DEF(switch_header) {
         auto path = env->project().findSwitchHeader(env->editor().path());
         if (!path.empty()) {

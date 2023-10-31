@@ -19,8 +19,6 @@
     STD_DEF(end)                                                               \
     STD_DEF(page_up)                                                           \
     STD_DEF(page_down)                                                         \
-    STD_DEF(word_begin)                                                        \
-    STD_DEF(word_end)                                                          \
     STD_DEF(switch_header)                                                     \
     STD_DEF(yank_line)                                                         \
     STD_DEF(delete_line)                                                       \
