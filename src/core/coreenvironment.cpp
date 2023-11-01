@@ -1,5 +1,6 @@
 #include "coreenvironment.h"
 #include "core/fifofile.h"
+#include "core/meditlog.h"
 #include "files/config.h"
 #include "files/project.h"
 #include "plugin/idebugger.h"
@@ -9,6 +10,7 @@
 #include <iostream>
 #include <memory>
 #include <ostream>
+#include <string_view>
 
 CoreEnvironment::CoreEnvironment(ThreadContext &context)
     : _context{&context}
@@ -23,10 +25,14 @@ CoreEnvironment::CoreEnvironment(ThreadContext &context)
         << std::endl; // Prevent the listen file from waiting
 
     _project->updateCache(std::filesystem::current_path());
+
+    subscribeToLog(
+        [this](std::string_view str) { printToAllConsoles(std::string{str}); });
 }
 
 CoreEnvironment::~CoreEnvironment() {
     _consoleCallback = {};
+    unsubscribeToLog();
 }
 
 IDebugger *CoreEnvironment::debugger() {

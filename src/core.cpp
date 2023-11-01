@@ -3,6 +3,7 @@
 #include "core/inarchive.cpp"
 #include "core/jsjobqueue.cpp"
 #include "core/jstimer.cpp"
+#include "core/meditlog.cpp"
 #include "core/os.cpp"
 #include "core/outarchive.cpp"
 #include "core/registers.cpp"
