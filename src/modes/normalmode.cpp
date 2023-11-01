@@ -78,7 +78,12 @@ std::shared_ptr<IMode> createNormalMode() {
         {{"dd"}, sc.delete_line},
         //        {{"dw"}, sc.combine(sc.select_word, sc.erase)},
         {{"dw"}, action},
+        {{"diw"}, action}, // Test only, change to automatic
         {{"diw"}, action},
+        {{"dib"}, action},
+        {{"di("}, action},
+        {{"dab"}, action},
+        {{"da("}, action},
         //        {{"diw"}, sc.combine(sc.select_inner_word, sc.erase)},
 
         {{"cc"}, sc.combine(sc.clear_line, sc.copy, sc.copy_indentation)},
