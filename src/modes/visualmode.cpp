@@ -1,30 +1,17 @@
 // Copyright Mattias Larsson Sköld
 
 #include "visualmode.h"
+#include "keys/bufferkeymap.h"
 #include "modes/mode.h"
 #include "modes/parentmode.h"
 #include "script/ienvironment.h"
 #include "script/standardcommands.h"
 #include "script/vimcommands.h"
+#include "text/cursorops.h"
 #include "views/editor.h"
 
 std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
     auto &sc = StandardCommands::get();
-
-    auto vimCommand = [](std::shared_ptr<IEnvironment> env) {
-        auto &editor = env->editor();
-        auto &mode = editor.mode();
-        auto motion = getMotion(mode.buffer());
-
-        if (!motion) {
-            return; /// Failed
-        }
-
-        auto cursor = editor.cursor();
-
-        cursor = motion.f(cursor, mode.repetitions());
-        editor.cursor(cursor);
-    };
 
     auto map = KeyMap{
         {
@@ -56,22 +43,65 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
         map.bind({{"y"}, {sc.combine(sc.yank, sc.normal_mode)}});
     }
 
+    auto vimCommand = [](std::shared_ptr<IEnvironment> env) {
+        auto &editor = env->editor();
+        auto &mode = editor.mode();
+        auto motion = getMotion(mode.buffer());
+
+        if (motion) {
+            auto cursor = editor.cursor();
+
+            cursor = motion.f(cursor, mode.repetitions());
+            editor.cursor(cursor);
+        }
+    };
+
     map.defaultAction(vimCommand);
 
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
-        {{"iw"}, {sc.select_inner_word}},
-        {{"aw"}, {sc.select_inner_word}},
-        {{"i("}, {sc.select_inner_paren}},
-        {{"a("}, {sc.select_around_paren}},
+        //        {{"iw"}, {sc.select_inner_word}},
+        //        {{"aw"}, {sc.select_inner_word}},
+        //        {{"i("}, {sc.select_inner_paren}},
+        //        {{"a("}, {sc.select_around_paren}},
     }};
 
     bufferMap.customMatchFunction([](FStringView str) -> BufferKeyMap::ReturnT {
-        auto m = getMotion(str);
-        if (m.match == vim::MatchType::PartialMatch) {
+        /// This function matches specific i and a commands. For the motion,
+        /// look above
+
+        if (str.empty()) {
+            return {BufferKeyMap::NoMatch, {}};
+        }
+        if (str.front() == 'i' || str.front() == 'a') {
+            auto selection = getSelectionFunction(str, VimMode::Visual);
+            if (selection.match == vim::MatchType::PartialMatch) {
+                return {BufferKeyMap::PartialMatch, {}};
+            }
+            if (selection.match == vim::MatchType::Match) {
+                auto wrapper = [selectionFunction = selection.f](
+                                   std::shared_ptr<IEnvironment> env) {
+                    auto &editor = env->editor();
+                    auto num = editor.mode().repetitions();
+                    auto cursor = editor.cursor();
+                    auto [selection, newCursor] =
+                        selectionFunction(cursor, num);
+
+                    if (!selection.empty()) {
+                        selection.endPosition(::left(selection.end(), true));
+                    }
+                    editor.selection(selection);
+                };
+
+                return {BufferKeyMap::Match, wrapper};
+            }
+        }
+
+        /// Separate handling for motions
+        auto motion = getMotion(str);
+        if (motion.match == vim::MatchType::PartialMatch) {
             return {BufferKeyMap::PartialMatch, {}};
         }
-        if (m.match == vim::MatchType::Match) {
-            auto motion = getMotion(str); // TODO: This should be getSelection
+        if (motion.match == vim::MatchType::Match) {
             if (motion) {
                 auto wrapper =
                     [motion = motion.f](std::shared_ptr<IEnvironment> env) {
@@ -88,6 +118,30 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
 
         return {BufferKeyMap::NoMatch, {}};
     });
+    //    bufferMap.customMatchFunction([](FStringView str) ->
+    //    BufferKeyMap::ReturnT {
+    //        auto motion = getMotion(str);
+    //        if (motion.match == vim::MatchType::PartialMatch) {
+    //            return {BufferKeyMap::PartialMatch, {}};
+    //        }
+    //        if (motion.match == vim::MatchType::Match) {
+    //            if (motion) {
+    //                auto wrapper =
+    //                    [motion = motion.f](std::shared_ptr<IEnvironment> env)
+    //                    {
+    //                        auto &editor = env->editor();
+    //                        auto num = editor.mode().repetitions();
+    //                        auto cursor = editor.cursor();
+    //                        cursor = motion(cursor, num);
+    //                        editor.cursor(cursor);
+    //                    };
+
+    //                return {BufferKeyMap::Match, wrapper};
+    //            }
+    //        }
+
+    //        return {BufferKeyMap::NoMatch, {}};
+    //    });
 
     auto mode =
         std::make_shared<Mode>(isBlockSelection ? "visual block" : "visual",

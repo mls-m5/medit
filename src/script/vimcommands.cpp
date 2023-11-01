@@ -225,16 +225,16 @@ VimMode applyAction(VimCommandType type,
     switch (type) {
     case T::Change:
         registers.save(standardRegister, content(range));
-        //        erase(extendRight(range));
         erase(range);
+        //        range.begin().buffer().history().markMajor();
         return VimMode::Insert;
     case T::Yank:
         registers.save(standardRegister, content(range));
         return VimMode::Normal;
     case T::Delete:
         registers.save(standardRegister, content(range));
-        //        erase(extendRight(range));
         erase(range);
+        //        range.begin().buffer().history().markMajor();
         return VimMode::Normal;
     default:
         throw std::runtime_error{"invalid action command type"};
@@ -286,6 +286,9 @@ ActionResultT findVimAction(FStringView buffer, VimMode modeName) {
 
     auto selectionFunction = getSelectionFunction(buffer, modeName);
 
+    if (selectionFunction.match == vim::NoMatch) {
+        return {bestResult};
+    }
     if (selectionFunction.match == vim::PartialMatch) {
         return {vim::PartialMatch};
     }
@@ -302,12 +305,12 @@ ActionResultT findVimAction(FStringView buffer, VimMode modeName) {
         auto repetitions = mode.repetitions();
         auto [selection, newCursor] =
             selectionF(cursor, std::max(1, repetitions));
-        //            getSelection(buffer, cursor, modeName, std::max(1,
-        //            repetitions));
 
-        applyAction(commandType, selection, env->registers());
+        auto newMode = applyAction(commandType, selection, env->registers());
 
         editor.cursor(newCursor);
+
+        editor.mode(vim::createMode(newMode));
     };
 
     return {vim::MatchType::Match, f};
@@ -363,6 +366,15 @@ std::pair<CursorRange, Cursor> getInnerSelection(Cursor cursor,
     case '(':
     case 'b': {
         auto range = inner('(', cursor);
+        return {range, range.begin()};
+    }
+    case '{':
+    case 'B': {
+        auto range = inner('{', cursor);
+        return {range, range.begin()};
+    }
+    case '[': {
+        auto range = inner('[', cursor);
         return {range, range.begin()};
     }
     }
@@ -437,7 +449,6 @@ SelectionFunctionT getSelectionFunction(FStringView buffer, VimMode modeName) {
         };
     }
 
-    //    throw std::runtime_error{"hsaothesut"};
     return {.match = vim::NoMatch};
 }
 
