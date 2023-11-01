@@ -263,6 +263,17 @@ StandardCommands create() {
     DEF(visual_block_mode) {
         env->editor().mode(createVisualMode(true));
     };
+    DEF(toggle_visual_end) {
+        auto &editor = env->editor();
+        auto anchor = editor.selectionAnchor();
+        if (!anchor) {
+            return;
+        }
+        auto cursor = editor.cursor();
+        editor.selectionAnchor(cursor);
+        editor.cursor(*anchor);
+    };
+
     DEF(toggle_comment) {
         ::toggleComments(env);
     };

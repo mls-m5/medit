@@ -45,6 +45,7 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
             {{Key::Space}, {sc.right}},
             {{">"}, {sc.indent}},
             {{"<"}, {sc.deindent}},
+            {{"o"}, {sc.toggle_visual_end}},
         },
     };
 
@@ -70,7 +71,7 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
             return {BufferKeyMap::PartialMatch, {}};
         }
         if (m.match == vim::MatchType::Match) {
-            auto motion = getMotion(str);
+            auto motion = getMotion(str); // TODO: This should be getSelection
             if (motion) {
                 auto wrapper =
                     [motion = motion.f](std::shared_ptr<IEnvironment> env) {
@@ -96,7 +97,7 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
     mode->bufferMap(std::move(bufferMap));
     mode->isBlockSelection(isBlockSelection);
 
-    mode->startCallback([](Editor &e) { e.anchor(e.cursor()); });
+    mode->startCallback([](Editor &e) { e.selectionAnchor(e.cursor()); });
     mode->exitCallback([](Editor &e) { e.clearSelection(); });
 
     mode->shouldEnableNumbers(true);
