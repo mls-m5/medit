@@ -70,7 +70,10 @@ struct VimMotionResult {
 
 VimMotionResult getMotion(FStringView);
 
-CursorRange getSelection(const FString &buffer, Cursor, VimMode, int);
+std::pair<CursorRange, Cursor> getSelection(const FString &buffer,
+                                            Cursor,
+                                            VimMode,
+                                            int);
 
 VimMode applyAction(VimCommandType type,
                     CursorRange range,
