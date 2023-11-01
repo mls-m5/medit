@@ -48,6 +48,7 @@
     STD_DEF(normal_mode)                                                       \
     STD_DEF(visual_mode)                                                       \
     STD_DEF(visual_block_mode)                                                 \
+    STD_DEF(toggle_visual_end)                                                 \
     STD_DEF(toggle_comment)                                                    \
     STD_DEF(select_word)                                                       \
     STD_DEF(select_inner_word)                                                 \

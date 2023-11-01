@@ -116,8 +116,12 @@ Cursor Editor::cursor(Position position) {
     return cursor({buffer(), position});
 }
 
-void Editor::anchor(Cursor cursor) {
+void Editor::selectionAnchor(Cursor cursor) {
     _selectionAnchor = {cursor};
+}
+
+std::optional<Cursor> Editor::selectionAnchor() const {
+    return _selectionAnchor;
 }
 
 void Editor::clearSelection() {
@@ -147,7 +151,7 @@ CursorRange Editor::selection() {
 }
 
 void Editor::selection(CursorRange range) {
-    anchor(range.begin());
+    selectionAnchor(range.begin());
     cursor(range.end());
 }
 

@@ -50,7 +50,8 @@ public:
     Cursor cursor(Cursor c, bool deselect = false);
     Cursor cursor(Position position);
 
-    void anchor(Cursor cursor);
+    void selectionAnchor(Cursor cursor);
+    std::optional<Cursor> selectionAnchor() const;
 
     void clearSelection();
 
