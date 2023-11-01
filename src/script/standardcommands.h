@@ -28,6 +28,7 @@
     STD_DEF(yank)                                                              \
     STD_DEF(yank_block)                                                        \
     STD_DEF(erase)                                                             \
+    STD_DEF(erase_after)                                                       \
     STD_DEF(erase_before_word)                                                 \
     STD_DEF(paste_before)                                                      \
     STD_DEF(paste)                                                             \

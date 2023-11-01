@@ -51,6 +51,7 @@ std::shared_ptr<IMode> createNormalMode() {
             {{"I"}, sc.combine(sc.home, sc.insert_mode)},
             {{"a"}, sc.combine(sc.right, sc.insert_mode)},
             {{"A"}, sc.combine(sc.end, sc.insert_mode)},
+            {{"s"}, sc.combine(sc.erase_after, sc.insert_mode)},
             {{">"}, {sc.indent}},
             {{"<"}, {sc.deindent}},
         },

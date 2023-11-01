@@ -191,19 +191,35 @@ StandardCommands create() {
         auto &e = env->editor();
         auto selection = e.selection();
         if (selection.empty()) {
-            env->registers().save(standardRegister,
-                                  content(e.cursor()).toString());
-            e.cursor(erase(e.cursor()));
-        }
-        else {
             auto str = std::string{};
 
-            //            REPEAT {
-            str += toString(selection);
-            e.cursor(erase(selection), true);
-            //            }
-
+            REPEAT {
+                str = toString(e.cursor()) + str;
+                e.cursor(erase(e.cursor()));
+            }
             env->registers().save(standardRegister, str);
+        }
+        else {
+            env->registers().save(standardRegister, toString(selection));
+            e.cursor(erase(selection), true);
+        }
+    };
+
+    DEF(erase_after) {
+        auto &e = env->editor();
+        auto selection = e.selection();
+        if (selection.empty()) {
+            auto str = std::string{};
+
+            REPEAT {
+                str += toString(e.cursor());
+                e.cursor(erase(right(e.cursor())));
+            }
+            env->registers().save(standardRegister, str);
+        }
+        else {
+            env->registers().save(standardRegister, toString(selection));
+            e.cursor(erase(selection), true);
         }
     };
 
