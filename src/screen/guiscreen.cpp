@@ -259,6 +259,10 @@ struct GuiScreen::Buffer {
     void renderLine(size_t y, FStringView str) {
         for (size_t x = 0; x < str.size(); ++x) {
             auto c = str.at(x);
+
+            if (!static_cast<uint32_t>(c.c)) {
+                continue;
+            }
             auto &s = screen.canvas.at(x, y);
 
             // Todo: Check what needs to be updated in some smart way
