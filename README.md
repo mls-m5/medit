@@ -16,6 +16,7 @@ Todo:
   - [x] Full row visual mode
   - [ ] Implement all navigation shortcuts for all modes (iw aw 'i{' etc)
   - [ ] r-command (replace single character)
+  - [ ] Generalized way to handle c, d, y and motion commands
 - [x] Undo/Redo
   - [x] Improve memory usage for undo/redo
 - [x] Multiple open editors
