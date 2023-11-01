@@ -215,25 +215,6 @@ VimMotionResult getMotion(FStringView buffer) {
     return {.match = vim::NoMatch};
 }
 
-// std::optional<std::function<Cursor(Cursor, int)>> getInnerFunction(
-//     FString buffer) {
-//     const static auto map = std::map<FString, std::function<Cursor(Cursor)>>{
-//         {"w", ::wordEnd},
-//         {"(", ::wordBegin},
-//     };
-
-//    if (auto single = map.find(buffer); single != map.end()) {
-//        return [single = single->second](Cursor cur, int num) {
-//            for (int i = 0; i < num; ++i) {
-//                cur = single(cur);
-//            }
-//            return cur;
-//        };
-//    }
-
-//    return std::nullopt;
-//}
-
 VimMode applyAction(VimCommandType type,
                     CursorRange range,
                     Registers &registers) {
@@ -241,14 +222,16 @@ VimMode applyAction(VimCommandType type,
     switch (type) {
     case T::Change:
         registers.save(standardRegister, content(range));
-        erase(extendRight(range));
+        //        erase(extendRight(range));
+        erase(range);
         return VimMode::Insert;
     case T::Yank:
         registers.save(standardRegister, content(range));
         return VimMode::Normal;
     case T::Delete:
         registers.save(standardRegister, content(range));
-        erase(extendRight(range));
+        //        erase(extendRight(range));
+        erase(range);
         return VimMode::Normal;
     default:
         throw std::runtime_error{"invalid action command type"};
@@ -284,6 +267,8 @@ vim::MatchType doVimAction(std::shared_ptr<IEnvironment> env,
 
     applyAction(commandType, selection, env->registers());
 
+    editor.cursor(newCursor);
+
     return vim::MatchType::Match; // Handle partial matches also
 }
 
@@ -306,7 +291,7 @@ std::pair<CursorRange, Cursor> getInnerSelection(Cursor cursor,
     case '(':
     case 'b': {
         auto range = inner('(', cursor);
-        return {range, range.end()};
+        return {range, range.begin()};
     }
     }
 
