@@ -1,4 +1,5 @@
 #include "views/bufferview.h"
+#include "meditfwd.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
 #include "text/buffer.h"
@@ -84,6 +85,7 @@ void BufferView::drawSpecial(IScreen &screen,
     for (size_t ty = 0; ty < height(); ++ty) {
         auto l = ty + yScroll();
         bool isAffected = false;
+        bool shouldDrawNewline = false;
         if (l < buffer().lines().size()) {
             auto line = _buffer->lines().at(l);
             if (range.begin().y() == range.end().y() &&
@@ -100,6 +102,7 @@ void BufferView::drawSpecial(IScreen &screen,
                 // Selection on a full line
                 line.format(f);
                 isAffected = true;
+                shouldDrawNewline = true;
             }
             else if (l == range.begin().y()) {
                 // Selection on first line in multi line selection
@@ -107,6 +110,7 @@ void BufferView::drawSpecial(IScreen &screen,
                     line.at(i).f = f;
                     isAffected = true;
                 }
+                shouldDrawNewline = true;
             }
             else if (l == range.end().y()) {
                 // Selection on last line in multi line selection
@@ -118,6 +122,12 @@ void BufferView::drawSpecial(IScreen &screen,
             }
             if (!line.empty() && isAffected) {
                 screen.draw(x() + _numberWidth, y() + ty, line);
+            }
+            if (shouldDrawNewline) {
+                /// Draw the newline after
+                screen.draw(x() + _numberWidth + line.size(),
+                            y() + ty,
+                            FString{" ", f});
             }
         }
     }
