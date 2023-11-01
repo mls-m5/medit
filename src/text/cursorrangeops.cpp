@@ -110,16 +110,46 @@ CursorRange line(Cursor cursor) {
 CursorRange inner(const Cursor cursor,
                   const Utf8Char start,
                   const Utf8Char stop) {
+
+    auto shouldEnableNestCheck =
+        start != stop; // Disable for for example " or '
+
     auto begin = cursor;
-    for (; content(begin) != start; begin = left(begin, true)) {
-        if (begin.x() == 0 && begin.y() == 0) {
-            return {cursor};
+    {
+        int count = 1;
+        for (;; begin = left(begin, true)) {
+            if (content(begin) == start) {
+                --count;
+            }
+            // This is to handle nested stuff like { {} {} }
+            if (shouldEnableNestCheck && content(begin) == stop) {
+                ++count;
+            }
+
+            if (!count) {
+                break;
+            }
+            if (begin.x() == 0 && begin.y() == 0) {
+                return {cursor};
+            }
         }
     }
 
     const auto bufferEnd = cursor.buffer().end();
     auto end = cursor;
-    for (; content(end) != stop; end = right(end, true)) {
+    {
+        int count = 1;
+        for (; end != bufferEnd; end = right(end, true)) {
+            if (content(end) == stop) {
+                --count;
+            }
+            if (shouldEnableNestCheck && content(end) == start) {
+                ++count;
+            }
+            if (!count) {
+                break;
+            }
+        }
     }
 
     if (end == bufferEnd) {
