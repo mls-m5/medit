@@ -37,6 +37,17 @@ std::function<Cursor(Cursor)> combine(Args... args) {
     };
 }
 
+Cursor lastNonSpaceOnLine(Cursor cursor) {
+    for (auto cur = cursor; cur != end(cursor); ++cur) {
+        auto c = content(cur);
+        if (!(c == '\t' || c == ' ' || c == '\n' || c == '\r')) {
+            cursor = cur;
+        }
+    }
+
+    return cursor;
+}
+
 /// std::less is used to be able to compare with FString
 const static auto map =
     std::map<FString, std::function<Cursor(Cursor)>, std::less<>>{
@@ -48,6 +59,7 @@ const static auto map =
         {"w", combine(wordEnd, wrap(right, true), wordEnd, wordBegin)},
         {"e", combine(wrap(right, true), wordEnd)},
         {"b", wordBegin},
+        {"g_", lastNonSpaceOnLine},
         {"gg", [](Cursor c) { return c.buffer().begin(); }},
         {"G", [](Cursor c) { return c.buffer().end(); }},
     };
@@ -250,7 +262,7 @@ void doVimAction(std::shared_ptr<IEnvironment> env, VimMode modeName) {
 
     auto commandType = getType(modeName, buffer);
     auto repetitions = mode.repetitions();
-    auto selection =
+    auto [selection, newCursor] =
         getSelection(buffer, cursor, modeName, std::max(1, repetitions));
 
     applyAction(commandType, selection, env->registers());
@@ -263,16 +275,16 @@ std::function<void(std::shared_ptr<IEnvironment>)> createVimAction(
     };
 }
 
-CursorRange getSelection(const FString &buffer,
-                         Cursor cursor,
-                         VimMode modeName,
-                         int repetitions) {
+std::pair<CursorRange, Cursor> getSelection(const FString &buffer,
+                                            Cursor cursor,
+                                            VimMode modeName,
+                                            int repetitions) {
 
     auto motion = getMotion(buffer);
 
     if (motion) {
         // TODO: Handle when motion is backwards
-        return CursorRange{cursor, motion.f(cursor, repetitions)};
+        return {CursorRange{cursor, motion.f(cursor, repetitions)}, cursor};
     }
 
     throw std::runtime_error{"hsaothesut"};
