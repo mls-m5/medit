@@ -47,6 +47,8 @@ const static auto map =
         {"w", combine(wordEnd, wrap(right, true), wordEnd, wordBegin)},
         {"e", combine(wrap(right, true), wordEnd)},
         {"b", wordBegin},
+        {"gg", [](Cursor c) { return c.buffer().begin(); }},
+        {"G", [](Cursor c) { return c.buffer().end(); }},
     };
 
 } // namespace
