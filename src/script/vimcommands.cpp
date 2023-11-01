@@ -10,6 +10,7 @@
 #include "text/fstring.h"
 #include "text/fstringview.h"
 #include "text/utf8char.h"
+#include "text/utf8charops.h"
 #include "views/editor.h"
 #include <array>
 #include <optional>
@@ -40,8 +41,20 @@ std::function<Cursor(Cursor)> combine(Args... args) {
 Cursor lastNonSpaceOnLine(Cursor cursor) {
     for (auto cur = cursor; cur != end(cursor); ++cur) {
         auto c = content(cur);
-        if (!(c == '\t' || c == ' ' || c == '\n' || c == '\r')) {
+        if (!isSpace(c)) {
             cursor = cur;
+        }
+    }
+
+    return cursor;
+}
+
+Cursor firstNonSpaceOnLine(Cursor cursor) {
+    for (auto cur = home(cursor); cur != end(cursor); ++cur) {
+        auto c = content(cur);
+        cursor = cur;
+        if (!isSpace(c)) {
+            return cursor;
         }
     }
 
@@ -59,6 +72,9 @@ const static auto map =
         {"w", combine(wordEnd, wrap(right, true), wordEnd, wordBegin)},
         {"e", combine(wrap(right, true), wordEnd)},
         {"b", wordBegin},
+        {"0", home},
+        {"$", end},
+        {"^", firstNonSpaceOnLine},
         {"g_", lastNonSpaceOnLine},
         {"gg", [](Cursor c) { return c.buffer().begin(); }},
         {"G", [](Cursor c) { return c.buffer().end(); }},

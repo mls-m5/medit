@@ -12,3 +12,4 @@
 #include "text/rawbuffer.cpp"
 #include "text/utf8caseconversion.cpp"
 #include "text/utf8char.cpp"
+#include "text/utf8charops.cpp"

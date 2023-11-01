@@ -17,7 +17,12 @@ bool Mode::keyPress(std::shared_ptr<IEnvironment> env) {
 
     if (key.key == Key::Text) {
         auto intRep = static_cast<uint32_t>(key.symbol);
-        if (_shouldEnableNumbers && (intRep >= '0' && intRep <= '9')) {
+
+        /// "0" is a valid command also
+        if (_repetitions == 0 && intRep == '0') {
+            /// Do nothing
+        }
+        else if (_shouldEnableNumbers && (intRep >= '0' && intRep <= '9')) {
             auto number = intRep - '0';
             if (_repetitions) {
                 _repetitions = _repetitions * 10 + number;
