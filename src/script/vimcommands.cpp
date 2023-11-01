@@ -80,6 +80,24 @@ const static auto map =
         {"G", [](Cursor c) { return c.buffer().end(); }},
     };
 
+CursorRange inner(char c, Cursor cursor) {
+    const auto matchingChar = ::vim::matching(c);
+    // TODO: Handle special case for ""
+
+    // TODO: Handle when there is numbers in the mode
+
+    return ::inner(cursor, c, matchingChar);
+}
+
+CursorRange around(char c, Cursor cursor) {
+    auto range = inner(c, cursor);
+
+    range.beginPosition(left(range.begin()));
+    range.endPosition(right(range.end()));
+
+    return range;
+}
+
 } // namespace
 
 // @param buffer. Note that this parameter changes the value sent in by erasing
@@ -197,41 +215,23 @@ VimMotionResult getMotion(FStringView buffer) {
     return {.match = vim::NoMatch};
 }
 
-std::optional<std::function<Cursor(Cursor, int)>> getInnerFunction(
-    FString buffer) {
-    const static auto map = std::map<FString, std::function<Cursor(Cursor)>>{
-        {"w", ::wordEnd},
-        {"(", ::wordBegin},
-    };
+// std::optional<std::function<Cursor(Cursor, int)>> getInnerFunction(
+//     FString buffer) {
+//     const static auto map = std::map<FString, std::function<Cursor(Cursor)>>{
+//         {"w", ::wordEnd},
+//         {"(", ::wordBegin},
+//     };
 
-    if (auto single = map.find(buffer); single != map.end()) {
-        return [single = single->second](Cursor cur, int num) {
-            for (int i = 0; i < num; ++i) {
-                cur = single(cur);
-            }
-            return cur;
-        };
-    }
+//    if (auto single = map.find(buffer); single != map.end()) {
+//        return [single = single->second](Cursor cur, int num) {
+//            for (int i = 0; i < num; ++i) {
+//                cur = single(cur);
+//            }
+//            return cur;
+//        };
+//    }
 
-    return std::nullopt;
-}
-
-// CursorRange vim::inner(char c, Cursor cursor) {
-//     const auto matchingChar = ::vim::matching(c);
-//     // TODO: Handle special case for ""
-
-//    // TODO: Handle when there is numbers in the mode
-
-//    return ::inner(cursor, c, matchingChar);
-//}
-
-// CursorRange vim::around(char c, Cursor cursor) {
-//     auto range = inner(c, cursor);
-
-//    range.beginPosition(left(range.begin()));
-//    range.endPosition(right(range.end()));
-
-//    return range;
+//    return std::nullopt;
 //}
 
 VimMode applyAction(VimCommandType type,
@@ -270,7 +270,8 @@ std::shared_ptr<IMode> vim::createMode(VimMode resultMode) {
     throw std::runtime_error{"cannot create mode: This should never happend"};
 }
 
-void doVimAction(std::shared_ptr<IEnvironment> env, VimMode modeName) {
+vim::MatchType doVimAction(std::shared_ptr<IEnvironment> env,
+                           VimMode modeName) {
     auto &editor = env->editor();
     auto &mode = editor.mode();
     auto cursor = editor.cursor();
@@ -282,6 +283,8 @@ void doVimAction(std::shared_ptr<IEnvironment> env, VimMode modeName) {
         getSelection(buffer, cursor, modeName, std::max(1, repetitions));
 
     applyAction(commandType, selection, env->registers());
+
+    return vim::MatchType::Match; // Handle partial matches also
 }
 
 std::function<void(std::shared_ptr<IEnvironment>)> createVimAction(
@@ -291,16 +294,64 @@ std::function<void(std::shared_ptr<IEnvironment>)> createVimAction(
     };
 }
 
-std::pair<CursorRange, Cursor> getSelection(const FString &buffer,
+std::pair<CursorRange, Cursor> getInnerSelection(Cursor cursor,
+                                                 Utf8Char type,
+                                                 int repetitions) {
+    auto intType = static_cast<char>(static_cast<uint32_t>(type));
+    switch (intType) {
+    case 'w': {
+        auto begin = wordBegin(cursor);
+        return {CursorRange{begin, wordEnd(cursor)}, begin};
+    }
+    case '(':
+    case 'b': {
+        auto range = inner('(', cursor);
+        return {range, range.end()};
+    }
+    }
+
+    return {cursor, cursor};
+}
+
+std::pair<CursorRange, Cursor> getAroundSelection(Cursor cursor,
+                                                  Utf8Char type,
+                                                  int repetitions) {
+
+    // TODO: Handle special cases for tags
+
+    auto selection = getInnerSelection(cursor, type, repetitions);
+
+    if (selection.first.empty()) {
+        return selection;
+    }
+
+    selection.first = extend(selection.first, 1, false);
+
+    return selection;
+}
+
+std::pair<CursorRange, Cursor> getSelection(FStringView buffer,
                                             Cursor cursor,
                                             VimMode modeName,
                                             int repetitions) {
+
+    if (buffer.empty()) {
+        return {cursor, cursor};
+    }
 
     auto motion = getMotion(buffer);
 
     if (motion) {
         // TODO: Handle when motion is backwards
         return {CursorRange{cursor, motion.f(cursor, repetitions)}, cursor};
+    }
+
+    if (buffer.front() == 'i') {
+        return getInnerSelection(cursor, buffer.at(1).c, repetitions);
+    }
+
+    if (buffer.front() == 'a') {
+        return getAroundSelection(cursor, buffer.at(1).c, repetitions);
     }
 
     throw std::runtime_error{"hsaothesut"};

@@ -312,10 +312,9 @@ struct GuiScreen::Buffer {
         renderer.drawColor(_styles.front().bg);
         renderer.fillRect();
 
-        screen.render(renderer,
-                      0,
-                      0,
-                      {0, 0, screen.canvas.width, screen.canvas.height - 1});
+        auto rect =
+            sdl::Rect{0, 0, screen.canvas.width, screen.canvas.height - 1};
+        screen.render(renderer, 0, 0, rect);
         drawBottomLine(renderer);
 
         renderer.drawColor(sdl::White);
@@ -332,11 +331,14 @@ struct GuiScreen::Buffer {
                           static_cast<int>(cellHeight)});
             break;
         default:
-            renderer.fillRect(
-                sdl::Rect{static_cast<int>(cellWidth * cursorPos.x()),
-                          static_cast<int>(cellHeight * cursorPos.y()),
-                          static_cast<int>(cellWidth),
-                          static_cast<int>(cellHeight)});
+            //            renderer.fillRect(
+            //                sdl::Rect{static_cast<int>(cellWidth *
+            //                cursorPos.x()),
+            //                          static_cast<int>(cellHeight *
+            //                          cursorPos.y()),
+            //                          static_cast<int>(cellWidth),
+            //                          static_cast<int>(cellHeight)});
+            screen.renderCursor(renderer, rect, cursorPos.x(), cursorPos.y());
             break;
         }
 

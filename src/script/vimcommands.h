@@ -70,7 +70,7 @@ struct VimMotionResult {
 
 VimMotionResult getMotion(FStringView);
 
-std::pair<CursorRange, Cursor> getSelection(const FString &buffer,
+std::pair<CursorRange, Cursor> getSelection(FStringView buffer,
                                             Cursor,
                                             VimMode,
                                             int);
@@ -79,8 +79,8 @@ VimMode applyAction(VimCommandType type,
                     CursorRange range,
                     Registers &registers);
 
-// template <VimMode modeName>
-void doVimAction(std::shared_ptr<IEnvironment> env, VimMode modeName);
+vim::MatchType doVimAction(std::shared_ptr<IEnvironment> env, VimMode modeName);
 
+/// Probably deprecated
 std::function<void(std::shared_ptr<IEnvironment>)> createVimAction(
     VimMode modeName);
