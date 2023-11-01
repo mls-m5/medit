@@ -84,4 +84,9 @@ public:
     const FString &buffer() const override {
         return _buffer;
     }
+
+    void clearBuffer() {
+        _buffer.clear();
+        _repetitions = 0;
+    }
 };

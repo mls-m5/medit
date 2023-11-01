@@ -3,6 +3,7 @@
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
 #include "modes/visualmode.h"
+#include "text/cursor.h"
 #include "text/cursorops.h"
 #include "text/cursorrange.h"
 #include "text/cursorrangeops.h"
@@ -104,6 +105,19 @@ std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
 }
 
 VimMotionResult getMotion(FStringView buffer) {
+    /// Take a function that fires once and add argument for how many
+    /// repetitions should be used
+    auto pack = [](std::function<Cursor(Cursor)> single) -> VimMotionResult {
+        auto f = [single](Cursor cur, int num) {
+            for (int i = 0; i < num; ++i) {
+                cur = single(cur);
+            }
+            return cur;
+        };
+
+        return {.match = vim::Match, .f = f};
+    };
+
     if (buffer.empty()) {
         return {.match = vim::NoMatch};
     }
@@ -112,6 +126,24 @@ VimMotionResult getMotion(FStringView buffer) {
         if (buffer.size() == 1) {
             return {.match = vim::MatchType::PartialMatch};
         }
+
+        auto searchTerm = buffer.at(1);
+        return pack([searchTerm](Cursor cursor) -> Cursor {
+            auto f = find(cursor, searchTerm.c, false);
+            return f ? *f : cursor;
+        });
+    }
+
+    if (buffer.front() == 'F') {
+        if (buffer.size() == 1) {
+            return {.match = vim::MatchType::PartialMatch};
+        }
+
+        auto searchTerm = buffer.at(1);
+        return pack([searchTerm](Cursor cursor) -> Cursor {
+            auto f = rfind(cursor, searchTerm.c, false);
+            return f ? *f : cursor;
+        });
     }
 
     if (auto single = map.find(buffer); single != map.end()) {
@@ -245,21 +277,3 @@ CursorRange getSelection(const FString &buffer,
 
     throw std::runtime_error{"hsaothesut"};
 }
-
-// vim::MatchType matchVimMotion(FStringView str) {
-//     vim::MatchType best = vim::MatchType::NoMatch;
-
-//    for (auto &element : map) {
-//        if (element.first.size() != str.size()) {
-//            continue;
-//        }
-//        if (element.first == str) {
-//            return vim::MatchType::Match;
-//        }
-//        if (FStringView{element.first}.substr(0, str.size()) == str) {
-//            best = vim::MatchType::PartialMatch;
-//        }
-//    }
-
-//    return best;
-//}
