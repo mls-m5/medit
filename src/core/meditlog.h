@@ -13,7 +13,7 @@ void logInternal(std::string text);
 // TODO: Maybe log with formatted text?
 
 template <typename... Args>
-void printInfo(Args... args) {
+void logInfo(Args... args) {
     auto ss = std::ostringstream{};
 
     (ss << ... << args);
