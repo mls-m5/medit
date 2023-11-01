@@ -24,8 +24,13 @@
 #include "views/mainwindow.h"
 #include <functional>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <string>
+
+int numRepeats(std::shared_ptr<IEnvironment> env) {
+    return env->editor().mode().repetitions();
+}
 
 namespace {
 StandardCommands create() {
@@ -34,6 +39,10 @@ StandardCommands create() {
 #define DEF(name)                                                              \
     commands.namedCommands[#name] =                                            \
         commands.name = [=](StandardCommands::EnvPtrT env)
+
+#define REPEAT                                                                 \
+    size_t NUM_REPEATS = numRepeats(env);                                      \
+    for (size_t i = 0; i < NUM_REPEATS; ++i)
 
     StandardCommands commands{};
     DEF(left) {
@@ -91,17 +100,33 @@ StandardCommands create() {
     DEF(yank_line) {
         auto &e = env->editor();
         auto cursor = e.cursor();
-        auto line = e.buffer().lineAt(cursor.y());
-        env->registers().save(standardRegister, std::string{line}, true);
+
+        auto &lines = e.buffer().lines();
+        auto repeats = e.mode().repetitions();
+        auto str = std::string{};
+
+        for (size_t i = cursor.y();
+             i < std::min(cursor.y() + repeats, lines.size());
+             ++i) {
+            auto line = lines.at(i);
+            str += line + "\n";
+        }
+        str.pop_back();
+        env->registers().save(standardRegister, str, true);
         env->editor().clearSelection();
     };
 
     DEF(delete_line) {
+        env->standardCommands().yank_line(env);
+
         auto &e = env->editor();
         auto cursor = e.cursor();
         auto line = e.buffer().lineAt(cursor.y());
-        env->registers().save(standardRegister, std::string{line}, true);
-        deleteLine(e.cursor());
+        //        env->registers().save(standardRegister, std::string{line},
+        //        true);
+        REPEAT {
+            deleteLine(e.cursor());
+        }
         e.cursor({e.buffer(), cursor.x(), cursor.y()});
     };
 
@@ -149,6 +174,13 @@ StandardCommands create() {
                 standardRegister, content(e.cursor()).toString(), true);
         }
         else {
+            auto str = toString(selection);
+            if (str.empty()) {
+                return;
+            }
+            if (str.back() == '\n') {
+                str.pop_back();
+            }
             env->registers().save(standardRegister, toString(selection), true);
         }
 
@@ -164,8 +196,14 @@ StandardCommands create() {
             e.cursor(erase(e.cursor()));
         }
         else {
-            env->registers().save(standardRegister, toString(selection));
+            auto str = std::string{};
+
+            //            REPEAT {
+            str += toString(selection);
             e.cursor(erase(selection), true);
+            //            }
+
+            env->registers().save(standardRegister, str);
         }
     };
 
@@ -174,40 +212,55 @@ StandardCommands create() {
         auto &e = env->editor();
         auto selection = e.selection();
         if (selection.empty()) {
-            auto begin = wordBegin(e.cursor());
-            e.cursor(erase(CursorRange{begin, e.cursor()}));
+            auto str = std::string{};
+
+            REPEAT {
+                auto begin = wordBegin(e.cursor());
+                auto range = CursorRange{begin, e.cursor()};
+                str = toString(selection) + str;
+                e.cursor(erase(range));
+            };
+            env->registers().save(standardRegister, str);
         }
         else {
+            env->registers().save(standardRegister, toString(selection));
             e.cursor(erase(selection), true);
         }
     };
 
     DEF(paste_before) {
         auto str = env->registers().load(standardRegister);
-        auto cursor = env->editor().cursor();
-        auto oldCursor = cursor;
-        if (str.isLine) {
-            insert({cursor.buffer(), 0, cursor.y()}, str.value + '\n');
-        }
-        else {
-            auto ss = std::istringstream{str.value};
-            cursor = insert(cursor, str.value);
-            env->editor().cursor(left(cursor));
+        REPEAT {
+            auto cursor = env->editor().cursor();
+            if (str.isLine) {
+                insert({cursor.buffer(), 0, cursor.y()}, str.value + '\n');
+            }
+            else {
+                auto ss = std::istringstream{str.value};
+                cursor = insert(cursor, str.value);
+                env->editor().cursor(left(cursor));
+            }
         }
     };
 
     DEF(paste) {
         auto str = env->registers().load(standardRegister);
         auto cursor = env->editor().cursor();
-        if (str.isLine) {
-            insert({cursor.buffer(), 0, cursor.y() + 1}, str.value + '\n');
-            cursor.y(cursor.y() + 1);
-            env->editor().cursor(cursor);
+        REPEAT {
+            if (str.isLine) {
+                insert({cursor.buffer(), Cursor::max, cursor.y()},
+                       '\n' + str.value);
+            }
+            else {
+                auto ss = std::istringstream{str.value};
+                cursor = right(cursor, false);
+                cursor = insert(cursor, str.value);
+                env->editor().cursor(cursor);
+            }
         }
-        else {
-            auto ss = std::istringstream{str.value};
-            cursor = right(cursor, false);
-            cursor = insert(cursor, str.value);
+
+        if (str.isLine) {
+            cursor.y(cursor.y() + 1);
             env->editor().cursor(cursor);
         }
     };

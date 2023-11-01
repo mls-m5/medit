@@ -150,6 +150,10 @@ CursorRange Editor::selection() {
     return {_cursor};
 }
 
+bool Editor::isBlockSelection() const {
+    return _mode->isBlockSelection();
+}
+
 void Editor::selection(CursorRange range) {
     selectionAnchor(range.begin());
     cursor(range.end());

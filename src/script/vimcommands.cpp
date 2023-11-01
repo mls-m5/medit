@@ -3,7 +3,6 @@
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
 #include "modes/visualmode.h"
-#include "script/command.h"
 #include "script/ienvironment.h"
 #include "text/cursor.h"
 #include "text/cursorops.h"
@@ -83,17 +82,14 @@ const static auto map =
         {"G", [](Cursor c) { return c.buffer().end(); }},
     };
 
-CursorRange inner(char c, Cursor cursor) {
+CursorRange vimInner(char c, Cursor cursor) {
     const auto matchingChar = ::vim::matching(c);
-    // TODO: Handle special case for ""
-
-    // TODO: Handle when there is numbers in the mode
 
     return ::inner(cursor, c, matchingChar);
 }
 
 CursorRange around(char c, Cursor cursor) {
-    auto range = inner(c, cursor);
+    auto range = vimInner(c, cursor);
 
     range.beginPosition(left(range.begin()));
     range.endPosition(right(range.end()));
@@ -105,30 +101,30 @@ CursorRange around(char c, Cursor cursor) {
 
 // @param buffer. Note that this parameter changes the value sent in by erasing
 // the information that is aquired through this function
-VimCommandType getType(VimMode modeName, FStringView &buffer) {
+VimCommandType getType(FStringView &buffer) {
     auto commandType = VimCommandType::Visual;
 
-    if (modeName == VimMode::Normal) {
-        auto first = static_cast<uint32_t>(buffer.front().c);
+    //    if (modeName == VimMode::Normal) {
+    auto first = static_cast<uint32_t>(buffer.front().c);
 
-        switch (first) {
-        case 'c':
-            commandType = VimCommandType::Change;
-            break;
-        case 'd':
-            commandType = VimCommandType::Delete;
-            break;
-        case 'y':
-            commandType = VimCommandType::Yank;
-            break;
-        default:
-            commandType = VimCommandType::Other;
-        }
-
-        if (commandType != VimCommandType::Other) {
-            buffer = buffer.substr(1);
-        }
+    switch (first) {
+    case 'c':
+        commandType = VimCommandType::Change;
+        break;
+    case 'd':
+        commandType = VimCommandType::Delete;
+        break;
+    case 'y':
+        commandType = VimCommandType::Yank;
+        break;
+    default:
+        commandType = VimCommandType::Other;
     }
+
+    if (commandType != VimCommandType::Other) {
+        buffer = buffer.substr(1);
+    }
+    //    }
 
     return commandType;
 }
@@ -276,13 +272,13 @@ ActionResultT findVimAction(FStringView buffer, VimMode modeName) {
     }
 
     /// Note that this removes the firts part of `buffer`
-    auto commandType = getType(modeName, buffer);
+    auto commandType = getType(buffer);
 
     if (commandType == VimCommandType::Other) {
         return {bestResult};
     }
 
-    auto selectionFunction = getSelectionFunction(buffer, modeName);
+    auto selectionFunction = getSelectionFunction(buffer);
 
     if (selectionFunction.match == vim::NoMatch) {
         return {bestResult};
@@ -314,44 +310,6 @@ ActionResultT findVimAction(FStringView buffer, VimMode modeName) {
     return {vim::MatchType::Match, f};
 }
 
-vim::MatchType doVimAction(std::shared_ptr<IEnvironment> env,
-                           VimMode modeName) {
-    auto &editor = env->editor();
-    auto &mode = editor.mode();
-    auto cursor = editor.cursor();
-    auto buffer = FStringView{mode.buffer()};
-
-    auto commandType = getType(modeName, buffer);
-    auto repetitions = mode.repetitions();
-
-    auto bestResult = vim::MatchType::NoMatch;
-
-    {
-        auto motion = getMotion(buffer);
-        if (motion.match == vim::Match) {
-            cursor = motion.f(cursor, repetitions);
-            editor.cursor(cursor);
-            return vim::Match;
-        }
-    }
-
-    auto [selection, newCursor] =
-        getSelection(buffer, cursor, modeName, std::max(1, repetitions));
-
-    applyAction(commandType, selection, env->registers());
-
-    editor.cursor(newCursor);
-
-    return vim::MatchType::Match; // Handle partial matches also
-}
-
-std::function<void(std::shared_ptr<IEnvironment>)> createVimAction(
-    VimMode modeName) {
-    return [modeName](std::shared_ptr<IEnvironment> env) {
-        doVimAction(env, modeName);
-    };
-}
-
 std::pair<CursorRange, Cursor> getInnerSelection(Cursor cursor,
                                                  Utf8Char type,
                                                  int repetitions) {
@@ -359,20 +317,32 @@ std::pair<CursorRange, Cursor> getInnerSelection(Cursor cursor,
     switch (intType) {
     case 'w': {
         auto begin = wordBegin(cursor);
-        return {CursorRange{begin, wordEnd(cursor)}, begin};
+        return {CursorRange{begin, right(wordEnd(cursor))}, begin};
     }
     case '(':
     case 'b': {
-        auto range = inner('(', cursor);
+        auto range = vimInner('(', cursor);
         return {range, range.begin()};
     }
     case '{':
     case 'B': {
-        auto range = inner('{', cursor);
+        auto range = vimInner('{', cursor);
         return {range, range.begin()};
     }
     case '[': {
-        auto range = inner('[', cursor);
+        auto range = vimInner('[', cursor);
+        return {range, range.begin()};
+    }
+    case '"': {
+        auto range = vimInner('"', cursor);
+        return {range, range.begin()};
+    }
+    case '\'': {
+        auto range = vimInner('\'', cursor);
+        return {range, range.begin()};
+    }
+    case '`': {
+        auto range = vimInner('`', cursor);
         return {range, range.begin()};
     }
     }
@@ -397,7 +367,7 @@ std::pair<CursorRange, Cursor> getAroundSelection(Cursor cursor,
     return selection;
 }
 
-SelectionFunctionT getSelectionFunction(FStringView buffer, VimMode modeName) {
+SelectionFunctionT getSelectionFunction(FStringView buffer) {
     if (buffer.empty()) {
         return {vim::PartialMatch};
     }
@@ -448,31 +418,4 @@ SelectionFunctionT getSelectionFunction(FStringView buffer, VimMode modeName) {
     }
 
     return {.match = vim::NoMatch};
-}
-
-std::pair<CursorRange, Cursor> getSelection(FStringView buffer,
-                                            Cursor cursor,
-                                            VimMode modeName,
-                                            int repetitions) {
-
-    if (buffer.empty()) {
-        return {cursor, cursor};
-    }
-
-    auto motion = getMotion(buffer);
-
-    if (motion) {
-        // TODO: Handle when motion is backwards
-        return {CursorRange{cursor, motion.f(cursor, repetitions)}, cursor};
-    }
-
-    if (buffer.front() == 'i') {
-        return getInnerSelection(cursor, buffer.at(1).c, repetitions);
-    }
-
-    if (buffer.front() == 'a') {
-        return getAroundSelection(cursor, buffer.at(1).c, repetitions);
-    }
-
-    throw std::runtime_error{"hsaothesut"};
 }

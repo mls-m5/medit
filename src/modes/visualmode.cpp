@@ -73,7 +73,7 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
             return {BufferKeyMap::NoMatch, {}};
         }
         if (str.front() == 'i' || str.front() == 'a') {
-            auto selection = getSelectionFunction(str, VimMode::Visual);
+            auto selection = getSelectionFunction(str);
             if (selection.match == vim::MatchType::PartialMatch) {
                 return {BufferKeyMap::PartialMatch, {}};
             }

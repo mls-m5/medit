@@ -1,11 +1,9 @@
 #pragma once
 
 #include "core/registers.h"
-#include "ienvironment.h"
 #include "script/command.h"
 #include "text/cursor.h"
 #include "text/cursorrange.h"
-#include "text/fstring.h"
 #include "text/fstringview.h"
 #include <functional>
 #include <meditfwd.h>
@@ -37,7 +35,7 @@ constexpr char matching(char c) {
         return '>';
     }
 
-    return 0;
+    return c;
 }
 
 enum MatchType {
@@ -55,8 +53,6 @@ enum class VimCommandType {
     Yank,
     Other,
 };
-
-// vim::MatchType matchVimMotion(FStringView str);
 
 VimCommandType getType(VimMode modeName, FStringView &buffer);
 
@@ -78,7 +74,7 @@ struct SelectionFunctionT {
     std::function<SelectionFunctionReturnT(Cursor, int)> f;
 };
 
-SelectionFunctionT getSelectionFunction(FStringView buffer, VimMode modeName);
+SelectionFunctionT getSelectionFunction(FStringView buffer);
 
 std::pair<CursorRange, Cursor> getSelection(FStringView buffer,
                                             Cursor,
@@ -93,13 +89,5 @@ struct ActionResultT {
     vim::MatchType match = vim::NoMatch;
     CommandT f;
 };
+
 ActionResultT findVimAction(FStringView, VimMode modeName);
-
-vim::MatchType doVimAction(std::shared_ptr<IEnvironment> env, VimMode modeName);
-
-/// Because env is not available when seaching for the command
-// vim::MatchType matchAction(FStringView buffer);
-
-/// Probably deprecated
-std::function<void(std::shared_ptr<IEnvironment>)> createVimAction(
-    VimMode modeName);

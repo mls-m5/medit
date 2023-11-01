@@ -8,6 +8,8 @@ private:
     size_t _y;
 
 public:
+    static constexpr size_t max = static_cast<size_t>(-1);
+
     constexpr Position(size_t x = 0, size_t y = 0)
         : _x(x)
         , _y(y) {}

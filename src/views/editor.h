@@ -57,6 +57,8 @@ public:
 
     CursorRange selection();
 
+    bool isBlockSelection() const;
+
     //! Set selection and make selection stay when moving cursor
     //! If you just want to move the cursor, use cursor(...) instead
     void selection(CursorRange range);
