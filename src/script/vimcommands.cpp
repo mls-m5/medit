@@ -226,7 +226,6 @@ VimMode applyAction(VimCommandType type,
     case T::Change:
         registers.save(standardRegister, content(range));
         erase(range);
-        //        range.begin().buffer().history().markMajor();
         return VimMode::Insert;
     case T::Yank:
         registers.save(standardRegister, content(range));
@@ -234,7 +233,6 @@ VimMode applyAction(VimCommandType type,
     case T::Delete:
         registers.save(standardRegister, content(range));
         erase(range);
-        //        range.begin().buffer().history().markMajor();
         return VimMode::Normal;
     default:
         throw std::runtime_error{"invalid action command type"};
