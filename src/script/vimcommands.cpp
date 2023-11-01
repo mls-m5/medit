@@ -136,8 +136,6 @@ std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
         throw "error";
     }
 
-    //    auto front = static_cast<uint32_t>(buffer.front().c);
-
     auto f = getMotion(buffer);
 
     if (f) {
@@ -252,6 +250,32 @@ std::shared_ptr<IMode> vim::createMode(VimMode resultMode) {
 
 ActionResultT findVimAction(FStringView buffer, VimMode modeName) {
     auto bestResult = vim::MatchType::NoMatch;
+
+    if (buffer.empty()) {
+        return {vim::NoMatch};
+    }
+
+    if (buffer.front() == 'r') {
+        if (buffer.size() == 1) {
+            return {vim::MatchType::PartialMatch};
+        }
+        auto replacement = buffer.at(1);
+
+        auto f = [replacement](std::shared_ptr<IEnvironment> env) {
+            auto &editor = env->editor();
+            auto cursor = editor.cursor();
+            auto repetitions = editor.mode().repetitions();
+            auto end = cursor;
+            for (size_t i = 0; i < repetitions; ++i) {
+                end = right(end);
+            }
+            replace({cursor, end},
+                    FString{static_cast<size_t>(repetitions), replacement});
+            editor.cursor(left(end));
+        };
+
+        return {vim::Match, f};
+    }
 
     {
         auto motion = getMotion(buffer);
