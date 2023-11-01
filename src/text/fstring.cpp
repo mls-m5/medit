@@ -74,21 +74,45 @@ size_t FString::find(Utf8Char c, size_t start) const {
     return npos;
 }
 
-bool FString::operator<(const FString &other) const {
-    auto size = std::min(this->size(), other.size());
+namespace { // Only for the compare function
+
+template <typename StringT1, typename StringT2>
+int compare(const StringT1 &s1, const StringT2 &s2) {
+    auto size = std::min(s1.size(), s2.size());
+
     for (size_t i = 0; i < size; ++i) {
-        auto c1 = static_cast<uint32_t>(at(i).c);
-        auto c2 = static_cast<uint32_t>(other.at(i).c);
+        auto c1 = static_cast<uint32_t>(s1.at(i).c);
+        auto c2 = static_cast<uint32_t>(s2.at(i).c);
 
         if (c1 < c2) {
-            return true;
+            return -1;
         }
         else if (c1 > c2) {
-            return false;
+            return 1;
         }
     }
 
-    return this->size() < other.size();
+    if (s1.size() < s2.size()) {
+        return -1;
+    }
+    else if (s1.size() > s2.size()) {
+        return 1;
+    }
+    return 0; // s1 and s2 are equal
+}
+
+} // anonymous namespace
+
+bool FString::operator<(const FString &other) const {
+    return compare(*this, other) < 0;
+}
+
+bool FString::operator<(const FStringView &other) const {
+    return compare(*this, other) < 0;
+}
+
+bool operator<(const FStringView &lhs, const FString &rhs) {
+    return compare(lhs, rhs) < 0;
 }
 
 FStringView FString::substr(size_t start, size_t length) const {

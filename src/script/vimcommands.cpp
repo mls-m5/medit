@@ -36,16 +36,18 @@ std::function<Cursor(Cursor)> combine(Args... args) {
     };
 }
 
-const static auto motionsMap = std::map<FString, std::function<Cursor(Cursor)>>{
-    {"h", wrap(left, false)},
-    {"l", wrap(right, false)},
-    {"j", down},
-    {"k", up},
-    {"b", combine(wrap(left, true), wordBegin)},
-    {"w", combine(wordEnd, wrap(right, true), wordEnd, wordBegin)},
-    {"e", combine(wrap(right, true), wordEnd)},
-    {"b", wordBegin},
-};
+/// std::less is used to be able to compare with FString
+const static auto map =
+    std::map<FString, std::function<Cursor(Cursor)>, std::less<>>{
+        {"h", wrap(left, false)},
+        {"l", wrap(right, false)},
+        {"j", down},
+        {"k", up},
+        {"b", combine(wrap(left, true), wordBegin)},
+        {"w", combine(wordEnd, wrap(right, true), wordEnd, wordBegin)},
+        {"e", combine(wrap(right, true), wordEnd)},
+        {"b", wordBegin},
+    };
 
 } // namespace
 
@@ -86,12 +88,12 @@ std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
         throw "error";
     }
 
-    auto front = static_cast<uint32_t>(buffer.front().c);
+    //    auto front = static_cast<uint32_t>(buffer.front().c);
 
     auto f = getMotion(buffer);
 
     if (f) {
-        return [f = *f](Cursor cursor, VimMode, int num) -> CursorRange {
+        return [f = f.f](Cursor cursor, VimMode, int num) -> CursorRange {
             return CursorRange{cursor, f(cursor, num)};
         };
     }
@@ -99,17 +101,38 @@ std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
     return std::nullopt;
 }
 
-std::optional<std::function<Cursor(Cursor, int)>> getMotion(FString buffer) {
-    if (auto single = motionsMap.find(buffer); single != motionsMap.end()) {
-        return [single = single->second](Cursor cur, int num) {
+VimMotionResult getMotion(FStringView buffer) {
+    if (buffer.empty()) {
+        return {.match = vim::NoMatch};
+    }
+
+    if (buffer.front() == 'f') {
+        if (buffer.size() == 1) {
+            return {.match = vim::MatchType::PartialMatch};
+        }
+    }
+
+    if (auto single = map.find(buffer); single != map.end()) {
+        auto f = [single = single->second](Cursor cur, int num) {
             for (int i = 0; i < num; ++i) {
                 cur = single(cur);
             }
             return cur;
         };
+
+        return {
+            .match = vim::Match,
+            .f = f,
+        };
     }
 
-    return std::nullopt;
+    for (auto &it : map) {
+        if (FString{it.first}.substr(0, buffer.size()) == buffer) {
+            return {.match = vim::PartialMatch};
+        }
+    }
+
+    return {.match = vim::NoMatch};
 }
 
 std::optional<std::function<Cursor(Cursor, int)>> getInnerFunction(
@@ -215,26 +238,26 @@ CursorRange getSelection(const FString &buffer,
 
     if (motion) {
         // TODO: Handle when motion is backwards
-        return CursorRange{cursor, (*motion)(cursor, repetitions)};
+        return CursorRange{cursor, motion.f(cursor, repetitions)};
     }
 
     throw std::runtime_error{"hsaothesut"};
 }
 
-vim::MatchType matchVimMotion(FStringView str) {
-    vim::MatchType best = vim::MatchType::NoMatch;
+// vim::MatchType matchVimMotion(FStringView str) {
+//     vim::MatchType best = vim::MatchType::NoMatch;
 
-    for (auto &element : motionsMap) {
-        if (element.first.size() != str.size()) {
-            continue;
-        }
-        if (element.first == str) {
-            return vim::MatchType::Match;
-        }
-        if (FStringView{element.first}.substr(0, str.size()) == str) {
-            best = vim::MatchType::PartialMatch;
-        }
-    }
+//    for (auto &element : map) {
+//        if (element.first.size() != str.size()) {
+//            continue;
+//        }
+//        if (element.first == str) {
+//            return vim::MatchType::Match;
+//        }
+//        if (FStringView{element.first}.substr(0, str.size()) == str) {
+//            best = vim::MatchType::PartialMatch;
+//        }
+//    }
 
-    return best;
-}
+//    return best;
+//}

@@ -55,11 +55,20 @@ enum class VimCommandType {
     Other,
 };
 
-vim::MatchType matchVimMotion(FStringView str);
+// vim::MatchType matchVimMotion(FStringView str);
 
 VimCommandType getType(VimMode modeName, FString &buffer);
 
-std::optional<std::function<Cursor(Cursor, int)>> getMotion(FString);
+struct VimMotionResult {
+    vim::MatchType match;
+    std::function<Cursor(Cursor, int)> f;
+
+    operator bool const() {
+        return match == vim::MatchType::Match && f;
+    }
+};
+
+VimMotionResult getMotion(FStringView);
 
 CursorRange getSelection(const FString &buffer, Cursor, VimMode, int);
 

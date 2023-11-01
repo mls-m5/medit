@@ -26,7 +26,7 @@ std::shared_ptr<IMode> createNormalMode() {
 
         auto cursor = editor.cursor();
 
-        cursor = (*motion)(cursor, mode.repetitions());
+        cursor = motion.f(cursor, mode.repetitions());
         editor.cursor(cursor);
     };
 
@@ -97,15 +97,15 @@ std::shared_ptr<IMode> createNormalMode() {
     }};
 
     bufferMap.customMatchFunction([](FStringView str) -> BufferKeyMap::ReturnT {
-        auto m = matchVimMotion(str);
-        if (m == vim::MatchType::PartialMatch) {
+        auto m = getMotion(str);
+        if (m.match == vim::MatchType::PartialMatch) {
             return {BufferKeyMap::PartialMatch, {}};
         }
-        if (m == vim::MatchType::Match) {
-            auto motion = getMotion(FString{str});
+        if (m.match == vim::MatchType::Match) {
+            auto motion = getMotion(str);
             if (motion) {
                 auto wrapper =
-                    [motion = *motion](std::shared_ptr<IEnvironment> env) {
+                    [motion = motion.f](std::shared_ptr<IEnvironment> env) {
                         auto &editor = env->editor();
                         auto num = editor.mode().repetitions();
                         auto cursor = editor.cursor();
