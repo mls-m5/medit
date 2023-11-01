@@ -64,6 +64,30 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
         {{"a("}, {sc.select_around_paren}},
     }};
 
+    bufferMap.customMatchFunction([](FStringView str) -> BufferKeyMap::ReturnT {
+        auto m = getMotion(str);
+        if (m.match == vim::MatchType::PartialMatch) {
+            return {BufferKeyMap::PartialMatch, {}};
+        }
+        if (m.match == vim::MatchType::Match) {
+            auto motion = getMotion(str);
+            if (motion) {
+                auto wrapper =
+                    [motion = motion.f](std::shared_ptr<IEnvironment> env) {
+                        auto &editor = env->editor();
+                        auto num = editor.mode().repetitions();
+                        auto cursor = editor.cursor();
+                        cursor = motion(cursor, num);
+                        editor.cursor(cursor);
+                    };
+
+                return {BufferKeyMap::Match, wrapper};
+            }
+        }
+
+        return {BufferKeyMap::NoMatch, {}};
+    });
+
     auto mode =
         std::make_shared<Mode>(isBlockSelection ? "visual block" : "visual",
                                std::move(map),
