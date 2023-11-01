@@ -2,7 +2,6 @@
 
 #include "fchar.h"
 #include "syntax/palette.h"
-#include "text/fstringview.h"
 #include "text/utf8char.h"
 #include <ostream>
 #include <vector>
@@ -125,6 +124,8 @@ public:
     }
 
     bool operator<(const FString &other) const;
+    bool operator<(const FStringView &other) const;
+    friend bool operator<(const FStringView &lhs, const FString &rhs);
 
     void reserve(size_t size) {
         _content.reserve(size);

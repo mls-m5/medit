@@ -5,6 +5,7 @@
 #include "text/cursorrangeops.h"
 #include "text/formattype.h"
 #include "text/fstring.h"
+#include "text/fstringview.h"
 #include <optional>
 
 namespace {

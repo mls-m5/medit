@@ -22,7 +22,7 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
 
         auto cursor = editor.cursor();
 
-        cursor = (*motion)(cursor, mode.repetitions());
+        cursor = motion.f(cursor, mode.repetitions());
         editor.cursor(cursor);
     };
 
