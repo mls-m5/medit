@@ -2,6 +2,7 @@
 
 #include "core/registers.h"
 #include "ienvironment.h"
+#include "script/command.h"
 #include "text/cursor.h"
 #include "text/cursorrange.h"
 #include "text/fstring.h"
@@ -57,7 +58,7 @@ enum class VimCommandType {
 
 // vim::MatchType matchVimMotion(FStringView str);
 
-VimCommandType getType(VimMode modeName, FString &buffer);
+VimCommandType getType(VimMode modeName, FStringView &buffer);
 
 struct VimMotionResult {
     vim::MatchType match;
@@ -70,6 +71,15 @@ struct VimMotionResult {
 
 VimMotionResult getMotion(FStringView);
 
+using SelectionFunctionReturnT = std::pair<CursorRange, Cursor>;
+
+struct SelectionFunctionT {
+    vim::MatchType match;
+    std::function<SelectionFunctionReturnT(Cursor, int)> f;
+};
+
+SelectionFunctionT getSelectionFunction(FStringView buffer, VimMode modeName);
+
 std::pair<CursorRange, Cursor> getSelection(FStringView buffer,
                                             Cursor,
                                             VimMode,
@@ -79,7 +89,16 @@ VimMode applyAction(VimCommandType type,
                     CursorRange range,
                     Registers &registers);
 
+struct ActionResultT {
+    vim::MatchType match = vim::NoMatch;
+    CommandT f;
+};
+ActionResultT findVimAction(FStringView, VimMode modeName);
+
 vim::MatchType doVimAction(std::shared_ptr<IEnvironment> env, VimMode modeName);
+
+/// Because env is not available when seaching for the command
+// vim::MatchType matchAction(FStringView buffer);
 
 /// Probably deprecated
 std::function<void(std::shared_ptr<IEnvironment>)> createVimAction(

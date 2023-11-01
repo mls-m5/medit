@@ -77,13 +77,13 @@ std::shared_ptr<IMode> createNormalMode() {
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
         {{"dd"}, sc.delete_line},
         //        {{"dw"}, sc.combine(sc.select_word, sc.erase)},
-        {{"dw"}, action},
-        {{"diw"}, action}, // Test only, change to automatic
-        {{"diw"}, action},
-        {{"dib"}, action},
-        {{"di("}, action},
-        {{"dab"}, action},
-        {{"da("}, action},
+        //        {{"dw"}, action},
+        //        {{"diw"}, action}, // Test only, change to automatic
+        //        {{"diw"}, action},
+        //        {{"dib"}, action},
+        //        {{"di("}, action},
+        //        {{"dab"}, action},
+        //        {{"da("}, action},
         //        {{"diw"}, sc.combine(sc.select_inner_word, sc.erase)},
 
         {{"cc"}, sc.combine(sc.clear_line, sc.copy, sc.copy_indentation)},
@@ -101,29 +101,44 @@ std::shared_ptr<IMode> createNormalMode() {
         {{"gd"}, {[](Ptr env) { env->mainWindow().gotoDefinition(); }}},
     }};
 
-    bufferMap.customMatchFunction([](FStringView str) -> BufferKeyMap::ReturnT {
-        auto m = getMotion(str);
-        if (m.match == vim::MatchType::PartialMatch) {
-            return {BufferKeyMap::PartialMatch, {}};
-        }
-        if (m.match == vim::MatchType::Match) {
-            auto motion = getMotion(str);
-            if (motion) {
-                auto wrapper =
-                    [motion = motion.f](std::shared_ptr<IEnvironment> env) {
-                        auto &editor = env->editor();
-                        auto num = editor.mode().repetitions();
-                        auto cursor = editor.cursor();
-                        cursor = motion(cursor, num);
-                        editor.cursor(cursor);
-                    };
-
-                return {BufferKeyMap::Match, wrapper};
+    bufferMap.customMatchFunction(
+        [action](FStringView str) -> BufferKeyMap::ReturnT {
+            auto action = findVimAction(str, VimMode::Normal);
+            if (action.match == vim::PartialMatch) {
+                return {BufferKeyMap::PartialMatch, {}};
             }
-        }
 
-        return {BufferKeyMap::NoMatch, {}};
-    });
+            if (action.match == vim::NoMatch) {
+                return {BufferKeyMap::NoMatch, {}};
+            }
+
+            return {BufferKeyMap::Match, action.f};
+
+            //            auto m = getMotion(str);
+            //            if (m.match == vim::MatchType::PartialMatch) {
+            //                return {BufferKeyMap::PartialMatch, {}};
+            //            }
+            //            if (m.match == vim::MatchType::Match) {
+            //                auto motion = getMotion(str);
+            //                if (motion) {
+            //                    auto wrapper =
+            //                        [motion =
+            //                        motion.f](std::shared_ptr<IEnvironment>
+            //                        env) {
+            //                            auto &editor = env->editor();
+            //                            auto num =
+            //                            editor.mode().repetitions(); auto
+            //                            cursor = editor.cursor(); cursor =
+            //                            motion(cursor, num);
+            //                            editor.cursor(cursor);
+            //                        };
+
+            //                    return {BufferKeyMap::Match, wrapper};
+            //                }
+            //            }
+
+            //            return {BufferKeyMap::NoMatch, {}};
+        });
 
     auto mode =
         std::make_shared<Mode>("normal", std::move(map), createParentMode());

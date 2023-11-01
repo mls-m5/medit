@@ -3,6 +3,8 @@
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
 #include "modes/visualmode.h"
+#include "script/command.h"
+#include "script/ienvironment.h"
 #include "text/cursor.h"
 #include "text/cursorops.h"
 #include "text/cursorrange.h"
@@ -13,6 +15,7 @@
 #include "text/utf8charops.h"
 #include "views/editor.h"
 #include <array>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -102,7 +105,7 @@ CursorRange around(char c, Cursor cursor) {
 
 // @param buffer. Note that this parameter changes the value sent in by erasing
 // the information that is aquired through this function
-VimCommandType getType(VimMode modeName, FString &buffer) {
+VimCommandType getType(VimMode modeName, FStringView &buffer) {
     auto commandType = VimCommandType::Visual;
 
     if (modeName == VimMode::Normal) {
@@ -123,7 +126,7 @@ VimCommandType getType(VimMode modeName, FString &buffer) {
         }
 
         if (commandType != VimCommandType::Other) {
-            buffer.erase(0, 1);
+            buffer = buffer.substr(1);
         }
     }
 
@@ -222,16 +225,16 @@ VimMode applyAction(VimCommandType type,
     switch (type) {
     case T::Change:
         registers.save(standardRegister, content(range));
-        //        erase(extendRight(range));
         erase(range);
+        //        range.begin().buffer().history().markMajor();
         return VimMode::Insert;
     case T::Yank:
         registers.save(standardRegister, content(range));
         return VimMode::Normal;
     case T::Delete:
         registers.save(standardRegister, content(range));
-        //        erase(extendRight(range));
         erase(range);
+        //        range.begin().buffer().history().markMajor();
         return VimMode::Normal;
     default:
         throw std::runtime_error{"invalid action command type"};
@@ -253,15 +256,87 @@ std::shared_ptr<IMode> vim::createMode(VimMode resultMode) {
     throw std::runtime_error{"cannot create mode: This should never happend"};
 }
 
+ActionResultT findVimAction(FStringView buffer, VimMode modeName) {
+    auto bestResult = vim::MatchType::NoMatch;
+
+    {
+        auto motion = getMotion(buffer);
+        if (motion.match == vim::Match) {
+            auto f = [f = motion.f](std::shared_ptr<IEnvironment> env) {
+                auto &editor = env->editor();
+                auto cursor = editor.cursor();
+                auto repetitions = editor.mode().repetitions();
+                cursor = f(cursor, repetitions);
+                editor.cursor(cursor);
+            };
+
+            return {vim::Match, f};
+        }
+        else if (motion.match == vim::PartialMatch) {
+            bestResult = vim::PartialMatch;
+        }
+    }
+
+    /// Note that this removes the firts part of `buffer`
+    auto commandType = getType(modeName, buffer);
+
+    if (commandType == VimCommandType::Other) {
+        return {bestResult};
+    }
+
+    auto selectionFunction = getSelectionFunction(buffer, modeName);
+
+    if (selectionFunction.match == vim::NoMatch) {
+        return {bestResult};
+    }
+    if (selectionFunction.match == vim::PartialMatch) {
+        return {vim::PartialMatch};
+    }
+
+    auto f = [modeName,
+              commandType,
+              buffer = FString{buffer},
+              selectionF =
+                  selectionFunction.f](std::shared_ptr<IEnvironment> env) {
+        auto &editor = env->editor();
+        auto &mode = editor.mode();
+        auto cursor = editor.cursor();
+
+        auto repetitions = mode.repetitions();
+        auto [selection, newCursor] =
+            selectionF(cursor, std::max(1, repetitions));
+
+        auto newMode = applyAction(commandType, selection, env->registers());
+
+        editor.cursor(newCursor);
+
+        editor.mode(vim::createMode(newMode));
+    };
+
+    return {vim::MatchType::Match, f};
+}
+
 vim::MatchType doVimAction(std::shared_ptr<IEnvironment> env,
                            VimMode modeName) {
     auto &editor = env->editor();
     auto &mode = editor.mode();
     auto cursor = editor.cursor();
-    auto buffer = mode.buffer();
+    auto buffer = FStringView{mode.buffer()};
 
     auto commandType = getType(modeName, buffer);
     auto repetitions = mode.repetitions();
+
+    auto bestResult = vim::MatchType::NoMatch;
+
+    {
+        auto motion = getMotion(buffer);
+        if (motion.match == vim::Match) {
+            cursor = motion.f(cursor, repetitions);
+            editor.cursor(cursor);
+            return vim::Match;
+        }
+    }
+
     auto [selection, newCursor] =
         getSelection(buffer, cursor, modeName, std::max(1, repetitions));
 
@@ -293,6 +368,15 @@ std::pair<CursorRange, Cursor> getInnerSelection(Cursor cursor,
         auto range = inner('(', cursor);
         return {range, range.begin()};
     }
+    case '{':
+    case 'B': {
+        auto range = inner('{', cursor);
+        return {range, range.begin()};
+    }
+    case '[': {
+        auto range = inner('[', cursor);
+        return {range, range.begin()};
+    }
     }
 
     return {cursor, cursor};
@@ -313,6 +397,59 @@ std::pair<CursorRange, Cursor> getAroundSelection(Cursor cursor,
     selection.first = extend(selection.first, 1, false);
 
     return selection;
+}
+
+SelectionFunctionT getSelectionFunction(FStringView buffer, VimMode modeName) {
+    if (buffer.empty()) {
+        return {vim::PartialMatch};
+    }
+
+    auto motion = getMotion(buffer);
+
+    if (motion) {
+        // TODO: Handle when motion is backwards
+        auto f = [f = motion.f](Cursor cursor,
+                                int repetitions) -> SelectionFunctionReturnT {
+            return {CursorRange{cursor, f(cursor, repetitions)}, cursor};
+        };
+
+        return {
+            .match = vim::Match,
+            .f = f,
+        };
+    }
+
+    if (buffer.front() == 'i') {
+        if (buffer.size() == 1) {
+            return {.match = vim::PartialMatch};
+        }
+        auto f = [type = buffer.at(1).c](
+                     Cursor cursor,
+                     int repetitions) -> SelectionFunctionReturnT {
+            return getInnerSelection(cursor, type, repetitions);
+        };
+        return {
+            .match = vim::Match,
+            .f = f,
+        };
+    }
+
+    if (buffer.front() == 'a') {
+        if (buffer.size() == 1) {
+            return {.match = vim::PartialMatch};
+        }
+        auto f = [type = buffer.at(1).c](
+                     Cursor cursor,
+                     int repetitions) -> SelectionFunctionReturnT {
+            return getAroundSelection(cursor, type, repetitions);
+        };
+        return {
+            .match = vim::Match,
+            .f = f,
+        };
+    }
+
+    return {.match = vim::NoMatch};
 }
 
 std::pair<CursorRange, Cursor> getSelection(FStringView buffer,
