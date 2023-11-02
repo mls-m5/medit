@@ -133,8 +133,12 @@ void GdbDebugger::setBreakpoint(SourceLocation loc) {
     _connection.send("b " + loc.path.string() + ":" +
                      std::to_string(loc.position.y() + 1));
     waitForDone();
+    _breakpointInfos.clear();
     _connection.send("info b"); // Request information about all set breakpoints
+    // New breakpoint infos will be added in the input thread
     waitForDone();
+
+    // TODO: Publish the information somehow
 }
 
 void GdbDebugger::deleteBreakpoint(SourceLocation loc) {}
@@ -188,18 +192,19 @@ void GdbDebugger::inputThread(std::istream &in) {
             }
         }
 
-        constexpr auto breakpointStr = std::string_view{"~\"Breakpoint "};
-        if (line.rfind(breakpointStr, 0) == 0) {
-            static const std::regex breakpointRegex(
-                R"~(~"Breakpoint (\d+) at (0x[0-9a-fA-F]+): file (.*), line (\d+).\\n")~");
-            if (std::regex_match(line, matches, breakpointRegex)) {
-                //                std::cout << "Breakpoint Number: " <<
-                //                matches[1].str()
-                //                          << std::endl;
-                //                std::cout << "Address: " << matches[2].str()
-                //                << std::endl; std::cout << "Filename: " <<
-                //                matches[3].str() << std::endl; std::cout <<
-                //                "Line: " << matches[4].str() << std::endl;
+        if (line.starts_with("~")) {
+            static const auto re = std::regex{
+                R"(~"(\d+)\s+breakpoint\s+.* in ([^\s]+) at ([^\s]+):(\d+))"};
+
+            auto match = std::smatch{};
+
+            if (std::regex_search(line, match, re)) {
+                _breakpointInfos.push_back({
+                    .breakpointNumber = match[1].str(),
+                    .functionSignature = match[2].str(),
+                    .filePath = match[3].str(),
+                    .lineNumber = std::stoi(match[4].str()),
+                });
             }
         }
 

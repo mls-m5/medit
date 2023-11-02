@@ -174,8 +174,6 @@ std::string SerializeScreen::request(std::string_view method) {
     }
 }
 
-// void SerializeScreen::receive(const nlohmann::json &json) {
-// void SerializeScreen::receive(Archive &arch) {
 void SerializeScreen::receive(std::string_view str) {
     PROFILE_FUNCTION();
     auto ss = std::istringstream{std::string{str}};

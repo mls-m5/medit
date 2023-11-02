@@ -11,6 +11,13 @@
 #include <string_view>
 #include <vector>
 
+struct BreakpointInfo {
+    std::string breakpointNumber;
+    std::string functionSignature;
+    std::string filePath;
+    int lineNumber;
+};
+
 class GdbDebugger : public IDebugger {
 public:
     GdbDebugger();
@@ -72,12 +79,7 @@ private:
     std::string _debugArgs;
     std::filesystem::path _workingDirectory;
 
-    enum RequestedInfo {
-        None,
-        BreakpointList,
-    };
-
-    RequestedInfo _requestedInfo = None;
+    std::vector<BreakpointInfo> _breakpointInfos;
 
     bool _isWaiting = false;
     std::mutex _waitMutex;
