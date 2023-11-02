@@ -30,6 +30,8 @@ public:
     /// Application output
     void applicationOutputCallback(
         std::function<void(std::string_view)>) override;
+    /// Only messages from the debugger
+    void debuggerOutputCallback(std::function<void(std::string_view)>) override;
 
     void gdbStatusCallback(std::function<void(std::string_view)>) override;
     void stateCallback(std::function<void(DebuggerState)>) override;
@@ -59,6 +61,7 @@ private:
 
     std::function<void(DebuggerState state)> _callback;
     std::function<void(std::string_view)> _applicationOutputCallback;
+    std::function<void(std::string_view)> _debuggerOutputCallback;
     std::function<void(std::string_view)> _gdbStatusCallback;
 
     void inputThread(std::istream &in);

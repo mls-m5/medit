@@ -3,6 +3,7 @@
 #include "core/ijobqueue.h"
 #include "plugin/idebugger.h"
 #include "script/ienvironment.h"
+#include "syntax/palette.h"
 #include "text/fstring.h"
 #include "views/editor.h"
 #include "views/mainwindow.h"
@@ -20,6 +21,15 @@ void debug(std::shared_ptr<IEnvironment> env) {
             auto cursor = env->console().buffer().end();
             cursor.x(0);
             env->console().cursor(cursor);
+        });
+    };
+    auto printDebug = [wenv = env->weak_from_this()](std::string_view str) {
+        auto env = wenv.lock();
+        env->context().guiQueue().addTask([env, str = std::string{str}] {
+            env->console().buffer().pushBack(FString{str, Palette::comment});
+            auto cursor = env->console().buffer().end();
+            //            cursor.x(0);
+            //            env->console().cursor(cursor);
         });
     };
 
@@ -53,6 +63,7 @@ void debug(std::shared_ptr<IEnvironment> env) {
     debugger->command(env->project().settings().debug.command);
     debugger->workingDirectory(env->project().settings().debug.workingDir);
     debugger->applicationOutputCallback(print);
+    debugger->debuggerOutputCallback(printDebug);
     debugger->gdbStatusCallback(statusMessage);
     debugger->stateCallback(stateCallback);
 

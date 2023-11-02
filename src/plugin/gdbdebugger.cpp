@@ -39,6 +39,11 @@ void GdbDebugger::applicationOutputCallback(
     _applicationOutputCallback = f;
 }
 
+void GdbDebugger::debuggerOutputCallback(
+    std::function<void(std::string_view)> f) {
+    _debuggerOutputCallback = f;
+}
+
 void GdbDebugger::gdbStatusCallback(std::function<void(std::string_view)> f) {
     _gdbStatusCallback = f;
 }
@@ -228,12 +233,39 @@ void GdbDebugger::inputThread(std::istream &in) {
             changeState({});
         }
 
-        //        std::cout << line << std::endl;
-
         if (_applicationOutputCallback) {
             // TODO: Separate applcation output from gdb output with gdb tty
             // command and special pipes
-            _applicationOutputCallback(line);
+
+            bool isGdbOutput = false;
+
+            if (!line.empty()) {
+                auto first = line.front();
+                switch (first) {
+                case '^':
+                case '*':
+                case '+':
+                case '=':
+                case '~':
+                case '@':
+                case '&':
+                    isGdbOutput = true;
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            if (line.starts_with("(gdb)")) {
+                isGdbOutput = true;
+            }
+
+            if (isGdbOutput) {
+                _debuggerOutputCallback(line);
+            }
+            else {
+                _applicationOutputCallback(line);
+            }
         }
 
         // Implement the regex logic here:

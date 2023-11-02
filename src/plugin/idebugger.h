@@ -49,6 +49,8 @@ public:
 
     virtual void applicationOutputCallback(
         std::function<void(std::string_view)>) = 0;
+    virtual void debuggerOutputCallback(
+        std::function<void(std::string_view)>) = 0;
     virtual void stateCallback(std::function<void(DebuggerState)>) = 0;
     virtual void gdbStatusCallback(std::function<void(std::string_view)>) = 0;
 
