@@ -1,6 +1,7 @@
 #include "deserializescreen.h"
 #include "core/inarchive.h"
 #include "core/outarchive.h"
+#include "core/profiler.h"
 #include "screen/cursorstyle.h"
 #include "syntax/palette.h"
 #include <sstream>
@@ -24,14 +25,17 @@ void DeserializeScreen::close() {
 }
 
 void DeserializeScreen::write(std::string_view data) {
+    PROFILE_FUNCTION();
     handle(data);
 }
 
 void DeserializeScreen::unsubscribe() {
+    PROFILE_FUNCTION();
     _callback = {};
 }
 
 void DeserializeScreen::handle(std::string_view str) {
+    PROFILE_FUNCTION();
     auto ss = std::istringstream{std::string{str}};
     auto arch = InArchive{ss};
 
@@ -121,6 +125,7 @@ void DeserializeScreen::handle(std::string_view str) {
 }
 
 void DeserializeScreen::send(std::string_view str) {
+    PROFILE_FUNCTION();
     //    auto ss = std::stringstream{};
     //    ss << data;
     if (!_callback) {
@@ -136,6 +141,7 @@ void DeserializeScreen::send(std::string_view str) {
 }
 
 void DeserializeScreen::screenCallback(IScreen::EventListT list) {
+    PROFILE_FUNCTION();
 
     auto ss = std::ostringstream{};
     {

@@ -103,8 +103,13 @@ flags:
                 std::exit(0);
             }
             else {
-                if (arg.rfind("-") != 0) {
+                if (arg.rfind("-", 0) != 0) {
                     file = args.at(i);
+                }
+                else {
+                    std::cerr << helpStr << "\n";
+                    std::cerr << "invalid argument " << arg << "\n";
+                    std::exit(1);
                 }
             }
         }

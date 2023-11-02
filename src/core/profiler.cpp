@@ -1,4 +1,5 @@
 #include "profiler.h"
+#include "core/threadname.h"
 #include <chrono>
 #include <cstdint>
 #include <fstream>
@@ -66,6 +67,7 @@ struct ProfiledData {
     std::vector<DebugFrame> frames;
     std::vector<InstantData> instants;
     int id = generateProfilingThreadId();
+    std::string name;
 };
 
 struct GlobalData {
@@ -98,11 +100,23 @@ struct GlobalData {
 
         auto file = std::ofstream{"medit_profile_log.json"};
         file << "[\n";
+
         for (auto &data : threadFrameDatas) {
+            // Output the thread's meta information
+
+            file << "{";
+            file << "\"name\": \"thread_name\", ";
+            file << "\"ph\": \"M\", ";
+            file << "\"pid\": 1, "; // Assuming process id is 1
+            file << "\"tid\": " << data->id << ", ";
+            file << "\"args\": {\"name\": \"" << data->name << "\"}";
+            file << "}";
+
             for (auto &frame : data->frames) {
                 file << frame << ",\n";
             }
         }
+
         file << "{}]\n";
         threadFrameDatas.clear();
     }
@@ -198,4 +212,11 @@ void profileInstant(std::string_view value) {
         return;
     }
     localProfilingThreadData.instant(value);
+}
+
+void setProfilerThreadName(std::string name) {
+    if (!shouldEnableProfiling || !isThreadInitialized) {
+        return;
+    }
+    localProfilingThreadData.data->name = std::move(name);
 }

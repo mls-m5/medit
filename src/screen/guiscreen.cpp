@@ -284,6 +284,7 @@ struct GuiScreen::Buffer {
 
     // Make sure that the bottom line aligns with the window border
     void drawBottomLine(sdl::RendererView renderer) {
+        auto d = ProfileDuration{};
         screen.render(renderer,
                       0,
                       pixelHeight - screen.cache.charHeight,
@@ -308,44 +309,58 @@ struct GuiScreen::Buffer {
 
         auto l = std::lock_guard{refreshMutex};
         _tv();
-        for (size_t y = 0; y < shownLines.size(); ++y) {
-            renderLine(y, shownLines.at(y));
+        {
+            auto d = ProfileDuration{"Draw"};
+
+            {
+                auto d = ProfileDuration{"Render Lines"};
+                for (size_t y = 0; y < shownLines.size(); ++y) {
+                    renderLine(y, shownLines.at(y));
+                }
+            }
+
+            renderer.drawColor(_styles.front().bg);
+            renderer.fillRect();
+
+            auto rect =
+                sdl::Rect{0, 0, screen.canvas.width, screen.canvas.height - 1};
+            {
+                auto d = ProfileDuration{"RenderScreen"};
+                screen.render(renderer, 0, 0, rect);
+            }
+            drawBottomLine(renderer);
+
+            renderer.drawColor(sdl::White);
+
+            auto cellWidth = screen.cache.charWidth;
+            auto cellHeight = screen.cache.charHeight;
+
+            switch (cursorStyle) {
+            case CursorStyle::Beam:
+                renderer.fillRect(
+                    sdl::Rect{static_cast<int>(cellWidth * cursorPos.x()),
+                              static_cast<int>(cellHeight * cursorPos.y()),
+                              1,
+                              static_cast<int>(cellHeight)});
+                break;
+            default:
+                //            renderer.fillRect(
+                //                sdl::Rect{static_cast<int>(cellWidth *
+                //                cursorPos.x()),
+                //                          static_cast<int>(cellHeight *
+                //                          cursorPos.y()),
+                //                          static_cast<int>(cellWidth),
+                //                          static_cast<int>(cellHeight)});
+                screen.renderCursor(
+                    renderer, rect, cursorPos.x(), cursorPos.y());
+                break;
+            }
         }
 
-        renderer.drawColor(_styles.front().bg);
-        renderer.fillRect();
-
-        auto rect =
-            sdl::Rect{0, 0, screen.canvas.width, screen.canvas.height - 1};
-        screen.render(renderer, 0, 0, rect);
-        drawBottomLine(renderer);
-
-        renderer.drawColor(sdl::White);
-
-        auto cellWidth = screen.cache.charWidth;
-        auto cellHeight = screen.cache.charHeight;
-
-        switch (cursorStyle) {
-        case CursorStyle::Beam:
-            renderer.fillRect(
-                sdl::Rect{static_cast<int>(cellWidth * cursorPos.x()),
-                          static_cast<int>(cellHeight * cursorPos.y()),
-                          1,
-                          static_cast<int>(cellHeight)});
-            break;
-        default:
-            //            renderer.fillRect(
-            //                sdl::Rect{static_cast<int>(cellWidth *
-            //                cursorPos.x()),
-            //                          static_cast<int>(cellHeight *
-            //                          cursorPos.y()),
-            //                          static_cast<int>(cellWidth),
-            //                          static_cast<int>(cellHeight)});
-            screen.renderCursor(renderer, rect, cursorPos.x(), cursorPos.y());
-            break;
+        {
+            auto d = ProfileDuration{"Present"};
+            renderer.present();
         }
-
-        renderer.present();
     }
 
     size_t addStyle(const Color &fg, const Color &bg, size_t index) {
@@ -417,6 +432,8 @@ struct GuiScreen::Buffer {
                 }
             }
         }();
+
+        auto duration = ProfileDuration{};
 
         if (!e) {
             return NullEvent{};

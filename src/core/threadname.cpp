@@ -1,4 +1,5 @@
 #include "threadname.h"
+#include "core/profiler.h"
 #include "os.h"
 #include <array>
 #include <string>
@@ -11,6 +12,7 @@ void setThreadName(const std::string &name) {
 #ifdef MEDIT_USING_LINUX
     pthread_setname_np(pthread_self(), name.c_str());
 #endif
+    setProfilerThreadName(name);
 }
 
 std::string getThreadName() {

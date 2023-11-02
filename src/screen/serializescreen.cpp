@@ -1,6 +1,7 @@
 #include "serializescreen.h"
 #include "core/inarchive.h"
 #include "core/outarchive.h"
+#include "core/profiler.h"
 #include "syntax/palette.h"
 #include <sstream>
 #include <string_view>
@@ -17,6 +18,7 @@ SerializeScreen::~SerializeScreen() {
 }
 
 void SerializeScreen::draw(size_t x, size_t y, FStringView str) {
+    PROFILE_FUNCTION();
     auto ss = std::ostringstream{};
     {
         auto arch = OutArchive{ss};
@@ -29,6 +31,7 @@ void SerializeScreen::draw(size_t x, size_t y, FStringView str) {
 }
 
 void SerializeScreen::refresh() {
+    PROFILE_FUNCTION();
     auto ss = std::ostringstream{};
     {
         auto arch = OutArchive{ss};
@@ -38,6 +41,7 @@ void SerializeScreen::refresh() {
 }
 
 void SerializeScreen::clear() {
+    PROFILE_FUNCTION();
     auto ss = std::ostringstream{};
     {
         auto arch = OutArchive{ss};
@@ -47,6 +51,7 @@ void SerializeScreen::clear() {
 }
 
 void SerializeScreen::cursor(size_t x, size_t y) {
+    PROFILE_FUNCTION();
     auto ss = std::ostringstream{};
     {
         auto arch = OutArchive{ss};
@@ -58,6 +63,7 @@ void SerializeScreen::cursor(size_t x, size_t y) {
 }
 
 void SerializeScreen::title(std::string title) {
+    PROFILE_FUNCTION();
     auto ss = std::ostringstream{};
     {
         auto arch = OutArchive{ss};
@@ -68,6 +74,7 @@ void SerializeScreen::title(std::string title) {
 }
 
 void SerializeScreen::palette(const Palette &palette) {
+    PROFILE_FUNCTION();
     auto ss = std::ostringstream{};
     {
         auto arch = OutArchive{ss};
@@ -80,6 +87,7 @@ void SerializeScreen::palette(const Palette &palette) {
 size_t SerializeScreen::addStyle(const Color &foreground,
                                  const Color &background,
                                  size_t index) {
+    PROFILE_FUNCTION();
     auto ss = std::ostringstream{};
     {
         auto arch = OutArchive{ss};
@@ -96,6 +104,7 @@ size_t SerializeScreen::addStyle(const Color &foreground,
 }
 
 void SerializeScreen::cursorStyle(CursorStyle style) {
+    PROFILE_FUNCTION();
     auto ss = std::ostringstream{};
     {
         auto arch = OutArchive{ss};
@@ -114,10 +123,12 @@ void SerializeScreen::unsubscribe() {
 }
 
 std::string SerializeScreen::clipboardData() {
+    PROFILE_FUNCTION();
     return this->request("get/clipboard");
 }
 
 void SerializeScreen::clipboardData(std::string text) {
+    PROFILE_FUNCTION();
     auto ss = std::ostringstream{};
     {
         auto arch = OutArchive{ss};
@@ -128,10 +139,12 @@ void SerializeScreen::clipboardData(std::string text) {
 }
 
 void SerializeScreen::send(std::string_view str) {
+    PROFILE_FUNCTION();
     _connection->write(str);
 }
 
 std::string SerializeScreen::request(std::string_view method) {
+    PROFILE_FUNCTION();
     auto id = ++_currentRequest;
     {
         auto ss = std::ostringstream{};
@@ -164,6 +177,7 @@ std::string SerializeScreen::request(std::string_view method) {
 // void SerializeScreen::receive(const nlohmann::json &json) {
 // void SerializeScreen::receive(Archive &arch) {
 void SerializeScreen::receive(std::string_view str) {
+    PROFILE_FUNCTION();
     auto ss = std::istringstream{std::string{str}};
     auto arch = InArchive{ss};
 

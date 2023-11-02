@@ -1,3 +1,4 @@
+#include "core/profiler.h"
 #include "core/threadname.h"
 #ifndef __EMSCRIPTEN__
 #include "ncursesscreen.h"
@@ -61,6 +62,7 @@ void reducedPalette() {
 } // namespace
 
 void NCursesScreen::init() {
+    PROFILE_FUNCTION();
     ::initscr();
 
     _tv.reset();
@@ -92,6 +94,7 @@ void NCursesScreen::init() {
 }
 
 void NCursesScreen::draw(size_t x, size_t y, FStringView rstr) {
+    PROFILE_FUNCTION();
     auto str = rstr;
     _threadQueue.push_back([str, this, x, y] {
         _tv();
@@ -113,6 +116,7 @@ void NCursesScreen::draw(size_t x, size_t y, FStringView rstr) {
 }
 
 void NCursesScreen::refresh() {
+    PROFILE_FUNCTION();
     _threadQueue.push_back([this] {
         _tv();
         ::refresh();
@@ -120,6 +124,7 @@ void NCursesScreen::refresh() {
 }
 
 void NCursesScreen::clear() {
+    PROFILE_FUNCTION();
     _threadQueue.push_back([this] {
         _tv();
         ::clear();
@@ -127,6 +132,7 @@ void NCursesScreen::clear() {
 }
 
 void NCursesScreen::cursor(size_t x, size_t y) {
+    PROFILE_FUNCTION();
     _threadQueue.push_back([this, x, y] {
         _tv();
         ::move(y, x);
@@ -140,6 +146,7 @@ NCursesScreen::NCursesScreen()
         _isRunning = true;
         loop();
     }) {
+    PROFILE_FUNCTION();
 
     using namespace std::literals;
 
@@ -159,6 +166,7 @@ NCursesScreen::~NCursesScreen() {
 }
 
 void NCursesScreen::subscribe(CallbackT f) {
+    PROFILE_FUNCTION();
     _callback = f;
 
     auto r = ResizeEvent();
@@ -168,6 +176,7 @@ void NCursesScreen::subscribe(CallbackT f) {
 }
 
 Event NCursesScreen::getInput() {
+    PROFILE_FUNCTION();
     _tv();
     const auto c = getch();
     if (c == ERR) {
@@ -248,6 +257,7 @@ void NCursesScreen::title(std::string title) {
 }
 
 void NCursesScreen::palette(const Palette &palette) {
+    PROFILE_FUNCTION();
     _palette = palette;
     _threadQueue.push_back([this] {
         _tv();
@@ -256,12 +266,14 @@ void NCursesScreen::palette(const Palette &palette) {
 }
 
 void NCursesScreen::cursorStyle(CursorStyle style) {
+    PROFILE_FUNCTION();
     if (_currentCursor != style) {
         // Not implemented
     }
 }
 
 size_t NCursesScreen::addStyle(const Color &fg, const Color &bg, size_t index) {
+    PROFILE_FUNCTION();
     _tv();
     if (!_hasColors) {
         return 1;
@@ -293,6 +305,7 @@ size_t NCursesScreen::addStyle(const Color &fg, const Color &bg, size_t index) {
 }
 
 void NCursesScreen::loop() {
+    PROFILE_FUNCTION();
     using namespace std::literals;
     for (; _isRunning;) {
 

@@ -3,6 +3,7 @@
 #include "core/coreenvironment.h"
 #include "core/ijobqueue.h"
 #include "core/plugins.h"
+#include "core/profiler.h"
 #include "files/project.h"
 #include "lsp/clientnotifications.h"
 #include "lsp/lspclient.h"
@@ -230,6 +231,7 @@ LspPlugin::Instance *LspPlugin::createInstance(std::filesystem::path path) {
 
 void LspPlugin::handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
                                       std::vector<long> data) {
+    auto duration = ProfileDuration{};
 
     struct Item {
         long *data;
@@ -318,6 +320,7 @@ void LspPlugin::handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
 
 void LspPlugin::requestSemanticsToken(std::shared_ptr<Buffer> buffer,
                                       Instance &instance) {
+    auto duration = ProfileDuration{};
     auto params = SemanticTokensParams{};
     params.textDocument.uri = pathToUri(buffer->path());
 
@@ -342,6 +345,7 @@ void LspPlugin::requestSemanticsToken(std::shared_ptr<Buffer> buffer,
 
 bool LspPlugin::updateBuffer(Buffer &buffer) {
     // TODO: Only update buffers with changed revision
+    auto duration = ProfileDuration{};
 
     auto i = instance(buffer.path());
     if (!i) {

@@ -1,4 +1,5 @@
 #include "core/timer.h"
+#include "core/profiler.h"
 #include "core/threadname.h"
 #include <algorithm>
 #include <thread>
@@ -52,12 +53,14 @@ void Timer::stop() {
 }
 
 void Timer::loop() {
+    //    auto duration = ProfileDuration{};
     setThreadName("timer");
     _isRunning = true;
     while (_isRunning) {
         {
             _mutex.lock();
             while (!_triggers.empty()) {
+                auto duration = ProfileDuration{"Timer-task"};
                 auto nextTime = _triggers.front().time;
                 if (nextTime < std::chrono::system_clock::now()) {
                     auto next = std::move(_triggers.front());

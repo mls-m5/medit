@@ -32,17 +32,20 @@ public:
     }
 
     void work(bool shouldWait = true) override {
-        auto duration = ProfileDuration{};
-        if (shouldWait) {
-            _waitMutex.lock();
-        }
-        while (!_queue.empty() && _running) {
-            auto task = std::move(_queue.front());
-            _queue.pop();
-            task();
+        {
+            auto duration = ProfileDuration{};
+            if (shouldWait) {
+                _waitMutex.lock();
+            }
+            while (!_queue.empty() && _running) {
+                auto task = std::move(_queue.front());
+                _queue.pop();
+                task();
+            }
         }
 
         if (shouldWait) {
+            //            auto duration = ProfileDuration{"JobQueue-wait"};
             wait();
         }
     }
@@ -65,6 +68,7 @@ public:
 private:
     //! Run and lock the current thread
     void loop() {
+        //        auto profileDuration = ProfileDuration{};
         setThreadName("jobs");
         _threadId = std::this_thread::get_id();
         while (_running) {
@@ -93,5 +97,4 @@ private:
     bool _running = true;
     std::thread::id _threadId = {};
     std::thread _thread;
-    ProfileDuration _profileDuration{};
 };
