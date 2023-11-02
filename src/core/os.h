@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <functional>
 #include <stdexcept>
 #include <string>
 
@@ -45,4 +46,4 @@ int getPid();
 
 bool isProcessRunning(int pid);
 
-void setupSignals();
+void setupSignals(std::function<void()> f);

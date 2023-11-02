@@ -62,7 +62,7 @@ void CoreEnvironment::unsubscribeToConsoleCallback(void *ref) {
                              _consoleCallback.end(),
                              [ref](auto &&a) { return a.second == ref; });
 
-    _consoleCallback.erase(it);
+    _consoleCallback.erase(it, _consoleCallback.end());
 }
 
 void CoreEnvironment::printToAllConsoles(std::string text) {

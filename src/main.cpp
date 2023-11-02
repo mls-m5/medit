@@ -182,6 +182,8 @@ struct MainData {
     void loop();
 
     void stop();
+
+    void quit();
 };
 
 // Its defined publicly so that emscripten can keep it after the main function
@@ -240,13 +242,17 @@ void MainData::loop() {
 #endif
 }
 
+void MainData::quit() {
+    quitMedit(*context);
+}
+
 } // namespace
 
 int main(int argc, char **argv) {
     auto settings = Settings{argc, argv};
 
     setThreadName("main");
-    setupSignals();
+    setupSignals([]() { mainData.quit(); });
 
     if (settings.enablePerformanceProfiling) {
         enableProfiling();
@@ -265,6 +271,7 @@ int main(int argc, char **argv) {
     mainData.loop();
 #ifndef __EMSCRIPTEN__
     mainData.stop();
+    mainData = {};
 #endif
 
     return 0;

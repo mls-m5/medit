@@ -2,6 +2,13 @@
 #include "os.h"
 #include <array>
 #include <cstdlib>
+#include <functional>
+
+namespace {
+
+std::function<void()> signalCallback;
+
+}
 
 #ifdef MEDIT_USING_WINDOWS
 
@@ -15,7 +22,7 @@ int getPid() {
     GetCurrentProcessId();
 }
 
-void setupSignals() {
+void setupSignals(std::function<void()> f) {
     static_static_assert(false, "not implemented");
 }
 
@@ -51,8 +58,15 @@ bool isProcessRunning(int pid) {
     return std::filesystem::exists(path);
 }
 
-void setupSignals() {
+void sigintHandler(int signum) {
+    std::puts("received interrupt");
+    signalCallback();
+}
+
+void setupSignals(std::function<void()> f) {
     signal(SIGPIPE, SIG_IGN);
+    signalCallback = f;
+    signal(SIGINT, sigintHandler);
 }
 
 #endif
