@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <memory>
+#include <mutex>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -21,6 +23,27 @@ struct DebugFrame {
         std::chrono::high_resolution_clock::now();
 };
 
+int64_t convertTimePointToMicroseconds(
+    std::chrono::high_resolution_clock::time_point tp) {
+    auto duration_since_epoch = tp.time_since_epoch();
+    return std::chrono::duration_cast<std::chrono::microseconds>(
+               duration_since_epoch)
+        .count();
+}
+
+std::ostream &operator<<(std::ostream &os, const DebugFrame &df) {
+    os << "{";
+    os << "\"name\": \"" << df.name << ":" << df.data2 << "@" << df.line
+       << "\", ";
+    os << "\"ph\": \"" << (df.start ? "B" : "E") << "\", ";
+    os << "\"ts\": " << convertTimePointToMicroseconds(df.ts) << ", ";
+    os << "\"pid\": 1, ";
+    os << "\"tid\": " << df.tid;
+    os << "}";
+
+    return os;
+}
+
 /// Data that does not have a duration
 struct InstantData {
     std::string data;
@@ -32,13 +55,18 @@ struct InstantData {
 
 bool shouldEnableProfiling = false;
 
-int64_t convertTimePointToMicroseconds(
-    std::chrono::high_resolution_clock::time_point tp) {
-    auto duration_since_epoch = tp.time_since_epoch();
-    return std::chrono::duration_cast<std::chrono::microseconds>(
-               duration_since_epoch)
-        .count();
-}
+struct ProfiledData {
+    /// Just generate a id that starts with 1 and continue upwards, for
+    /// readability
+    int generateProfilingThreadId() {
+        static auto id = int{0};
+        return ++id;
+    }
+
+    std::vector<DebugFrame> frames;
+    std::vector<InstantData> instants;
+    int id = generateProfilingThreadId();
+};
 
 struct GlobalData {
     GlobalData(const GlobalData &) = delete;
@@ -46,10 +74,20 @@ struct GlobalData {
     GlobalData &operator=(const GlobalData &) = delete;
     GlobalData &operator=(GlobalData &&) = delete;
 
-    std::vector<struct ThreadData *> threadFrameDatas;
+    std::vector<std::shared_ptr<ProfiledData>> threadFrameDatas;
 
-    std::vector<DebugFrame> frames;
-    std::vector<InstantData> instants;
+    //    std::vector<DebugFrame> frames;
+    //    std::vector<InstantData> instants;
+
+    auto lock() {
+        return std::unique_lock{mutex};
+    }
+
+    auto getNewProfiledData() {
+        auto lock = this->lock();
+        threadFrameDatas.push_back(std::make_unique<ProfiledData>());
+        return threadFrameDatas.back();
+    }
 
     ~GlobalData() {
         /// Collect all data
@@ -59,82 +97,74 @@ struct GlobalData {
         }
 
         auto file = std::ofstream{"medit_profile_log.json"};
-        for (auto &frame : frames) {
-            file << "collectede frame << " << frame.name << " ts "
-                 << convertTimePointToMicroseconds(frame.ts) << "\n";
+        file << "[\n";
+        for (auto &data : threadFrameDatas) {
+            for (auto &frame : data->frames) {
+                file << frame << ",\n";
+            }
         }
+        file << "{}]\n";
+        threadFrameDatas.clear();
     }
 
-private:
     GlobalData() = default;
-    friend GlobalData &globalData();
+    std::shared_ptr<GlobalData> globalData();
+    std::mutex mutex{};
 };
 
 /// Should not be accessed a lot, could be performance hog due to static
-GlobalData &globalData() {
-    static auto data = GlobalData{};
+std::shared_ptr<GlobalData> globalData() {
+    /// This with the shared pointer is a workaround since we have no idea what
+    /// is deinitialized first, but we want the global data to be the last
+    static auto data = std::make_shared<GlobalData>();
     return data;
 }
 
-struct ThreadData {
-    std::vector<DebugFrame> frames;
-    std::vector<InstantData> instants;
-    int id = generateProfilingThreadId();
+thread_local auto isThreadInitialized = true;
 
-    ThreadData() {
-        auto &global = globalData();
-        global.threadFrameDatas.push_back(this);
-    }
+struct ThreadData {
+    std::shared_ptr<GlobalData> global = globalData();
+    std::shared_ptr<ProfiledData> data = global->getNewProfiledData();
+
+    ThreadData() = default;
 
     ~ThreadData() {
-        auto &global = globalData();
-        global.frames.insert(
-            global.frames.begin(), frames.begin(), frames.end());
-        frames.clear();
-        global.instants.insert(
-            global.instants.begin(), instants.begin(), instants.end());
+        isThreadInitialized = false;
     }
 
     void enterFrame(std::string_view name,
                     std::string_view data2,
                     uint_least32_t line) {
-        frames.push_back({
+        data->frames.push_back({
             .start = true,
             .name = name,
             .data2 = data2,
             .line = line,
-            .tid = id,
+            .tid = data->id,
         });
     }
 
     void exitFrame(std::string_view name,
                    std::string_view data2,
                    uint_least32_t line) {
-        frames.push_back({
+        data->frames.push_back({
             .start = false,
             .name = name,
             .data2 = data2,
             .line = line,
-            .tid = id,
+            .tid = data->id,
         });
     }
 
     void instant(std::string_view data) {
-        instants.push_back({
+        this->data->instants.push_back({
             .data = std::string{data},
-            .tid = id,
+            .tid = this->data->id,
         });
-    }
-
-    /// Just generate a id that starts with 1 and continue upwards, for
-    /// readability
-    int generateProfilingThreadId() {
-        static auto id = int{0};
-        return ++id;
     }
 };
 
-thread_local ThreadData localProfilingThreadData;
+thread_local auto localProfilingThreadData = ThreadData{};
 
 } // namespace
 
@@ -144,7 +174,7 @@ ProfileDuration::ProfileDuration(std::string_view name,
     : name{name}
     , data2{data2}
     , line{line} {
-    if (!shouldEnableProfiling) {
+    if (!shouldEnableProfiling || !isThreadInitialized) {
         return;
     }
 
@@ -152,7 +182,7 @@ ProfileDuration::ProfileDuration(std::string_view name,
 }
 
 ProfileDuration::~ProfileDuration() {
-    if (!shouldEnableProfiling) {
+    if (!shouldEnableProfiling || !isThreadInitialized) {
         return;
     }
 
@@ -164,5 +194,8 @@ void enableProfiling() {
 }
 
 void profileInstant(std::string_view value) {
+    if (!shouldEnableProfiling || !isThreadInitialized) {
+        return;
+    }
     localProfilingThreadData.instant(value);
 }

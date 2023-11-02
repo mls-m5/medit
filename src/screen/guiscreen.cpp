@@ -1,4 +1,5 @@
 #include "guiscreen.h"
+#include "core/profiler.h"
 #include "core/threadname.h"
 #include "sdlpp/rect.hpp"
 #include "sdlpp/surface.hpp"
@@ -303,6 +304,8 @@ struct GuiScreen::Buffer {
 
     // Update the screen
     void refresh() {
+        auto duration = ProfileDuration{};
+
         auto l = std::lock_guard{refreshMutex};
         _tv();
         for (size_t y = 0; y < shownLines.size(); ++y) {
