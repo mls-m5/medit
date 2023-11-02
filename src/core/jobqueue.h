@@ -2,6 +2,7 @@
 
 #include "core/threadname.h"
 #include "ijobqueue.h"
+#include "profiler.h"
 #include <functional>
 #include <mutex>
 #include <queue>
@@ -31,6 +32,7 @@ public:
     }
 
     void work(bool shouldWait = true) override {
+        auto duration = ProfileDuration{};
         if (shouldWait) {
             _waitMutex.lock();
         }
@@ -91,4 +93,5 @@ private:
     bool _running = true;
     std::thread::id _threadId = {};
     std::thread _thread;
+    ProfileDuration _profileDuration{};
 };

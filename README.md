@@ -77,6 +77,9 @@ Todo:
    - [x] Status
    - [ ] Blame
    - [ ] Commit (interaction where you select which files and write message)
+- [ ] GDB debugger integration
+   - [ ] Basic operations, run, set breakpoints step
+   - [ ] Visualize breakpoints (using annotation system)
 - [ ] Console
    - [x] Interact with console (focus, scroll, keypresses etc)
    - [ ] Support for multiple consoles for different usages.
@@ -140,6 +143,7 @@ Todo:
 - [x] Build before running
 - [ ] Locator performance is really bad when opening large project
 - [ ] Make ctrl+c work again
+- [ ] Autocreate settings file with default settings to help user
       
 ## Bugs
 - [x] When open a file where there is no project/.git, the program freezes

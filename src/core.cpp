@@ -6,6 +6,7 @@
 #include "core/meditlog.cpp"
 #include "core/os.cpp"
 #include "core/outarchive.cpp"
+#include "core/profiler.cpp"
 #include "core/registers.cpp"
 #include "core/threadname.cpp"
 #include "core/threadvalidation.cpp"

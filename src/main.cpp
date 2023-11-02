@@ -3,6 +3,7 @@
 #include "core/coreenvironment.h"
 #include "core/jobqueue.h"
 #include "core/os.h"
+#include "core/profiler.h"
 #include "core/threadname.h"
 #include "core/timer.h"
 #include "files/config.h"
@@ -246,6 +247,10 @@ int main(int argc, char **argv) {
 
     setThreadName("main");
     setupSignals();
+
+    if (settings.enablePerformanceProfiling) {
+        enableProfiling();
+    }
 
 #ifndef __EMSCRIPTEN__
     if (settings.style == UiStyle::FifoClient ||

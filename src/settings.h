@@ -20,6 +20,7 @@ struct Settings {
     UiStyle style = UiStyle::Matgui;
     int port = 4304;
     std::string address = "localhost";
+    bool enablePerformanceProfiling = false;
 
     static constexpr auto helpStr = R"_(
 medit text editor
@@ -38,6 +39,7 @@ flags:
 --remote              test serialize screen
 --port -p <port>      set port number for tcp connection
 --addr <address>      set the ip address to remote server
+--profiling           enable performance profiling
 
     )_";
 
@@ -92,6 +94,9 @@ flags:
             }
             else if (arg == "--port" || arg == "-p") {
                 port = std::stoi(args.at(++i));
+            }
+            else if (arg == "--profiling") {
+                enablePerformanceProfiling = true;
             }
             else if (arg == "--help" || arg == "-h") {
                 std::cout << helpStr << std::endl;
