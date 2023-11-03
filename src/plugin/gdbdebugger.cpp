@@ -92,6 +92,8 @@ void GdbDebugger::run() {
         return;
     }
 
+    updateBreakpointInfo();
+
     _connection.send("run &");
 }
 
@@ -120,11 +122,6 @@ void GdbDebugger::stepOut() {
     _connection.send("finish &");
 }
 
-void GdbDebugger::toggleBreakpoint(SourceLocation loc) {
-    // TODO: Handle unsetting
-    setBreakpoint(loc);
-}
-
 void GdbDebugger::stateCallback(std::function<void(DebuggerState)> f) {
     _callback = f;
 }
@@ -134,11 +131,19 @@ void GdbDebugger::breakpointListCallback(
     _breakpointListCallback = f;
 }
 
-void GdbDebugger::setBreakpoint(SourceLocation loc) {
-    _connection.send("b " + loc.path.string() + ":" +
-                     std::to_string(loc.position.y() + 1));
-    waitForDone();
-    _breakpointInfos.clear();
+void GdbDebugger::toggleBreakpoint(SourceLocation loc) {
+    if (deleteBreakpoint(loc)) {
+        return;
+    }
+    setBreakpoint(loc);
+}
+
+void GdbDebugger::updateBreakpointInfo() {
+    // We cannot simply clear the list since we need to send a message to those
+    // who need to remove breakpoints
+    for (auto &it : _breakpointInfos) {
+        it.second.clear();
+    }
     _connection.send("info b"); // Request information about all set breakpoints
     // New breakpoint infos will be added in the input thread
     waitForDone();
@@ -148,7 +153,41 @@ void GdbDebugger::setBreakpoint(SourceLocation loc) {
     }
 }
 
-void GdbDebugger::deleteBreakpoint(SourceLocation loc) {}
+void GdbDebugger::setBreakpoint(SourceLocation loc) {
+    _connection.send("b " + loc.path.string() + ":" +
+                     std::to_string(loc.position.y() + 1));
+    waitForDone();
+    updateBreakpointInfo();
+}
+
+bool GdbDebugger::deleteBreakpoint(SourceLocation loc) {
+    auto didFind = false;
+    for (auto &file : _breakpointInfos) {
+        auto ec = std::error_code{};
+        if (!std::filesystem::equivalent(file.first, loc.path, ec)) {
+            continue;
+        }
+        for (size_t i = 0; i < file.second.size();) {
+            auto &info = file.second.at(i);
+            if (loc.position.y() == info.lineNumber) {
+                _connection.send("delete breakpoint " +
+                                 std::to_string(info.breakpointNumber));
+                waitForDone();
+                file.second.erase(file.second.begin() + i);
+                didFind = true;
+            }
+            else {
+                ++i;
+            }
+        }
+        break; // Only do one file
+    }
+
+    if (didFind) {
+        updateBreakpointInfo();
+    }
+    return didFind;
+}
 
 GdbDebugger::WaitResult GdbDebugger::waitForDone() {
     _isWaiting = true;
@@ -165,7 +204,6 @@ void GdbDebugger::changeState(DebuggerState state) {
 }
 
 void GdbDebugger::inputThread(std::istream &in) {
-
     std::smatch matches;
 
     for (std::string line; std::getline(in, line);) {
@@ -201,14 +239,14 @@ void GdbDebugger::inputThread(std::istream &in) {
 
         if (line.starts_with("~")) {
             static const auto re = std::regex{
-                R"(~"(\d+)\s+breakpoint\s+.* in ([^\s]+) at ([^\s]+):(\d+))"};
+                R"(~"(\d+)\s+breakpoint\s+.* in (.+) at (.+):(\d+))"};
 
             auto match = std::smatch{};
 
             if (std::regex_search(line, match, re)) {
                 auto file = match[3].str();
                 _breakpointInfos[file].push_back({
-                    .breakpointNumber = match[1].str(),
+                    .breakpointNumber = std::stoi(match[1].str()),
                     .functionSignature = match[2].str(),
                     .filePath = match[3].str(),
                     .lineNumber = std::stoul(match[4].str()) - 1,
@@ -225,15 +263,8 @@ void GdbDebugger::inputThread(std::istream &in) {
         static const auto stopExpression = std::regex(
             R"_(stopped,reason="([^"]+)",.*?addr="([^"]+)",.*?func="([^"]+)",.*?file="([^"]+)",.*?fullname="([^"]+)",.*?line="([^"]+)")_");
         if (std::regex_search(line, matches, stopExpression)) {
-            //            std::cout << "Reason: " << matches[1].str() <<
-            //            std::endl; std::cout << "Address: " <<
-            //            matches[2].str() << std::endl; std::cout << "Function:
-            //            " << matches[3].str() << std::endl; std::cout <<
-            //            "File: " << matches[4].str() << std::endl;
             auto fullName = matches[5].str();
-            //            std::cout << "Fullname: " << fullName << std::endl;
             auto line = matches[6].str();
-            //            std::cout << "Line: " << line << std::endl;
 
             auto state = DebuggerState{};
             state.location.position = {0, std::stoul(line) - 1};

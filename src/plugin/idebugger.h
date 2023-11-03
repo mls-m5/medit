@@ -35,7 +35,7 @@ struct DebuggerState {
 };
 
 struct BreakpointInfo {
-    std::string breakpointNumber;
+    int breakpointNumber;
     std::string functionSignature;
     std::string filePath;
     size_t lineNumber; // medit line number, starting with 0
@@ -84,7 +84,9 @@ public:
 
     virtual void toggleBreakpoint(SourceLocation) = 0;
     virtual void setBreakpoint(SourceLocation) = 0;
-    virtual void deleteBreakpoint(SourceLocation) = 0;
+
+    /// Try to remove a breakpoint. Return true if successfull
+    virtual bool deleteBreakpoint(SourceLocation) = 0;
 
     // Watchpoints
     // Conditions

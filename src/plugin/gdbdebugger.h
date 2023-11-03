@@ -49,7 +49,7 @@ public:
 
     void toggleBreakpoint(SourceLocation) override;
     void setBreakpoint(SourceLocation) override;
-    void deleteBreakpoint(SourceLocation) override;
+    bool deleteBreakpoint(SourceLocation) override;
 
 private:
     enum WaitResult {
@@ -66,6 +66,9 @@ private:
     std::function<void(std::string_view)> _debuggerOutputCallback;
     std::function<void(std::string_view)> _gdbStatusCallback;
     std::function<void(const BreakpointList &)> _breakpointListCallback;
+
+    /// Query list of breakpoints from gdb
+    void updateBreakpointInfo();
 
     void inputThread(std::istream &in);
 
