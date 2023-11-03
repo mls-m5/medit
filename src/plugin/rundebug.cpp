@@ -4,6 +4,7 @@
 #include "plugin/idebugger.h"
 #include "script/ienvironment.h"
 #include "syntax/palette.h"
+#include "text/diagnostics.h"
 #include "text/fstring.h"
 #include "views/editor.h"
 #include "views/mainwindow.h"
@@ -55,6 +56,30 @@ void debug(std::shared_ptr<IEnvironment> env) {
         });
     };
 
+    auto breakpointCallback =
+        [wenv = env->weak_from_this()](const BreakpointList &infos) {
+            auto env = wenv.lock();
+            /// Todo create some indicator
+            env->context().guiQueue().addTask([infos = std::move(infos), env] {
+                for (auto &it : infos) {
+                    auto d = std::vector<Diagnostics::Diagnostic>{};
+
+                    for (auto &info : it.second) {
+                        d.push_back({
+                            .type = DiagnosticType::Breakpoint,
+                            .source = "debugger",
+                            .message = "breakpoint",
+                            .range = {.begin = {0, info.lineNumber},
+                                      .end = {Position::max, info.lineNumber}},
+                        });
+                    }
+
+                    env->core().files().publishDiagnostics(
+                        it.first, "gdb", std::move(d));
+                }
+            });
+        };
+
     if (!debugger) {
         print("no debugger found");
         return;
@@ -66,6 +91,7 @@ void debug(std::shared_ptr<IEnvironment> env) {
     debugger->debuggerOutputCallback(printDebug);
     debugger->gdbStatusCallback(statusMessage);
     debugger->stateCallback(stateCallback);
+    debugger->breakpointListCallback(breakpointCallback);
 
     debugger->run();
 }

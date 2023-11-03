@@ -121,10 +121,7 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
                  path = uriToPath(params.uri),
                  bufferDiagnostics] {
                     parent->_core->files().publishDiagnostics(
-                        path,
-                        "clangd",
-                        //                params.diagnostics.front().source,
-                        std::move(bufferDiagnostics));
+                        path, "clangd", std::move(bufferDiagnostics));
                 });
         }});
 

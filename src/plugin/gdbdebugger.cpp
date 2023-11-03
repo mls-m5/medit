@@ -129,6 +129,11 @@ void GdbDebugger::stateCallback(std::function<void(DebuggerState)> f) {
     _callback = f;
 }
 
+void GdbDebugger::breakpointListCallback(
+    std::function<void(const BreakpointList)> f) {
+    _breakpointListCallback = f;
+}
+
 void GdbDebugger::setBreakpoint(SourceLocation loc) {
     _connection.send("b " + loc.path.string() + ":" +
                      std::to_string(loc.position.y() + 1));
@@ -138,7 +143,9 @@ void GdbDebugger::setBreakpoint(SourceLocation loc) {
     // New breakpoint infos will be added in the input thread
     waitForDone();
 
-    // TODO: Publish the information somehow
+    if (_breakpointListCallback) {
+        _breakpointListCallback(_breakpointInfos);
+    }
 }
 
 void GdbDebugger::deleteBreakpoint(SourceLocation loc) {}
@@ -199,11 +206,12 @@ void GdbDebugger::inputThread(std::istream &in) {
             auto match = std::smatch{};
 
             if (std::regex_search(line, match, re)) {
-                _breakpointInfos.push_back({
+                auto file = match[3].str();
+                _breakpointInfos[file].push_back({
                     .breakpointNumber = match[1].str(),
                     .functionSignature = match[2].str(),
                     .filePath = match[3].str(),
-                    .lineNumber = std::stoi(match[4].str()),
+                    .lineNumber = std::stoul(match[4].str()),
                 });
             }
         }

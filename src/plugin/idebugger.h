@@ -3,6 +3,7 @@
 #include "text/position.h"
 #include <filesystem>
 #include <functional>
+#include <map>
 #include <string_view>
 
 /// Specify a line in a file
@@ -33,6 +34,16 @@ struct DebuggerState {
     SourceLocation location;
 };
 
+struct BreakpointInfo {
+    std::string breakpointNumber;
+    std::string functionSignature;
+    std::string filePath;
+    size_t lineNumber;
+};
+
+using BreakpointList =
+    std::map<std::filesystem::path, std::vector<BreakpointInfo>>;
+
 /// Abstraction for debuggers like gdb or pdb
 class IDebugger {
 public:
@@ -53,6 +64,8 @@ public:
         std::function<void(std::string_view)>) = 0;
     virtual void stateCallback(std::function<void(DebuggerState)>) = 0;
     virtual void gdbStatusCallback(std::function<void(std::string_view)>) = 0;
+    virtual void breakpointListCallback(
+        std::function<void(const BreakpointList)>) = 0;
 
     /// Specify where to run the command
     virtual void workingDirectory(std::filesystem::path) = 0;

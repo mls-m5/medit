@@ -4,9 +4,18 @@
 #include <string>
 #include <vector>
 
+enum class DiagnosticType {
+    Note,
+    Error,
+    Warning,
+    Breakpoint,      // Used by debugger
+    RunningPosition, // Used by debugger
+};
+
 class Diagnostics {
 public:
     struct Diagnostic {
+        DiagnosticType type = DiagnosticType::Note;
         std::string source;
         std::string message;
         struct Range {

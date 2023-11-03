@@ -11,13 +11,6 @@
 #include <string_view>
 #include <vector>
 
-struct BreakpointInfo {
-    std::string breakpointNumber;
-    std::string functionSignature;
-    std::string filePath;
-    int lineNumber;
-};
-
 class GdbDebugger : public IDebugger {
 public:
     GdbDebugger();
@@ -42,6 +35,8 @@ public:
 
     void gdbStatusCallback(std::function<void(std::string_view)>) override;
     void stateCallback(std::function<void(DebuggerState)>) override;
+    void breakpointListCallback(
+        std::function<void(const BreakpointList)>) override;
 
     void run() override;
     void pause() override;
@@ -70,6 +65,7 @@ private:
     std::function<void(std::string_view)> _applicationOutputCallback;
     std::function<void(std::string_view)> _debuggerOutputCallback;
     std::function<void(std::string_view)> _gdbStatusCallback;
+    std::function<void(const BreakpointList &)> _breakpointListCallback;
 
     void inputThread(std::istream &in);
 
@@ -79,7 +75,7 @@ private:
     std::string _debugArgs;
     std::filesystem::path _workingDirectory;
 
-    std::vector<BreakpointInfo> _breakpointInfos;
+    BreakpointList _breakpointInfos;
 
     bool _isWaiting = false;
     std::mutex _waitMutex;
