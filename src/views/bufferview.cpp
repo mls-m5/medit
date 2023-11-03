@@ -41,7 +41,7 @@ void BufferView::draw(IScreen &screen) {
         auto l = ty + yScroll();
         if (l < buffer().lines().size()) {
             auto hasLineDiagnostics =
-                buffer().diagnostics().findLineDiagnostic(l - 1);
+                buffer().diagnostics().findLineDiagnostic(l);
 
             auto &line = _buffer->lines().at(l);
 

@@ -211,7 +211,7 @@ void GdbDebugger::inputThread(std::istream &in) {
                     .breakpointNumber = match[1].str(),
                     .functionSignature = match[2].str(),
                     .filePath = match[3].str(),
-                    .lineNumber = std::stoul(match[4].str()),
+                    .lineNumber = std::stoul(match[4].str()) - 1,
                 });
             }
         }

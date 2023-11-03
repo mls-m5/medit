@@ -8,6 +8,7 @@
 #include "text/fstring.h"
 #include "views/editor.h"
 #include "views/mainwindow.h"
+#include <string>
 #include <string_view>
 
 void debug(std::shared_ptr<IEnvironment> env) {
@@ -68,9 +69,10 @@ void debug(std::shared_ptr<IEnvironment> env) {
                         d.push_back({
                             .type = DiagnosticType::Breakpoint,
                             .source = "debugger",
-                            .message = "breakpoint",
+                            .message = "breakpoint line " +
+                                       std::to_string(info.lineNumber + 1),
                             .range = {.begin = {0, info.lineNumber},
-                                      .end = {Position::max, info.lineNumber}},
+                                      .end = {1, info.lineNumber}},
                         });
                     }
 

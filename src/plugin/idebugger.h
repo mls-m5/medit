@@ -38,7 +38,7 @@ struct BreakpointInfo {
     std::string breakpointNumber;
     std::string functionSignature;
     std::string filePath;
-    size_t lineNumber;
+    size_t lineNumber; // medit line number, starting with 0
 };
 
 using BreakpointList =

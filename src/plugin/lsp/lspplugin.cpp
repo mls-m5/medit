@@ -110,8 +110,8 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
                     //                        item.source, // item.source, could
                     //                        not get this to work
                     .message = item.message,
-                    .range = {toMeditPosition(item.range.start, true),
-                              toMeditPosition(item.range.end, true)},
+                    .range = {toMeditPosition(item.range.start, false),
+                              toMeditPosition(item.range.end, false)},
                 });
             }
 
