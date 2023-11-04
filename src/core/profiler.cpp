@@ -1,5 +1,4 @@
 #include "profiler.h"
-#include "core/threadname.h"
 #include <chrono>
 #include <cstdint>
 #include <fstream>

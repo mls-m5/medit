@@ -1,3 +1,10 @@
+
+// block 5
+void print() {
+    std::cout << "this is a block\n";
+}
+// end
+
 int main() {
 1-2:    std::cout << "hello, world\n";
 2:    std::cout << "hello there\n";

@@ -32,17 +32,18 @@ struct VideoDump {
         }
     }
 
-    std::filesystem::path generateTmpPngPath(int num) {
-        return "/tmp/playback-img-dump-" + std::to_string(num) + ".png";
+    std::filesystem::path generateTmpImgPath(int num) {
+        return "/tmp/playback-img-dump-" + std::to_string(num) + ".bmp";
     }
 
     void dump() {
         auto surface = screen->readPixels();
-        auto path = generateTmpPngPath(imgNum);
+        auto path = generateTmpImgPath(imgNum);
         if (std::filesystem::exists(path)) {
             std::filesystem::remove(path);
         }
-        img::savePng(surface, path.c_str());
+        //        img::savePng(surface, path.c_str());
+        surface.saveBMP(path.c_str());
         paths.push_back(path);
         ++imgNum;
     }
@@ -78,9 +79,17 @@ struct VideoDump {
             putFile(paths.back());
         }
 
-        auto command = "ffmpeg -f concat -safe 0 -r 24 -i " +
-                       listFile.string() + " -c:v libx264 -pix_fmt yuv420p " +
-                       currentOutputPath.string();
+        //        auto command = "ffmpeg -f concat -safe 0 -r 24 -i " +
+        //                       listFile.string() +
+        //                       " -c:v libx264 -pix_fmt yuv420p -preset
+        //                       ultrafast " + currentOutputPath.string();
+
+        int fps = 24;
+
+        auto command = "ffmpeg -f concat -safe 0 -r " + std::to_string(fps) +
+                       " -i " + listFile.string() + " -c:v libx264rgb -crf " +
+                       std::to_string(18) + " -preset ultrafast " +
+                       " -pix_fmt yuv420p " + " " + currentOutputPath.string();
         std::cout << command << std::endl;
         auto returnCode = std::system(command.c_str());
 
@@ -109,9 +118,9 @@ struct VideoDump {
         std::filesystem::remove_all(currentOutputPath);
 
         saveLastScreenshot(
-            generateTmpPngPath(imgNum - 1), // Why 2? idk... Should be 1
+            generateTmpImgPath(imgNum - 1),
             (currentOutputPath.parent_path() / currentOutputPath.stem())
-                .replace_extension(".png"));
+                .replace_extension(".bmp"));
 
         threads.emplace_back([paths = this->paths, currentOutputPath] {
             startConversion(paths, currentOutputPath);
