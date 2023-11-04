@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <limits>
+#include <string>
 #include <vector>
 
 constexpr auto helpStr = R"_(
@@ -12,6 +14,11 @@ code_playback scriptfile.txt [options]
 flags:
 --help                 print this text
 --profiling            enable profiling
+--start                start frame number
+--stop                 stop frame number
+--size                 set font size
+--width                character width
+--height               character height
 )_";
 
 struct CodePlaybackSettings {
@@ -20,6 +27,9 @@ struct CodePlaybackSettings {
     int viewportHeight = 15;
     int fontSize = 30;
     bool shouldEnableProfiling = false;
+
+    int startFrameNumber = 0;
+    int stopFrameNumber = std::numeric_limits<int>::max();
 
     CodePlaybackSettings(int argc, char **argv) {
         auto args = std::vector<std::string>{argv + 1, argv + argc};
@@ -35,7 +45,27 @@ struct CodePlaybackSettings {
                 std::cout << "profiling enabled..." << std::endl;
                 shouldEnableProfiling = true;
             }
+            else if (arg == "--start") {
+                startFrameNumber = std::stoi(args.at(++i));
+            }
+            else if (arg == "--stop") {
+                stopFrameNumber = std::stoi(args.at(++i));
+            }
+            else if (arg == "--size" || arg == "-s") {
+                fontSize = std::stoi(args.at(++i));
+            }
+            else if (arg == "--width" || arg == "-w") {
+                viewportWidth = std::stoi(args.at(++i));
+            }
+            else if (arg == "--height" || arg == "-h") {
+                viewportHeight = std::stoi(args.at(++i));
+            }
             else {
+                if (arg.starts_with('-')) {
+                    std::cerr << helpStr << "\n";
+                    std::cerr << "unknown argument " << arg << "\n";
+                    std::exit(1);
+                }
                 scriptFile = arg;
             }
         }

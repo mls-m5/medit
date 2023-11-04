@@ -57,6 +57,7 @@ struct FrameNumLineDescription {
         BlockEnd,
     };
 
+#if 0
     bool tryPrefix(const std::string fullLine) {
         auto line = fullLine;
         std::string beginStr = std::string{};
@@ -101,6 +102,7 @@ struct FrameNumLineDescription {
         this->line = line;
         return true;
     }
+#endif
 
     /// For formating sake i sometimes comment out some of the versions
     /// so that you could run clang-format on the file without it being messed
@@ -204,9 +206,9 @@ struct FrameNumLineDescription {
     }
 
     FrameNumLineDescription(const std::string &fullLine) {
-        if (tryPrefix(fullLine)) {
-            return;
-        }
+        //        if (tryPrefix(fullLine)) {
+        //            return;
+        //        }
 
         tryComments(fullLine);
     }

@@ -181,6 +181,12 @@ int main(int argc, char *argv[]) {
     for (auto &edit : edits) {
         std::cout << currentEdit << "/" << count << std::endl;
         ++currentEdit;
+
+        if (currentEdit < settings.startFrameNumber ||
+            currentEdit > settings.stopFrameNumber) {
+            continue;
+        }
+
         drawBufferEdit(edit);
         if (!isRunning) {
             break;
