@@ -1,5 +1,6 @@
 
 #include "basichighligting.h"
+#include "core/profiler.h"
 #include "files/extensions.h"
 #include "syntax/palette.h"
 #include "text/cursorrangeops.h"
@@ -325,6 +326,7 @@ bool BasicHighlighting::highlight(Buffer &buffer) {
 }
 
 bool BasicHighlighting::highlightStatic(Buffer &buffer) {
+    auto duration = ProfileDuration{};
     if (!shouldEnable(buffer.path())) {
         return false;
     }

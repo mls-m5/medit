@@ -575,6 +575,7 @@ void GuiScreen::draw(size_t x, size_t y, FStringView str) {
 }
 
 void GuiScreen::refresh() {
+    auto duration = ProfileDuration{};
     if (_palette.isChanged()) {
         _palette.update(*this);
     }

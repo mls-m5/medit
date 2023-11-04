@@ -1,4 +1,5 @@
 
+#include "core/profiler.h"
 #include "edit.h"
 #include "files/config.h"
 #include "files/file.h"
@@ -88,6 +89,10 @@ public:
 int main(int argc, char *argv[]) {
     const auto settings = CodePlaybackSettings{argc, argv};
 
+    if (settings.shouldEnableProfiling) {
+        enableProfiling();
+    }
+
     auto screen = ScreenType{};
     screen.fontSize(settings.fontSize);
 
@@ -127,6 +132,7 @@ int main(int argc, char *argv[]) {
     auto videoDump = VideoDump{screen};
 
     auto drawBufferEdit = [&](const BufferEdit edit) {
+        auto duration = ProfileDuration{};
         auto splits = splitEdit(edit);
         int num = 1;
         for (auto &e : splits) {

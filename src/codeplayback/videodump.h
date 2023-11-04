@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/profiler.h"
 #include "screen/guiscreen.h"
 #include "sdlpp/image.hpp"
 #include <filesystem>
@@ -37,13 +38,16 @@ struct VideoDump {
     }
 
     void dump() {
+        auto duration = ProfileDuration{};
         auto surface = screen->readPixels();
         auto path = generateTmpImgPath(imgNum);
         if (std::filesystem::exists(path)) {
             std::filesystem::remove(path);
         }
-        //        img::savePng(surface, path.c_str());
-        surface.saveBMP(path.c_str());
+        {
+            auto duration = ProfileDuration{"save"};
+            surface.saveBMP(path.c_str());
+        }
         paths.push_back(path);
         ++imgNum;
     }
@@ -51,6 +55,7 @@ struct VideoDump {
     void saveLastScreenshot(std::filesystem::path path,
                             std::filesystem::path to) {
         {
+            auto duration = ProfileDuration{};
             std::filesystem::copy(
                 path, to, std::filesystem::copy_options::overwrite_existing);
         }
@@ -59,6 +64,7 @@ struct VideoDump {
     // Convert images. (run in another thread)
     static void startConversion(std::vector<std::filesystem::path> paths,
                                 std::filesystem::path currentOutputPath) {
+        auto duration = ProfileDuration{};
 
         auto listFile = std::filesystem::path{
             "/tmp/" + currentOutputPath.filename().string() + "-listfile.txt"};
@@ -106,6 +112,7 @@ struct VideoDump {
 
     // Finish this segment and create a video and a ending frame
     int finish() {
+        auto duration = ProfileDuration{};
         if (paths.empty()) {
             return 0;
         }

@@ -11,6 +11,7 @@ code_playback scriptfile.txt [options]
 
 flags:
 --help                 print this text
+--profiling            enable profiling
 )_";
 
 struct CodePlaybackSettings {
@@ -18,6 +19,7 @@ struct CodePlaybackSettings {
     int viewportWidth = 60;
     int viewportHeight = 15;
     int fontSize = 30;
+    bool shouldEnableProfiling = false;
 
     CodePlaybackSettings(int argc, char **argv) {
         auto args = std::vector<std::string>{argv + 1, argv + argc};
@@ -28,6 +30,10 @@ struct CodePlaybackSettings {
             if (arg == "--help") {
                 std::cout << helpStr << std::endl;
                 std::exit(0);
+            }
+            else if (arg == "--profiling") {
+                std::cout << "profiling enabled..." << std::endl;
+                shouldEnableProfiling = true;
             }
             else {
                 scriptFile = arg;

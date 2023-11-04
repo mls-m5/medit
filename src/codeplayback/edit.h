@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/profiler.h"
 #include "text/bufferedit.h"
 #include <fstream>
 #include <regex>
@@ -324,6 +325,8 @@ std::vector<BufferEdit> extractEditsFromString(Buffer &buffer, std::string in) {
 
 std::vector<BufferEdit> loadEditsFromFile(Buffer &buffer,
                                           std::filesystem::path path) {
+
+    auto duration = ProfileDuration{};
     auto descriptions = [&] {
         auto file = std::ifstream{path};
         return streamToDescriptions(file);
