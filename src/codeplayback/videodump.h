@@ -1,17 +1,20 @@
 #pragma once
 
+#include "SDL_surface.h"
 #include "core/profiler.h"
 #include "screen/guiscreen.h"
-#include "sdlpp/image.hpp"
+#include "sdlpp/surface.hpp"
 #include <filesystem>
 #include <fstream>
+#include <future>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 #include <thread>
 #include <vector>
 
 struct VideoDump {
-    std::vector<std::filesystem::path> paths;
+    std::vector<std::future<std::filesystem::path>> paths;
     int videoNum = 0;
     int imgNum = 0;
     std::filesystem::path outputPath;
@@ -44,16 +47,21 @@ struct VideoDump {
         if (std::filesystem::exists(path)) {
             std::filesystem::remove(path);
         }
-        {
+
+        auto surfPtr = std::shared_ptr<SDL_Surface>{std::move(surface)};
+
+        paths.push_back(std::async(std::launch::async, [surfPtr, path] {
+            auto surface = sdl::SurfaceView{surfPtr.get()};
             auto duration = ProfileDuration{"save"};
             surface.saveBMP(path.c_str());
-        }
-        paths.push_back(path);
+            return path;
+        }));
+        //        paths.push_back(path);
         ++imgNum;
     }
 
-    void saveLastScreenshot(std::filesystem::path path,
-                            std::filesystem::path to) {
+    static void saveLastScreenshot(std::filesystem::path path,
+                                   std::filesystem::path to) {
         {
             auto duration = ProfileDuration{};
             std::filesystem::copy(
@@ -62,14 +70,26 @@ struct VideoDump {
     }
 
     // Convert images. (run in another thread)
-    static void startConversion(std::vector<std::filesystem::path> paths,
-                                std::filesystem::path currentOutputPath) {
+    static void startConversion(
+        std::vector<std::future<std::filesystem::path>> &futurePaths,
+        std::filesystem::path currentOutputPath) {
         auto duration = ProfileDuration{};
 
         auto listFile = std::filesystem::path{
             "/tmp/" + currentOutputPath.filename().string() + "-listfile.txt"};
 
         std::filesystem::remove_all(listFile);
+
+        auto paths = std::vector<std::filesystem::path>{};
+        for (auto &f : futurePaths) {
+            paths.push_back(f.get());
+        }
+
+        saveLastScreenshot(
+            paths.back(),
+            //            generateTmpImgPath(imgNum - 1),
+            (currentOutputPath.parent_path() / currentOutputPath.stem())
+                .replace_extension(".bmp"));
 
         {
 
@@ -124,13 +144,11 @@ struct VideoDump {
 
         std::filesystem::remove_all(currentOutputPath);
 
-        saveLastScreenshot(
-            generateTmpImgPath(imgNum - 1),
-            (currentOutputPath.parent_path() / currentOutputPath.stem())
-                .replace_extension(".bmp"));
+        auto pathsPtr =
+            std::make_shared<decltype(paths)>(std::move(this->paths));
 
-        threads.emplace_back([paths = this->paths, currentOutputPath] {
-            startConversion(paths, currentOutputPath);
+        threads.emplace_back([pathsPtr, currentOutputPath] {
+            startConversion(*pathsPtr, currentOutputPath);
         });
 
         // Cleanup
