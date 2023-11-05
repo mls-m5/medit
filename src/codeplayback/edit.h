@@ -4,6 +4,7 @@
 #include "text/bufferedit.h"
 #include <cctype>
 #include <fstream>
+#include <iostream>
 #include <regex>
 #include <string>
 
@@ -165,10 +166,6 @@ struct FrameNumLineDescription {
     }
 
     FrameNumLineDescription(const std::string &fullLine) {
-        //        if (tryPrefix(fullLine)) {
-        //            return;
-        //        }
-
         tryComments(fullLine);
     }
 
@@ -201,16 +198,12 @@ std::string extractSingleFrame(
     const std::vector<FrameNumLineDescription> &descriptions, int frameNum) {
     auto res = std::ostringstream{};
 
-    //    bool removeBlock = false;
-    //    auto blockName = std::string{};
     auto blockName = std::vector<std::string>{};
 
     for (auto &d : descriptions) {
         if (d.type == FrameNumLineDescription::BlockStart) {
             if (!d.isInside(frameNum)) {
                 blockName.push_back(d.name);
-                //                removeBlock = true;
-                //                blockName = d.name;
             }
         }
 
@@ -219,8 +212,6 @@ std::string extractSingleFrame(
                 continue;
             }
             if (d.name == blockName.back()) {
-                //                removeBlock = false;
-                //                blockName.clear();
                 blockName.pop_back();
             }
             continue;
@@ -233,6 +224,10 @@ std::string extractSingleFrame(
         if (d.isInside(frameNum)) {
             res << d.line << "\n";
         }
+    }
+
+    if (!blockName.empty()) {
+        std::cerr << "block " << blockName.back() << " was never closed\n";
     }
 
     return res.str();

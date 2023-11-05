@@ -32,4 +32,26 @@ howdy?
     }
 }
 
+TEST_CASE("mixed blocks") {
+    auto text = R"(
+struct Hello { // 1
+// block 2
+you
+there
+howdy?
+// end
+}; // 1
+)";
+    auto buffer = Buffer{};
+
+    auto edits = extractEditsFromString(buffer, text);
+
+    EXPECT_EQ(edits.size(), 3);
+
+    for (auto &edit : edits) {
+        std::cout << "applying: " << edit.to << std::endl;
+        apply(edit);
+    }
+}
+
 TEST_SUIT_END

@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
 
     auto drawBufferEdit = [&](const BufferEdit edit) {
         auto duration = ProfileDuration{};
-        std::cout << "insert code " << edit.to << std::endl;
+        std::cout << "insert code:\n" << edit.to << std::endl;
         auto edits = splitEdit(edit);
         int num = 1;
         for (auto &e : edits) {
