@@ -93,6 +93,10 @@ int main(int argc, char *argv[]) {
         enableProfiling();
     }
 
+    std::cout << "creating video from file " << settings.scriptFile
+              << std::endl;
+    std::cout << "output path " << settings.outputPath << std::endl;
+
     auto screen = ScreenType{};
     screen.fontSize(settings.fontSize);
 
@@ -130,24 +134,7 @@ int main(int argc, char *argv[]) {
     });
 
     auto videoDump = VideoDump{screen};
-
-    auto drawBufferEdit = [&](const BufferEdit edit) {
-        auto duration = ProfileDuration{};
-        auto splits = splitEdit(edit);
-        int num = 1;
-        for (auto &e : splits) {
-            std::cout << "subframe " << num << "/" << splits.size()
-                      << std::endl;
-            auto cursor = apply(e);
-            BasicHighlighting::highlightStatic(buffer);
-            editor.cursor(cursor);
-            editor.draw(screen);
-            editor.updateCursor(screen);
-            screen.refresh();
-            videoDump.dump();
-            ++num;
-        }
-    };
+    videoDump.fps = settings.fps;
 
     auto edits = std::vector<BufferEdit>{};
 
@@ -165,9 +152,15 @@ int main(int argc, char *argv[]) {
     }
 
     auto outputPath = std::filesystem::absolute(settings.scriptFile);
+
     if (settings.scriptFile.empty()) {
         outputPath = "output";
     }
+
+    if (!settings.outputPath.empty()) {
+        outputPath = std::filesystem::absolute(settings.outputPath);
+    }
+
     outputPath.replace_extension(".mp4");
 
     videoDump.outputPath = outputPath;
@@ -178,6 +171,28 @@ int main(int argc, char *argv[]) {
 
     auto count = edits.size();
     auto currentEdit = 0;
+
+    auto drawBufferEdit = [&](const BufferEdit edit) {
+        auto duration = ProfileDuration{};
+        std::cout << "insert code " << edit.to << std::endl;
+        auto edits = splitEdit(edit);
+        int num = 1;
+        for (auto &e : edits) {
+            if (num % 10 == 0) {
+                std::cout << currentEdit << "/" << count << ": subframe " << num
+                          << "/" << edits.size() << std::endl;
+            }
+            auto cursor = apply(e);
+            BasicHighlighting::highlightStatic(buffer);
+            editor.cursor(cursor);
+            editor.draw(screen);
+            editor.updateCursor(screen);
+            screen.refresh();
+            videoDump.dump();
+            ++num;
+        }
+    };
+
     for (auto &edit : edits) {
         std::cout << currentEdit << "/" << count << std::endl;
         ++currentEdit;

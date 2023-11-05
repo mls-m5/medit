@@ -1,13 +1,18 @@
 
-// block 5
+// block a 5
 void print() {
     std::cout << "this is a block\n";
+    // block b 6
+    std::cerr << "nested named blocks\n"
+    // end b
 }
-// end
+// end a
 
 int main() {
-1-2:    std::cout << "hello, world\n";
-2:    std::cout << "hello there\n";
-3:    std::cout << "zup\n";
-    std::cout << "comments works also\n";   // 4
+// block 1-2
+    std::cout << "hello, world\n";
+// end
+    std::cout << "hello there\n"; // 2
+    std::cout << "zup\n"; // 3
+    std::cout << "comments are used also\n";   // 4
 }

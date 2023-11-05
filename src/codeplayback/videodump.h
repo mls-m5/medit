@@ -19,6 +19,7 @@ struct VideoDump {
     int imgNum = 0;
     std::filesystem::path outputPath;
     std::vector<std::thread> threads; // For encoding
+    int fps = 24;
 
     GuiScreen *screen = nullptr;
 
@@ -72,7 +73,8 @@ struct VideoDump {
     // Convert images. (run in another thread)
     static void startConversion(
         std::vector<std::future<std::filesystem::path>> &futurePaths,
-        std::filesystem::path currentOutputPath) {
+        std::filesystem::path currentOutputPath,
+        int fps) {
         auto duration = ProfileDuration{};
 
         auto listFile = std::filesystem::path{
@@ -110,12 +112,11 @@ struct VideoDump {
         //                       " -c:v libx264 -pix_fmt yuv420p -preset
         //                       ultrafast " + currentOutputPath.string();
 
-        int fps = 24;
-
         auto command = "ffmpeg -f concat -safe 0 -r " + std::to_string(fps) +
                        " -i " + listFile.string() + " -c:v libx264rgb -crf " +
                        std::to_string(18) + " -preset ultrafast " +
-                       " -pix_fmt yuv420p " + " " + currentOutputPath.string();
+                       " -pix_fmt yuv420p -loglevel error -stats " + " " +
+                       currentOutputPath.string();
         std::cout << command << std::endl;
         auto returnCode = std::system(command.c_str());
 
@@ -147,8 +148,8 @@ struct VideoDump {
         auto pathsPtr =
             std::make_shared<decltype(paths)>(std::move(this->paths));
 
-        threads.emplace_back([pathsPtr, currentOutputPath] {
-            startConversion(*pathsPtr, currentOutputPath);
+        threads.emplace_back([pathsPtr, currentOutputPath, fps = this->fps] {
+            startConversion(*pathsPtr, currentOutputPath, fps);
         });
 
         // Cleanup

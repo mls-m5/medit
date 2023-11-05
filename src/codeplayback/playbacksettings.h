@@ -13,16 +13,20 @@ code_playback scriptfile.txt [options]
 
 flags:
 --help                 print this text
---profiling            enable profiling
+--out -o               set output directory
+--start                start frame number
 --start                start frame number
 --stop                 stop frame number
---size                 set font size
---width                character width
---height               character height
+--size -s              set font size
+--width -x             character width
+--height -y            character height
+--fps                  frames per second in output
+--profiling            enable profiling
 )_";
 
 struct CodePlaybackSettings {
     std::filesystem::path scriptFile;
+    std::filesystem::path outputPath;
     int viewportWidth = 60;
     int viewportHeight = 15;
     int fontSize = 30;
@@ -30,6 +34,7 @@ struct CodePlaybackSettings {
 
     int startFrameNumber = 0;
     int stopFrameNumber = std::numeric_limits<int>::max();
+    int fps = 24;
 
     CodePlaybackSettings(int argc, char **argv) {
         auto args = std::vector<std::string>{argv + 1, argv + argc};
@@ -54,11 +59,17 @@ struct CodePlaybackSettings {
             else if (arg == "--size" || arg == "-s") {
                 fontSize = std::stoi(args.at(++i));
             }
-            else if (arg == "--width" || arg == "-w") {
+            else if (arg == "--width" || arg == "-x") {
                 viewportWidth = std::stoi(args.at(++i));
             }
-            else if (arg == "--height" || arg == "-h") {
+            else if (arg == "--height" || arg == "-y") {
                 viewportHeight = std::stoi(args.at(++i));
+            }
+            else if (arg == "--out" || arg == "-o") {
+                outputPath = args.at(++i);
+            }
+            else if (arg == "--fps") {
+                fps = std::stoi(args.at(++i));
             }
             else {
                 if (arg.starts_with('-')) {
@@ -67,6 +78,12 @@ struct CodePlaybackSettings {
                     std::exit(1);
                 }
                 scriptFile = arg;
+            }
+        }
+
+        if (outputPath.empty()) {
+            if (scriptFile.has_parent_path()) {
+                outputPath = scriptFile.parent_path();
             }
         }
 

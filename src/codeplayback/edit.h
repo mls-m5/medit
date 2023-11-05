@@ -47,6 +47,20 @@ std::vector<BufferEdit> splitEdit(const BufferEdit &old) {
         }
     }
 
+    // Move newlines to the front. That looks better
+    if (!ret.empty()) {
+        for (int max = 0; max < ret.size(); ++max) {
+            if (ret.back().from.empty() && ret.back().to == "\n") {
+                auto e = ret.back();
+                ret.pop_back();
+                e.position = ret.front().position;
+                ret.insert(ret.begin(), e);
+                continue;
+            }
+            break;
+        }
+    }
+
     return ret;
 }
 
@@ -206,24 +220,27 @@ std::string extractSingleFrame(
     const std::vector<FrameNumLineDescription> &descriptions, int frameNum) {
     auto res = std::ostringstream{};
 
-    bool removeBlock = false;
-    auto blockName = std::string{};
+    //    bool removeBlock = false;
+    //    auto blockName = std::string{};
+    auto blockName = std::vector<std::string>{};
 
     for (auto &d : descriptions) {
         if (d.type == FrameNumLineDescription::BlockStart) {
             if (!d.isInside(frameNum)) {
-                removeBlock = true;
-                blockName = d.name;
+                blockName.push_back(d.name);
+                //                removeBlock = true;
+                //                blockName = d.name;
             }
         }
 
-        if (removeBlock) {
+        if (!blockName.empty()) {
             if (d.type != FrameNumLineDescription::BlockEnd) {
                 continue;
             }
-            if (d.name == blockName) {
-                removeBlock = false;
-                blockName.clear();
+            if (d.name == blockName.back()) {
+                //                removeBlock = false;
+                //                blockName.clear();
+                blockName.pop_back();
             }
             continue;
         }
@@ -267,7 +284,7 @@ std::vector<FrameNumLineDescription> streamToDescriptions(std::istream &ss) {
 
 std::vector<BufferEdit> descriptionsToBufferEdit(
     Buffer &buffer, const std::vector<FrameNumLineDescription> &descriptions) {
-    int max = 0;
+    int max = 1;
     for (auto &d : descriptions) {
         if (d.hasEnd()) {
             max = std::max(d.end, max);
