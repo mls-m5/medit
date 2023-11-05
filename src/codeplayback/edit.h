@@ -2,6 +2,7 @@
 
 #include "core/profiler.h"
 #include "text/bufferedit.h"
+#include <cctype>
 #include <fstream>
 #include <regex>
 #include <string>
@@ -57,53 +58,6 @@ struct FrameNumLineDescription {
         BlockEnd,
     };
 
-#if 0
-    bool tryPrefix(const std::string fullLine) {
-        auto line = fullLine;
-        std::string beginStr = std::string{};
-        while (!line.empty() && std::isdigit(line.front())) {
-            beginStr += line.front();
-            line.erase(0, 1);
-        }
-
-        if (line.empty() || (line.front() != '-' && line.front() != ':')) {
-            begin = -1;
-            end = std::numeric_limits<int>::max();
-            this->line = fullLine;
-            return false;
-        }
-
-        begin = std::stoi(beginStr);
-        end = std::numeric_limits<int>::max();
-
-        if (line.front() == ':') {
-            this->line = line.substr(1);
-            return true;
-        }
-
-        std::string endStr;
-        // line.front must be '-'
-        line.erase(0, 1); // remove '-'
-        while (!line.empty() && std::isdigit(line.front())) {
-            endStr += line.front();
-            line.erase(0, 1);
-        }
-
-        if (line.empty() || line.front() != ':') {
-            begin = -1;
-            end = std::numeric_limits<int>::max();
-            this->line = fullLine;
-            return false;
-        }
-
-        line.erase(0, 1); // Remove ':'
-
-        end = stoi(endStr);
-        this->line = line;
-        return true;
-    }
-#endif
-
     /// For formating sake i sometimes comment out some of the versions
     /// so that you could run clang-format on the file without it being messed
     /// up, but then you need to remove the comment
@@ -129,10 +83,16 @@ struct FrameNumLineDescription {
         return line;
     }
 
-    void useMatch(const std::smatch &match, int num, const std::string &line) {
-        begin = std::stoi(match[1]);
-        if (num > 1) {
-            end = std::stoi(match[2]);
+    void useMatch(const std::smatch &match,
+                  int firstNum,
+                  int secondNum,
+                  const std::string &line) {
+        begin = std::stoi(match[firstNum]);
+        if (secondNum > -1) {
+            auto match2 = match[secondNum].str();
+            if (!match2.empty()) {
+                end = std::stoi(match2);
+            }
         }
         this->line = removeInitialComment(line.substr(0, match.position()));
     }
@@ -145,56 +105,60 @@ struct FrameNumLineDescription {
             static const std::regex singleRegex(R"(\s*//\s*(\d+)\s*$)");
 
             if (std::regex_search(line, match, rangeRegex)) {
-                //            begin = std::stoi(match[1]);
-                //            end = std::stoi(match[2]);
-                //            this->line = removeInitialComment(line.substr(0,
-                //            match.position()));
-                useMatch(match, 2, line);
+                useMatch(match, 1, 2, line);
                 return true;
             }
             else if (std::regex_search(line, match, singleRegex)) {
-                //            begin = std::stoi(match[1]);
-                //            this->line = removeInitialComment(line.substr(0,
-                //            match.position()));
-                useMatch(match, 1, line);
+                useMatch(match, 1, -1, line);
+                //                useMatch(match, 1, line, false);
                 return true;
             }
         }
 
         {
             static const std::regex blockBeginRangeRegex(
-                R"(\s*//\s*block (\d+)-(\d+)\s*$)");
-            static const std::regex blockBeginSingleRegex(
-                R"(\s*//\s*block (\d+)\s*$)");
+                R"(\s*//\s*block (\w+\s)?(\d+)(-(\d+))*\s*$)");
+            //            static const std::regex blockBeginSingleRegex(
+            //                R"(\s*//\s*block (\d+)\s*$)");
 
             if (std::regex_search(line, match, blockBeginRangeRegex)) {
-                useMatch(match, 2, line);
+                useMatch(match, 2, 4, line);
                 type = Type::BlockStart;
+                name = match[1];
+                while (std::isspace(name.back())) {
+                    name.pop_back();
+                }
                 return true;
             }
-            else if (std::regex_search(line, match, blockBeginSingleRegex)) {
-                useMatch(match, 1, line);
-                type = Type::BlockStart;
-                return true;
-            }
+            //            else if (std::regex_search(line, match,
+            //            blockBeginSingleRegex)) {
+            //                useMatch(match, 1, line, false);
+            //                type = Type::BlockStart;
+            //                return true;
+            //            }
         }
 
         {
             static const std::regex blockEndRangeRegex(
-                R"(\s*//\s*end (\d+)-(\d+)\s*$)");
-            static const std::regex blockEndSingleRegex(
-                R"(\s*//\s*end (\d+)\s*$)");
+                R"(\s*//\s*end (\w+)?\s*$)");
+            //            static const std::regex blockEndSingleRegex(
+            //                R"(\s*//\s*end (\d+)\s*$)");
 
             if (std::regex_search(line, match, blockEndRangeRegex)) {
-                useMatch(match, 2, line);
+                //                useMatch(match, 2, 4, line);
                 type = Type::BlockEnd;
+                name = match[1];
                 return true;
+                //                useMatch(match, 2, line, true);
+                //                type = Type::BlockEnd;
+                //                return true;
             }
-            else if (std::regex_search(line, match, blockEndSingleRegex)) {
-                useMatch(match, 1, line);
-                type = Type::BlockEnd;
-                return true;
-            }
+            //            else if (std::regex_search(line, match,
+            //            blockEndSingleRegex)) {
+            //                useMatch(match, 1, line, true);
+            //                type = Type::BlockEnd;
+            //                return true;
+            //            }
             else if (line.find("// end") != std::string::npos) {
                 type = Type::BlockEnd;
                 return true;
@@ -223,6 +187,7 @@ struct FrameNumLineDescription {
     int begin = -1;
     int end = std::numeric_limits<int>::max();
     Type type = Type::Normal;
+    std::string name;
 
     bool isInside(int i) const {
         return i >= begin && i < end;
@@ -242,11 +207,13 @@ std::string extractSingleFrame(
     auto res = std::ostringstream{};
 
     bool removeBlock = false;
+    auto blockName = std::string{};
 
     for (auto &d : descriptions) {
         if (d.type == FrameNumLineDescription::BlockStart) {
             if (!d.isInside(frameNum)) {
                 removeBlock = true;
+                blockName = d.name;
             }
         }
 
@@ -254,7 +221,10 @@ std::string extractSingleFrame(
             if (d.type != FrameNumLineDescription::BlockEnd) {
                 continue;
             }
-            removeBlock = false;
+            if (d.name == blockName) {
+                removeBlock = false;
+                blockName.clear();
+            }
             continue;
         }
 
