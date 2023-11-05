@@ -40,35 +40,6 @@ using ScreenType = GuiScreen;
 
 // #endif
 
-using namespace std::literals;
-
-constexpr auto testText = R"_(
-int main() {
-    std::cout << "hello, world\n";
-}
-)_"sv;
-
-constexpr auto testText2 = R"_(
-int main() {
-    std::cout << "hello there\n";
-}
-)_"sv;
-
-constexpr auto testText3 = R"_(
-int main() {
-    std::cout << "hello there\n";
-    std::cout << "zup\n";
-}
-)_"sv;
-
-constexpr auto testText4 = R"_(
-int main() {
-1-2:    std::cout << "hello, world\n";
-2:    std::cout << "hello there\n";
-3:    std::cout << "zup\n";
-}
-)_"sv;
-
 struct PlaybackWindow : public Window {
 public:
     PlaybackWindow(size_t width, size_t height)
@@ -141,15 +112,18 @@ int main(int argc, char *argv[]) {
     if (!settings.scriptFile.empty()) {
         edits = loadEditsFromFile(buffer, settings.scriptFile);
     }
-    else if (false) {
-        edits.push_back(createEdit(buffer, "", testText));
-        edits.push_back(createEdit(buffer, testText, testText2));
-        edits.push_back(createEdit(buffer, testText2, testText3));
-        edits.push_back(createEdit(buffer, testText3, ""));
+
+    std::cout << " =================== preview ==================\n";
+    {
+        int num = 0;
+        for (auto &edit : edits) {
+            std::cout << "=== preview edit " << num << " \n";
+            std::cout << edit.to;
+            ++num;
+        }
     }
-    else {
-        edits = extractEditsFromString(buffer, std::string{testText4});
-    }
+    std::cout << " ================ end preview =================\n"
+              << std::endl;
 
     auto outputPath = std::filesystem::absolute(settings.scriptFile);
 

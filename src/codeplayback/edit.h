@@ -49,7 +49,7 @@ std::vector<BufferEdit> splitEdit(const BufferEdit &old) {
 
     // Move newlines to the front. That looks better
     if (!ret.empty()) {
-        for (int max = 0; max < ret.size(); ++max) {
+        for (size_t max = 0; max < ret.size(); ++max) {
             if (ret.back().from.empty() && ret.back().to == "\n") {
                 auto e = ret.back();
                 ret.pop_back();
@@ -131,9 +131,7 @@ struct FrameNumLineDescription {
 
         {
             static const std::regex blockBeginRangeRegex(
-                R"(\s*//\s*block (\w+\s)?(\d+)(-(\d+))*\s*$)");
-            //            static const std::regex blockBeginSingleRegex(
-            //                R"(\s*//\s*block (\d+)\s*$)");
+                R"(\s*//\s*block ([\w\W_]+\s)?(\d+)(-(\d+))*\s*$)");
 
             if (std::regex_search(line, match, blockBeginRangeRegex)) {
                 useMatch(match, 2, 4, line);
@@ -144,35 +142,18 @@ struct FrameNumLineDescription {
                 }
                 return true;
             }
-            //            else if (std::regex_search(line, match,
-            //            blockBeginSingleRegex)) {
-            //                useMatch(match, 1, line, false);
-            //                type = Type::BlockStart;
-            //                return true;
-            //            }
         }
 
         {
             static const std::regex blockEndRangeRegex(
-                R"(\s*//\s*end (\w+)?\s*$)");
-            //            static const std::regex blockEndSingleRegex(
-            //                R"(\s*//\s*end (\d+)\s*$)");
+                R"(\s*//\s*end ([\w\W_]+)?\s*$)");
 
             if (std::regex_search(line, match, blockEndRangeRegex)) {
                 //                useMatch(match, 2, 4, line);
                 type = Type::BlockEnd;
                 name = match[1];
                 return true;
-                //                useMatch(match, 2, line, true);
-                //                type = Type::BlockEnd;
-                //                return true;
             }
-            //            else if (std::regex_search(line, match,
-            //            blockEndSingleRegex)) {
-            //                useMatch(match, 1, line, true);
-            //                type = Type::BlockEnd;
-            //                return true;
-            //            }
             else if (line.find("// end") != std::string::npos) {
                 type = Type::BlockEnd;
                 return true;
