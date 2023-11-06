@@ -258,7 +258,7 @@ struct GuiScreen::Buffer {
     }
 
     void renderLine(size_t y, FStringView str) {
-        for (size_t x = 0; x < str.size(); ++x) {
+        for (size_t x = 0; x < str.size() && x < screen.canvas.width; ++x) {
             auto c = str.at(x);
 
             if (!static_cast<uint32_t>(c.c)) {
@@ -343,14 +343,9 @@ struct GuiScreen::Buffer {
                               1,
                               static_cast<int>(cellHeight)});
                 break;
+            case CursorStyle::Hidden:
+                break;
             default:
-                //            renderer.fillRect(
-                //                sdl::Rect{static_cast<int>(cellWidth *
-                //                cursorPos.x()),
-                //                          static_cast<int>(cellHeight *
-                //                          cursorPos.y()),
-                //                          static_cast<int>(cellWidth),
-                //                          static_cast<int>(cellHeight)});
                 screen.renderCursor(
                     renderer, rect, cursorPos.x(), cursorPos.y());
                 break;

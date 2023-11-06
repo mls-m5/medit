@@ -22,6 +22,8 @@ flags:
 --height -y            character height
 --fps                  frames per second in output
 --profiling            enable profiling
+--lines-off            disable linenumbers
+--cursor               cursor style, block, beam or hidden, standard: beam
 )_";
 
 struct CodePlaybackSettings {
@@ -35,6 +37,8 @@ struct CodePlaybackSettings {
     int startFrameNumber = 0;
     int stopFrameNumber = std::numeric_limits<int>::max();
     int fps = 24;
+    bool hasLineNumbers = true;
+    std::string cursor = "beam";
 
     CodePlaybackSettings(int argc, char **argv) {
         auto args = std::vector<std::string>{argv + 1, argv + argc};
@@ -71,6 +75,12 @@ struct CodePlaybackSettings {
             else if (arg == "--fps") {
                 fps = std::stoi(args.at(++i));
             }
+            else if (arg == "--lines-off") {
+                hasLineNumbers = false;
+            }
+            else if (arg == "--cursor") {
+                cursor = args.at(++i);
+            }
             else {
                 if (arg.starts_with('-')) {
                     std::cerr << helpStr << "\n";
@@ -83,7 +93,9 @@ struct CodePlaybackSettings {
 
         if (outputPath.empty()) {
             if (scriptFile.has_parent_path()) {
-                outputPath = scriptFile.parent_path();
+                outputPath = scriptFile.parent_path() /
+                             (scriptFile.stem().string() + "-out" +
+                              scriptFile.extension().string());
             }
         }
 
@@ -102,18 +114,27 @@ struct CodePlaybackSettings {
                 break;
             }
             line = line.substr(3);
-            if (auto f = line.find(":"); f != std::string::npos) {
+            if (auto f = line.find(": "); f != std::string::npos) {
                 auto a = line.substr(0, f);
-                auto b = line.substr(f + 1);
+                auto b = line.substr(f + 2);
 
                 if (a == "height") {
                     viewportHeight = std::stoi(b);
                 }
-                if (a == "width") {
+                else if (a == "width") {
                     viewportWidth = std::stoi(b);
                 }
-                if (a == "size") {
+                else if (a == "size") {
                     fontSize = std::stoi(b);
+                }
+                else if (a == "cursor") {
+                    cursor = b;
+                }
+                else if (a == "fps") {
+                    fps = std::stoi(b);
+                }
+                else if (a == "lines") {
+                    hasLineNumbers = b != "off";
                 }
             }
         }

@@ -107,11 +107,6 @@ struct VideoDump {
             putFile(paths.back());
         }
 
-        //        auto command = "ffmpeg -f concat -safe 0 -r 24 -i " +
-        //                       listFile.string() +
-        //                       " -c:v libx264 -pix_fmt yuv420p -preset
-        //                       ultrafast " + currentOutputPath.string();
-
         auto command = "ffmpeg -f concat -safe 0 -r " + std::to_string(fps) +
                        " -i " + listFile.string() + " -c:v libx264rgb -crf " +
                        std::to_string(18) + " -preset ultrafast " +

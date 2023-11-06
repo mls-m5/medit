@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
     auto window = PlaybackWindow{screen.width(), screen.height()};
 
     auto editor = Editor{&window, std::make_shared<Buffer>()};
-    editor.showLines(true);
+    editor.showLines(settings.hasLineNumbers);
 
     auto &buffer = editor.buffer();
     /// Assigning for highlighting to be correct
@@ -139,9 +139,15 @@ int main(int argc, char *argv[]) {
 
     videoDump.outputPath = outputPath;
 
-    screen.cursorStyle(CursorStyle::Block);
-
-    screen.cursorStyle(CursorStyle::Beam);
+    if (settings.cursor == "block") {
+        screen.cursorStyle(CursorStyle::Block);
+    }
+    if (settings.cursor == "hidden" || settings.cursor == "off") {
+        screen.cursorStyle(CursorStyle::Hidden);
+    }
+    else {
+        screen.cursorStyle(CursorStyle::Beam);
+    }
 
     auto count = edits.size();
     auto currentEdit = 0;
