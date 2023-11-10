@@ -46,6 +46,9 @@ Project::Project(DirectoryNotifications &directoryNotifications,
                 else if (type == DirectoryNotifications::Removed) {
                     removeCachedFile(path);
                 }
+                else if (type == DirectoryNotifications::Changed) {
+                    updateCachedFile(path);
+                }
             });
         },
         this);
@@ -283,9 +286,22 @@ void Project::addCachedFile(std::filesystem::path path) {
         return;
     }
     _fileCache.push_back(path);
+    checkProjectFile(path);
 }
 
 void Project::removeCachedFile(std::filesystem::path path) {
     _tv();
     _fileCache.erase(std::remove(_fileCache.begin(), _fileCache.end(), path));
+}
+
+void Project::updateCachedFile(std::filesystem::path path) {
+    _tv();
+    checkProjectFile(path);
+}
+
+void Project::checkProjectFile(std::filesystem::path path) {
+    if (std::filesystem::relative(path, _settings.root) != ".medit.json") {
+        return;
+    }
+    loadProjectFile();
 }

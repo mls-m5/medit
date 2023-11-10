@@ -93,6 +93,10 @@ private:
 
     void addCachedFile(std::filesystem::path);
     void removeCachedFile(std::filesystem::path);
+    void updateCachedFile(std::filesystem::path);
+
+    /// Check if the projcet file needs to be reloaded
+    void checkProjectFile(std::filesystem::path);
 
     std::vector<std::pair<std::filesystem::path, size_t>> _extensions;
 
