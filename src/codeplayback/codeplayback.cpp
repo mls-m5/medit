@@ -113,16 +113,16 @@ int main(int argc, char *argv[]) {
         edits = loadEditsFromFile(buffer, settings.scriptFile);
     }
 
-    std::cout << " =================== preview ==================\n";
+    std::cout << "\n =================== preview ==================\n";
     {
         int num = 0;
         for (auto &edit : edits) {
-            std::cout << "=== preview edit " << num << " \n";
+            std::cout << "\n=== preview edit " << num << " \n";
             std::cout << edit.to;
             ++num;
         }
     }
-    std::cout << " ================ end preview =================\n"
+    std::cout << "\n ================ end preview =================\n"
               << std::endl;
 
     auto outputPath = std::filesystem::absolute(settings.scriptFile);
