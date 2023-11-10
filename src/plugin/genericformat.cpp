@@ -52,8 +52,9 @@ bool formatHtmlAndXml(std::filesystem::path path, Editor &editor) {
     }
 
     editor.save();
-    runCommand("tidy -indent -m --tidy-mark no " +
-               std::string{std::filesystem::absolute(path)});
+    runCommand("tidy -indent -m --tidy-mark no",
+               (isXml(path) ? "-xml " : ""),
+               std::filesystem::absolute(path));
     editor.load();
 
     return true;

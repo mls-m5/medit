@@ -51,6 +51,10 @@ const auto wordListHtml = std::vector<std::string_view>{
     "video",    "wbr",
 };
 
+const auto wordListXml = std::vector<std::string_view>{
+    "CDATA",
+};
+
 const auto wordlistJavascript = std::vector<std::string_view>{
     "abstract",     "arguments", "await",    "boolean",    "break",
     "byte",         "case",      "catch",    "char",       "class",
@@ -289,6 +293,9 @@ const std::vector<std::string_view> *getWordList(
     }
     if (isHtml(extension)) {
         return &wordListHtml;
+    }
+    if (isXml(extension)) {
+        return &wordListXml;
     }
     if (isJs(extension)) {
         return &wordlistJavascript;
