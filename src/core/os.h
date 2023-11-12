@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <functional>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -47,3 +48,17 @@ int getPid();
 bool isProcessRunning(int pid);
 
 void setupSignals(std::function<void()> f);
+
+/// Template version of run command that takes any number of arguments with
+/// spaces between
+template <typename... Args>
+int runCommand(Args &&...args) {
+    auto ss = std::ostringstream{};
+    ((ss << args << " "), ...);
+    auto str = ss.str();
+    if (str.empty()) {
+        return -1;
+    }
+    str.pop_back();
+    return runCommand(static_cast<const std::string &>(str));
+}
