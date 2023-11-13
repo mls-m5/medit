@@ -54,6 +54,8 @@ std::shared_ptr<IMode> createNormalMode() {
             {{"s"}, sc.combine(sc.erase_after, sc.insert_mode)},
             {{">"}, {sc.indent}},
             {{"<"}, {sc.deindent}},
+
+            {{"D"}, {sc.erase_until_end_of_line}},
         },
     };
 

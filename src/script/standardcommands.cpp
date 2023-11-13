@@ -40,9 +40,15 @@ StandardCommands create() {
     commands.namedCommands[#name] =                                            \
         commands.name = [=](StandardCommands::EnvPtrT env)
 
+// Repeat the command specified number of times
 #define REPEAT                                                                 \
     size_t NUM_REPEATS = numRepeats(env);                                      \
     for (size_t i = 0; i < NUM_REPEATS; ++i)
+
+// Repeat minus one time
+#define REPEAT_M1                                                              \
+    size_t NUM_REPEATS = numRepeats(env);                                      \
+    for (size_t i = 1; i < NUM_REPEATS; ++i)
 
     StandardCommands commands{};
     DEF(left) {
@@ -242,6 +248,19 @@ StandardCommands create() {
             env->registers().save(standardRegister, toString(selection));
             e.cursor(erase(selection), true);
         }
+    };
+
+    DEF(erase_until_end_of_line) {
+        auto &e = env->editor();
+        auto cursor = e.cursor();
+        auto end = cursor;
+
+        REPEAT_M1 {
+            end.y(end.y() + 1);
+        }
+
+        end = ::end(end);
+        erase({cursor, end});
     };
 
     DEF(paste_before) {
@@ -466,6 +485,8 @@ StandardCommands create() {
 
 #undef MAP_DEBUG
 #undef DEF
+#undef REPEAT
+#undef REPEAT_M1
 
     return commands;
 }

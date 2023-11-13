@@ -1,22 +1,35 @@
 /*
  * Scripted tests. The tests are loaded from a file
  * */
+#include "core/registers.h"
 #include "keys/event.h"
 #include "mls-unit-test/unittest.h"
 #include "mock/script/mockenvironment.h"
 #include "modes/normalmode.h"
 #include "script/ienvironment.h"
+#include "script/standardcommands.h"
 #include "text/buffer.h"
+#include "text/cursorrangeops.h"
 #include "text/position.h"
 #include "views/editor.h"
 #include <fstream>
+#include <iterator>
 #include <memory>
+#include <regex>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
+namespace {
+
+static const auto vimPartCommandRegex = std::regex{R"(\[([A-Z])(\-(.*))?\])"};
+// static const auto vimPartCommandRegex = std::regex{R"(N)"};
+
+} // namespace
+
 struct VimCodePart : public std::string {
+    std::string input;
     std::string mode;
     std::string command;
     Position position;
@@ -28,8 +41,21 @@ struct VimCodePart : public std::string {
         if (back() == '\n') {
             pop_back();
         }
+        input = *this;
 
-        // TODO: Handle mode, position etc
+        auto match = std::smatch{};
+        if (std::regex_search(*this, match, vimPartCommandRegex)) {
+            //            std::cout << "match " << match.str() << std::endl;
+
+            command = match[3];
+            mode = match[1];
+
+            // TODO: Handle newlines
+            position.x(match.position());
+
+            //            erase(match[0].first, match[0].second);
+            erase(match.position(), match[0].str().size());
+        }
     }
 };
 
@@ -90,24 +116,25 @@ std::vector<VimTest> loadVimTests() {
     return ret;
 }
 
+// struct Environment: public MockEnvironment {
+//     using MockEnvironment::MockEnvironment;
+
+//    std::
+//};
+
 std::shared_ptr<MockEnvironment> createMockEnvironment() {
+
     auto env = std::make_unique<MockEnvironment>();
-    createNormalMode();
+
+    env->mock_standardCommands_0.returnValueRef(StandardCommands::get());
+    env->mock_statusMessage_1.onCall(
+        [](auto msg) { std::cout << msg << "\n"; });
+
     return env;
 }
 
-void emulateKeyPress(MockEnvironment &env, std::shared_ptr<std::string> keys) {
-    env.mock_key_0.onCall([keys]() {
-        if (keys->empty()) {
-            throw std::runtime_error{"out of keys"};
-        }
-        else {
-            auto c = keys->front();
-            keys->erase(0, 1);
-            return KeyEvent{Key::Text,
-                            c}; // Dummy event, this should not happend
-        }
-    });
+void emulateKeyPress(MockEnvironment &env, char c) {
+    env.mock_key_0.onCall([c]() { return KeyEvent{Key::Text, c}; });
 }
 
 struct TestSuitVim : public unittest::StaticTestSuit {
@@ -116,22 +143,63 @@ struct TestSuitVim : public unittest::StaticTestSuit {
         unittest::testResult = &this->testResult;
 
         for (auto &test : loadVimTests()) {
-            newTest(test.name) = [tests = test.tests]() {
+            newTest(test.name) = [name = test.name, tests = test.tests]() {
+                if (name.find("TODO") != std::string::npos) {
+                    std::cout << "Test or tested code is not implemented yet"
+                              << std::endl;
+                    return;
+                }
                 for (auto &test : tests) {
+
+                    if (test.empty()) {
+                        continue;
+                    }
+
+                    Registers registers;
+
                     auto env = createMockEnvironment();
+                    env->mock_registers_0.returnValueRef(registers);
 
                     auto buffer = std::make_shared<Buffer>(test.front());
                     auto editor = Editor{nullptr, buffer};
 
+                    editor.cursor(test.front().position);
+
                     env->mock_editor_0.returnValueRef(editor);
 
-                    std::cout << "should run:\n";
+                    std::cout << "code:\n";
+
+                    auto result = std::string{};
 
                     for (auto &part : test) {
-                        auto keys = std::make_shared<std::string>(part.command);
-                        emulateKeyPress(*env, keys);
-                        editor.keyPress(env);
-                        std::cout << "part:" << part << "\n";
+                        std::cout << "raw: \n'''" << part.input << "'''\n";
+                        std::cout << "part:\n'''" << part << "'''\n";
+                        std::cout << "command: " << part.command << "\n";
+                        std::cout << "mode: " << part.mode << "\n";
+                        std::cout << "pos: " << part.position.x() << ", "
+                                  << part.position.y() << "\n";
+
+                        if (!result.empty()) {
+                            std::cout << "resulting text from previous:\n'''";
+                            std::cout << result << "'''" << std::endl;
+                            std::cout << "resulting pos: " << editor.cursor()
+                                      << std::endl;
+
+                            EXPECT_EQ(part, result);
+                            EXPECT_EQ(part.position, editor.cursor());
+                        }
+
+                        auto keys = part.command;
+                        editor.cursor(part.position);
+
+                        while (!keys.empty()) {
+                            emulateKeyPress(*env, keys.front());
+                            editor.keyPress(env);
+                            keys.erase(0, 1);
+                        }
+
+                        result = content({buffer->begin(), buffer->end()});
+                        std::cout << "\n";
                     }
                     std::cout.flush();
                 }
