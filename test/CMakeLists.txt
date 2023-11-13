@@ -32,8 +32,6 @@ target_include_directories(
     ../src
     )
 
-#test_disabled(${testname})
-
 add_test(NAME medit_tests
     COMMAND medit_tests
     )
