@@ -180,7 +180,8 @@ VimMotionResult getMotion(FStringView buffer, VimCommandType type) {
             }
 
             auto newPosition = *f;
-            if (type == VimCommandType::Delete) {
+            if (type == VimCommandType::Delete ||
+                type == VimCommandType::Change) {
                 newPosition = right(newPosition);
             }
             return newPosition;

@@ -19,6 +19,22 @@ hello [N-cw]there you
 hello [I] you
 ```
 
+## ctx
+
+```
+[N-cto]hello there
+----
+[I]o there
+```
+
+## cfx
+
+```
+[N-cfo]hello there
+----
+[I] there
+```
+
 ## C
 
 ```
