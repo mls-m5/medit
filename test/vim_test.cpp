@@ -13,6 +13,7 @@
 #include "text/cursorrangeops.h"
 #include "text/position.h"
 #include "views/editor.h"
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <memory>
@@ -104,39 +105,45 @@ struct VimTest {
 
 /// Split file up in sub-tests
 std::vector<VimTest> loadVimTests() {
-    auto file = std::ifstream{"test/res/vimtest.md"};
-
-    bool isCode = false;
 
     auto ret = std::vector<VimTest>{};
 
-    for (std::string line; std::getline(file, line);) {
-        if (line.starts_with("##")) {
-            while (!line.empty() &&
-                   (line.front() == '#' || line.front() == ' ')) {
-                line.erase(0, 1);
+    for (auto &it : std::filesystem::directory_iterator{"test/res"}) {
+        if (!it.path().filename().string().starts_with("vim") ||
+            it.path().extension() != ".md") {
+            continue;
+        }
+        auto file = std::ifstream{it.path()};
+        bool isCode = false;
+
+        for (std::string line; std::getline(file, line);) {
+            if (line.starts_with("##")) {
+                while (!line.empty() &&
+                       (line.front() == '#' || line.front() == ' ')) {
+                    line.erase(0, 1);
+                }
+                ret.emplace_back().name = line;
+                continue;
             }
-            ret.emplace_back().name = line;
-            continue;
-        }
 
-        if (line.starts_with("```")) {
-            if (!isCode) {
-                ret.back().tests.emplace_back().emplace_back();
+            if (line.starts_with("```")) {
+                if (!isCode) {
+                    ret.back().tests.emplace_back().emplace_back();
+                }
+
+                isCode = !isCode;
+                continue;
             }
 
-            isCode = !isCode;
-            continue;
-        }
+            if (line.starts_with("===") || line.starts_with("---")) {
+                ret.back().tests.back().emplace_back();
+                continue;
+            }
 
-        if (line.starts_with("===") || line.starts_with("---")) {
-            ret.back().tests.back().emplace_back();
-            continue;
-        }
-
-        if (isCode) {
-            auto &currentTestPart = ret.back().tests.back().back();
-            currentTestPart += line + "\n";
+            if (isCode) {
+                auto &currentTestPart = ret.back().tests.back().back();
+                currentTestPart += line + "\n";
+            }
         }
     }
 
