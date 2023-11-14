@@ -3,6 +3,7 @@
  * */
 #include "core/registers.h"
 #include "keys/event.h"
+#include "mls-unit-test/expect.h"
 #include "mls-unit-test/unittest.h"
 #include "mock/script/mockenvironment.h"
 #include "modes/normalmode.h"
@@ -24,7 +25,43 @@
 namespace {
 
 static const auto vimPartCommandRegex = std::regex{R"(\[([A-Z])(\-(.*))?\])"};
-// static const auto vimPartCommandRegex = std::regex{R"(N)"};
+
+std::string translateVimMode(char c) {
+    switch (c) {
+    case 'I':
+        return "insert";
+    case 'V':
+        return "visual";
+    case 'B':
+        return "visual block";
+    }
+    return "normal";
+}
+
+std::pair<std::string, std::string> diffText(std::string a, std::string b) {
+    if (a.empty() || b.empty()) {
+        return {};
+    }
+
+    while (!(a.empty() || b.empty())) {
+        if (a.front() == b.front()) {
+            a.erase(0, 1);
+            b.erase(0, 1);
+            continue;
+        }
+        break;
+    }
+    while (!(a.empty() || b.empty())) {
+        if (a.back() == b.back()) {
+            a.pop_back();
+            b.pop_back();
+            continue;
+        }
+        break;
+    }
+
+    return {a, b};
+}
 
 } // namespace
 
@@ -33,6 +70,7 @@ struct VimCodePart : public std::string {
     std::string mode;
     std::string command;
     Position position;
+    std::optional<Position> anchor;
 
     void finalize() {
         if (empty()) {
@@ -45,7 +83,6 @@ struct VimCodePart : public std::string {
 
         auto match = std::smatch{};
         if (std::regex_search(*this, match, vimPartCommandRegex)) {
-            //            std::cout << "match " << match.str() << std::endl;
 
             command = match[3];
             mode = match[1];
@@ -53,7 +90,6 @@ struct VimCodePart : public std::string {
             // TODO: Handle newlines
             position.x(match.position());
 
-            //            erase(match[0].first, match[0].second);
             erase(match.position(), match[0].str().size());
         }
     }
@@ -116,14 +152,7 @@ std::vector<VimTest> loadVimTests() {
     return ret;
 }
 
-// struct Environment: public MockEnvironment {
-//     using MockEnvironment::MockEnvironment;
-
-//    std::
-//};
-
 std::shared_ptr<MockEnvironment> createMockEnvironment() {
-
     auto env = std::make_unique<MockEnvironment>();
 
     env->mock_standardCommands_0.returnValueRef(StandardCommands::get());
@@ -170,6 +199,7 @@ struct TestSuitVim : public unittest::StaticTestSuit {
                     std::cout << "code:\n";
 
                     auto result = std::string{};
+                    auto previous = std::string{};
 
                     for (auto &part : test) {
                         std::cout << "raw: \n'''" << part.input << "'''\n";
@@ -185,8 +215,16 @@ struct TestSuitVim : public unittest::StaticTestSuit {
                             std::cout << "resulting pos: " << editor.cursor()
                                       << std::endl;
 
+                            auto diff = diffText(previous, result);
+
                             EXPECT_EQ(part, result);
                             EXPECT_EQ(part.position, editor.cursor());
+                            if (!part.mode.empty()) {
+                                EXPECT_EQ(translateVimMode(part.mode.front()),
+                                          editor.mode().name());
+                            }
+                            EXPECT_EQ(registers.load(standardRegister).value,
+                                      diff.first);
                         }
 
                         auto keys = part.command;
@@ -199,6 +237,7 @@ struct TestSuitVim : public unittest::StaticTestSuit {
                         }
 
                         result = content({buffer->begin(), buffer->end()});
+                        previous = part;
                         std::cout << "\n";
                     }
                     std::cout.flush();

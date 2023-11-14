@@ -55,7 +55,8 @@ std::shared_ptr<IMode> createNormalMode() {
             {{">"}, {sc.indent}},
             {{"<"}, {sc.deindent}},
 
-            {{"D"}, {sc.erase_until_end_of_line}},
+            {{"D"}, {sc.delete_until_end_of_line}},
+            {{"C"}, {sc.combine(sc.delete_until_end_of_line, sc.insert_mode)}},
         },
     };
 
@@ -89,7 +90,8 @@ std::shared_ptr<IMode> createNormalMode() {
 
         {{"cc"}, sc.combine(sc.delete_line, sc.split, sc.left, sc.insert_mode)},
         {{"cw"}, sc.combine(sc.select_word, sc.erase, sc.insert_mode)},
-        {{"ciw"}, sc.combine(sc.select_inner_word, sc.erase, sc.insert_mode)},
+        //        {{"ciw"}, sc.combine(sc.select_inner_word, sc.erase,
+        //        sc.insert_mode)},
 
         {{"gd"}, {[](Ptr env) { env->mainWindow().gotoDefinition(); }}},
     }};

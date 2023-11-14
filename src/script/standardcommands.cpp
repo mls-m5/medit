@@ -250,7 +250,7 @@ StandardCommands create() {
         }
     };
 
-    DEF(erase_until_end_of_line) {
+    DEF(delete_until_end_of_line) {
         auto &e = env->editor();
         auto cursor = e.cursor();
         auto end = cursor;
@@ -260,6 +260,7 @@ StandardCommands create() {
         }
 
         end = ::end(end);
+        env->registers().save(standardRegister, toString({cursor, end}));
         erase({cursor, end});
     };
 

@@ -22,6 +22,7 @@
     STD_DEF(switch_header)                                                     \
     STD_DEF(yank_line)                                                         \
     STD_DEF(delete_line)                                                       \
+    STD_DEF(delete_word)                                                       \
     STD_DEF(clear_line)                                                        \
     STD_DEF(insert)                                                            \
     STD_DEF(split)                                                             \
@@ -30,7 +31,7 @@
     STD_DEF(erase)                                                             \
     STD_DEF(erase_after)                                                       \
     STD_DEF(erase_before_word)                                                 \
-    STD_DEF(erase_until_end_of_line)                                           \
+    STD_DEF(delete_until_end_of_line)                                           \
     STD_DEF(paste_before)                                                      \
     STD_DEF(paste)                                                             \
     STD_DEF(join)                                                              \

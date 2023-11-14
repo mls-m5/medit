@@ -27,8 +27,6 @@ public:
         _callback = {};
     }
 
-    //    size_t x() const override;
-    //    size_t y() const override;
     size_t width() const;
     size_t height() const;
     void title(std::string title) override;

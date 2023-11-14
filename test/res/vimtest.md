@@ -1,4 +1,4 @@
-# First Level Heading
+# Vim test
 
 
 ## Syntax test 1
@@ -26,13 +26,17 @@ hello [N]
 ```
 
 
-## TODO: cw
+## cw
 
 ```
 hello [N-cw]there
 ----
 hello [I]
 ```
+
+## TODO: cw2
+
+This is tricky since its differs from dw in vim.
 
 ```
 hello [N-cw]there you
@@ -54,6 +58,21 @@ hello [N-2D]there you
 another line that should be removed
 ----
 hello [N]
+```
+
+## C
+
+```
+hello [N-C]there you
+----
+hello [I]
+```
+
+```
+hello [N-2C]there you
+another line that should be removed
+----
+hello [I]
 ```
 
 
