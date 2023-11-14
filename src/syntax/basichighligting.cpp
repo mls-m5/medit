@@ -276,6 +276,11 @@ const auto wordlistCMake = std::vector<std::string_view>{
     "write_file",
 };
 
+const auto wordlistJson = std::vector<std::string_view>{
+    "true",
+    "false",
+};
+
 template <typename ListT>
 void highlightWord(CursorRange word, const ListT &list) {
     for (auto &w : list) {
@@ -314,6 +319,9 @@ const std::vector<std::string_view> *getWordList(
     }
     if (isCmakeLists(extension)) {
         return &wordlistCMake;
+    }
+    if (isJson(extension)) {
+        return &wordlistJson;
     }
     return nullptr;
 }
