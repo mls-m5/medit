@@ -19,6 +19,10 @@
 [[nodiscard]] Cursor wordBegin(Cursor);
 [[nodiscard]] Cursor wordEnd(Cursor);
 
+//! Goto the beginning of the next word
+//! Used to implement vim motion w
+[[nodiscard]] Cursor nextWord(Cursor, bool allowLineChange = true);
+
 //! Find stuff
 [[nodiscard]] std::optional<Cursor> find(Cursor,
                                          Utf8Char,

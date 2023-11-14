@@ -1,14 +1,6 @@
 # Vim test
 
 
-## Syntax test 1
-
-```
-hello [N-dw]there you
--------------
-hello [N]you
-```
-
 ## dw
 
 ```
@@ -17,15 +9,49 @@ hello [N-dw]there you
 hello [N]you
 ```
 
-## TODO: dw on end of line does not seem to work
 
+Special cases on line breaks
 ```
 hello [N-dw]there
+other
+----
+hello [N]
+other
+```
+
+```
+hello [N-2dw]there
+other
 ----
 hello [N]
 ```
 
 
+## di(
+
+```
+int main([N-di(]x, y) {
+}
+----
+int main([N]) {
+}
+```
+
+## di" - inside
+
+```
+auto x = "hello[N-di"] there!";
+----
+auto x = "[N]";
+```
+
+## TODO: di" - outside
+
+```
+auto[N-di"] x = "hello there!";
+----
+auto x = "[N]";
+```
 
 ## D
 

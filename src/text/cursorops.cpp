@@ -2,8 +2,31 @@
 #include "cursorops.h"
 #include "buffer.h"
 #include "cursorrangeops.h"
-#include "syntax/basichighligting.h"
+// #include "syntax/basichighligting.h"
+#include "text/utf8char.h"
 #include "views/bufferview.h"
+
+namespace {
+
+enum class InternalCharType {
+    Space = 0,
+    Alnum = 1,
+    Other = 2, // Special characters
+};
+
+// space = 0, alnum = 1, other = 2
+InternalCharType getType(Cursor cursor) {
+    auto c = content(cursor).front();
+    if (isalnum(c) || c == '_') {
+        return InternalCharType::Alnum;
+    }
+    if (isspace(c)) {
+        return InternalCharType::Space;
+    }
+    return InternalCharType::Other;
+};
+
+} // namespace
 
 bool isValid(Cursor cursor) {
     auto &lines = cursor.buffer().lines();
@@ -194,13 +217,14 @@ Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
 
 Cursor wordBegin(Cursor cursor) {
     // space = 0, alnum = 1, other = 2
-    auto getType = [](Cursor cursor) {
-        auto c = content(cursor).front();
-        return (isalnum(c) || c == '_') ? 1 : ((!isspace(c)) * 2);
-    };
+    //    auto getType = [](Cursor cursor) {
+    //        auto c = content(cursor).front();
+    //        return (isalnum(c) || c == '_') ? 1 : ((!isspace(c)) * 2);
+    //    };
     auto type = getType(cursor);
 
-    while ((cursor.x() > 0 || cursor.y() > 0) && type == 0) {
+    while ((cursor.x() > 0 || cursor.y() > 0) &&
+           type == InternalCharType::Space) {
         cursor = left(cursor);
         type = getType(cursor);
     }
@@ -218,19 +242,52 @@ Cursor wordBegin(Cursor cursor) {
     return cursor;
 }
 
+Cursor nextWord(Cursor cursor, bool allowLineChange) {
+    auto cur = cursor;
+    auto &buffer = cur.buffer();
+    auto startType = getType(cur);
+
+    auto end = buffer.end();
+
+    for (; cur < end; cur = right(cur)) {
+        if (cur.y() != cursor.y()) {
+            if (!allowLineChange) {
+                return ::end(cursor);
+            }
+            else {
+                // This is a really wierd one from vim
+                if (cur.buffer().lineAt(cur.y()).empty()) {
+                    return cur;
+                }
+            }
+        }
+
+        auto type = getType(cur);
+        if (type == InternalCharType::Space) {
+            startType = InternalCharType::Space;
+            continue;
+        }
+        if (type != startType) {
+            break;
+        }
+    }
+
+    return cur;
+}
+
 Cursor wordEnd(Cursor cursor) {
-    // space = 0, alnum = 1, other = 2
-    auto getType = [](Cursor cursor) {
-        auto c = content(cursor).front();
-        return (isalnum(c) || c == '_') ? 1 : ((!isspace(c)) * 2);
-    };
+    //    // space = 0, alnum = 1, other = 2
+    //    auto getType = [](Cursor cursor) {
+    //        auto c = content(cursor).front();
+    //        return (isalnum(c) || c == '_') ? 1 : ((!isspace(c)) * 2);
+    //    };
 
     auto &buffer = cursor.buffer();
 
     auto end = buffer.end();
     auto type = getType(cursor);
 
-    while (cursor < end && type == 0) {
+    while (cursor < end && type == InternalCharType::Space) {
         cursor = right(cursor);
         type = getType(cursor);
     }

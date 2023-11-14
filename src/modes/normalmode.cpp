@@ -79,6 +79,7 @@ std::shared_ptr<IMode> createNormalMode() {
 
     auto bufferMap = BufferKeyMap{BufferKeyMap::MapType{
         {{"dd"}, sc.delete_line},
+        {{"dw"}, sc.delete_word}, // Does not use normal w-motion on first
 
         {{"cc"}, sc.combine(sc.clear_line, sc.copy, sc.copy_indentation)},
         {{"cw"}, sc.combine(sc.select_word, sc.erase, sc.insert_mode)},

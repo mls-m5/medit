@@ -71,7 +71,7 @@ const static auto map =
         {"j", down},
         {"k", up},
         {"b", combine(wrap(left, true), wordBegin)},
-        {"w", combine(wordEnd, wrap(right, true), wordEnd, wordBegin)},
+        {"w", wrap(nextWord, true)},
         {"e", combine(wrap(right, true), wordEnd)},
         {"b", wordBegin},
         {"0", home},
@@ -341,7 +341,7 @@ std::pair<CursorRange, Cursor> getInnerSelection(Cursor cursor,
     switch (intType) {
     case 'w': {
         auto begin = wordBegin(cursor);
-        return {CursorRange{begin, right(wordEnd(cursor))}, begin};
+        return {CursorRange{begin, right(wordEnd(cursor), false)}, begin};
     }
     case '(':
     case 'b': {
@@ -379,6 +379,7 @@ std::pair<CursorRange, Cursor> getAroundSelection(Cursor cursor,
                                                   int repetitions) {
 
     // TODO: Handle special cases for tags
+    // TODO: For words, only select spaces, and not special characters
 
     auto selection = getInnerSelection(cursor, type, repetitions);
 

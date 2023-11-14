@@ -251,6 +251,50 @@ TEST_CASE("goto beginning of word") {
     }
 }
 
+TEST_CASE("goto beginning of _next_ word") {
+    const auto testText = "Apa bepa\ncepa"sv;
+
+    auto buffer = Buffer{testText};
+    {
+        auto c = nextWord({buffer, 0, 0});
+
+        ASSERT_EQ(c.x(), 4);
+        ASSERT_EQ(c.y(), 0);
+    }
+    {
+        auto c = nextWord({buffer, 2, 0});
+
+        ASSERT_EQ(c.x(), 4);
+        ASSERT_EQ(c.y(), 0);
+    }
+    {
+        auto c = nextWord({buffer, 3, 0});
+
+        ASSERT_EQ(c.x(), 4);
+        ASSERT_EQ(c.y(), 0);
+    }
+    {
+        auto c = nextWord({buffer, 5, 0});
+
+        ASSERT_EQ(c.x(), 0);
+        ASSERT_EQ(c.y(), 1);
+    }
+    {
+        // On the newline character
+        auto c = nextWord({buffer, 8, 0});
+
+        ASSERT_EQ(c.x(), 0);
+        ASSERT_EQ(c.y(), 1);
+    }
+    {
+        // I guess this differs from vim, but in practice it should be the same
+        auto c = nextWord({buffer, 2, 1});
+
+        ASSERT_EQ(c.x(), 4); // The character passed the last char in the buffer
+        ASSERT_EQ(c.y(), 1);
+    }
+}
+
 TEST_CASE("goto end of word") {
     const auto testText = "Apa bepa\ncepa"sv;
 

@@ -264,6 +264,26 @@ StandardCommands create() {
         erase({cursor, end});
     };
 
+    DEF(delete_word) {
+        auto &e = env->editor();
+        auto cursor = e.cursor();
+        auto end = cursor;
+
+        if (numRepeats(env) == 1) {
+
+            end = nextWord(cursor, false);
+        }
+
+        else {
+            REPEAT {
+                end = nextWord(end, true);
+            }
+        }
+
+        env->registers().save(standardRegister, toString({cursor, end}));
+        erase({cursor, end});
+    };
+
     DEF(paste_before) {
         auto str = env->registers().load(standardRegister);
         REPEAT {
