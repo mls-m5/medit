@@ -35,4 +35,8 @@ public:
     //! Returns a pointer because somtimes there is no character (like when
     //! there is a line-break
     FChar operator*();
+
+    constexpr Position pos() const {
+        return Position{x(), y()};
+    }
 };

@@ -3,6 +3,7 @@
 #include "core/debugoutput.h"
 #include "script/ienvironment.h"
 #include "script/interaction.h"
+#include "script/simpleinteraction.h"
 #include "text/fstring.h"
 #include "views/editor.h"
 #include "views/mainwindow.h"

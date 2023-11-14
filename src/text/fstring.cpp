@@ -178,3 +178,11 @@ FString FString::join(std::vector<FString> strings, Utf8Char c) {
 
     return ret;
 }
+
+std::ostream &operator<<(std::ostream &out, const FString &str) {
+    for (auto c : str) {
+        out.write(c.c.data(), static_cast<std::streamsize>(c.size()));
+    }
+
+    return out;
+}

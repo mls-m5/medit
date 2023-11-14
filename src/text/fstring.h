@@ -3,6 +3,7 @@
 #include "fchar.h"
 #include "syntax/palette.h"
 #include "text/utf8char.h"
+#include <ios>
 #include <ostream>
 #include <vector>
 
@@ -176,7 +177,4 @@ private:
     VectorT _content;
 };
 
-inline std::ostream &operator<<(std::ostream &out, const FString &str) {
-    out << std::string{str};
-    return out;
-}
+std::ostream &operator<<(std::ostream &out, const FString &str);

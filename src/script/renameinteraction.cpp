@@ -2,6 +2,7 @@
 #include "core/coreenvironment.h"
 #include "ienvironment.h"
 #include "interaction.h"
+#include "script/simpleinteraction.h"
 #include "syntax/irename.h"
 #include "text/changes.h"
 #include "text/cursorrangeops.h"

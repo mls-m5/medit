@@ -163,6 +163,10 @@ public:
         return _data.front();
     }
 
+    constexpr const char *data() const {
+        return _data.data();
+    }
+
     constexpr bool operator==(char c) const {
         return size() == 1 && _data.front() == c;
     }
