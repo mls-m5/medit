@@ -375,9 +375,9 @@ void MainWindow::refreshScreen() {
         }
 
         updateTitle();
-        updateCursor(_screen);
         _screen.clear();
         draw(_screen);
+        updateCursor(_screen);
         _screen.refresh();
     }
 }
