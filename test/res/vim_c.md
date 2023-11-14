@@ -11,8 +11,6 @@ hello [N-cw]there
 hello [I]
 ```
 
-## TODO: cw2
-
 This is tricky since its differs from dw in vim.
 
 ```

@@ -284,6 +284,31 @@ StandardCommands create() {
         erase({cursor, end});
     };
 
+    DEF(change_word) {
+        auto &e = env->editor();
+        auto cursor = e.cursor();
+        auto end = cursor;
+
+        //        if (numRepeats(env) == 1) {
+        end = right(wordEnd(cursor), false);
+        if (end.y() != cursor.y()) {
+            // Specific vim behaviour for the first time
+            end = cursor;
+        }
+        //        }
+
+        //        else {
+        REPEAT_M1 {
+            end = right(wordEnd(end));
+        }
+        //        }
+
+        env->registers().save(standardRegister, toString({cursor, end}));
+        erase({cursor, end});
+
+        env->standardCommands().insert_mode(env);
+    };
+
     DEF(paste_before) {
         auto str = env->registers().load(standardRegister);
         REPEAT {

@@ -23,6 +23,7 @@
     STD_DEF(yank_line)                                                         \
     STD_DEF(delete_line)                                                       \
     STD_DEF(delete_word)                                                       \
+    STD_DEF(change_word)                                                       \
     STD_DEF(clear_line)                                                        \
     STD_DEF(insert)                                                            \
     STD_DEF(split)                                                             \
