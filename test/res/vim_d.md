@@ -53,6 +53,24 @@ auto[N-di"] x = "hello there!";
 auto x = "[N]";
 ```
 
+## dtx
+
+```
+[N-dto]hello there
+----
+[N]o there
+```
+
+## dfx
+
+```
+[N-dfo]hello there
+----
+[N] there
+```
+
+
+
 ## D
 
 ```

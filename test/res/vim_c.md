@@ -11,7 +11,7 @@ hello [N-cw]there
 hello [I]
 ```
 
-This is tricky since its differs from dw in vim.
+This is tricky since it's differs from dw in vim.
 
 ```
 hello [N-cw]there you

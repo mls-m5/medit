@@ -63,7 +63,7 @@ std::shared_ptr<IMode> createNormalMode() {
     auto vimMotion = [](std::shared_ptr<IEnvironment> env) {
         auto &editor = env->editor();
         auto &mode = editor.mode();
-        auto motion = getMotion(mode.buffer());
+        auto motion = getMotion(mode.buffer(), VimCommandType::Motion);
 
         if (!motion) {
             return;

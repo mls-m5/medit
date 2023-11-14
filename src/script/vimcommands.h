@@ -52,6 +52,7 @@ enum class VimCommandType {
     Delete,
     Yank,
     Other,
+    Motion,
 };
 
 VimCommandType getType(VimMode modeName, FStringView &buffer);
@@ -65,7 +66,9 @@ struct VimMotionResult {
     }
 };
 
-VimMotionResult getMotion(FStringView);
+/// Param is used because some motions are different for visual mode and delete
+/// Set command = 0 for motion only
+VimMotionResult getMotion(FStringView str, VimCommandType);
 
 using SelectionFunctionReturnT = std::pair<CursorRange, Cursor>;
 
@@ -74,7 +77,7 @@ struct SelectionFunctionT {
     std::function<SelectionFunctionReturnT(Cursor, int)> f;
 };
 
-SelectionFunctionT getSelectionFunction(FStringView buffer);
+SelectionFunctionT getSelectionFunction(FStringView buffer, VimCommandType);
 
 std::pair<CursorRange, Cursor> getSelection(FStringView buffer,
                                             Cursor,

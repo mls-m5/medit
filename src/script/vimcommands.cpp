@@ -130,13 +130,13 @@ VimCommandType getType(FStringView &buffer) {
 }
 
 std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
-    const FString &buffer) {
+    const FString &buffer, VimCommandType type) {
 
     if (buffer.empty()) {
         throw "error";
     }
 
-    auto f = getMotion(buffer);
+    auto f = getMotion(buffer, type);
 
     if (f) {
         return [f = f.f](Cursor cursor, VimMode, int num) -> CursorRange {
@@ -147,7 +147,7 @@ std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
     return std::nullopt;
 }
 
-VimMotionResult getMotion(FStringView buffer) {
+VimMotionResult getMotion(FStringView buffer, VimCommandType type) {
     /// Take a function that fires once and add argument for how many
     /// repetitions should be used
     auto pack = [](std::function<Cursor(Cursor)> single) -> VimMotionResult {
@@ -165,15 +165,25 @@ VimMotionResult getMotion(FStringView buffer) {
         return {.match = vim::NoMatch};
     }
 
-    if (buffer.front() == 'f') {
+    auto front = buffer.front();
+
+    if (front == 'f' || front == 't') {
         if (buffer.size() == 1) {
             return {.match = vim::MatchType::PartialMatch};
         }
 
         auto searchTerm = buffer.at(1);
-        return pack([searchTerm](Cursor cursor) -> Cursor {
-            auto f = find(cursor, searchTerm.c, false);
-            return f ? *f : cursor;
+        return pack([searchTerm, type, front](Cursor cursor) -> Cursor {
+            auto f = find(cursor, searchTerm.c, false, front == 't');
+            if (!f) {
+                return cursor;
+            }
+
+            auto newPosition = *f;
+            if (type == VimCommandType::Delete) {
+                newPosition = right(newPosition);
+            }
+            return newPosition;
         });
     }
 
@@ -278,7 +288,7 @@ ActionResultT findVimAction(FStringView buffer, VimMode modeName) {
     }
 
     {
-        auto motion = getMotion(buffer);
+        auto motion = getMotion(buffer, VimCommandType::Motion);
         if (motion.match == vim::Match) {
             auto f = [f = motion.f](std::shared_ptr<IEnvironment> env) {
                 auto &editor = env->editor();
@@ -302,7 +312,7 @@ ActionResultT findVimAction(FStringView buffer, VimMode modeName) {
         return {bestResult};
     }
 
-    auto selectionFunction = getSelectionFunction(buffer);
+    auto selectionFunction = getSelectionFunction(buffer, commandType);
 
     if (selectionFunction.match == vim::NoMatch) {
         return {bestResult};
@@ -392,14 +402,18 @@ std::pair<CursorRange, Cursor> getAroundSelection(Cursor cursor,
     return selection;
 }
 
-SelectionFunctionT getSelectionFunction(FStringView buffer) {
+SelectionFunctionT getSelectionFunction(FStringView buffer,
+                                        VimCommandType type) {
     if (buffer.empty()) {
         return {vim::PartialMatch};
     }
 
-    auto motion = getMotion(buffer);
+    auto motion = getMotion(buffer, type);
 
-    if (motion) {
+    if (motion.match == vim::PartialMatch) {
+        return {.match = vim::PartialMatch};
+    }
+    else if (motion) {
         // TODO: Handle when motion is backwards
         auto f = [f = motion.f](Cursor cursor,
                                 int repetitions) -> SelectionFunctionReturnT {

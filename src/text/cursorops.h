@@ -24,9 +24,12 @@
 [[nodiscard]] Cursor nextWord(Cursor, bool allowLineChange = true);
 
 //! Find stuff
+//! @param cursorBefore is used for example "t" commands where you do not want
+//! to include the last character
 [[nodiscard]] std::optional<Cursor> find(Cursor,
                                          Utf8Char,
-                                         bool allowLineChange = false);
+                                         bool allowLineChange = false,
+                                         bool cursorBefore = false);
 [[nodiscard]] std::optional<Cursor> rfind(Cursor,
                                           Utf8Char,
                                           bool allowLineChange = false);

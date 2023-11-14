@@ -46,7 +46,7 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
     auto vimCommand = [](std::shared_ptr<IEnvironment> env) {
         auto &editor = env->editor();
         auto &mode = editor.mode();
-        auto motion = getMotion(mode.buffer());
+        auto motion = getMotion(mode.buffer(), VimCommandType::Visual);
 
         if (motion) {
             auto cursor = editor.cursor();
@@ -73,7 +73,7 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
             return {BufferKeyMap::NoMatch, {}};
         }
         if (str.front() == 'i' || str.front() == 'a') {
-            auto selection = getSelectionFunction(str);
+            auto selection = getSelectionFunction(str, VimCommandType::Visual);
             if (selection.match == vim::MatchType::PartialMatch) {
                 return {BufferKeyMap::PartialMatch, {}};
             }
@@ -97,7 +97,7 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
         }
 
         /// Separate handling for motions
-        auto motion = getMotion(str);
+        auto motion = getMotion(str, VimCommandType::Visual);
         if (motion.match == vim::MatchType::PartialMatch) {
             return {BufferKeyMap::PartialMatch, {}};
         }

@@ -2,7 +2,6 @@
 #include "cursorops.h"
 #include "buffer.h"
 #include "cursorrangeops.h"
-// #include "syntax/basichighligting.h"
 #include "text/utf8char.h"
 #include "views/bufferview.h"
 
@@ -14,7 +13,6 @@ enum class InternalCharType {
     Other = 2, // Special characters
 };
 
-// space = 0, alnum = 1, other = 2
 InternalCharType getType(Cursor cursor) {
     auto c = content(cursor).front();
     if (isalnum(c) || c == '_') {
@@ -216,11 +214,6 @@ Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
 }
 
 Cursor wordBegin(Cursor cursor) {
-    // space = 0, alnum = 1, other = 2
-    //    auto getType = [](Cursor cursor) {
-    //        auto c = content(cursor).front();
-    //        return (isalnum(c) || c == '_') ? 1 : ((!isspace(c)) * 2);
-    //    };
     auto type = getType(cursor);
 
     while ((cursor.x() > 0 || cursor.y() > 0) &&
@@ -276,12 +269,6 @@ Cursor nextWord(Cursor cursor, bool allowLineChange) {
 }
 
 Cursor wordEnd(Cursor cursor) {
-    //    // space = 0, alnum = 1, other = 2
-    //    auto getType = [](Cursor cursor) {
-    //        auto c = content(cursor).front();
-    //        return (isalnum(c) || c == '_') ? 1 : ((!isspace(c)) * 2);
-    //    };
-
     auto &buffer = cursor.buffer();
 
     auto end = buffer.end();
@@ -331,12 +318,20 @@ Cursor autocompleteWordBegin(const Cursor cursor) {
     return begin;
 }
 
-std::optional<Cursor> find(Cursor cursor, Utf8Char c, bool allowLineChange) {
+std::optional<Cursor> find(Cursor cursor,
+                           Utf8Char c,
+                           bool allowLineChange,
+                           bool cursorBefore) {
     auto end = allowLineChange ? cursor.buffer().end() : ::end(cursor);
-    for (auto cur = cursor; cur != end; cur = right(cur, allowLineChange)) {
+    auto prev = cursor;
+    for (auto cur = cursor; cur < end; cur = right(cur, allowLineChange)) {
         if (content(cur) == c) {
+            if (cursorBefore) {
+                return prev;
+            }
             return cur;
         }
+        prev = cur;
     }
     return {};
 }

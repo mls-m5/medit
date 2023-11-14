@@ -289,19 +289,14 @@ StandardCommands create() {
         auto cursor = e.cursor();
         auto end = cursor;
 
-        //        if (numRepeats(env) == 1) {
         end = right(wordEnd(cursor), false);
         if (end.y() != cursor.y()) {
             // Specific vim behaviour for the first time
             end = cursor;
         }
-        //        }
-
-        //        else {
         REPEAT_M1 {
             end = right(wordEnd(end));
         }
-        //        }
 
         env->registers().save(standardRegister, toString({cursor, end}));
         erase({cursor, end});
