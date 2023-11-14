@@ -6,7 +6,9 @@
 #include "mls-unit-test/expect.h"
 #include "mls-unit-test/unittest.h"
 #include "mock/script/mockenvironment.h"
+#include "modes/insertmode.h"
 #include "modes/normalmode.h"
+#include "modes/visualmode.h"
 #include "script/ienvironment.h"
 #include "script/standardcommands.h"
 #include "text/buffer.h"
@@ -37,6 +39,18 @@ std::string translateVimMode(char c) {
         return "visual block";
     }
     return "normal";
+}
+
+std::shared_ptr<IMode> createMode(char c) {
+    switch (c) {
+    case 'I':
+        return createInsertMode();
+    case 'V':
+        return createVisualMode(false);
+    case 'B':
+        return createVisualMode(true);
+    }
+    return createNormalMode();
 }
 
 std::pair<std::string, std::string> diffText(std::string a, std::string b) {
@@ -89,10 +103,38 @@ struct VimCodePart : public std::string {
             mode = match[1];
 
             // TODO: Handle newlines
-            position.x(match.position());
+            position = getPosition(match.position());
 
             erase(match.position(), match[0].str().size());
         }
+
+        if (auto f = find("[VA]"); f != std::string::npos) {
+            anchor = getPosition(f);
+
+            if (anchor->y() == position.y()) {
+                if (anchor->x() < position.x()) {
+                    position.x(position.x() - 4);
+                }
+            }
+
+            erase(f, 4);
+        }
+    }
+
+    Position getPosition(size_t index) {
+        size_t col = 0;
+        size_t line = 0;
+        for (size_t i = 0; i < size() && i < index; ++i) {
+            auto c = at(i);
+            if (c == '\n') {
+                ++line;
+            }
+            else {
+                ++col;
+            }
+        }
+
+        return {col, line};
     }
 };
 
@@ -232,11 +274,20 @@ struct TestSuitVim : public unittest::StaticTestSuit {
                             }
                             EXPECT_EQ(registers.load(standardRegister).value,
                                       diff.first);
+
+                            if (part.anchor) {
+                                EXPECT_TRUE(editor.selectionAnchor());
+                                EXPECT_EQ(*editor.selectionAnchor(),
+                                          *part.anchor);
+                            }
                         }
 
                         auto keys = part.command;
                         editor.cursor(part.position);
 
+                        if (!part.mode.empty()) {
+                            editor.mode(createMode(part.mode.front()));
+                        }
                         while (!keys.empty()) {
                             emulateKeyPress(*env, keys.front());
                             editor.keyPress(env);

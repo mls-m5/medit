@@ -1,8 +1,5 @@
 # Vim test - c
 
-
-
-
 ## cw
 
 ```
