@@ -43,7 +43,7 @@ bool formatClang(std::filesystem::path path, Editor &editor) {
 }
 
 bool formatHtmlAndXml(std::filesystem::path path, Editor &editor) {
-    if (!isHtml(path) && !isXml(path)) {
+    if (!isHtml(path) && !isXml(path) && !isSvg(path)) {
         return false;
     }
 
@@ -53,7 +53,7 @@ bool formatHtmlAndXml(std::filesystem::path path, Editor &editor) {
 
     editor.save();
     runCommand("tidy -indent -m --tidy-mark no",
-               (isXml(path) ? "-xml " : ""),
+               (isHtml(path) ? "" : "-xml "),
                std::filesystem::absolute(path));
     editor.load();
 

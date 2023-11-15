@@ -76,7 +76,7 @@ private:
     ProjectLanguage guessProjectLanguage() const;
 
     // Set the current root
-    std::filesystem::path root(std::filesystem::path) const;
+    std::filesystem::path findRoot(std::filesystem::path) const;
 
     /// When there is no build command provided. Try to guess what it could be
     /// based on what files are in the project

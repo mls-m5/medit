@@ -299,7 +299,7 @@ const std::vector<std::string_view> *getWordList(
     if (isHtml(extension)) {
         return &wordListHtml;
     }
-    if (isXml(extension)) {
+    if (isXml(extension) || isSvg(extension)) {
         return &wordListXml;
     }
     if (isJs(extension)) {

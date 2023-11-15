@@ -54,12 +54,12 @@ Project::Project(DirectoryNotifications &directoryNotifications,
         this);
 }
 
-std::filesystem::path Project::root(std::filesystem::path arg) const {
+std::filesystem::path Project::findRoot(std::filesystem::path arg) const {
     _tv();
 
-    if (std::filesystem::is_directory(arg)) {
-        return arg;
-    }
+    //    if (std::filesystem::is_directory(arg)) {
+    //        return arg;
+    //    }
 
     auto path = std::filesystem::absolute(arg);
 
@@ -76,8 +76,8 @@ std::filesystem::path Project::root(std::filesystem::path arg) const {
 
     } while (!path.empty() && path != "/");
 
-    if (path.empty()) {
-        return arg;
+    if (path.empty() || path == "/") {
+        return {};
     }
 
     return arg.parent_path();
@@ -173,7 +173,7 @@ std::vector<std::filesystem::path> Project::findProjectFiles(
 #endif
 
     auto &root = _settings.root;
-    root = this->root(pathInProject);
+    root = this->findRoot(pathInProject);
 
     if (root.empty()) {
         return {};

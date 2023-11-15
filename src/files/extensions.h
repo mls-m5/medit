@@ -59,6 +59,10 @@ inline bool isXml(const std::filesystem::path &path) {
     return path.extension() == ".xml";
 }
 
+inline bool isSvg(const std::filesystem::path &path) {
+    return path.extension() == ".svg";
+}
+
 inline bool isJs(const std::filesystem::path &path) {
     return path.extension() == ".js";
 }
@@ -89,10 +93,10 @@ inline bool isRust(const std::filesystem::path &path) {
 
 inline bool isKnownExtension(const std::filesystem::path &path) {
     const auto checks = std::to_array(
-        {isCppHeader, isCppSource, isCSource, isCpp,        isJson,
-         isMarkdown,  isMake,      isMatmake, isCmakeLists, isTextFile,
-         isHtml,      isJs,        isPython,  isJava,       isCSharp,
-         isPhp,       isGo,        isXml,     isXhtml,      isRust});
+        {isCppHeader, isCppSource, isCSource,    isCpp,      isJson, isMarkdown,
+         isMake,      isMatmake,   isCmakeLists, isTextFile, isHtml, isJs,
+         isPython,    isJava,      isCSharp,     isPhp,      isGo,   isXml,
+         isSvg,       isXhtml,     isRust});
 
     for (const auto &check : checks) {
         if (check(path)) {
