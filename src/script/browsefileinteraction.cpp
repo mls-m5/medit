@@ -1,4 +1,4 @@
-#include "fileviewinteraction.h"
+#include "browsefileinteraction.h"
 #include "script/ienvironment.h"
 #include "script/interaction.h"
 #include "syntax/palette.h"
@@ -141,6 +141,6 @@ void internalBeginFileViewInteraction(std::shared_ptr<IEnvironment> env,
 
 } // namespace
 
-void beginFileViewInteraction(std::shared_ptr<IEnvironment> env) {
+void beginBrowseFileInteraction(std::shared_ptr<IEnvironment> env) {
     internalBeginFileViewInteraction(env, {});
 }

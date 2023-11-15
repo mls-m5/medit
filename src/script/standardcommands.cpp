@@ -13,7 +13,7 @@
 #include "plugin/rundebug.h"
 #include "renameinteraction.h"
 #include "saveinteraction.h"
-#include "script/fileviewinteraction.h"
+#include "script/browsefileinteraction.h"
 #include "script/ienvironment.h"
 #include "script/indent.h"
 #include "script/renamefileinteraction.h"
@@ -442,12 +442,13 @@ StandardCommands create() {
     };
 
     DEF(browse_files) {
-        beginFileViewInteraction(env);
+        beginBrowseFileInteraction(env);
     };
 
     DEF(close_buffer) {
         auto &buffer = env->editor();
         if (!buffer.closeBuffer()) {
+            env->statusMessage(FString{"closing editor..."});
             quitMedit(env->context());
             return;
         }

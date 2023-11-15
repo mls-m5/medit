@@ -40,8 +40,8 @@ void BufferView::draw(IScreen &screen) {
         FString{std::string(_numberWidth, ' '), Palette::lineNumbers};
 
     const auto maxWidth = 80;
-    auto overSize = static_cast<std::ptrdiff_t>(width()) - maxWidth -
-                    static_cast<std::ptrdiff_t>(_numberWidth);
+    auto overSize = static_cast<std::ptrdiff_t>(width() + xScroll()) -
+                    maxWidth - static_cast<std::ptrdiff_t>(_numberWidth);
     auto overWidthFill = FString{};
     if (overSize > 0) {
         overWidthFill = FString{static_cast<std::size_t>(overSize),
@@ -60,8 +60,9 @@ void BufferView::draw(IScreen &screen) {
             auto &line = _buffer->lines().at(l);
 
             if (overSize > 0) {
-                screen.draw(
-                    x() + _numberWidth + maxWidth, y() + ty, overWidthFill);
+                screen.draw(x() + _numberWidth + maxWidth - xScroll(),
+                            y() + ty,
+                            overWidthFill);
             }
 
             screen.draw(x() + _numberWidth, y() + ty, line.substr(xScroll()));

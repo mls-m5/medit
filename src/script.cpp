@@ -1,4 +1,4 @@
-#include "script/fileviewinteraction.cpp"
+#include "script/browsefileinteraction.cpp"
 #include "script/indent.cpp"
 #include "script/interaction.cpp"
 #include "script/localenvironment.cpp"

@@ -55,6 +55,10 @@ bool InteractionHandling::keyPress(std::shared_ptr<IEnvironment> env) {
         close();
         return true;
     }
+    //    if (env->key().key == Key::Escape) {
+    //        close();
+    //        return true;
+    //    }
     return false;
 }
 
