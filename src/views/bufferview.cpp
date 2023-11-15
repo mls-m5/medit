@@ -5,6 +5,8 @@
 #include "text/buffer.h"
 #include "text/cursor.h"
 #include "text/cursorrange.h"
+#include "text/fchar.h"
+#include "text/fstring.h"
 #include "views/iwindow.h"
 #include <stdexcept>
 
@@ -37,6 +39,16 @@ void BufferView::draw(IScreen &screen) {
     auto fillStr =
         FString{std::string(_numberWidth, ' '), Palette::lineNumbers};
 
+    const auto maxWidth = 80;
+    auto overSize =
+        static_cast<int>(width()) - maxWidth - static_cast<int>(_numberWidth);
+    auto overWidthFill = FString{};
+    if (overSize > 0) {
+        overWidthFill = FString{overSize, FChar{' ', Palette::outside}};
+    }
+
+    auto bottomFill = FString{width(), FChar{' ', Palette::outside}};
+
     auto fillStrError = FString{std::string(_numberWidth, ' '), Palette::error};
     for (size_t ty = 0; ty < height(); ++ty) {
         auto l = ty + yScroll();
@@ -45,6 +57,11 @@ void BufferView::draw(IScreen &screen) {
                 buffer().diagnostics().findLineDiagnostic(l);
 
             auto &line = _buffer->lines().at(l);
+
+            if (overSize > 0) {
+                screen.draw(
+                    x() + _numberWidth + maxWidth, y() + ty, overWidthFill);
+            }
 
             screen.draw(x() + _numberWidth, y() + ty, line.substr(xScroll()));
 
@@ -72,6 +89,9 @@ void BufferView::draw(IScreen &screen) {
 
                 ++l;
             }
+        }
+        else {
+            screen.draw(x(), y() + ty, bottomFill);
         }
     }
 }

@@ -39,8 +39,6 @@ struct Style {
         arch("b", background);
         arch("f", f);
     }
-
-    //    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Style, color, background, f);
 };
 
 class Palette /*: public IPalette*/ {
@@ -96,6 +94,8 @@ public:
         error,
         warning,
         note,
+
+        outside,
     };
 
     void visit(Archive &arch);

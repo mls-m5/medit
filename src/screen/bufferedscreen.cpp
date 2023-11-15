@@ -55,37 +55,29 @@ struct BufferedScreen::Canvas {
     }
 };
 
-void BufferedScreen::forceThread() {
-    if (_threadId != std::this_thread::get_id()) {
-        throw std::runtime_error{
-            "trying to run from wrong thread in bufferedscreen"};
-    }
-}
-
 BufferedScreen::BufferedScreen(IScreen *screen)
     : _backend(screen)
-    , _canvas(std::make_unique<Canvas>())
-    , _threadId(std::this_thread::get_id()) {}
+    , _canvas(std::make_unique<Canvas>()) {}
 
 BufferedScreen::~BufferedScreen() = default;
 
 void BufferedScreen::draw(size_t x, size_t y, FStringView str) {
-    forceThread();
+    _tv();
     _canvas->draw(x, y, str);
 }
 
 void BufferedScreen::refresh() {
-    forceThread();
+    _tv();
     _canvas->refresh(*_backend);
 }
 
 void BufferedScreen::clear() {
-    forceThread();
+    _tv();
     _canvas->fill(' ');
 }
 
 void BufferedScreen::cursor(size_t x, size_t y) {
-    forceThread();
+    _tv();
     _canvas->_cursorX = x;
     _canvas->_cursorY = y;
 }
@@ -108,7 +100,7 @@ size_t BufferedScreen::addStyle(const Color &foreground,
 }
 
 void BufferedScreen::cursorStyle(CursorStyle style) {
-    forceThread();
+    _tv();
     _backend->cursorStyle(style);
 }
 

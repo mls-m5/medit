@@ -37,10 +37,10 @@ MainWindow::MainWindow(CoreEnvironment &core,
     , _completeView(this, core.plugins().get<ICompletionSource>())
     , _currentEditor(0) {
 
-    //    for (int i = 0; i < 2; ++i) {
-    _editors.push_back(
-        std::make_unique<Editor>(this, _env->core().files().create()));
-    //    }
+    for (int i = 0; i < 2; ++i) {
+        _editors.push_back(
+            std::make_unique<Editor>(this, _env->core().files().create()));
+    }
     _inputFocus = _editors.front().get();
 
     for (auto &editor : _editors) {
@@ -427,20 +427,20 @@ void MainWindow::showConsole() {
     _inputFocus = &_console;
 }
 
-void MainWindow::showOpen() {
-    auto editor = currentEditor();
-    if (!editor) {
-        return;
-    }
-    auto path = editor->path();
-    if (path.empty()) {
-        path = std::filesystem::current_path();
-    }
-    auto input =
-        std::make_unique<InputBox>(this, "Path to open: ", path.string());
-    input->callback([this](std::string value) { open(value); });
-    showPopup(std::move(input));
-}
+// void MainWindow::showOpen() {
+//     auto editor = currentEditor();
+//     if (!editor) {
+//         return;
+//     }
+//     auto path = editor->path();
+//     if (path.empty()) {
+//         path = std::filesystem::current_path();
+//     }
+//     auto input =
+//         std::make_unique<InputBox>(this, "Path to open: ", path.string());
+//     input->callback([this](std::string value) { open(value); });
+//     showPopup(std::move(input));
+// }
 
 void MainWindow::gotoDefinition() {
     for (auto &navigation : _env->core().plugins().get<INavigation>()) {

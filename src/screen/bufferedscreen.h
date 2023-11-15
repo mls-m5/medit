@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/threadvalidation.h"
 #include "screen/iscreen.h"
 #include <memory>
 #include <thread>
@@ -8,13 +9,12 @@ class BufferedScreen : public IScreen {
     IScreen *_backend;
     struct Canvas;
     std::unique_ptr<Canvas> _canvas;
-    std::thread::id _threadId;
 
-    void forceThread();
+    ThreadValidation _tv{"BufferedScreen"};
 
 public:
     BufferedScreen(IScreen *backend);
-    ~BufferedScreen();
+    ~BufferedScreen() override;
 
     //! @see IScreen
     void draw(size_t x, size_t y, FStringView str) override;

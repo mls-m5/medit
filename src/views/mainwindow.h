@@ -97,7 +97,7 @@ struct MainWindow : public Window {
     void showConsole();
 
     /// Show open dialogue
-    void showOpen();
+    //    void showOpen();
 
     void gotoDefinition();
 
