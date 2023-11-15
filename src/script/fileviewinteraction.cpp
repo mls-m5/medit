@@ -30,8 +30,20 @@ void handleFileViewResponse(std::shared_ptr<IEnvironment> env,
         return result;
     };
 
-    auto rootPath = std::filesystem::path(lineAt(1));
-    auto result = rootPath / lineAt(i.cursorPosition.y());
+    if (i.text.empty()) {
+        return;
+    }
+
+    auto result = std::string{};
+
+    /// Filesystem mode
+    if (i.text.front() == '/') {
+        auto rootPath = std::filesystem::path(lineAt(1));
+        result = rootPath / lineAt(i.cursorPosition.y());
+    }
+    else { /// Project mode
+        result = lineAt(i.cursorPosition.y());
+    }
 
     if (result.empty()) {
         env->statusMessage(FString{"no file selected"});
@@ -47,7 +59,6 @@ void handleFileViewResponse(std::shared_ptr<IEnvironment> env,
 }
 
 FString formatPath(std::filesystem::path path) {
-
     auto str = FString{};
 
     if (path.has_parent_path()) {
@@ -71,7 +82,7 @@ void internalBeginFileViewInteraction(std::shared_ptr<IEnvironment> env,
 
     auto &editor = env->editor();
 
-    size_t currentLine = 1;
+    size_t currentLine = 0;
 
     const auto hideHiddenFiles = true;
 
@@ -85,13 +96,6 @@ void internalBeginFileViewInteraction(std::shared_ptr<IEnvironment> env,
     if (root.empty()) {
         root = std::filesystem::current_path();
     }
-
-    if (std::filesystem::absolute(root).has_parent_path()) {
-        interaction.text +=
-            std::filesystem::absolute(root).parent_path().string() + "\n";
-        ++currentLine;
-    }
-    interaction.text += std::filesystem::absolute(root).string() + "\n";
 
     auto addFile = [&](std::filesystem::path file, std::filesystem::path root) {
         if (hideHiddenFiles && file.has_filename() &&
@@ -118,6 +122,13 @@ void internalBeginFileViewInteraction(std::shared_ptr<IEnvironment> env,
 
     // If project had no files. Just brows the current directory
     if (env->project().files().empty()) {
+        if (std::filesystem::absolute(root).has_parent_path()) {
+            interaction.text +=
+                std::filesystem::absolute(root).parent_path().string() + "\n";
+            ++currentLine;
+        }
+        interaction.text += std::filesystem::absolute(root).string() + "\n";
+        ++currentLine;
         for (auto &it : std::filesystem::directory_iterator{
                  std::filesystem::absolute(root)}) {
             addFile(it.path(), root);
