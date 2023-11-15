@@ -67,6 +67,8 @@
     STD_DEF(rename_file)                                                       \
     STD_DEF(indent)                                                            \
     STD_DEF(deindent)                                                          \
+    STD_DEF(split_editor)                                                      \
+    STD_DEF(close_editor)                                                      \
     STD_DEF(debug_run)                                                         \
     STD_DEF(debug_pause)                                                       \
     STD_DEF(debug_stop)                                                        \

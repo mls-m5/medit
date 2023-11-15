@@ -514,6 +514,14 @@ StandardCommands create() {
         env->mainWindow().showCommandPalette();
     };
 
+    DEF(split_editor) {
+        env->mainWindow().splitEditor();
+    };
+
+    DEF(close_editor) {
+        env->mainWindow().closeEditor();
+    };
+
     // ------------------------
 
     commands.open = [](StandardCommands::EnvPtrT env,

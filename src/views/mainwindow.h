@@ -96,8 +96,11 @@ struct MainWindow : public Window {
     void escape();
     void showConsole();
 
-    /// Show open dialogue
-    //    void showOpen();
+    ///! Create a new editor
+    void splitEditor();
+
+    ///! Close current editor window
+    void closeEditor();
 
     void gotoDefinition();
 

@@ -17,7 +17,6 @@
 #include "text/cursorrangeops.h"
 #include "text/fstring.h"
 #include "text/fstringview.h"
-#include "views/inputbox.h"
 #include <filesystem>
 #include <memory>
 #include <string_view>
@@ -37,7 +36,7 @@ MainWindow::MainWindow(CoreEnvironment &core,
     , _completeView(this, core.plugins().get<ICompletionSource>())
     , _currentEditor(0) {
 
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 1; ++i) {
         _editors.push_back(
             std::make_unique<Editor>(this, _env->core().files().create()));
     }
@@ -328,10 +327,18 @@ void MainWindow::paste(std::string text) {
 }
 
 bool MainWindow::mouseDown(int x, int y) {
-    if (auto e = currentEditor()) {
-        e->mouseDown(x, y);
-        return true;
+    for (size_t i = 0; i < _editors.size(); ++i) {
+        auto &e = *_editors.at(i);
+        if (e.mouseDown(x, y)) {
+            _currentEditor = i;
+            _inputFocus = &e;
+            return true;
+        }
     }
+    //    if (auto e = currentEditor()) {
+    //        e->mouseDown(x, y);
+    //        return true;
+    //    }
     return false;
 }
 
@@ -427,20 +434,27 @@ void MainWindow::showConsole() {
     _inputFocus = &_console;
 }
 
-// void MainWindow::showOpen() {
-//     auto editor = currentEditor();
-//     if (!editor) {
-//         return;
-//     }
-//     auto path = editor->path();
-//     if (path.empty()) {
-//         path = std::filesystem::current_path();
-//     }
-//     auto input =
-//         std::make_unique<InputBox>(this, "Path to open: ", path.string());
-//     input->callback([this](std::string value) { open(value); });
-//     showPopup(std::move(input));
-// }
+void MainWindow::splitEditor() {
+    auto &buffer = _editors.back()->buffer();
+    _editors.push_back(
+        std::make_unique<Editor>(this, buffer.shared_from_this()));
+    _editors.back()->showLines(true);
+}
+
+void MainWindow::closeEditor() {
+    if (_editors.size() <= 1) {
+        return;
+    }
+
+    _editors.erase(_editors.begin() + _currentEditor,
+                   _editors.begin() + _currentEditor + 1);
+
+    if (_currentEditor > 0) {
+        --_currentEditor;
+    }
+
+    _inputFocus = currentEditor();
+}
 
 void MainWindow::gotoDefinition() {
     for (auto &navigation : _env->core().plugins().get<INavigation>()) {

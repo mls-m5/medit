@@ -1,5 +1,4 @@
 #include "views/bufferview.h"
-#include "meditfwd.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
 #include "text/buffer.h"
@@ -8,6 +7,7 @@
 #include "text/fchar.h"
 #include "text/fstring.h"
 #include "views/iwindow.h"
+#include <cstddef>
 #include <stdexcept>
 
 namespace {
@@ -40,11 +40,12 @@ void BufferView::draw(IScreen &screen) {
         FString{std::string(_numberWidth, ' '), Palette::lineNumbers};
 
     const auto maxWidth = 80;
-    auto overSize =
-        static_cast<int>(width()) - maxWidth - static_cast<int>(_numberWidth);
+    auto overSize = static_cast<std::ptrdiff_t>(width()) - maxWidth -
+                    static_cast<std::ptrdiff_t>(_numberWidth);
     auto overWidthFill = FString{};
     if (overSize > 0) {
-        overWidthFill = FString{overSize, FChar{' ', Palette::outside}};
+        overWidthFill = FString{static_cast<std::size_t>(overSize),
+                                FChar{' ', Palette::outside}};
     }
 
     auto bottomFill = FString{width(), FChar{' ', Palette::outside}};
