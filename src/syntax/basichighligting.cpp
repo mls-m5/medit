@@ -293,7 +293,7 @@ void highlightWord(CursorRange word, const ListT &list) {
 
 const std::vector<std::string_view> *getWordList(
     const std::filesystem::path &extension) {
-    if (isCpp(extension)) {
+    if (isCpp(extension) || isC(extension)) {
         return &wordListCpp;
     }
     if (isHtml(extension)) {
@@ -386,6 +386,8 @@ bool BasicHighlighting::highlightStatic(Buffer &buffer) {
         highlightWord(word, *wordList);
     }
 
+    bool isHashPreprocessor = isCpp(buffer.path()) || isC(buffer.path());
+
     //     Identify comment
     for (size_t y = 0; y < buffer.lines().size(); ++y) {
         auto &line = buffer.lineAt(y);
@@ -403,7 +405,9 @@ bool BasicHighlighting::highlightStatic(Buffer &buffer) {
         if (!line.empty()) {
             if (line.front().c == '#') {
                 auto range = CursorRange{buffer, {0, y}, {10000, y}};
-                format(range, Palette::comment);
+                format(range,
+                       isHashPreprocessor ? Palette::preprocessor
+                                          : Palette::comment);
             }
         }
     }

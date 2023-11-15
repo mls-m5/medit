@@ -44,8 +44,7 @@ void beginFileViewInteraction(std::shared_ptr<IEnvironment> env) {
     size_t currentLine = 0;
 
     for (auto &file : env->project().files()) {
-        if (editor.file() &&
-            std::filesystem::equivalent(editor.file()->path(), file)) {
+        if (std::filesystem::equivalent(editor.path(), file)) {
             interaction.cursorPosition.y(currentLine);
         }
         auto path = std::filesystem::relative(file, root);
