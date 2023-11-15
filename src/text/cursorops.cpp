@@ -48,7 +48,7 @@ Cursor fix(Cursor cursor) {
         cursor.y(lines.size() - 1);
     }
 
-    auto line = lines.at(cursor.y());
+    auto &line = lines.at(cursor.y());
     if (line.empty()) {
         cursor.x(0);
     }
