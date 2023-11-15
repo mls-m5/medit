@@ -41,6 +41,7 @@
     STD_DEF(copy)                                                              \
     STD_DEF(cut)                                                               \
     STD_DEF(copy_indentation)                                                  \
+    STD_DEF(close_brace)                                                       \
     STD_DEF(undo)                                                              \
     STD_DEF(undo_major)                                                        \
     STD_DEF(redo)                                                              \

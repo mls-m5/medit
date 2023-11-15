@@ -49,6 +49,9 @@ Cursor join(Cursor);
 
 Cursor split(Cursor);
 
+/// Get the indentation from a line
+[[nodiscard]] FString indentation(Cursor cursor);
+
 //! Used for auto indentation
 Cursor copyIndentation(Cursor, std::string autoIndentString = "    ");
 
@@ -78,3 +81,5 @@ Cursor apply(BufferEdit edit);
 
 /// Implementations for things like vims % command
 Cursor findMatching(Cursor);
+
+[[nodiscard]] const FString &lineAt(Cursor);

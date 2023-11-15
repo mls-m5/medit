@@ -18,8 +18,10 @@
 #include "script/indent.h"
 #include "script/renamefileinteraction.h"
 #include "text/cursorops.h"
+#include "text/cursorrange.h"
 #include "text/cursorrangeops.h"
 #include "text/fstring.h"
+#include "text/utf8charops.h"
 #include "togglecomments.h"
 #include "views/editor.h"
 #include "views/mainwindow.h"
@@ -364,6 +366,34 @@ StandardCommands create() {
     DEF(copy_indentation) {
         auto &e = env->editor();
         e.cursor(copyIndentation(e.cursor()));
+    };
+    DEF(close_brace) {
+        auto &e = env->editor();
+        auto cursor = e.cursor();
+        if (cursor.x() == 0 || cursor.y() == 0) {
+            e.cursor(insert('}', cursor));
+            return;
+        }
+
+        if (!isSpace(content(left(cursor)))) {
+            e.cursor(insert('}', cursor));
+            return;
+        }
+        auto left = matchingLeft(cursor, '{', '}', true);
+        if (!left) {
+            e.cursor(insert('}', cursor));
+            return;
+        }
+        auto indentationLeft = ::indentation(*left);
+        auto currentIndentation = ::indentation(cursor);
+        auto lineStart = ::home(cursor);
+        auto indentationStop = lineStart;
+        for (auto c : currentIndentation) {
+            indentationStop = right(indentationStop);
+        }
+        erase(CursorRange{lineStart, indentationStop});
+        cursor = insert(lineStart, indentationLeft);
+        e.cursor(insert('}', cursor));
     };
     DEF(undo) {
         env->editor().undo();

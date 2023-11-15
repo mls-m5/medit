@@ -2,6 +2,7 @@
 #include "cursorops.h"
 #include "buffer.h"
 #include "cursorrangeops.h"
+#include "text/fstring.h"
 #include "text/utf8char.h"
 #include "views/bufferview.h"
 #include <optional>
@@ -175,6 +176,22 @@ Cursor split(Cursor cursor) {
     }
 }
 
+FString indentation(Cursor cursor) {
+    auto &line = lineAt(cursor);
+
+    FString indentationStr;
+    for (auto c : line) {
+        if (c.c == ' ' || c.c == '\t') {
+            indentationStr += std::string{c};
+        }
+        else {
+            break;
+        }
+    }
+
+    return indentationStr;
+}
+
 Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
     cursor = fix(cursor);
 
@@ -186,16 +203,7 @@ Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
 
     auto &line = cursor.buffer().lineAt(cursor.y());
     auto &lineAbove = lines.at(cursor.y() - 1);
-
-    std::string indentationStr;
-    for (auto c : lineAbove) {
-        if (c.c == ' ' || c.c == '\t') {
-            indentationStr += std::string{c};
-        }
-        else {
-            break;
-        }
-    }
+    auto indentationStr = indentation({cursor.buffer(), 0, cursor.y() - 1});
 
     cursor.x(indentationStr.size());
 
@@ -482,4 +490,8 @@ Cursor findMatching(Cursor cursor) {
     }
 
     return cursor;
+}
+
+const FString &lineAt(Cursor cursor) {
+    return cursor.buffer().lineAt(cursor.y());
 }

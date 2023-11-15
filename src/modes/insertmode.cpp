@@ -20,6 +20,7 @@ std::shared_ptr<IMode> createInsertMode() {
         {KeyEvent{Key::KeyCombination, '\b', Modifiers::Ctrl},
          {sc.erase_before_word}},
         {{"\n"}, {sc.combine(sc.split, sc.copy_indentation)}},
+        {{"}"}, sc.close_brace},
     }};
     map.defaultAction({sc.insert});
 

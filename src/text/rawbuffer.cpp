@@ -2,6 +2,7 @@
 #include "cursorrange.h"
 #include "cursorrangeops.h"
 #include "text/cursor.h"
+#include "text/fstringview.h"
 #include <sstream>
 
 const std::vector<FString> &RawBuffer::lines() const {

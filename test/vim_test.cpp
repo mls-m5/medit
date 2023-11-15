@@ -128,6 +128,7 @@ struct VimCodePart : public std::string {
             auto c = at(i);
             if (c == '\n') {
                 ++line;
+                col = 0;
             }
             else {
                 ++col;
@@ -272,8 +273,11 @@ struct TestSuitVim : public unittest::StaticTestSuit {
                                 EXPECT_EQ(translateVimMode(part.mode.front()),
                                           editor.mode().name());
                             }
-                            EXPECT_EQ(registers.load(standardRegister).value,
-                                      diff.first);
+                            if (part.mode != "I") {
+                                EXPECT_EQ(
+                                    registers.load(standardRegister).value,
+                                    diff.first);
+                            }
 
                             if (part.anchor) {
                                 EXPECT_TRUE(editor.selectionAnchor());

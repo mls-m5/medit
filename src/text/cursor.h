@@ -32,6 +32,7 @@ public:
 
     Cursor &operator++();
 
+
     //! Returns a pointer because somtimes there is no character (like when
     //! there is a line-break
     FChar operator*();
