@@ -76,6 +76,13 @@ void internalBeginFileViewInteraction(std::shared_ptr<IEnvironment> env,
     const auto hideHiddenFiles = true;
 
     if (root.empty()) {
+        root = editor.path();
+        if (!std::filesystem::is_directory(root) && !root.empty()) {
+            root = root.parent_path();
+        }
+    }
+
+    if (root.empty()) {
         root = std::filesystem::current_path();
     }
 

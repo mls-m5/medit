@@ -215,6 +215,9 @@ void LspPlugin::registerPlugin(CoreEnvironment &core, Plugins &plugins) {
 }
 
 LspPlugin::Instance *LspPlugin::createInstance(std::filesystem::path path) {
+    if (_core->project().settings().root.empty()) {
+        return nullptr;
+    }
     auto config = LspConfiguration::getConfiguration(path);
     if (!config) {
         _unsupportedExtensions.push_back(path.extension());

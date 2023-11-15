@@ -63,7 +63,11 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
 
     std::optional<SavedState> foundState;
     for (auto it = _openedBuffers.begin(); it != _openedBuffers.end();) {
-        if (auto ptr = it->buffer.lock(); !ptr || ptr == buffer) {
+        auto ptr = it->buffer.lock();
+        if (!ptr) {
+            it = _openedBuffers.erase(it);
+        }
+        else if (ptr == buffer) {
             foundState = std::move(*it);
             it = _openedBuffers.erase(it);
         }

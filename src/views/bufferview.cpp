@@ -6,6 +6,7 @@
 #include "text/cursor.h"
 #include "text/cursorrange.h"
 #include "views/iwindow.h"
+#include <stdexcept>
 
 namespace {
 
@@ -142,6 +143,9 @@ const Buffer &BufferView::buffer() const {
 }
 
 void BufferView::buffer(std::shared_ptr<Buffer> buffer) {
+    if (!buffer) {
+        throw std::runtime_error{"trying to set buffer view buffer to nullptr"};
+    }
     unsubscribe();
     _buffer = std::move(buffer);
     subscribeToBuffer();
