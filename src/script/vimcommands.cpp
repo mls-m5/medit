@@ -80,6 +80,7 @@ const static auto map =
         {"g_", lastNonSpaceOnLine},
         {"gg", [](Cursor c) { return c.buffer().begin(); }},
         {"G", [](Cursor c) { return c.buffer().end(); }},
+        {"%", findMatching},
     };
 
 CursorRange vimInner(char c, Cursor cursor) {

@@ -52,9 +52,29 @@ Cursor split(Cursor);
 //! Used for auto indentation
 Cursor copyIndentation(Cursor, std::string autoIndentString = "    ");
 
+Cursor fixBraceIndentation(Cursor);
+
 Utf8Char content(Cursor);
 
 //! For autocompleteon find the first character of the word to be completed
 Cursor autocompleteWordBegin(const Cursor cursor);
 
 Cursor apply(BufferEdit edit);
+
+/// Used find mathcing, parantheses, braces etc
+[[nodiscard]] std::optional<Cursor> matchingLeft(
+    Cursor cursor,
+    const Utf8Char start,
+    const Utf8Char stop,
+    bool shouldEnableNestCheck = true);
+
+[[nodiscard]] std::optional<Cursor> matchingRight(
+    Cursor cursor,
+    const Utf8Char start,
+    const Utf8Char stop,
+    bool shouldEnableNestCheck = true);
+
+[[nodiscard]] Cursor findAnyMatching(Cursor cursor);
+
+/// Implementations for things like vims % command
+Cursor findMatching(Cursor);

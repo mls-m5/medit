@@ -4,6 +4,7 @@
 #include "cursorrangeops.h"
 #include "text/utf8char.h"
 #include "views/bufferview.h"
+#include <optional>
 
 namespace {
 
@@ -377,4 +378,108 @@ Cursor up(Cursor cur) {
 Cursor down(Cursor cur) {
     cur.y(cur.y() + 1);
     return fix(cur);
+}
+
+std::optional<Cursor> matchingLeft(Cursor cursor,
+                                   const Utf8Char start,
+                                   const Utf8Char stop,
+                                   bool shouldEnableNestCheck) {
+    if (start == stop) {
+        shouldEnableNestCheck = false;
+    }
+
+    auto begin = cursor;
+    int count = 1;
+
+    for (;; begin = left(begin, true)) {
+        auto c = content(begin);
+        if (c == start) {
+            --count;
+        }
+        // This is to handle nested stuff like { {} {} }
+        if (shouldEnableNestCheck && c == stop) {
+            ++count;
+        }
+
+        if (!count) {
+            break;
+        }
+        if (begin.x() == 0 && begin.y() == 0) {
+            return std::nullopt;
+        }
+    }
+    if (count) {
+        // Failed to find match
+        return std::nullopt;
+    }
+    return begin;
+}
+
+std::optional<Cursor> matchingRight(Cursor cursor,
+                                    const Utf8Char start,
+                                    const Utf8Char stop,
+                                    bool shouldEnableNestCheck) {
+    if (start == stop) {
+        shouldEnableNestCheck = false;
+    }
+
+    const auto bufferEnd = cursor.buffer().end();
+    auto end = cursor;
+    int count = 1;
+    for (; end != bufferEnd; end = right(end, true)) {
+        if (content(end) == stop) {
+            --count;
+        }
+        if (shouldEnableNestCheck && content(end) == start) {
+            ++count;
+        }
+        if (!count) {
+            break;
+        }
+    }
+    if (count) {
+        // Failed to find match
+        return std::nullopt;
+    }
+    return end;
+}
+
+/// The bool is if the match is forward else backward
+std::pair<char, bool> getMatchType(Utf8Char c) {
+    switch (static_cast<int>(c)) {
+    case '(':
+        return {')', true};
+    case ')':
+        return {'(', false};
+    case '{':
+        return {'}', true};
+    case '}':
+        return {'{', false};
+    case '[':
+        return {']', true};
+    case ']':
+        return {'[', false};
+    }
+
+    return {0, false};
+}
+
+// Cursor fixBraceIndentation(Cursor cursor) {}
+
+Cursor findMatching(Cursor cursor) {
+    auto startC = content(cursor);
+    auto [c, forward] = getMatchType(startC);
+
+    if (forward) {
+        cursor = right(cursor);
+        auto res = matchingRight(cursor, startC, c, true);
+        return res ? *res : cursor;
+    }
+    else {
+        cursor = left(cursor);
+        auto res = matchingLeft(cursor, c, startC, true);
+        return res ? *res : cursor;
+    }
+
+    return cursor;
 }

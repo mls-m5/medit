@@ -380,6 +380,21 @@ TEST_CASE("find() - multiline") {
     }
 }
 
+TEST_CASE("findMatching() ") {
+    auto buffer = Buffer{"apa( bepa\ncepa )depa"};
+
+    {
+        auto cursor = findMatching({buffer, 3, 0});
+        ASSERT_EQ(cursor.x(), 5);
+        ASSERT_EQ(cursor.y(), 1);
+    }
+    {
+        auto cursor = findMatching({buffer, 5, 1});
+        ASSERT_EQ(cursor.x(), 3);
+        ASSERT_EQ(cursor.y(), 0);
+    }
+}
+
 TEST_CASE("rfind()") {
     auto buffer = Buffer{"apa bepa cepa depa"};
 

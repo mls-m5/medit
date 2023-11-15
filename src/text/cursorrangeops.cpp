@@ -3,6 +3,7 @@
 #include "text/buffer.h"
 #include "text/cursorops.h"
 #include "text/cursorrange.h"
+#include "text/utf8char.h"
 #include <iostream>
 #include <sstream>
 
@@ -114,49 +115,20 @@ CursorRange inner(const Cursor cursor,
     auto shouldEnableNestCheck =
         start != stop; // Disable for for example " or '
 
-    auto begin = cursor;
-    {
-        int count = 1;
-        for (;; begin = left(begin, true)) {
-            if (content(begin) == start) {
-                --count;
-            }
-            // This is to handle nested stuff like { {} {} }
-            if (shouldEnableNestCheck && content(begin) == stop) {
-                ++count;
-            }
-
-            if (!count) {
-                break;
-            }
-            if (begin.x() == 0 && begin.y() == 0) {
-                return {cursor};
-            }
-        }
+    auto begin = matchingLeft(cursor, start, stop, shouldEnableNestCheck);
+    if (!begin) {
+        return {cursor};
     }
-
-    const auto bufferEnd = cursor.buffer().end();
-    auto end = cursor;
-    {
-        int count = 1;
-        for (; end != bufferEnd; end = right(end, true)) {
-            if (content(end) == stop) {
-                --count;
-            }
-            if (shouldEnableNestCheck && content(end) == start) {
-                ++count;
-            }
-            if (!count) {
-                break;
-            }
-        }
-    }
-
-    if (end == bufferEnd) {
+    auto end = matchingRight(cursor, start, stop, shouldEnableNestCheck);
+    if (!end) {
         return {cursor};
     }
 
-    return {++begin, end};
+    if (*end == cursor.buffer().end()) {
+        return {cursor};
+    }
+
+    return {++*begin, *end};
 }
 
 CursorRange all(Buffer &buffer) {

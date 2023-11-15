@@ -5,7 +5,7 @@
 
 ```
 hello [N-dw]there you
-==============
+-----------
 hello [N]you
 ```
 
@@ -70,6 +70,13 @@ auto x = "[N]";
 ```
 
 
+## TODO: %
+
+```
+hello [N-d%](there y)ou
+-----------
+hello [N]ou
+```
 
 ## D
 
