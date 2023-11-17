@@ -203,8 +203,13 @@ StandardCommands create() {
             auto str = std::string{};
 
             REPEAT {
-                str = toString(e.cursor()) + str;
-                e.cursor(erase(e.cursor()));
+                auto cursor = e.cursor();
+                if (cursor.x() == 0) {
+                    break;
+                }
+                //                cursor = left(cursor);
+                str = std::string{content(left(cursor)).toString()} + str;
+                e.cursor(erase(cursor));
             }
             env->registers().save(standardRegister, str);
         }
@@ -221,7 +226,7 @@ StandardCommands create() {
             auto str = std::string{};
 
             REPEAT {
-                str += toString(e.cursor());
+                str += content(e.cursor());
                 e.cursor(erase(right(e.cursor())));
             }
             env->registers().save(standardRegister, str);

@@ -53,3 +53,6 @@ hello
 [I]
 ```
 
+
+## TODO: Restore cursor position after undo
+... Check vim for how it works

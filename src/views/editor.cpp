@@ -149,10 +149,10 @@ void Editor::clearSelection() {
 CursorRange Editor::selection() {
     if (_mode->isBlockSelection()) {
         if (!_selectionAnchor) {
-            return {home(_cursor), end(_cursor)};
+            return {home(cursor()), end(cursor())};
         }
 
-        auto range = CursorRange{*_selectionAnchor, _cursor};
+        auto range = CursorRange{*_selectionAnchor, cursor()};
         range.beginPosition(home(range.begin()));
         range.endPosition(right(end(range.end())));
         return range;
@@ -202,6 +202,9 @@ void Editor::showLines(bool value) {
 bool Editor::keyPress(std::shared_ptr<IEnvironment> env) {
     if (_mode) {
         if (_mode->keyPress(env)) {
+            if (_mode->isEverythingMajor()) {
+                _bufferView.buffer().history().markMajor();
+            }
             return true;
         }
         else {

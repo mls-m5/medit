@@ -94,4 +94,17 @@ hello[N]
 ```
 
 
+## x
+```
+hell[N-x]o
+----
+hel[N]l
+```
+
+## X - captial x
+```
+hell[N-X]o
+----
+hel[N]o
+```
 
