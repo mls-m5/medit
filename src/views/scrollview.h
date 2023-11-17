@@ -23,7 +23,7 @@ public:
     }
 
     void scroll(size_t x, size_t y) {
-        xScroll(y);
+        xScroll(x);
         yScroll(y);
     }
 
