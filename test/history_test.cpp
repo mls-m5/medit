@@ -14,11 +14,7 @@ TEST_CASE("simple undo") {
     auto buffer = Buffer{testString1};
     auto &history = buffer.history();
 
-    //    history.commit();
-
     buffer.text(testString2);
-
-    //    history.commit();
 
     history.undo();
 

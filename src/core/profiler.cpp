@@ -77,9 +77,6 @@ struct GlobalData {
 
     std::vector<std::shared_ptr<ProfiledData>> threadFrameDatas;
 
-    //    std::vector<DebugFrame> frames;
-    //    std::vector<InstantData> instants;
-
     auto lock() {
         return std::unique_lock{mutex};
     }
