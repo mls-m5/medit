@@ -26,6 +26,7 @@
     STD_DEF(change_word)                                                       \
     STD_DEF(clear_line)                                                        \
     STD_DEF(insert)                                                            \
+    STD_DEF(insert_at_beginning)                                               \
     STD_DEF(split)                                                             \
     STD_DEF(yank)                                                              \
     STD_DEF(yank_block)                                                        \

@@ -440,6 +440,11 @@ StandardCommands create() {
     DEF(insert_mode) {
         env->editor().mode(createInsertMode());
     };
+    DEF(insert_at_beginning) {
+        auto &e = env->editor();
+        e.mode(createInsertMode());
+        e.cursor(firstNonSpaceOnLine(e.cursor()));
+    };
     DEF(normal_mode) {
         env->editor().mode(createNormalMode());
     };

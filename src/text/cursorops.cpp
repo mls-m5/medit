@@ -4,7 +4,7 @@
 #include "cursorrangeops.h"
 #include "text/fstring.h"
 #include "text/utf8char.h"
-#include "views/bufferview.h"
+#include "text/utf8charops.h"
 #include <optional>
 
 namespace {
@@ -494,4 +494,27 @@ Cursor findMatching(Cursor cursor) {
 
 const FString &lineAt(Cursor cursor) {
     return cursor.buffer().lineAt(cursor.y());
+}
+
+Cursor lastNonSpaceOnLine(Cursor cursor) {
+    for (auto cur = cursor; cur != end(cursor); ++cur) {
+        auto c = content(cur);
+        if (!isSpace(c)) {
+            cursor = cur;
+        }
+    }
+
+    return cursor;
+}
+
+Cursor firstNonSpaceOnLine(Cursor cursor) {
+    for (auto cur = home(cursor); cur != end(cursor); ++cur) {
+        auto c = content(cur);
+        cursor = cur;
+        if (!isSpace(c)) {
+            return cursor;
+        }
+    }
+
+    return cursor;
 }

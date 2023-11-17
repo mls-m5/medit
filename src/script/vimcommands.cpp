@@ -40,29 +40,6 @@ std::function<Cursor(Cursor)> combine(Args... args) {
     };
 }
 
-Cursor lastNonSpaceOnLine(Cursor cursor) {
-    for (auto cur = cursor; cur != end(cursor); ++cur) {
-        auto c = content(cur);
-        if (!isSpace(c)) {
-            cursor = cur;
-        }
-    }
-
-    return cursor;
-}
-
-Cursor firstNonSpaceOnLine(Cursor cursor) {
-    for (auto cur = home(cursor); cur != end(cursor); ++cur) {
-        auto c = content(cur);
-        cursor = cur;
-        if (!isSpace(c)) {
-            return cursor;
-        }
-    }
-
-    return cursor;
-}
-
 /// std::less is used to be able to compare with FString
 const static auto map =
     std::map<FString, std::function<Cursor(Cursor)>, std::less<>>{

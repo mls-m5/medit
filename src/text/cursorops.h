@@ -83,3 +83,7 @@ Cursor apply(BufferEdit edit);
 Cursor findMatching(Cursor);
 
 [[nodiscard]] const FString &lineAt(Cursor);
+
+[[nodiscard]] Cursor lastNonSpaceOnLine(Cursor cursor);
+
+[[nodiscard]] Cursor firstNonSpaceOnLine(Cursor cursor);

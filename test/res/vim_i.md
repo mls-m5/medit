@@ -62,7 +62,7 @@ hel[I-<esc>]lo
 he[N]llo
 ```
 
-## TODO: I should move to after indentation
+## I should move to after indentation
 
 ```
     hel[N-I]lo

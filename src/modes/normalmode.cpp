@@ -44,7 +44,7 @@ std::shared_ptr<IMode> createNormalMode() {
             {{"V"}, sc.visual_block_mode},
             {{"u"}, sc.undo_major},
             {{"U"}, sc.redo},
-            {{"I"}, sc.combine(sc.home, sc.insert_mode)},
+            {{"I"}, sc.insert_at_beginning},
             {{"a"}, sc.combine(sc.insert_mode, sc.right)},
             {{"A"}, sc.combine(sc.insert_mode, sc.end)},
             {{"s"}, sc.combine(sc.erase_after, sc.insert_mode)},
