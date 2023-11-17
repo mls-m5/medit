@@ -29,6 +29,7 @@ std::shared_ptr<IMode> createInsertMode() {
 
     mode->cursorStyle(CursorStyle::Beam);
     mode->shouldSelectPlusOne(true);
+    mode->isEverythingMajor(false);
 
     return mode;
 }

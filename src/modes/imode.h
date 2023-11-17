@@ -32,4 +32,8 @@ public:
     /// For example for normal mode you would not want to select past the last
     /// character
     virtual bool shouldSelectPlusOne() const = 0;
+
+    /// True for all modes but for vim-insert mode. If true. Every key press
+    /// triggers a major change mark in the buffers history
+    virtual bool isEverythingMajor() const = 0;
 };

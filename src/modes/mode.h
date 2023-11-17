@@ -22,6 +22,7 @@ class Mode : public IMode, public std::enable_shared_from_this<Mode> {
     bool _shouldEnableNumbers = false;
     int _repetitions = 0;
     bool _shouldSelectPlusOne = false;
+    bool _isEverythingMajor = true;
 
 public:
     Mode(std::string name, KeyMap map, std::shared_ptr<IMode> parent = {});
@@ -97,5 +98,13 @@ public:
 
     void shouldSelectPlusOne(bool value) {
         _shouldSelectPlusOne = value;
+    }
+
+    bool isEverythingMajor() const override {
+        return _isEverythingMajor;
+    }
+
+    void isEverythingMajor(bool value) {
+        _isEverythingMajor = value;
     }
 };
