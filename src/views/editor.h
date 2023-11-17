@@ -43,6 +43,10 @@ public:
 
     Cursor cursor() const;
 
+    /// Cursor that is not fit into buffer. This could be used for example for
+    /// preserving column when moving between lines
+    Cursor virtualCursor() const;
+
     /// Convert from cursor positiono to screen position
     Position cursorPosition(Position editorPos) const;
 

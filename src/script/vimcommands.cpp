@@ -294,7 +294,7 @@ ActionResultT findVimAction(FStringView buffer, VimMode modeName) {
         if (motion.match == vim::Match) {
             auto f = [f = motion.f](std::shared_ptr<IEnvironment> env) {
                 auto &editor = env->editor();
-                auto cursor = editor.cursor();
+                auto cursor = editor.virtualCursor();
                 auto repetitions = editor.mode().repetitions();
                 cursor = f(cursor, repetitions);
                 editor.cursor(cursor);

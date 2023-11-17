@@ -82,7 +82,7 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
     }
 
     _openedBuffers.push_back({_bufferView.buffer().weak_from_this(),
-                              _cursor,
+                              _cursor.pos(),
                               {_bufferView.xScroll(), _bufferView.yScroll()}});
 
     _cursor = Cursor{*buffer};
@@ -92,6 +92,10 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
 
 Cursor Editor::cursor() const {
     return fix(_cursor);
+}
+
+Cursor Editor::virtualCursor() const {
+    return _cursor;
 }
 
 Position Editor::cursorPosition(Position editorPos) const {

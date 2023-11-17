@@ -15,3 +15,15 @@ hello (there y[N])ou
 -----------
 hello (there y[N])ou
 ```
+
+## Preserve cursor position between lines
+
+```
+hell[N-jj]o
+
+hello
+-----------
+hello
+
+hell[N]o
+```

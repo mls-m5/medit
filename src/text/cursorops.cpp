@@ -385,7 +385,7 @@ Cursor up(Cursor cur) {
 
 Cursor down(Cursor cur) {
     cur.y(cur.y() + 1);
-    return fix(cur);
+    return cur;
 }
 
 std::optional<Cursor> matchingLeft(Cursor cursor,
