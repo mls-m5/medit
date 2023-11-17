@@ -196,6 +196,12 @@ StandardCommands create() {
         e.cursor(selection.begin(), true);
     };
 
+    DEF(backspace) {
+        auto &e = env->editor();
+        auto cursor = e.cursor();
+        e.cursor(erase(cursor));
+    };
+
     DEF(erase) {
         auto &e = env->editor();
         auto selection = e.selection();
@@ -207,7 +213,6 @@ StandardCommands create() {
                 if (cursor.x() == 0) {
                     break;
                 }
-                //                cursor = left(cursor);
                 str = std::string{content(left(cursor)).toString()} + str;
                 e.cursor(erase(cursor));
             }

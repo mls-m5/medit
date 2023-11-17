@@ -29,6 +29,50 @@ namespace {
 
 static const auto vimPartCommandRegex = std::regex{R"(\[([A-Z])(\-(.*))?\])"};
 
+std::string replaceSpecialKeys(std::string str) {
+    auto list = std::vector<std::pair<std::string, std::string>>{
+        {"<esc>", "\027"},
+    };
+    for (auto &rep : list) {
+        for (size_t f = 0; ((f = str.find(rep.first)) != std::string::npos);
+             ++f) {
+            str.replace(f, rep.first.size(), rep.second);
+        }
+    }
+    return str;
+}
+
+std::string unescapeCommand(std::string raw) {
+    auto ret = std::string{};
+    bool isEscape = false;
+    for (auto c : raw) {
+        if (c == '\\') {
+            isEscape = true;
+            continue;
+        }
+
+        if (isEscape) {
+            isEscape = false;
+
+            switch (c) {
+            case 'b':
+                c = '\b';
+                break;
+            case 'n':
+                c = '\n';
+                break;
+            case 't':
+                c = '\t';
+                break;
+            }
+        }
+
+        ret.push_back(c);
+    }
+
+    return replaceSpecialKeys(ret);
+}
+
 std::string translateVimMode(char c) {
     switch (c) {
     case 'I':
@@ -99,7 +143,7 @@ struct VimCodePart : public std::string {
         auto match = std::smatch{};
         if (std::regex_search(*this, match, vimPartCommandRegex)) {
 
-            command = match[3];
+            command = unescapeCommand(match[3]);
             mode = match[1];
 
             // TODO: Handle newlines
@@ -213,7 +257,20 @@ std::shared_ptr<MockEnvironment> createMockEnvironment() {
 }
 
 void emulateKeyPress(MockEnvironment &env, char c) {
-    env.mock_key_0.onCall([c]() { return KeyEvent{Key::Text, c}; });
+    auto key = Key::Text;
+
+    switch (c) {
+    case '\b':
+        key = Key::Backspace;
+        c = 0;
+        break;
+    case '\027':
+        key = Key::Escape;
+        c = 0;
+        break;
+    }
+
+    env.mock_key_0.onCall([c, key]() { return KeyEvent{key, c}; });
 }
 
 struct TestSuitVim : public unittest::StaticTestSuit {

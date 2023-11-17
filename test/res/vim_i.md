@@ -54,5 +54,31 @@ hello
 ```
 
 
+## Exit insert -> movement
+
+```
+hel[I-<esc>]lo
+---
+he[N]llo
+```
+
+## TODO: I should move to after indentation
+
+```
+    hel[N-I]lo
+---
+    [I]hello
+```
+
+## Backspace on newline in insert mode
+
+```
+hello
+[I-\b]
+----
+hello[I]
+```
+
+
 ## TODO: Restore cursor position after undo
 ... Check vim for how it works

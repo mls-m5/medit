@@ -336,10 +336,6 @@ bool MainWindow::mouseDown(int x, int y) {
             return true;
         }
     }
-    //    if (auto e = currentEditor()) {
-    //        e->mouseDown(x, y);
-    //        return true;
-    //    }
     return false;
 }
 

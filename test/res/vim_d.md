@@ -108,3 +108,13 @@ hell[N-X]o
 hel[N]o
 ```
 
+```
+hello
+[N-X]
+----
+hello
+[N]
+```
+
+
+

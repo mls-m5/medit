@@ -29,6 +29,7 @@
     STD_DEF(split)                                                             \
     STD_DEF(yank)                                                              \
     STD_DEF(yank_block)                                                        \
+    STD_DEF(backspace)                                                         \
     STD_DEF(erase)                                                             \
     STD_DEF(erase_after)                                                       \
     STD_DEF(erase_before_word)                                                 \

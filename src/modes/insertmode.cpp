@@ -4,6 +4,8 @@
 #include "modes/parentmode.h"
 #include "screen/cursorstyle.h"
 #include "script/standardcommands.h"
+#include "text/cursorops.h"
+#include "views/editor.h"
 
 std::shared_ptr<IMode> createInsertMode() {
     using Ptr = StandardCommands::EnvPtrT;
@@ -14,7 +16,7 @@ std::shared_ptr<IMode> createInsertMode() {
         {{Key::Right}, {sc.right}},
         {{Key::Down}, {sc.down}},
         {{Key::Up}, {sc.up}},
-        {{Key::Backspace}, {sc.erase}},
+        {{Key::Backspace}, {sc.backspace}},
         {{Key::Delete}, {sc.combine(sc.right, sc.erase)}},
         {{Key::Escape}, {sc.normal_mode}},
         {KeyEvent{Key::KeyCombination, '\b', Modifiers::Ctrl},
@@ -30,6 +32,8 @@ std::shared_ptr<IMode> createInsertMode() {
     mode->cursorStyle(CursorStyle::Beam);
     mode->shouldSelectPlusOne(true);
     mode->isEverythingMajor(false);
+    mode->exitCallback(
+        [](Editor &editor) { editor.cursor(left(editor.cursor(), false)); });
 
     return mode;
 }
