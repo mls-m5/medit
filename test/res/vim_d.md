@@ -15,7 +15,7 @@ Special cases on line breaks
 hello [N-dw]there
 other
 ----
-hello [N]
+hello[N] 
 other
 ```
 
@@ -23,7 +23,7 @@ other
 hello [N-2dw]there
 other
 ----
-hello [N]
+hello[N] 
 ```
 
 
@@ -83,14 +83,14 @@ hello [N]ou
 ```
 hello [N-D]there you
 ----
-hello [N]
+hello[N] 
 ```
 
 ```
 hello [N-2D]there you
 another line that should be removed
 ----
-hello [N]
+hello[N] 
 ```
 
 

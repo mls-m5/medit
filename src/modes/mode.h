@@ -21,6 +21,7 @@ class Mode : public IMode, public std::enable_shared_from_this<Mode> {
     bool _isBlockSelection = false;
     bool _shouldEnableNumbers = false;
     int _repetitions = 0;
+    bool _shouldSelectPlusOne = false;
 
 public:
     Mode(std::string name, KeyMap map, std::shared_ptr<IMode> parent = {});
@@ -88,5 +89,13 @@ public:
     void clearBuffer() {
         _buffer.clear();
         _repetitions = 0;
+    }
+
+    bool shouldSelectPlusOne() const override {
+        return _shouldSelectPlusOne;
+    }
+
+    void shouldSelectPlusOne(bool value) {
+        _shouldSelectPlusOne = value;
     }
 };

@@ -43,3 +43,13 @@ This is _without_ a end brace
         [I]
     }
 ```
+
+## o
+
+```
+[N-o]hello
+---
+hello
+[I]
+```
+

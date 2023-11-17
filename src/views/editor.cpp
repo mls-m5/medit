@@ -91,7 +91,17 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
 }
 
 Cursor Editor::cursor() const {
-    return fix(_cursor);
+    auto cur = fix(_cursor);
+    if (_mode->shouldSelectPlusOne()) {
+        return cur;
+    }
+
+    if (cur.x() == 0) {
+        return cur;
+    }
+
+    cur.x(std::min(cur.x(), lineAt(cur).size() - 1));
+    return cur;
 }
 
 Cursor Editor::virtualCursor() const {
@@ -168,6 +178,11 @@ void Editor::selection(CursorRange range) {
 }
 
 void Editor::mode(std::shared_ptr<IMode> mode) {
+    // This seems silly, but it is required when for example switching from
+    // normal mode so that the virtual cursor position matches up with the
+    // actual cursor position
+    cursor(cursor());
+
     if (_mode) {
         _mode->exit(*this);
     }
@@ -215,7 +230,7 @@ void Editor::updateCursor(IScreen &screen) const {
 
     // Make the cursor appear as it is on the line but can stay on same x
     // position between longer lines
-    auto tmpCursor = fix(_cursor);
+    auto tmpCursor = cursor(); // fix(_cursor);
 
     screen.cursor(_bufferView.x() + _bufferView.numberWidth() + tmpCursor.x() -
                       _bufferView.xScroll(),

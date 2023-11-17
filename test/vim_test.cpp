@@ -207,7 +207,7 @@ std::shared_ptr<MockEnvironment> createMockEnvironment() {
 
     env->mock_standardCommands_0.returnValueRef(StandardCommands::get());
     env->mock_statusMessage_1.onCall(
-        [](auto msg) { std::cout << msg << "\n"; });
+        [](auto msg) { std::cout << "status message: " << msg << "\n"; });
 
     return env;
 }
@@ -246,24 +246,28 @@ struct TestSuitVim : public unittest::StaticTestSuit {
 
                     env->mock_editor_0.returnValueRef(editor);
 
-                    std::cout << "code:\n";
-
                     auto result = std::string{};
                     auto previous = std::string{};
 
                     for (auto &part : test) {
-                        std::cout << "raw: \n'''" << part.input << "'''\n";
-                        std::cout << "part:\n'''" << part << "'''\n";
-                        std::cout << "command: " << part.command << "\n";
-                        std::cout << "mode: " << part.mode << "\n";
-                        std::cout << "pos: " << part.position.x() << ", "
-                                  << part.position.y() << "\n";
+                        if (false) {
+                            std::cout << "raw: \n'''" << part.input << "'''\n";
+                            std::cout << "part:\n'''" << part << "'''\n";
+                            std::cout << "command: " << part.command << "\n";
+                            std::cout << "mode: " << part.mode << "\n";
+                            std::cout << "pos: " << part.position.x() << ", "
+                                      << part.position.y() << "\n";
+                        }
 
                         if (!result.empty()) {
-                            std::cout << "resulting text from previous:\n'''";
-                            std::cout << result << "'''" << std::endl;
-                            std::cout << "resulting pos: " << editor.cursor()
-                                      << std::endl;
+                            if (false) {
+                                std::cout
+                                    << "resulting text from previous:\n'''";
+                                std::cout << result << "'''" << std::endl;
+                                std::cout
+                                    << "resulting pos: " << editor.cursor()
+                                    << std::endl;
+                            }
 
                             auto diff = diffText(previous, result);
 

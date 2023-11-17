@@ -5,7 +5,7 @@
 ```
 hello [N-cw]there
 ----
-hello [I]
+hello[I] 
 ```
 
 This is tricky since it's differs from dw in vim.

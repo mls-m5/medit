@@ -267,6 +267,22 @@ StandardCommands create() {
         erase({cursor, end});
     };
 
+    DEF(change_until_end_of_line) {
+        auto &e = env->editor();
+        auto cursor = e.cursor();
+        auto end = cursor;
+
+        REPEAT_M1 {
+            end.y(end.y() + 1);
+        }
+
+        env->standardCommands().insert_mode(env);
+
+        end = ::end(end);
+        env->registers().save(standardRegister, toString({cursor, end}));
+        erase({cursor, end});
+    };
+
     DEF(delete_word) {
         auto &e = env->editor();
         auto cursor = e.cursor();

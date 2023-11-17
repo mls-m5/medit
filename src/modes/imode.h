@@ -28,4 +28,8 @@ public:
 
     virtual const struct FString &buffer() const = 0;
     virtual int repetitions() const = 0;
+
+    /// For example for normal mode you would not want to select past the last
+    /// character
+    virtual bool shouldSelectPlusOne() const = 0;
 };

@@ -28,6 +28,7 @@ std::shared_ptr<IMode> createInsertMode() {
         std::make_shared<Mode>("insert", std::move(map), createParentMode());
 
     mode->cursorStyle(CursorStyle::Beam);
+    mode->shouldSelectPlusOne(true);
 
     return mode;
 }

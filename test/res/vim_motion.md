@@ -16,6 +16,16 @@ hello (there y[N])ou
 hello (there y[N])ou
 ```
 
+
+
+## Normal mod cursor should not move past last character
+
+```
+hell[N-l]o
+-----------
+hell[N]o
+```
+
 ## Preserve cursor position between lines
 
 ```
