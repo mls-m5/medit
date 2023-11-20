@@ -97,8 +97,10 @@ void internalBeginFileViewInteraction(std::shared_ptr<IEnvironment> env,
         root = std::filesystem::current_path();
     }
 
-    auto addFile = [&](std::filesystem::path file, std::filesystem::path root) {
-        if (hideHiddenFiles && file.has_filename() &&
+    auto addFile = [&](std::filesystem::path file,
+                       std::filesystem::path root,
+                       bool isProjectFile) {
+        if (!isProjectFile && hideHiddenFiles && file.has_filename() &&
             file.filename().string().starts_with(".")) {
             return;
         }
@@ -117,7 +119,7 @@ void internalBeginFileViewInteraction(std::shared_ptr<IEnvironment> env,
     };
 
     for (auto &file : env->project().files()) {
-        addFile(file, root);
+        addFile(file, root, true);
     }
 
     // If project had no files. Just brows the current directory
@@ -131,7 +133,7 @@ void internalBeginFileViewInteraction(std::shared_ptr<IEnvironment> env,
         ++currentLine;
         for (auto &it : std::filesystem::directory_iterator{
                  std::filesystem::absolute(root)}) {
-            addFile(it.path(), root);
+            addFile(it.path(), root, false);
         }
     }
 
