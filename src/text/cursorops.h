@@ -59,7 +59,7 @@ Cursor fixBraceIndentation(Cursor);
 
 Utf8Char content(Cursor);
 
-//! For autocompleteon find the first character of the word to be completed
+//! For autocompletion find the first character of the word to be completed
 Cursor autocompleteWordBegin(const Cursor cursor);
 
 Cursor apply(BufferEdit edit);

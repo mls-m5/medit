@@ -1,12 +1,13 @@
 #pragma once
 
+#include "logtype.h"
 #include <functional>
 #include <sstream>
 #include <string_view>
 
 namespace impl {
 
-void logInternal(std::string text);
+void logInternal(LogType, std::string text);
 
 }
 
@@ -18,8 +19,26 @@ void logInfo(Args... args) {
 
     (ss << ... << args);
 
-    impl::logInternal(std::move(ss).str());
+    impl::logInternal(LogType::ConsoleInfo, std::move(ss).str());
 }
 
-void subscribeToLog(std::function<void(std::string_view)> callback);
+template <typename... Args>
+void logError(Args... args) {
+    auto ss = std::ostringstream{};
+
+    (ss << ... << args);
+
+    impl::logInternal(LogType::Error, std::move(ss).str());
+}
+
+template <typename... Args>
+void logStatusMessage(Args... args) {
+    auto ss = std::ostringstream{};
+
+    (ss << ... << args);
+
+    impl::logInternal(LogType::StatusMessage, std::move(ss).str());
+}
+
+void subscribeToLog(std::function<void(LogType, std::string_view)> callback);
 void unsubscribeToLog();

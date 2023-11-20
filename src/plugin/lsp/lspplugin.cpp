@@ -2,6 +2,7 @@
 #include "core/context.h"
 #include "core/coreenvironment.h"
 #include "core/ijobqueue.h"
+#include "core/logtype.h"
 #include "core/plugins.h"
 #include "core/profiler.h"
 #include "files/project.h"
@@ -127,7 +128,7 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
 
     client->subscribe(
         std::function{[this, parent](const ShowMessageParams &params) {
-            parent->_core->printToAllConsoles(params.message);
+            parent->_core->printToAllLogs(LogType::ConsoleInfo, params.message);
         }});
 
     client->callback([](auto j) {
@@ -339,7 +340,7 @@ void LspPlugin::requestSemanticsToken(std::shared_ptr<Buffer> buffer,
             auto ss = std::ostringstream{};
             ss << "Lsp error: " << getErrorCodeName(error.code) << ": ";
             ss << error.message << std::endl;
-            _core->printToAllConsoles(ss.str());
+            _core->printToAllLogs(LogType::Error, ss.str());
         });
 }
 

@@ -2,6 +2,7 @@
 
 #include "core/context.h"
 #include "core/fifofilelistener.h"
+#include "core/logtype.h"
 #include "core/plugins.h"
 #include "files.h"
 #include "files/uniquefile.h"
@@ -36,14 +37,12 @@ public:
 
     Project &project();
 
-    void subscribeToConsoleCallback(std::function<void(std::string)> f,
-                                    void *ref) {
-        _consoleCallback.push_back({f, ref});
-    }
+    void subscribeToLogCallback(
+        std::function<void(LogType type, std::string)> f, void *ref);
 
     void unsubscribeToConsoleCallback(void *ref);
 
-    void printToAllConsoles(std::string text);
+    void printToAllLogs(LogType, std::string text);
 
 private:
     ThreadContext *_context =
@@ -59,6 +58,6 @@ private:
     /// handled this way
     UniqueFile _consoleTtyPath;
     FifoFileListener _consoleInFile;
-    std::vector<std::pair<std::function<void(std::string)>, void *>>
+    std::vector<std::pair<std::function<void(LogType, std::string)>, void *>>
         _consoleCallback;
 };

@@ -49,5 +49,5 @@ void AutoComplete::populate(std::shared_ptr<IEnvironment> env,
     }
 
     env->statusMessage(
-        FString{"no completeon source active for the current document"});
+        FString{"no completion source active for the current document"});
 }

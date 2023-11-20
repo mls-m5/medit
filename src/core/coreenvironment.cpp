@@ -1,5 +1,6 @@
 #include "coreenvironment.h"
 #include "core/fifofile.h"
+#include "core/logtype.h"
 #include "core/meditlog.h"
 #include "files/config.h"
 #include "files/project.h"
@@ -17,8 +18,9 @@ CoreEnvironment::CoreEnvironment(ThreadContext &context)
     , _project{std::make_unique<Project>(files().directoryNotifications(),
                                          context.guiQueue())}
     , _consoleTtyPath{createFifo(standardConsoleTtyPipePath())}
-    , _consoleInFile{_consoleTtyPath,
-                     [this](std::string data) { printToAllConsoles(data); }} {
+    , _consoleInFile{_consoleTtyPath, [this](std::string data) {
+                         printToAllLogs(LogType::ConsoleInfo, data);
+                     }} {
     cleanUpLocalPipes();
 
     std::ofstream{_consoleTtyPath.path()}
@@ -26,8 +28,9 @@ CoreEnvironment::CoreEnvironment(ThreadContext &context)
 
     _project->updateCache(std::filesystem::current_path());
 
-    subscribeToLog(
-        [this](std::string_view str) { printToAllConsoles(std::string{str}); });
+    subscribeToLog([this](LogType type, std::string_view str) {
+        printToAllLogs(type, std::string{str});
+    });
 }
 
 CoreEnvironment::~CoreEnvironment() {
@@ -57,6 +60,11 @@ Project &CoreEnvironment::project() {
     return *_project;
 }
 
+void CoreEnvironment::subscribeToLogCallback(
+    std::function<void(LogType, std::string)> f, void *ref) {
+    _consoleCallback.push_back({f, ref});
+}
+
 void CoreEnvironment::unsubscribeToConsoleCallback(void *ref) {
     auto it = std::remove_if(_consoleCallback.begin(),
                              _consoleCallback.end(),
@@ -65,10 +73,10 @@ void CoreEnvironment::unsubscribeToConsoleCallback(void *ref) {
     _consoleCallback.erase(it, _consoleCallback.end());
 }
 
-void CoreEnvironment::printToAllConsoles(std::string text) {
+void CoreEnvironment::printToAllLogs(LogType type, std::string text) {
     for (auto &cb : _consoleCallback) {
         if (cb.first) {
-            cb.first(text);
+            cb.first(type, text);
         }
     }
 }

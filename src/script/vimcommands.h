@@ -60,6 +60,7 @@ VimCommandType getType(VimMode modeName, FStringView &buffer);
 struct VimMotionResult {
     vim::MatchType match;
     std::function<Cursor(Cursor, int)> f;
+    bool shouldFitCursor = false;
 
     operator bool const() {
         return match == vim::MatchType::Match && f;

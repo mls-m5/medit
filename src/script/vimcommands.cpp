@@ -1,5 +1,4 @@
 #include "script/vimcommands.h"
-#include "meditfwd.h"
 #include "modes/insertmode.h"
 #include "modes/normalmode.h"
 #include "modes/visualmode.h"
@@ -11,7 +10,6 @@
 #include "text/fstring.h"
 #include "text/fstringview.h"
 #include "text/utf8char.h"
-#include "text/utf8charops.h"
 #include "views/editor.h"
 #include <array>
 #include <memory>
@@ -20,6 +18,22 @@
 #include <string>
 
 namespace {
+
+struct MotionCommand {
+    using FT = std::function<Cursor(Cursor)>;
+    FT f;
+    bool shouldFitCursor = false;
+
+    MotionCommand() = default;
+    MotionCommand(const MotionCommand &) = default;
+    MotionCommand(MotionCommand &&) = default;
+    MotionCommand &operator=(const MotionCommand &) = default;
+    MotionCommand &operator=(MotionCommand &&) = default;
+    ~MotionCommand() = default;
+
+    MotionCommand(FT f)
+        : f{f} {}
+};
 
 // Wrapper functions for handling functions with default arguments
 template <typename F, typename... Args>
@@ -40,25 +54,43 @@ std::function<Cursor(Cursor)> combine(Args... args) {
     };
 }
 
+///// std::less is used to be able to compare with FString
+// const static auto map = std::map<FString, MotionCommand, std::less<>>{
+//     {"h", wrap(left, false)},
+//     {"l", wrap(right, false)},
+//     {"j", down},
+//     {"k", up},
+//     {"b", combine(wrap(left, true), wordBegin)},
+//     {"w", wrap(nextWord, true)},
+//     {"e", combine(wrap(right, true), wordEnd)},
+//     {"b", wordBegin},
+//     {"0", home},
+//     {"$", end},
+//     {"^", firstNonSpaceOnLine},
+//     {"g_", lastNonSpaceOnLine},
+//     {"gg", [](Cursor c) { return c.buffer().begin(); }},
+//     {"G", [](Cursor c) { return c.buffer().end(); }},
+//     {"%", findMatching},
+// };
+
 /// std::less is used to be able to compare with FString
-const static auto map =
-    std::map<FString, std::function<Cursor(Cursor)>, std::less<>>{
-        {"h", wrap(left, false)},
-        {"l", wrap(right, false)},
-        {"j", down},
-        {"k", up},
-        {"b", combine(wrap(left, true), wordBegin)},
-        {"w", wrap(nextWord, true)},
-        {"e", combine(wrap(right, true), wordEnd)},
-        {"b", wordBegin},
-        {"0", home},
-        {"$", end},
-        {"^", firstNonSpaceOnLine},
-        {"g_", lastNonSpaceOnLine},
-        {"gg", [](Cursor c) { return c.buffer().begin(); }},
-        {"G", [](Cursor c) { return c.buffer().end(); }},
-        {"%", findMatching},
-    };
+const static auto map = std::map<FString, MotionCommand, std::less<>>{
+    {"h", {wrap(left, false)}},
+    {"l", {wrap(right, false)}},
+    {"j", {down}},
+    {"k", {up}},
+    {"b", {combine(wrap(left, true), wordBegin)}},
+    {"w", {wrap(nextWord, true)}},
+    {"e", {combine(wrap(right, true), wordEnd)}},
+    {"b", {wordBegin}},
+    {"0", {home}},
+    {"$", {end}},
+    {"^", {firstNonSpaceOnLine}},
+    {"g_", {lastNonSpaceOnLine}},
+    {"gg", {[](Cursor c) { return c.buffer().begin(); }}},
+    {"G", {[](Cursor c) { return c.buffer().end(); }}},
+    {"%", {findMatching}},
+};
 
 CursorRange vimInner(char c, Cursor cursor) {
     const auto matchingChar = ::vim::matching(c);
@@ -181,7 +213,7 @@ VimMotionResult getMotion(FStringView buffer, VimCommandType type) {
     if (auto single = map.find(buffer); single != map.end()) {
         auto f = [single = single->second](Cursor cur, int num) {
             for (int i = 0; i < num; ++i) {
-                cur = single(cur);
+                cur = single.f(cur);
             }
             return cur;
         };
@@ -189,6 +221,7 @@ VimMotionResult getMotion(FStringView buffer, VimCommandType type) {
         return {
             .match = vim::Match,
             .f = f,
+            .shouldFitCursor = single->second.shouldFitCursor,
         };
     }
 
@@ -269,8 +302,12 @@ ActionResultT findVimAction(FStringView buffer, VimMode modeName) {
     {
         auto motion = getMotion(buffer, VimCommandType::Motion);
         if (motion.match == vim::Match) {
-            auto f = [f = motion.f](std::shared_ptr<IEnvironment> env) {
+            auto f = [f = motion.f, shouldFitCursor = motion.shouldFitCursor](
+                         std::shared_ptr<IEnvironment> env) {
                 auto &editor = env->editor();
+                if (shouldFitCursor) {
+                    editor.cursor(editor.cursor());
+                }
                 auto cursor = editor.virtualCursor();
                 auto repetitions = editor.mode().repetitions();
                 cursor = f(cursor, repetitions);

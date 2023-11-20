@@ -5,6 +5,7 @@
 #include "core/coreenvironment.h"
 #include "core/ijobqueue.h"
 #include "core/itimer.h"
+#include "core/logtype.h"
 #include "core/plugins.h"
 #include "files/config.h"
 #include "modes/insertmode.h"
@@ -47,15 +48,22 @@ MainWindow::MainWindow(CoreEnvironment &core,
     }
     _console.showLines(false);
     _env->console(&_console);
-    _env->core().subscribeToConsoleCallback(
-        [this](std::string data) {
-            _env->context().guiQueue().addTask([this, data = std::move(data)] {
-                showConsole();
-                _console.buffer().pushBack(FString{data});
-                _console.cursor(Cursor(_console.buffer(),
-                                       0,
-                                       _console.buffer().lines().size() - 1));
-            });
+    _env->core().subscribeToLogCallback(
+        [this](LogType type, std::string data) {
+            _env->context().guiQueue().addTask(
+                [this, data = std::move(data), type] {
+                    if (type == LogType::StatusMessage) {
+                        _env->statusMessage(FString{data});
+                    }
+                    else {
+                        showConsole();
+                        _console.buffer().pushBack(FString{data});
+                        _console.cursor(
+                            Cursor(_console.buffer(),
+                                   0,
+                                   _console.buffer().lines().size() - 1));
+                    }
+                });
         },
         this);
 

@@ -12,20 +12,20 @@ private:
     std::string currentString;
 
 protected:
-    virtual int_type overflow(int_type ch) override {
+    int_type overflow(int_type ch) override {
         if (ch != traits_type::eof()) {
-            currentString += ch;
+            currentString += static_cast<char>(ch);
             if (ch == '\n') {
-                impl::logInternal(currentString);
+                impl::logInternal(LogType::ConsoleInfo, currentString);
                 currentString.clear();
             }
         }
         return ch;
     }
 
-    virtual int sync() override {
+    int sync() override {
         if (!currentString.empty()) {
-            impl::logInternal(currentString);
+            impl::logInternal(LogType::ConsoleInfo, currentString);
             currentString.clear();
         }
         return 0;
@@ -35,7 +35,7 @@ public:
     CustomStreamBuf() {}
     ~CustomStreamBuf() override {
         // Ensure everything is flushed
-        sync();
+        CustomStreamBuf::sync();
     }
 };
 
@@ -46,20 +46,20 @@ public:
         while (!loggedText.empty()) {
             auto lock = std::unique_lock{_mutex};
 
-            std::cout << loggedText.front() << "\n";
+            std::cout << loggedText.front().second << "\n";
             loggedText.pop();
         }
     }
 
-    void log(std::string text) {
+    void log(LogType type, std::string text) {
         auto lock = std::unique_lock{_mutex};
 
         if (!_callback) {
-            loggedText.push(std::move(text));
+            loggedText.push({type, std::move(text)});
             return;
         }
 
-        _callback(text);
+        _callback(type, text);
     }
 
     static MeditLog &instance() {
@@ -67,16 +67,16 @@ public:
         return log;
     }
 
-    std::queue<std::string> loggedText;
+    std::queue<std::pair<LogType, std::string>> loggedText;
 
-    void subscribe(std::function<void(std::string_view)> callback) {
+    void subscribe(std::function<void(LogType, std::string_view)> callback) {
         _callback = callback;
 
         // Flush the cached text
         while (!loggedText.empty()) {
             auto lock = std::unique_lock{_mutex};
 
-            _callback(loggedText.front());
+            _callback(loggedText.front().first, loggedText.front().second);
             loggedText.pop();
         }
     }
@@ -85,7 +85,7 @@ public:
         _callback = {};
     }
 
-    std::function<void(std::string_view)> _callback;
+    std::function<void(LogType, std::string_view)> _callback;
     std::mutex _mutex;
 
     CustomStreamBuf buf;
@@ -94,11 +94,11 @@ public:
 
 } // namespace
 
-void impl::logInternal(std::string text) {
-    MeditLog::instance().log(std::move(text));
+void impl::logInternal(LogType type, std::string text) {
+    MeditLog::instance().log(type, std::move(text));
 }
 
-void subscribeToLog(std::function<void(std::string_view)> callback) {
+void subscribeToLog(std::function<void(LogType, std::string_view)> callback) {
     auto &instance = MeditLog::instance();
     instance.originalBuf = std::cout.rdbuf();
     std::cout.rdbuf(&instance.buf);
