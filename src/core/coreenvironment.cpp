@@ -19,7 +19,7 @@ CoreEnvironment::CoreEnvironment(ThreadContext &context)
                                          context.guiQueue())}
     , _consoleTtyPath{createFifo(standardConsoleTtyPipePath())}
     , _consoleInFile{_consoleTtyPath, [this](std::string data) {
-                         printToAllLogs(LogType::ConsoleInfo, data);
+                         printToAllLogs(LogType::Info, data);
                      }} {
     cleanUpLocalPipes();
 

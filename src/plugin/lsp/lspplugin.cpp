@@ -128,7 +128,7 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
 
     client->subscribe(
         std::function{[this, parent](const ShowMessageParams &params) {
-            parent->_core->printToAllLogs(LogType::ConsoleInfo, params.message);
+            parent->_core->printToAllLogs(LogType::Info, params.message);
         }});
 
     client->callback([](auto j) {

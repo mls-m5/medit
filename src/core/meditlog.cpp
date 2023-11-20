@@ -1,4 +1,5 @@
 #include "meditlog.h"
+#include "core/logtype.h"
 #include <iostream>
 #include <mutex>
 #include <queue>
@@ -16,7 +17,7 @@ protected:
         if (ch != traits_type::eof()) {
             currentString += static_cast<char>(ch);
             if (ch == '\n') {
-                impl::logInternal(LogType::ConsoleInfo, currentString);
+                impl::logInternal(LogType::Info, currentString);
                 currentString.clear();
             }
         }
@@ -25,7 +26,7 @@ protected:
 
     int sync() override {
         if (!currentString.empty()) {
-            impl::logInternal(LogType::ConsoleInfo, currentString);
+            impl::logInternal(LogType::Info, currentString);
             currentString.clear();
         }
         return 0;
@@ -95,6 +96,13 @@ public:
 } // namespace
 
 void impl::logInternal(LogType type, std::string text) {
+    if (type == LogType::StatusMessage) {
+        for (auto &c : text) {
+            if (c == '\n') {
+                c = ' ';
+            }
+        }
+    }
     MeditLog::instance().log(type, std::move(text));
 }
 

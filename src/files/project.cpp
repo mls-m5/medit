@@ -1,11 +1,13 @@
 
 #include "project.h"
 #include "core/ijobqueue.h"
+#include "core/meditlog.h"
 #include "files/directorynotifications.h"
 #include "files/extensions.h"
 #include "text/startswith.h"
 #include "json/json.h"
 #include <algorithm>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -56,10 +58,6 @@ Project::Project(DirectoryNotifications &directoryNotifications,
 
 std::filesystem::path Project::findRoot(std::filesystem::path arg) const {
     _tv();
-
-    //    if (std::filesystem::is_directory(arg)) {
-    //        return arg;
-    //    }
 
     auto path = std::filesystem::absolute(arg);
 
@@ -237,7 +235,8 @@ void Project::loadProjectFile() {
     try {
         std::fstream(projectFile) >> json;
     }
-    catch (Json::ParsingError &) {
+    catch (Json::ParsingError &error) {
+        logStatusMessage(error.what());
     }
 
     if (auto it = json.find("build"); it != json.end()) {

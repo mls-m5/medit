@@ -2,6 +2,6 @@
 
 enum class LogType {
     StatusMessage,
-    ConsoleInfo,
+    Info,
     Error,
 };

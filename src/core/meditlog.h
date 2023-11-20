@@ -14,30 +14,27 @@ void logInternal(LogType, std::string text);
 // TODO: Maybe log with formatted text?
 
 template <typename... Args>
-void logInfo(Args... args) {
+void log(LogType type, const Args &...args) {
     auto ss = std::ostringstream{};
 
     (ss << ... << args);
 
-    impl::logInternal(LogType::ConsoleInfo, std::move(ss).str());
+    impl::logInternal(type, std::move(ss).str());
 }
 
 template <typename... Args>
-void logError(Args... args) {
-    auto ss = std::ostringstream{};
-
-    (ss << ... << args);
-
-    impl::logInternal(LogType::Error, std::move(ss).str());
+void logInfo(const Args &...args) {
+    log(LogType::Info, args...);
 }
 
 template <typename... Args>
-void logStatusMessage(Args... args) {
-    auto ss = std::ostringstream{};
+void logError(const Args &...args) {
+    log(LogType::Error, args...);
+}
 
-    (ss << ... << args);
-
-    impl::logInternal(LogType::StatusMessage, std::move(ss).str());
+template <typename... Args>
+void logStatusMessage(const Args &...args) {
+    log(LogType::StatusMessage, args...);
 }
 
 void subscribeToLog(std::function<void(LogType, std::string_view)> callback);
