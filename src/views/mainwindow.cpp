@@ -12,6 +12,7 @@
 #include "navigation/inavigation.h"
 #include "screen/iscreen.h"
 #include "script/localenvironment.h"
+#include "syntax/basichighligting.h"
 #include "syntax/iformat.h"
 #include "syntax/palette.h"
 #include "text/cursorops.h"
@@ -285,6 +286,9 @@ void MainWindow::open(std::filesystem::path path,
     }
 
     _env->core().files().updateHighlighting();
+
+    // Do a basic (and fast) highlighting before the lsp highligting kicks in
+    BasicHighlighting::highlightStatic(editor->buffer());
 
     updateTitle();
 }
