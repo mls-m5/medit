@@ -38,6 +38,10 @@ std::string getGoLspCommand() {
     return "gopls";
 }
 
+std::string getRustLspCommand() {
+    return "rust-analyzer";
+}
+
 } // namespace
 
 std::optional<LspConfiguration> LspConfiguration::getConfiguration(

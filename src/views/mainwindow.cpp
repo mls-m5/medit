@@ -58,6 +58,8 @@ MainWindow::MainWindow(CoreEnvironment &core,
                     }
                     else {
                         showConsole();
+                        // TODO: Create some nice formatting for errors and add
+                        // that. The current is unusable
                         _console.buffer().pushBack(FString{data});
                         _console.cursor(
                             Cursor(_console.buffer(),
