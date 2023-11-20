@@ -10,7 +10,6 @@
 #include <array>
 #include <cctype>
 #include <filesystem>
-#include <iostream>
 #include <locale>
 #include <string>
 #include <string_view>
@@ -431,7 +430,6 @@ bool BasicHighlighting::highlightStatic(Buffer &buffer) {
                 size_t end = x;
 
                 auto range = CursorRange{buffer, {begin, y}, {end, y}};
-                //                std::cout << "string: " << range << std::endl;
                 format(range, Palette::string);
             }
         }

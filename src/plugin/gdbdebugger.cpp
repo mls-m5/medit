@@ -11,7 +11,8 @@
 
 GdbDebugger::GdbDebugger()
     : _connection{"gdb --interpreter=mi3",
-                  [this](std::istream &in) { inputThread(in); }} {}
+                  [this](std::istream &in) { inputThread(in); },
+                  [this]() { gdbExitedUnexpected(); }} {}
 
 bool GdbDebugger::doesSupport(std::filesystem::path extension) {
     return extension == ".cpp" || extension == ".go";
@@ -201,6 +202,12 @@ void GdbDebugger::changeState(DebuggerState state) {
     if (_callback) {
         _callback(state);
     }
+}
+
+void GdbDebugger::gdbExitedUnexpected() {
+    _gdbStatusCallback("gdb exited");
+    _isRunning = false;
+    // TODO: Make sure that this works
 }
 
 void GdbDebugger::inputThread(std::istream &in) {

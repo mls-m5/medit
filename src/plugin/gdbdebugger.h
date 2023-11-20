@@ -61,6 +61,8 @@ private:
 
     void changeState(DebuggerState state);
 
+    void gdbExitedUnexpected();
+
     std::function<void(DebuggerState state)> _callback;
     std::function<void(std::string_view)> _applicationOutputCallback;
     std::function<void(std::string_view)> _debuggerOutputCallback;

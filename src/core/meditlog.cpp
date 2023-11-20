@@ -11,13 +11,14 @@ namespace {
 class CustomStreamBuf : public std::streambuf {
 private:
     std::string currentString;
+    LogType type;
 
 protected:
     int_type overflow(int_type ch) override {
         if (ch != traits_type::eof()) {
             currentString += static_cast<char>(ch);
             if (ch == '\n') {
-                impl::logInternal(LogType::Info, currentString);
+                impl::logInternal(type, currentString);
                 currentString.clear();
             }
         }
@@ -26,14 +27,15 @@ protected:
 
     int sync() override {
         if (!currentString.empty()) {
-            impl::logInternal(LogType::Info, currentString);
+            impl::logInternal(type, currentString);
             currentString.clear();
         }
         return 0;
     }
 
 public:
-    CustomStreamBuf() {}
+    CustomStreamBuf(LogType type)
+        : type{type} {};
     ~CustomStreamBuf() override {
         // Ensure everything is flushed
         CustomStreamBuf::sync();
@@ -89,8 +91,10 @@ public:
     std::function<void(LogType, std::string_view)> _callback;
     std::mutex _mutex;
 
-    CustomStreamBuf buf;
+    CustomStreamBuf buf{LogType::Info};
+    CustomStreamBuf errorBuf{LogType::Error};
     std::streambuf *originalBuf = nullptr;
+    std::streambuf *originalErrorBuf = nullptr;
 };
 
 } // namespace
@@ -110,6 +114,8 @@ void subscribeToLog(std::function<void(LogType, std::string_view)> callback) {
     auto &instance = MeditLog::instance();
     instance.originalBuf = std::cout.rdbuf();
     std::cout.rdbuf(&instance.buf);
+    instance.originalErrorBuf = std::cerr.rdbuf();
+    std::cerr.rdbuf(&instance.errorBuf);
     instance.subscribe(callback);
 }
 
@@ -118,5 +124,8 @@ void unsubscribeToLog() {
     instance.unsubscribe();
     if (instance.originalBuf) {
         std::cout.rdbuf(instance.originalBuf);
+    }
+    if (instance.originalErrorBuf) {
+        std::cerr.rdbuf(instance.originalErrorBuf);
     }
 }

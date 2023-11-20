@@ -3,6 +3,7 @@
 #include "core/coreenvironment.h"
 #include "core/ijobqueue.h"
 #include "core/logtype.h"
+#include "core/meditlog.h"
 #include "core/plugins.h"
 #include "core/profiler.h"
 #include "files/project.h"
@@ -77,7 +78,7 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
     : _config{std::move(config)} {
     client = std::make_unique<LspClient>(_config.command);
 
-    auto initializedPromise = std::promise<void>{};
+    auto initializedPromise = std::promise<bool>{};
     auto initializedFuture = initializedPromise.get_future();
 
     auto rootPath = parent->_core->project().settings().root;
@@ -89,13 +90,16 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
         [&initializedPromise](const nlohmann::json &j) {
             //            std::cout << "initialization response:\n";
             //            std::cout << std::setw(2) << j << std::endl;
-            initializedPromise.set_value();
+            initializedPromise.set_value(true);
         },
         [&initializedPromise](auto &&j) {
             std::cerr << "error\n";
             std::cerr << j << "\n";
-            initializedPromise.set_value();
+            initializedPromise.set_value(false);
         });
+
+    client->unexpectedShutdownCallback(
+        [&] { initializedPromise.set_value(false); });
 
     /// Todo: If the instance is created some time after the project is created
     /// the old files will not be tracked. Make sure to feed in all the old
@@ -136,7 +140,9 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
         std::cerr << std::setw(4) << j << "\n";
     });
 
-    initializedFuture.get();
+    if (!initializedFuture.get()) {
+        throw std::runtime_error{"Failed to initialize lsp plugin"};
+    }
 }
 
 LspPlugin::LspPlugin(CoreEnvironment *core)
@@ -225,9 +231,15 @@ LspPlugin::Instance *LspPlugin::createInstance(std::filesystem::path path) {
         return nullptr;
     }
 
-    _instances.push_back(std::make_unique<Instance>(std::move(*config), this));
-
-    return _instances.back().get();
+    try {
+        _instances.push_back(
+            std::make_unique<Instance>(std::move(*config), this));
+        return _instances.back().get();
+    }
+    catch (std::runtime_error &e) {
+        logError(e.what());
+        return nullptr;
+    }
 }
 
 void LspPlugin::handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
