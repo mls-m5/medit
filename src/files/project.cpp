@@ -205,6 +205,9 @@ std::vector<std::filesystem::path> Project::findProjectFiles(
         if (!isKnownExtension(path)) {
             continue;
         }
+        if (!std::filesystem::is_regular_file(path)) {
+            continue;
+        }
         paths.push_back(path);
         if (path.has_extension()) {
             ++extensions[path.extension()];
