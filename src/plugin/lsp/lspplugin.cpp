@@ -12,6 +12,7 @@
 #include "lsp/requests.h"
 #include "lsp/servernotifications.h"
 #include "lspconfiguration.h"
+#include "nlohmann/json.hpp"
 #include "script/ienvironment.h"
 #include "script/standardcommands.h"
 #include "syntax/basichighligting.h"
@@ -143,6 +144,7 @@ LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
     if (!initializedFuture.get()) {
         throw std::runtime_error{"Failed to initialize lsp plugin"};
     }
+    client->notify("initialized", nlohmann::json{});
 }
 
 LspPlugin::LspPlugin(CoreEnvironment *core)

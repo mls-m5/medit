@@ -70,11 +70,12 @@ std::optional<LspConfiguration> LspConfiguration::getConfiguration(
         return ret;
     }
 
-    //    if (extension == ".rs") {
-    //        ret = LspConfiguration{};
-    //        ret->command = getRustLspCommand();
-    //        ret->isFileSupported = [](auto path) { return isRust(path); };
-    //    }
+    // TODO {2023-11-21} Handle when a language client is not installed
+    if (extension == ".rs") {
+        ret = LspConfiguration{};
+        ret->command = getRustLspCommand();
+        ret->isFileSupported = [](auto path) { return isRust(path); };
+    }
 
     return ret;
 }
