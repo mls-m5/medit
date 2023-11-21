@@ -1,6 +1,7 @@
 #include "console.h"
 #include "core/context.h"
 #include "core/ijobqueue.h"
+#include "files/config.h"
 #include "files/popenstream.h"
 #include "script/ienvironment.h"
 #include "syntax/palette.h"
@@ -22,7 +23,10 @@ void Console::run(std::shared_ptr<IEnvironment> env) {
         env->context().guiQueue().addTask([env, openingMessage] {
             env->console().buffer().pushBack(openingMessage);
         });
-        POpenStream stream(command, true, 100);
+        POpenStream stream(
+            (command + " 2> \"" + standardErrorTtyPipePath().string() + "\""),
+            true,
+            100);
 
         for (std::string line; getline(stream, line);) {
             env->context().guiQueue().addTask([line, env] {

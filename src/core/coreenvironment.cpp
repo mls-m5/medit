@@ -18,9 +18,14 @@ CoreEnvironment::CoreEnvironment(ThreadContext &context)
     , _project{std::make_unique<Project>(files().directoryNotifications(),
                                          context.guiQueue())}
     , _consoleTtyPath{createFifo(standardConsoleTtyPipePath())}
-    , _consoleInFile{_consoleTtyPath, [this](std::string data) {
+    , _errorTtyPath{createFifo(standardErrorTtyPipePath())}
+    , _consoleInFile{_consoleTtyPath,
+                     [this](std::string data) {
                          printToAllLogs(LogType::Info, data);
-                     }} {
+                     }}
+    , _errorInFile{_errorTtyPath, [this](std::string data) {
+                       printToAllLogs(LogType::Error, data);
+                   }} {
     cleanUpLocalPipes();
 
     std::ofstream{_consoleTtyPath.path()}

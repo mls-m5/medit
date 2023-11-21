@@ -57,7 +57,9 @@ private:
     /// Move this out in the future and when there is more terminals that is
     /// handled this way
     UniqueFile _consoleTtyPath;
+    UniqueFile _errorTtyPath;
     FifoFileListener _consoleInFile;
+    FifoFileListener _errorInFile;
     std::vector<std::pair<std::function<void(LogType, std::string)>, void *>>
         _consoleCallback;
 };

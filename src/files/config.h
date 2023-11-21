@@ -18,6 +18,9 @@ std::filesystem::path standardProcessFifoDirectory();
 /// A file that other processes can print to to write to the log
 std::filesystem::path standardConsoleTtyPipePath();
 
+/// Same as standardConsoleTtyPipePath but for error messages
+std::filesystem::path standardErrorTtyPipePath();
+
 void cleanUpLocalPipes();
 
 /// Fifo paths for the fifo server/server
