@@ -59,6 +59,6 @@ void beginRenameFileInteraction(std::shared_ptr<IEnvironment> env) {
                                 }};
 
     env->mainWindow().interactions().newInteraction(
-        Interaction{si.serialize(), {3 + pathStr.size(), 2}},
+        Interaction{si.serialize(), {3 + pathStr.size(), 2}, "rename file"},
         handleUserResponse);
 }

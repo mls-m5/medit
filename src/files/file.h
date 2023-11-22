@@ -10,7 +10,7 @@ public:
     File(std::filesystem::path path);
 
     void load(Buffer &) override;
-    void save(const Buffer &) override;
+    bool save(const Buffer &) override;
     std::string representation() const override;
     std::filesystem::path path() const override;
 

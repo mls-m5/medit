@@ -19,12 +19,16 @@ std::unique_ptr<Buffer> Buffer::open(std::filesystem::path path) {
     return buffer;
 }
 
-void Buffer::save() {
+bool Buffer::save() {
     _tv();
     if (_file) {
-        _file->save(*this);
-        _raw.isChanged(false);
+        if (_file->save(*this)) {
+            _raw.isChanged(false);
+            return true;
+        }
+        return false;
     }
+    return false;
 }
 
 void Buffer::assignFile(std::unique_ptr<IFile> file) {

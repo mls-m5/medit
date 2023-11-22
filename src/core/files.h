@@ -27,7 +27,8 @@ public:
     std::shared_ptr<Buffer> create();
 
     /// Use this when saving a buffer that does not have a file
-    void save(Buffer &, std::filesystem::path);
+    /// @return true if saved successfull
+    bool save(Buffer &, std::filesystem::path);
 
     using BufferSubscriptionCallbackT = std::function<void(BufferEvent)>;
 

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "interaction.h"
 #include "text/fstring.h"
-#include "text/position.h"
 #include <algorithm>
 #include <istream>
 #include <memory>
@@ -16,6 +14,7 @@
 struct SimpleInteraction {
     std::string op;
     std::vector<std::pair<std::string, std::string>> values;
+    std::string title;
     bool valid = true;
 
     /// Create text form
@@ -26,13 +25,6 @@ struct SimpleInteraction {
 
     void deserialize(const std::string &in);
 
-    std::string_view at(std::string_view name) const {
-        for (auto &it : values) {
-            if (it.first == name) {
-                return it.second;
-            }
-        }
-
-        return {};
-    }
+    /// Get reference for a name
+    std::string_view at(std::string_view name) const;
 };

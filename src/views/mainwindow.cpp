@@ -201,8 +201,10 @@ void MainWindow::draw(IScreen &screen) {
         _screen.draw(0, height() - 1, statusMessage);
 
         auto cur = editor->cursor();
-        auto cursorMessage = FString{std::to_string(cur.y() + 1) + ", " +
-                                     std::to_string(cur.x() + 1)};
+        auto cursorMessage =
+            FString{std::to_string(cur.y() + 1) + "/" +
+                    std::to_string(cur.buffer().lines().size()) + ", " +
+                    std::to_string(cur.x() + 1)};
 
         _screen.draw(
             width() - cursorMessage.size() - 1, height() - 1, cursorMessage);
@@ -407,8 +409,11 @@ void MainWindow::updateTitle() {
     }
 
     if (auto file = editor->file()) {
-        auto path = std::filesystem::relative(
-            file->path(), _env->core().project().settings().root);
+        auto path = file->path();
+        if (path.has_parent_path()) {
+            path = std::filesystem::relative(
+                file->path(), _env->core().project().settings().root);
+        }
         auto title = path.string() + " - medit";
         if (editor->buffer().isChanged()) {
             title += "*";

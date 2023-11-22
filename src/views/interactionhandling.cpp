@@ -1,6 +1,7 @@
 #include "interactionhandling.h"
 #include "core/context.h"
 #include "core/ijobqueue.h"
+#include "files/unsavablefile.h"
 #include "keys/event.h"
 #include "script/ienvironment.h"
 #include "script/interaction.h"
@@ -22,10 +23,13 @@ void InteractionHandling::newInteraction(const Interaction &i,
 
     auto env = _window.env().shared_from_this();
 
+    auto file = std::make_unique<UnsavableFile>(i.title);
+
     // We do not create with the core create function because we do not want
     // to add it to the tracked buffers
     auto newBuffer = std::make_shared<Buffer>();
     _operationBuffer = newBuffer;
+    newBuffer->assignFile(std::move(file));
 
     editor->buffer(newBuffer);
 

@@ -41,7 +41,7 @@ public:
     [[nodiscard]] static std::unique_ptr<Buffer> open(
         std::filesystem::path path);
 
-    void save();
+    bool save();
 
     /// Used when saving a buffer that is not saved yet. Check usage in the
     /// project to se how it is used

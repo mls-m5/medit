@@ -41,7 +41,7 @@
       This way the interactions can be used for even save-prompts and other stuff
 - [x] Handle errors when renaming is not possible
 - [ ] Redraw screen when buffer is opened or closed
-- [ ] Update highlighting on emitted changes instead of keypress
+- [x] Update highlighting on emitted changes instead of keypress
     - [ ] Move highlighting handling into core environment
 - [ ] Unload files after applying changes to closed files
 

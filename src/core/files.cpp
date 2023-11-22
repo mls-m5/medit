@@ -118,15 +118,19 @@ std::shared_ptr<Buffer> Files::create() {
     return _buffers.back();
 }
 
-void Files::save(Buffer &buffer, std::filesystem::path path) {
+bool Files::save(Buffer &buffer, std::filesystem::path path) {
     _tv();
 
     buffer.assignFile(std::make_unique<File>(std::filesystem::absolute(path)));
-    buffer.save();
+    if (!buffer.save()) {
+        return false;
+    }
 
     _buffers.push_back(buffer.shared_from_this());
     emitBufferSubscriptionEvent(
         {_buffers.back(), _buffers.back()->file()->path(), BufferEvent::Open});
+
+    return true;
 }
 
 void Files::unsubscribeToBufferEvents(void *reference) {

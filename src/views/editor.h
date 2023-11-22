@@ -30,7 +30,7 @@ public:
 
     void background(FormatType c);
 
-    void save();
+    bool save();
     void load();
 
     void undo();

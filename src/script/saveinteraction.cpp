@@ -2,6 +2,7 @@
 #include "core/coreenvironment.h"
 #include "interaction.h"
 #include "script/ienvironment.h"
+#include "script/simpleinteraction.h"
 #include "views/mainwindow.h"
 #include <filesystem>
 #include <fstream>
@@ -41,12 +42,15 @@ void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
     }
 
     try {
-        env->core().files().save(*buffer, path);
+        if (!env->core().files().save(*buffer, path)) {
+            // Just use single handling since errors was already handled
+            throw std::runtime_error{"file is not saveable"};
+        }
         env->mainWindow().statusMessage(FString{"saved to "} +
                                         buffer->file()->path().string());
     }
     catch (std::runtime_error &e) {
-        env->statusMessage(FString{"failed to save file "} + FString{path} +
+        env->statusMessage(FString{"Could not save file "} + FString{path} +
                            ": " + e.what());
     }
 }
@@ -56,7 +60,11 @@ void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
 void saveInteraction(std::shared_ptr<IEnvironment> env) {
     auto &e = env->editor();
     if (e.file()) {
-        e.save();
+        if (!e.save()) {
+            env->mainWindow().statusMessage(FString{"Could not save "} +
+                                            e.file()->path().string());
+            return;
+        }
         env->mainWindow().statusMessage(FString{"Saved to "} +
                                         e.file()->path().string());
         return;

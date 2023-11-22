@@ -74,6 +74,7 @@ void internalBeginFileViewInteraction(std::shared_ptr<IEnvironment> env,
 
     auto interaction = Interaction{
         .text = "",
+        .title = "browse files...",
     };
 
     if (root.empty()) {

@@ -32,8 +32,8 @@ void Editor::background(FormatType c) {
     _background = c;
 }
 
-void Editor::save() {
-    buffer().save();
+bool Editor::save() {
+    return buffer().save();
 }
 
 void Editor::load() {

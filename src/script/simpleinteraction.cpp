@@ -72,3 +72,13 @@ void SimpleInteraction::deserialize(const std::string &in) {
     auto ss = std::istringstream{in};
     deserialize(ss);
 }
+
+std::string_view SimpleInteraction::at(std::string_view name) const {
+    for (auto &it : values) {
+        if (it.first == name) {
+            return it.second;
+        }
+    }
+
+    return {};
+}
