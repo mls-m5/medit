@@ -164,7 +164,7 @@ public:
 
     std::vector<FString> split(Utf8Char c = '\n') const;
 
-    static FString join(std::vector<FString> strings, Utf8Char c = '\n');
+    static FString join(const std::vector<FString> &strings, Utf8Char c = '\n');
 
     FString operator+(const FString &other);
 

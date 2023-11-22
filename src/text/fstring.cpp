@@ -156,7 +156,7 @@ std::vector<FString> FString::split(Utf8Char c) const {
     return ret;
 }
 
-FString FString::join(std::vector<FString> strings, Utf8Char c) {
+FString FString::join(const std::vector<FString> &strings, Utf8Char c) {
 
     size_t size = strings.size() - 1;
 
