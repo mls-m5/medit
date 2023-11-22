@@ -65,7 +65,7 @@ Cursor right(Cursor cursor, bool allowLineChange) {
     }
 
     cursor = fix(cursor);
-    auto line = lines.at(cursor.y());
+    auto &line = lines.at(cursor.y());
 
     if (cursor.x() == line.size()) {
         if (allowLineChange) {
