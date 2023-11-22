@@ -34,4 +34,7 @@ public:
     //! Returns non-zero result if there was a error during the execution of
     //! command
     int returnCode();
+
+    /// Read all of the content into a single string
+    std::string readToString();
 };

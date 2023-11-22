@@ -67,6 +67,8 @@ public:
 
     const StandardCommands &standardCommands() const override;
 
+    InteractionHandling &interactions() override;
+
     Editor &editor() override;
 
     //! Trigger redraw of winow

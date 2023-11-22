@@ -47,6 +47,9 @@ bool InteractionHandling::keyPress(std::shared_ptr<IEnvironment> env) {
 
     /// This is when the user has edited the response and wants to accept it
     if (env->key().symbol == "\n") {
+        if (env->key().hasModifiers()) {
+            return false;
+        }
         auto interaction = Interaction{
             .text = content(CursorRange{*buffer}),
             .cursorPosition = env->editor().cursor().pos(),

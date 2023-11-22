@@ -6,6 +6,14 @@
 
 /// The part of interaction handling that handles creating window
 struct InteractionHandling {
+    InteractionHandling(const InteractionHandling &) = delete;
+    InteractionHandling(InteractionHandling &&) = delete;
+    InteractionHandling &operator=(const InteractionHandling &) = delete;
+    InteractionHandling &operator=(InteractionHandling &&) = delete;
+    ~InteractionHandling() = default;
+    InteractionHandling(MainWindow &window)
+        : _window{window} {};
+
     using InteractionCallback =
         std::function<void(std::shared_ptr<IEnvironment>, const Interaction &)>;
 

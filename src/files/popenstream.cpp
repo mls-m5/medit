@@ -1,6 +1,7 @@
 
 #include "files/popenstream.h"
 #include <iostream>
+#include <sstream>
 
 POpenStream::POpenStreamBuf::POpenStreamBuf(std::string command,
                                             bool captureStdErr,
@@ -38,8 +39,15 @@ POpenStream::POpenStreamBuf::~POpenStreamBuf() {
 POpenStream::POpenStream(std::string command,
                          bool captureStdErr,
                          size_t bufferSize)
-    : std::istream(&buffer), buffer(command, captureStdErr, bufferSize) {}
+    : std::istream(&buffer)
+    , buffer(command, captureStdErr, bufferSize) {}
 
 int POpenStream::returnCode() {
     return buffer.returnCode;
+}
+
+std::string POpenStream::readToString() {
+    auto ss = std::ostringstream{};
+    ss << rdbuf();
+    return ss.str();
 }

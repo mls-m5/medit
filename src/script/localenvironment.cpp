@@ -24,6 +24,10 @@ const StandardCommands &LocalEnvironment::standardCommands() const {
     return StandardCommands::get();
 }
 
+InteractionHandling &LocalEnvironment::interactions() {
+    return _mainWindow.interactions();
+}
+
 Editor &LocalEnvironment::editor() {
     auto e = _mainWindow.currentEditor();
     if (e) {

@@ -26,6 +26,8 @@ public:
     [[nodiscard]] virtual Editor &editor() = 0;
     [[nodiscard]] virtual Editor &console() = 0;
 
+    [[nodiscard]] virtual InteractionHandling &interactions() = 0;
+
     virtual void statusMessage(FStringView string) = 0;
 
     //! In the future this can be multiple values depending on which console

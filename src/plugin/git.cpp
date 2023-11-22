@@ -1,4 +1,5 @@
 #include "files/project.h"
+#include "gitcommitinteraction.h"
 #include "script/ienvironment.h"
 #include "script/standardcommands.h"
 #include "syntax/palette.h"
@@ -35,4 +36,5 @@ void gitPush(std::shared_ptr<IEnvironment> env) {
 void registerGitCommands(StandardCommands &standardCommands) {
     standardCommands.namedCommands["git_status"] = gitStatus;
     standardCommands.namedCommands["git_push"] = gitPush;
+    standardCommands.namedCommands["git_commit"] = beginGitCommit;
 }

@@ -55,3 +55,5 @@ struct Changes;
 class IConnection;
 class TcpServer;
 class TcpConnection;
+
+class InteractionHandling;

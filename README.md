@@ -32,7 +32,6 @@ Todo:
   - [ ] Find usages
   - [x] Rename symbol
   - [x] Goto definition
-  - [x] Switch header/source
   - [x] Auto complete
     - [x] Clang based autocomplete
   - [x] Basic syntax highlighting
@@ -66,12 +65,13 @@ Todo:
 - [x] ctrl+backspace to erase whole word
 - Editors
   - [ ] Word wrapping
-  - [ ] Horizontal scroll
+  - [x] Horizontal scroll
 - [ ] Performance improvements for remote connections
    - [ ] Serialize to binary
 - [ ] Communication over network sessions
    - [ ] Add interactions for users to add own name
    - [ ] Create some way for users to send short messages to eachother.
+   - [ ] Show user cursors on other users screen
 - [ ] Git plugin
    - [x] Push
    - [ ] Diff
