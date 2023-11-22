@@ -12,6 +12,8 @@ class FStringView {
     size_t _size = 0;
 
 public:
+    static constexpr size_t npos = static_cast<size_t>(-1);
+
     FStringView(const FString &str);
 
     constexpr FStringView(const FChar *data, size_t size)
@@ -110,6 +112,8 @@ public:
     }
 
     explicit operator FString() const;
+
+    size_t find(Utf8Char c, size_t start) const;
 };
 
 inline bool operator==(const FString &a, const FStringView &b) {

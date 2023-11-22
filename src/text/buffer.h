@@ -5,6 +5,7 @@
 #include "files/path.h"
 #include "rawbuffer.h"
 #include "text/diagnostics.h"
+#include "text/fstringview.h"
 #include "text/history.h"
 #include <filesystem>
 #include <memory>
@@ -138,7 +139,7 @@ public:
     //! Apply changes and apply to history
     Cursor apply(BufferEdit edit);
 
-    [[nodiscard]] const FString &lineAt(size_t index) const;
+    [[nodiscard]] FStringView lineAt(size_t index) const;
 
     void pushBack(FString string = {});
 

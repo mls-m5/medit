@@ -140,7 +140,7 @@ VimCommandType getType(FStringView &buffer) {
 }
 
 std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
-    const FString &buffer, VimCommandType type) {
+    FStringView buffer, VimCommandType type) {
 
     if (buffer.empty()) {
         throw "error";

@@ -2,6 +2,7 @@
 
 #include "meditfwd.h"
 #include "text/cursor.h"
+#include "text/fstringview.h"
 #include "text/utf8char.h"
 #include <optional>
 
@@ -82,7 +83,7 @@ Cursor apply(BufferEdit edit);
 /// Implementations for things like vims % command
 Cursor findMatching(Cursor);
 
-[[nodiscard]] const FString &lineAt(Cursor);
+[[nodiscard]] FStringView lineAt(Cursor);
 
 [[nodiscard]] Cursor lastNonSpaceOnLine(Cursor cursor);
 

@@ -28,7 +28,7 @@ public:
 
     [[nodiscard]] bool empty() const;
 
-    [[nodiscard]] const FString &lineAt(size_t index) const;
+    [[nodiscard]] FStringView lineAt(size_t index) const;
 
     [[nodiscard]] bool isChanged() const;
 

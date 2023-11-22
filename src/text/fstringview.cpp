@@ -24,3 +24,13 @@ FStringView::FStringView(const Cursor begin, Cursor end) {
 FStringView::operator FString() const {
     return FString{begin(), end()};
 }
+
+size_t FStringView::find(Utf8Char c, size_t start) const {
+    for (size_t i = start; i < size(); ++i) {
+        if (at(i) == c) {
+            return i;
+        }
+    }
+
+    return npos;
+}

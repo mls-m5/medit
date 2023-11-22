@@ -69,7 +69,7 @@ Cursor Buffer::apply(BufferEdit edit) {
     return cur;
 }
 
-const FString &Buffer::lineAt(size_t index) const {
+FStringView Buffer::lineAt(size_t index) const {
     _tv();
     return _raw.lineAt(index);
 }

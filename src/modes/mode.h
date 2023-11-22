@@ -83,7 +83,7 @@ public:
         return *this;
     }
 
-    const FString &buffer() const override {
+    FStringView buffer() const override {
         return _buffer;
     }
 

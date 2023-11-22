@@ -177,7 +177,7 @@ Cursor split(Cursor cursor) {
 }
 
 FString indentation(Cursor cursor) {
-    auto &line = lineAt(cursor);
+    auto line = lineAt(cursor);
 
     FString indentationStr;
     for (auto c : line) {
@@ -201,7 +201,7 @@ Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
 
     auto &lines = cursor.buffer().lines();
 
-    auto &line = cursor.buffer().lineAt(cursor.y());
+    auto line = cursor.buffer().lineAt(cursor.y());
     auto &lineAbove = lines.at(cursor.y() - 1);
     auto indentationStr = indentation({cursor.buffer(), 0, cursor.y() - 1});
 
@@ -304,7 +304,7 @@ Cursor wordEnd(Cursor cursor) {
 Utf8Char content(Cursor cursor) {
     cursor = fix(cursor);
 
-    auto &line = cursor.buffer().lineAt(cursor.y());
+    auto line = cursor.buffer().lineAt(cursor.y());
 
     if (cursor.x() == line.size()) {
         return '\n';
@@ -492,7 +492,7 @@ Cursor findMatching(Cursor cursor) {
     return cursor;
 }
 
-const FString &lineAt(Cursor cursor) {
+FStringView lineAt(Cursor cursor) {
     return cursor.buffer().lineAt(cursor.y());
 }
 

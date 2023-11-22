@@ -13,7 +13,7 @@ bool RawBuffer::empty() const {
     return _lines.empty() || (_lines.size() == 1 && _lines.front().empty());
 }
 
-const FString &RawBuffer::lineAt(size_t index) const {
+FStringView RawBuffer::lineAt(size_t index) const {
     return _lines.at(index);
 }
 

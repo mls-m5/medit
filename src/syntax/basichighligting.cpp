@@ -389,7 +389,7 @@ bool BasicHighlighting::highlightStatic(Buffer &buffer) {
 
     //     Identify comment
     for (size_t y = 0; y < buffer.lines().size(); ++y) {
-        auto &line = buffer.lineAt(y);
+        auto line = buffer.lineAt(y);
         for (size_t x = 1; x < line.size(); ++x) {
 
             if (line.at(x - 1).c == '/' && line.at(x).c == '/') {
@@ -414,7 +414,7 @@ bool BasicHighlighting::highlightStatic(Buffer &buffer) {
     // Identify strings
     for (size_t y = 0; y < buffer.lines().size(); ++y) {
         FChar startChar = '"';
-        auto &line = buffer.lineAt(y);
+        auto line = buffer.lineAt(y);
         for (size_t x = 0; x < line.size(); ++x) {
             auto c = line.at(x).c;
             if (c == '"' || c == '\'') {

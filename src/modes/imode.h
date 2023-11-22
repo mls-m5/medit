@@ -26,7 +26,7 @@ public:
     /// If only whole lines can be selected
     virtual bool isBlockSelection() const = 0;
 
-    virtual const struct FString &buffer() const = 0;
+    virtual struct FStringView buffer() const = 0;
     virtual int repetitions() const = 0;
 
     /// For example for normal mode you would not want to select past the last
