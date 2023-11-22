@@ -20,6 +20,7 @@
 #include "text/changes.h"
 #include "text/cursorrangeops.h"
 #include "views/editor.h"
+#include <cctype>
 #include <filesystem>
 #include <future>
 #include <iomanip>
@@ -28,6 +29,7 @@
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
 // TODO: Tidy up this file
 
@@ -40,12 +42,36 @@ std::string pathToUri(std::filesystem::path path) {
     return "file://" + std::filesystem::absolute(path).string();
 }
 
+char fromHex(char c) {
+    if (c >= '0' && c < '9') {
+        return c - '0';
+    }
+    return std::tolower(c) - 'a' + 10;
+}
+
 std::filesystem::path uriToPath(lsp::URI uri) {
     if (uri.rfind("file://", 0) != 0) {
         return "invalid uri";
     }
 
-    return uri.substr(7);
+    auto path = uri.substr(7);
+
+    for (size_t i = 2; i < path.size(); ++i) {
+        auto c = path.at(i - 2);
+        if (c == '%') {
+            char a = fromHex(path.at(i - 1));
+            char b = fromHex(path.at(i));
+
+            char newChar = (a << '\4') + b;
+
+            auto replacement = std::string{};
+            replacement.push_back(newChar);
+            path.replace(i - 2, 3, replacement);
+            i -= 2;
+        }
+    }
+
+    return path;
 }
 
 /// @param offest   of the input is offsetted by 1 character and need sto be
