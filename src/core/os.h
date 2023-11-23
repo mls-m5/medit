@@ -42,6 +42,7 @@ constexpr Os getOs() {
 [[nodiscard]] std::filesystem::path executablePath();
 
 int runCommand(const std::string &command);
+int runCommandAndCapture(const std::string &command);
 
 int getPid();
 
@@ -61,4 +62,17 @@ int runCommand(Args &&...args) {
     }
     str.pop_back();
     return runCommand(static_cast<const std::string &>(str));
+}
+
+/// Run command and capture output to terminals
+template <typename... Args>
+int runCommandAndCapture(Args &&...args) {
+    auto ss = std::ostringstream{};
+    ((ss << args << " "), ...);
+    auto str = ss.str();
+    if (str.empty()) {
+        return -1;
+    }
+    str.pop_back();
+    return runCommandAndCapture(static_cast<const std::string &>(str));
 }

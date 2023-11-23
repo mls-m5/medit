@@ -1,5 +1,6 @@
 
 #include "os.h"
+#include "files/config.h"
 #include <array>
 #include <cstdlib>
 #include <functional>
@@ -77,4 +78,11 @@ std::filesystem::path executablePath() {
 
 int runCommand(const std::string &command) {
     return std::system(command.c_str());
+}
+
+int runCommandAndCapture(const std::string &command) {
+    auto newCommand =
+        (command + " >\"" + standardConsoleTtyPipePath().string() + "\" 2>\"" +
+         standardErrorTtyPipePath().string() + "\"");
+    return std::system(newCommand.c_str());
 }

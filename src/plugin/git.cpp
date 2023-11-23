@@ -37,4 +37,5 @@ void registerGitCommands(StandardCommands &standardCommands) {
     standardCommands.namedCommands["git_status"] = gitStatus;
     standardCommands.namedCommands["git_push"] = gitPush;
     standardCommands.namedCommands["git_commit"] = beginGitCommit;
+    standardCommands.namedCommands["git_commit_amend"] = beginGitCommitAmmend;
 }
