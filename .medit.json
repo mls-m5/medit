@@ -1,7 +1,11 @@
 {
-    "build": "cd build/default ; cmake ../..  -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ; cmake --build .",
+    "build": "cd build/default ; cmake ../..  -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ; make -j ; ctest .",
     "run": "cd build/default ; ./medit",
     "debug": {
+        "working_dir": "build/default",
+        "command": "medit"
+    },
+    "debug2": {
         "working_dir": "build/default/test",
         "command": "medit_tests"
     }
