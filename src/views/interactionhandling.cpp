@@ -54,10 +54,12 @@ bool InteractionHandling::keyPress(std::shared_ptr<IEnvironment> env) {
             .text = content(CursorRange{*buffer}),
             .cursorPosition = env->editor().cursor().pos(),
         };
-        env->context().guiQueue().addTask(
-            [callback = _callback, interaction, env]() {
-                callback(env, interaction);
-            });
+        if (_callback) {
+            env->context().guiQueue().addTask(
+                [callback = _callback, interaction, env]() {
+                    callback(env, interaction);
+                });
+        }
 
         close();
         return true;
