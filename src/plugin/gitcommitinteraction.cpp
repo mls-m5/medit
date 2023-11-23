@@ -6,6 +6,7 @@
 #include "files/popenstream.h"
 #include "script/interaction.h"
 #include "views/interactionhandling.h"
+#include <cctype>
 #include <cstdlib>
 #include <fstream>
 #include <memory>
@@ -57,6 +58,14 @@ void handleGitCommitResponse(std::shared_ptr<IEnvironment> env,
     }
 
     auto messagePath = *gitDir / "commit_message.txt";
+
+    while (!message.empty() && std::isspace(message.back())) {
+        message.pop_back();
+    }
+
+    while (!message.empty() && std::isspace(message.front())) {
+        message.erase(0, 1);
+    }
 
     std::ofstream{messagePath} << message;
 
