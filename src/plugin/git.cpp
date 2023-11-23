@@ -6,13 +6,47 @@
 #include "script/interaction.h"
 #include "script/standardcommands.h"
 #include "syntax/palette.h"
+#include "text/cursorrange.h"
+#include "text/cursorrangeops.h"
+#include "text/fstring.h"
 #include "views/console.h"
 #include "views/editor.h"
+#include <istream>
 #include <memory>
 #include <string>
 #include <string_view>
 
 namespace {
+
+FString universalGitFormat(std::istream &stream) {
+    auto ret = std::vector<FString>{};
+    for (std::string line; std::getline(stream, line);) {
+        auto fstr = FString{line};
+        if (line.empty()) {
+            continue;
+        }
+        if (line.front() == '+') {
+            // TODO: {2023-11-23} Format + as blue and - as red etc
+            fstr.format(Palette::identifier);
+        }
+        else if (line.front() == '-') {
+            fstr.format(Palette::identifier);
+        }
+
+        auto str = std::string{line};
+        if (str.starts_with("commit ")) {
+            fstr.format(Palette::comment, 0, 7);
+            fstr.format(Palette::identifier, 7);
+        }
+
+        if (str.starts_with("Author: ") || str.starts_with("Date: ")) {
+            fstr.format(Palette::comment);
+        }
+        ret.push_back(std::move(fstr));
+    }
+
+    return FString::join(ret);
+}
 
 void gitPush(std::shared_ptr<IEnvironment> env) {
     auto root = env->project().settings().root;
@@ -27,11 +61,10 @@ void gitPush(std::shared_ptr<IEnvironment> env) {
 
 void viewResultAsInteraction(std::shared_ptr<IEnvironment> env,
                              const std::string &command) {
-    // TODO: {2023-11-23} Format + as blue and - as red etc
     auto stream = POpenStream{command};
 
     auto interaction = Interaction{
-        .text = stream.readToString(),
+        .text = universalGitFormat(stream),
         .title = command + "...",
     };
 

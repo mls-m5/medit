@@ -157,7 +157,9 @@ std::vector<FString> FString::split(Utf8Char c) const {
 }
 
 FString FString::join(const std::vector<FString> &strings, Utf8Char c) {
-
+    if (strings.empty()) {
+        return {};
+    }
     size_t size = strings.size() - 1;
 
     for (auto &line : strings) {

@@ -136,9 +136,10 @@ public:
         _content.clear();
     }
 
-    void format(FormatType f) {
-        for (auto &c : _content) {
-            c.f = f;
+    void format(FormatType f, size_t start = 0, size_t end = npos) {
+        end = std::min(end, size());
+        for (size_t i = start; i < end; ++i) {
+            at(i).f = f;
         }
     }
 
