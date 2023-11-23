@@ -5,6 +5,20 @@
 #include <filesystem>
 #include <string>
 
+namespace {
+
+std::string convertToComparableString(const FString &str) {
+    auto ret = std::string{toLower(str)};
+    for (auto &c : ret) {
+        if (c == '_') {
+            c = ' ';
+        }
+    }
+    return ret;
+}
+
+} // namespace
+
 QuickList::QuickList(IView *parent, PopulateFunctionT populateFunction)
     : Editor{parent, std::make_shared<Buffer>(true)}
     , _list{parent}
@@ -65,11 +79,13 @@ void QuickList::updateList() {
     const size_t maxFillLen = 20;
     _list.clear();
 
-    auto bufferStr = std::string(toLower(FString{buffer().text()}));
+    //     auto bufferStr = std::string(toLower(FString{buffer().text()}));
+    auto bufferStr = convertToComparableString(buffer().text());
 
     for (auto &item : _populate()) {
         size_t fillLen = 1;
-        auto str = std::string{toLower(item.second)};
+        //         auto str = std::string{toLower(item.second)};
+        auto str = convertToComparableString(item.second);
 
         if (str.find(bufferStr) == std::string::npos) {
             continue;
