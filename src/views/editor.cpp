@@ -8,6 +8,7 @@
 #include "syntax/palette.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
+#include "views/editorcursor.h"
 #include "views/iwindow.h"
 #include <optional>
 #include <stdexcept>
@@ -90,8 +91,8 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
     _bufferView.buffer(std::move(buffer));
 }
 
-Cursor Editor::cursor() const {
-    auto cur = fix(_cursor);
+Cursor Editor::fix(Cursor cursor) const {
+    auto cur = ::fix(cursor);
     if (_mode->shouldSelectPlusOne()) {
         return cur;
     }
@@ -104,8 +105,12 @@ Cursor Editor::cursor() const {
     return cur;
 }
 
-Cursor Editor::virtualCursor() const {
-    return _cursor;
+Cursor Editor::cursor() const {
+    return this->fix(_cursor);
+}
+
+EditorCursor Editor::virtualCursor() {
+    return {*this, _cursor};
 }
 
 Position Editor::cursorPosition(Position editorPos) const {
@@ -224,7 +229,7 @@ bool Editor::mouseDown(int x, int y) {
     int relY = y - this->y();
 
     // TODO: It does not seem to select when clicking where there is no text
-    cursor(fix(Cursor(buffer(), relX, relY + _bufferView.yScroll())));
+    cursor(::fix(Cursor(buffer(), relX, relY + _bufferView.yScroll())));
 
     return true;
 }
@@ -287,7 +292,7 @@ size_t Editor::y() const {
 }
 
 void Editor::fitCursor() {
-    _bufferView.fitPosition(fix(_cursor));
+    _bufferView.fitPosition(::fix(_cursor));
 }
 
 bool Editor::closeBuffer() {

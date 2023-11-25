@@ -45,7 +45,7 @@ public:
 
     /// Cursor that is not fit into buffer. This could be used for example for
     /// preserving column when moving between lines
-    Cursor virtualCursor() const;
+    EditorCursor virtualCursor();
 
     /// Convert from cursor positiono to screen position
     Position cursorPosition(Position editorPos) const;
@@ -100,6 +100,10 @@ public:
     //! Make sure that the buffer with the cursor is scrolled so that the cursor
     //! is visible
     void fitCursor();
+
+    //! Fix the cursor, almost like the cursorops version, but this takes the
+    //! poosibility of using the modes plus one attribute
+    Cursor fix(Cursor) const;
 
     /// Close the buffer and open another buffer previously opened in editor
     /// @return true if another buffer was found and false if no other buffer

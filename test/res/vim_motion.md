@@ -1,5 +1,16 @@
 # Vim motions
 
+
+## Simple move
+
+```
+hell[N-h]o
+hel
+-----------
+hel[N]lo
+hel
+```
+
 ## %
 
 ```
@@ -36,4 +47,15 @@ hello
 hello
 
 hell[N]o
+```
+
+
+## Override preserved position when moving something else than vertical
+
+```
+hell[N-jh]o
+hel
+-----------
+hello
+h[N]el
 ```

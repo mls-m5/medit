@@ -65,10 +65,10 @@ std::shared_ptr<IMode> createNormalMode() {
             return;
         }
 
-        auto cursor = editor.cursor();
+        auto cursor = EditorCursor{editor};
 
         cursor = motion.f(cursor, mode.repetitions());
-        editor.cursor(cursor);
+        editor.cursor(cursor.cursor());
     };
 
     map.defaultAction(vimMotion);

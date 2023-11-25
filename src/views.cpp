@@ -3,6 +3,7 @@
 #include "views/completeview.cpp"
 #include "views/console.cpp"
 #include "views/editor.cpp"
+#include "views/editorcursor.cpp"
 #include "views/inputbox.cpp"
 #include "views/interactionhandling.cpp"
 #include "views/listview.cpp"

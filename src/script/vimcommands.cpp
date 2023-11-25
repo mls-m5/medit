@@ -11,6 +11,7 @@
 #include "text/fstringview.h"
 #include "text/utf8char.h"
 #include "views/editor.h"
+#include "views/editorcursor.h"
 #include <array>
 #include <memory>
 #include <optional>
@@ -19,10 +20,12 @@
 
 namespace {
 
+/// This is a workaround for when you should presering position when moving
+/// vertically, but then not preserving the position when moving horizontal
 struct MotionCommand {
+
     using FT = std::function<Cursor(Cursor)>;
-    FT f;
-    bool shouldFitCursor = false;
+    using FT2 = std::function<EditorCursor(EditorCursor)>;
 
     MotionCommand() = default;
     MotionCommand(const MotionCommand &) = default;
@@ -31,8 +34,23 @@ struct MotionCommand {
     MotionCommand &operator=(MotionCommand &&) = default;
     ~MotionCommand() = default;
 
-    MotionCommand(FT f)
-        : f{f} {}
+    MotionCommand(FT f, bool shouldFitCursor = true)
+        : f2{[f](EditorCursor cursor) -> EditorCursor {
+            return {cursor.editor(), f(cursor)};
+        }}
+        , shouldFitCursor{shouldFitCursor} {}
+
+    EditorCursor operator()(EditorCursor cursor) const {
+        if (shouldFitCursor) {
+            cursor = cursor.fix();
+        }
+        cursor = f2(cursor);
+        return cursor;
+    }
+
+private:
+    FT2 f2;
+    bool shouldFitCursor = true;
 };
 
 // Wrapper functions for handling functions with default arguments
@@ -54,31 +72,12 @@ std::function<Cursor(Cursor)> combine(Args... args) {
     };
 }
 
-///// std::less is used to be able to compare with FString
-// const static auto map = std::map<FString, MotionCommand, std::less<>>{
-//     {"h", wrap(left, false)},
-//     {"l", wrap(right, false)},
-//     {"j", down},
-//     {"k", up},
-//     {"b", combine(wrap(left, true), wordBegin)},
-//     {"w", wrap(nextWord, true)},
-//     {"e", combine(wrap(right, true), wordEnd)},
-//     {"b", wordBegin},
-//     {"0", home},
-//     {"$", end},
-//     {"^", firstNonSpaceOnLine},
-//     {"g_", lastNonSpaceOnLine},
-//     {"gg", [](Cursor c) { return c.buffer().begin(); }},
-//     {"G", [](Cursor c) { return c.buffer().end(); }},
-//     {"%", findMatching},
-// };
-
 /// std::less is used to be able to compare with FString
 const static auto map = std::map<FString, MotionCommand, std::less<>>{
     {"h", {wrap(left, false)}},
     {"l", {wrap(right, false)}},
-    {"j", {down}},
-    {"k", {up}},
+    {"j", {down, false}},
+    {"k", {up, false}},
     {"b", {combine(wrap(left, true), wordBegin)}},
     {"w", {wrap(nextWord, true)}},
     {"e", {combine(wrap(right, true), wordEnd)}},
@@ -139,8 +138,8 @@ VimCommandType getType(FStringView &buffer) {
     return commandType;
 }
 
-std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
-    FStringView buffer, VimCommandType type) {
+std::optional<std::function<CursorRange(EditorCursor, VimMode, int)>>
+getSelection(FStringView buffer, VimCommandType type) {
 
     if (buffer.empty()) {
         throw "error";
@@ -149,8 +148,8 @@ std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
     auto f = getMotion(buffer, type);
 
     if (f) {
-        return [f = f.f](Cursor cursor, VimMode, int num) -> CursorRange {
-            return CursorRange{cursor, f(cursor, num)};
+        return [f = f.f](EditorCursor cursor, VimMode, int num) -> CursorRange {
+            return CursorRange{cursor.cursor(), f(cursor, num)};
         };
     }
 
@@ -160,8 +159,9 @@ std::optional<std::function<CursorRange(Cursor, VimMode, int)>> getSelection(
 VimMotionResult getMotion(FStringView buffer, VimCommandType type) {
     /// Take a function that fires once and add argument for how many
     /// repetitions should be used
-    auto pack = [](std::function<Cursor(Cursor)> single) -> VimMotionResult {
-        auto f = [single](Cursor cur, int num) {
+    auto pack = [](std::function<EditorCursor(EditorCursor)> single)
+        -> VimMotionResult {
+        auto f = [single](EditorCursor cur, int num) {
             for (int i = 0; i < num; ++i) {
                 cur = single(cur);
             }
@@ -183,8 +183,9 @@ VimMotionResult getMotion(FStringView buffer, VimCommandType type) {
         }
 
         auto searchTerm = buffer.at(1);
-        return pack([searchTerm, type, front](Cursor cursor) -> Cursor {
-            auto f = find(cursor, searchTerm.c, false, front == 't');
+        return pack([searchTerm, type, front](
+                        EditorCursor cursor) -> EditorCursor {
+            auto f = find(cursor.cursor(), searchTerm.c, false, front == 't');
             if (!f) {
                 return cursor;
             }
@@ -194,7 +195,7 @@ VimMotionResult getMotion(FStringView buffer, VimCommandType type) {
                 type == VimCommandType::Change) {
                 newPosition = right(newPosition);
             }
-            return newPosition;
+            return {cursor.editor(), newPosition};
         });
     }
 
@@ -204,24 +205,28 @@ VimMotionResult getMotion(FStringView buffer, VimCommandType type) {
         }
 
         auto searchTerm = buffer.at(1);
-        return pack([searchTerm](Cursor cursor) -> Cursor {
+        return pack([searchTerm](EditorCursor cursor) -> EditorCursor {
             auto f = rfind(cursor, searchTerm.c, false);
-            return f ? *f : cursor;
+            if (f) {
+                return {cursor.editor(), *f};
+            }
+            else {
+                return {cursor.editor(), cursor};
+            }
         });
     }
 
     if (auto single = map.find(buffer); single != map.end()) {
-        auto f = [single = single->second](Cursor cur, int num) {
+        auto f = [single = single->second](EditorCursor cur, int num) {
             for (int i = 0; i < num; ++i) {
-                cur = single.f(cur);
+                cur = single(cur);
             }
             return cur;
         };
 
         return {
-            .match = vim::Match,
-            .f = f,
-            .shouldFitCursor = single->second.shouldFitCursor,
+            .match = vim::Match, .f = f,
+            //            .shouldFitCursor = single->second.shouldFitCursor,
         };
     }
 
@@ -302,12 +307,11 @@ ActionResultT findVimAction(FStringView buffer, VimMode modeName) {
     {
         auto motion = getMotion(buffer, VimCommandType::Motion);
         if (motion.match == vim::Match) {
-            auto f = [f = motion.f, shouldFitCursor = motion.shouldFitCursor](
-                         std::shared_ptr<IEnvironment> env) {
+            auto f = [f = motion.f](std::shared_ptr<IEnvironment> env) {
                 auto &editor = env->editor();
-                if (shouldFitCursor) {
-                    editor.cursor(editor.cursor());
-                }
+                //                if (shouldFitCursor) {
+                //                    editor.cursor(editor.cursor());
+                //                }
                 auto cursor = editor.virtualCursor();
                 auto repetitions = editor.mode().repetitions();
                 cursor = f(cursor, repetitions);
@@ -344,7 +348,7 @@ ActionResultT findVimAction(FStringView buffer, VimMode modeName) {
                   selectionFunction.f](std::shared_ptr<IEnvironment> env) {
         auto &editor = env->editor();
         auto &mode = editor.mode();
-        auto cursor = editor.cursor();
+        auto cursor = EditorCursor{editor};
 
         auto repetitions = mode.repetitions();
         auto [selection, newCursor] =
@@ -431,7 +435,7 @@ SelectionFunctionT getSelectionFunction(FStringView buffer,
     }
     else if (motion) {
         // TODO: Handle when motion is backwards
-        auto f = [f = motion.f](Cursor cursor,
+        auto f = [f = motion.f](EditorCursor cursor,
                                 int repetitions) -> SelectionFunctionReturnT {
             return {CursorRange{cursor, f(cursor, repetitions)}, cursor};
         };

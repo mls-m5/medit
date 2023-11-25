@@ -5,6 +5,7 @@
 #include "text/cursor.h"
 #include "text/cursorrange.h"
 #include "text/fstringview.h"
+#include "views/editorcursor.h"
 #include <functional>
 #include <meditfwd.h>
 #include <memory>
@@ -59,8 +60,7 @@ VimCommandType getType(VimMode modeName, FStringView &buffer);
 
 struct VimMotionResult {
     vim::MatchType match;
-    std::function<Cursor(Cursor, int)> f;
-    bool shouldFitCursor = false;
+    std::function<EditorCursor(EditorCursor, int)> f;
 
     operator bool const() {
         return match == vim::MatchType::Match && f;
@@ -75,7 +75,7 @@ using SelectionFunctionReturnT = std::pair<CursorRange, Cursor>;
 
 struct SelectionFunctionT {
     vim::MatchType match;
-    std::function<SelectionFunctionReturnT(Cursor, int)> f;
+    std::function<SelectionFunctionReturnT(EditorCursor, int)> f;
 };
 
 SelectionFunctionT getSelectionFunction(FStringView buffer, VimCommandType);

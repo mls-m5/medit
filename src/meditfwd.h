@@ -9,6 +9,7 @@ class FChar;
 class Position;
 class Cursor;
 class CursorRange;
+class EditorCursor;
 class BufferEdit;
 class IScreen;
 class IView;

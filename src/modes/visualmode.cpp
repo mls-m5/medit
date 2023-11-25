@@ -2,6 +2,7 @@
 
 #include "visualmode.h"
 #include "keys/bufferkeymap.h"
+#include "meditfwd.h"
 #include "modes/mode.h"
 #include "modes/parentmode.h"
 #include "script/ienvironment.h"
@@ -49,7 +50,7 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
         auto motion = getMotion(mode.buffer(), VimCommandType::Visual);
 
         if (motion) {
-            auto cursor = editor.cursor();
+            auto cursor = EditorCursor{editor};
 
             cursor = motion.f(cursor, mode.repetitions());
             editor.cursor(cursor);
@@ -82,7 +83,7 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
                                    std::shared_ptr<IEnvironment> env) {
                     auto &editor = env->editor();
                     auto num = editor.mode().repetitions();
-                    auto cursor = editor.cursor();
+                    auto cursor = EditorCursor{editor};
                     auto [selection, newCursor] =
                         selectionFunction(cursor, num);
 
@@ -107,7 +108,7 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
                     [motion = motion.f](std::shared_ptr<IEnvironment> env) {
                         auto &editor = env->editor();
                         auto num = editor.mode().repetitions();
-                        auto cursor = editor.cursor();
+                        auto cursor = EditorCursor(editor);
                         cursor = motion(cursor, num);
                         editor.cursor(cursor);
                     };
