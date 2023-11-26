@@ -3,6 +3,7 @@
 #include "buffer.h"
 #include "cursorrangeops.h"
 #include "text/fstring.h"
+#include "text/utf8caseconversion.h"
 #include "text/utf8char.h"
 #include "text/utf8charops.h"
 #include <optional>
@@ -16,11 +17,11 @@ enum class InternalCharType {
 };
 
 InternalCharType getType(Cursor cursor) {
-    auto c = content(cursor).front();
-    if (isalnum(c) || c == '_') {
+    auto c = content(cursor);
+    if (isAlNum(c) || c == '_') {
         return InternalCharType::Alnum;
     }
-    if (isspace(c)) {
+    if (isspace(c.front())) {
         return InternalCharType::Space;
     }
     return InternalCharType::Other;
@@ -314,9 +315,9 @@ Utf8Char content(Cursor cursor) {
 }
 
 Cursor autocompleteWordBegin(const Cursor cursor) {
-    auto currentChar = content(left(cursor)).at(0);
+    auto currentChar = content(left(cursor));
     Cursor begin = cursor;
-    if (isalnum(currentChar)) {
+    if (isAlNum(currentChar)) {
         // If on for example a newline
         begin = wordBegin(cursor);
     }

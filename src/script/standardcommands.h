@@ -39,6 +39,9 @@
     STD_DEF(paste_before)                                                      \
     STD_DEF(paste)                                                             \
     STD_DEF(join)                                                              \
+    STD_DEF(convert_to_upper)                                                  \
+    STD_DEF(convert_to_lower)                                                  \
+    STD_DEF(toggle_case)                                                       \
     STD_DEF(format)                                                            \
     STD_DEF(save)                                                              \
     STD_DEF(copy)                                                              \

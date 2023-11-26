@@ -34,6 +34,9 @@ std::shared_ptr<IMode> createVisualMode(bool isBlockSelection) {
             {{">"}, {sc.indent}},
             {{"<"}, {sc.deindent}},
             {{"o"}, {sc.toggle_visual_end}},
+            {{"U"}, {sc.convert_to_upper}},
+            {{"u"}, {sc.convert_to_lower}},
+            {{"~"}, {sc.toggle_case}},
         },
     };
 

@@ -21,6 +21,7 @@
 #include "text/cursorrange.h"
 #include "text/cursorrangeops.h"
 #include "text/fstring.h"
+#include "text/utf8caseconversion.h"
 #include "text/utf8charops.h"
 #include "togglecomments.h"
 #include "views/editor.h"
@@ -372,6 +373,34 @@ StandardCommands create() {
     DEF(join) {
         auto &e = env->editor();
         e.cursor(join(e.cursor()));
+    };
+
+    DEF(convert_to_upper) {
+        auto &e = env->editor();
+        auto sel = e.selection();
+        if (sel.empty()) {
+            return;
+        }
+        auto text = toUpper(content(sel));
+        replace(sel, text);
+    };
+    DEF(convert_to_lower) {
+        auto &e = env->editor();
+        auto sel = e.selection();
+        if (sel.empty()) {
+            return;
+        }
+        auto text = toLower(content(sel));
+        replace(sel, text);
+    };
+    DEF(toggle_case) {
+        auto &e = env->editor();
+        auto sel = e.selection();
+        if (sel.empty()) {
+            return;
+        }
+        auto text = toggleCase(content(sel));
+        replace(sel, text);
     };
 
     DEF(format) {

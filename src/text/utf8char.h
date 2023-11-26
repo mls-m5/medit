@@ -177,6 +177,10 @@ public:
         return value;
     }
 
+    uint32_t toInt() const {
+        return static_cast<uint32_t>(*this);
+    }
+
     friend bool operator<(const Utf8Char &self, const Utf8Char &other) {
         return static_cast<uint32_t>(self) < static_cast<uint32_t>(other);
     }

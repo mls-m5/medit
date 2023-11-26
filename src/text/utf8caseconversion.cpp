@@ -1,5 +1,6 @@
 #include "utf8caseconversion.h"
 #include "utf8char.h"
+#include <cctype>
 #include <unordered_map>
 
 namespace {
@@ -637,6 +638,18 @@ Utf8Char toUpper(Utf8Char c) {
     return c;
 }
 
+Utf8Char toggleCase(Utf8Char c) {
+    if (auto f = toLowerMap.find(c); f != toLowerMap.end()) {
+        return Utf8Char{f->second};
+    }
+
+    if (auto f = toUpperMap.find(c); f != toLowerMap.end()) {
+        return Utf8Char{f->second};
+    }
+
+    return c;
+}
+
 FString toLower(FString str) {
     for (auto &c : str) {
         c.c = toLower(c.c);
@@ -651,11 +664,36 @@ FString toUpper(FString str) {
     return str;
 }
 
+FString toggleCase(FString str) {
+    for (auto &c : str) {
+        c.c = toggleCase(c.c);
+    }
+    return str;
+}
+
 bool isAlpha(Utf8Char c) {
-    if (toLowerMap.find(c) != toLowerMap.end()) {
+    if (auto f = toLowerMap.find(c); f != toLowerMap.end()) {
         return true;
     }
-    if (toUpperMap.find(c) != toUpperMap.end()) {
+
+    if (auto f = toUpperMap.find(c); f != toLowerMap.end()) {
+        return true;
+    }
+    //    if (toLowerMap.find(c) != toLowerMap.end()) {
+    //        return true;
+    //    }
+    //    if (toUpperMap.find(c) != toUpperMap.end()) {
+    //        return true;
+    //    }
+    return false;
+}
+
+bool isAlNum(Utf8Char c) {
+    if (isAlpha(c)) {
+        return true;
+    }
+    auto i = c.toInt();
+    if (i >= '0' && i <= '9') {
         return true;
     }
     return false;
