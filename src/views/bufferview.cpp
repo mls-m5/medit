@@ -7,6 +7,7 @@
 #include "text/fchar.h"
 #include "text/fstring.h"
 #include "views/iwindow.h"
+#include <algorithm>
 #include <cstddef>
 #include <stdexcept>
 
@@ -17,7 +18,7 @@ size_t getLineNumWidth(size_t numLines) {
     while (numLines /= 10) {
         ++width;
     }
-    return std::min<size_t>(width + 1, 2);
+    return std::max<size_t>(width + 1, 2);
 }
 
 } // namespace
