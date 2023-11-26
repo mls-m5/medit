@@ -8,3 +8,5 @@ Utf8Char toUpper(Utf8Char);
 
 FString toLower(FString);
 FString toUpper(FString);
+
+bool isAlpha(Utf8Char);

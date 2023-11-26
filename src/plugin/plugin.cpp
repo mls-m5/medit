@@ -6,3 +6,4 @@
 #include "jsonformat.cpp"
 #include "run.cpp"
 #include "rundebug.cpp"
+#include "wordstatistics.cpp"

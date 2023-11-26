@@ -650,3 +650,13 @@ FString toUpper(FString str) {
     }
     return str;
 }
+
+bool isAlpha(Utf8Char c) {
+    if (toLowerMap.find(c) != toLowerMap.end()) {
+        return true;
+    }
+    if (toUpperMap.find(c) != toUpperMap.end()) {
+        return true;
+    }
+    return false;
+}

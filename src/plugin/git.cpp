@@ -1,4 +1,3 @@
-#include "core/os.h"
 #include "files/popenstream.h"
 #include "files/project.h"
 #include "gitcommitinteraction.h"
@@ -6,8 +5,6 @@
 #include "script/interaction.h"
 #include "script/standardcommands.h"
 #include "syntax/palette.h"
-#include "text/cursorrange.h"
-#include "text/cursorrangeops.h"
 #include "text/fstring.h"
 #include "views/console.h"
 #include "views/editor.h"
