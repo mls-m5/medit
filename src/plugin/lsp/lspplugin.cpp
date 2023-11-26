@@ -19,6 +19,7 @@
 #include "syntax/palette.h"
 #include "text/changes.h"
 #include "text/cursorrangeops.h"
+#include "text/utf8caseconversion.h"
 #include "views/editor.h"
 #include <cctype>
 #include <filesystem>
@@ -450,6 +451,7 @@ void LspComplete::list(std::shared_ptr<IEnvironment> scope,
                 .name = item.label, // TODO: Redo this class
                 .description = item.detail,
                 .filterText = item.filterText,
+                .lowerCaseText = toLower(item.filterText),
                 .edit =
                     {
                         .range = range,

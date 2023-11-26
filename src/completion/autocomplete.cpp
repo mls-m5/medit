@@ -6,6 +6,7 @@
 #include "core/plugins.h"
 #include "script/ienvironment.h"
 #include "text/fstring.h"
+#include "text/utf8caseconversion.h"
 #include <algorithm>
 
 AutoComplete::AutoComplete(Plugins::ListT<ICompletionSource> sources) {
@@ -21,8 +22,10 @@ AutoComplete::~AutoComplete() {}
 AutoComplete::CompletionList AutoComplete::getMatching(std::string beginning) {
     CompletionList ret;
 
+    beginning = toLower(beginning);
+
     for (auto &item : _items) {
-        if (item.filterText.find(beginning) != std::string::npos) {
+        if (item.lowerCaseText.find(beginning) != std::string::npos) {
             ret.push_back(item);
         }
     }

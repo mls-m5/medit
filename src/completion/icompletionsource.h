@@ -23,6 +23,7 @@ public:
         std::string name;
         FString description;
         std::string filterText;
+        std::string lowerCaseText;
         TextEdit edit;
     };
 
