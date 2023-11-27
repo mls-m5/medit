@@ -2,6 +2,7 @@
 
 #include "meditfwd.h"
 #include "text/formattype.h"
+#include "text/fstringview.h"
 #include "views/scrollview.h"
 #include <memory>
 #include <vector>
@@ -39,8 +40,12 @@ private:
 
     void bufferChangedEvent();
 
+    void rewrapLines();
+
     std::shared_ptr<Buffer> _buffer;
+    std::vector<FStringView> _virtualLines;
 
     bool _showLines = false;
     size_t _numberWidth = 3;
+    bool _shouldWrap = true;
 };

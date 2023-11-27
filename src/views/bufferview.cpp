@@ -36,7 +36,10 @@ void BufferView::draw(IScreen &screen) {
         return;
     }
 
-    _numberWidth = getLineNumWidth(_buffer->lines().size()) + 2;
+    //    auto &lines = _buffer->lines();
+    auto &lines = _virtualLines;
+
+    _numberWidth = getLineNumWidth(lines.size()) + 2;
     auto fillStr =
         FString{std::string(_numberWidth, ' '), Palette::lineNumbers};
 
@@ -54,11 +57,11 @@ void BufferView::draw(IScreen &screen) {
     auto fillStrError = FString{std::string(_numberWidth, ' '), Palette::error};
     for (size_t ty = 0; ty < height(); ++ty) {
         auto l = ty + yScroll();
-        if (l < buffer().lines().size()) {
+        if (l < lines.size()) {
             auto hasLineDiagnostics =
                 buffer().diagnostics().findLineDiagnostic(l);
 
-            auto &line = _buffer->lines().at(l);
+            auto &line = lines.at(l);
 
             if (overSize > 0) {
                 screen.draw(x() + _numberWidth + maxWidth - xScroll(),
@@ -106,12 +109,14 @@ void BufferView::drawSpecial(IScreen &screen,
         return;
     }
 
+    auto &lines = _virtualLines;
+
     for (size_t ty = 0; ty < height(); ++ty) {
         auto l = ty + yScroll();
         bool isAffected = false;
         bool shouldDrawNewline = false;
-        if (l < buffer().lines().size()) {
-            auto line = _buffer->lines().at(l);
+        if (l < lines.size()) {
+            auto line = FString{lines.at(l)};
             if (range.begin().y() == range.end().y() &&
                 l == range.begin().y()) {
                 // Selection on a single line
@@ -172,7 +177,8 @@ void BufferView::buffer(std::shared_ptr<Buffer> buffer) {
     unsubscribe();
     _buffer = std::move(buffer);
     subscribeToBuffer();
-    contentHeight(_buffer->lines().size());
+    //    contentHeight(_buffer->lines().size());
+    bufferChangedEvent();
 
     //    if (auto w = window()) { // Why does this not work?
     //        w->triggerRedraw();
@@ -201,9 +207,20 @@ void BufferView::unsubscribe() {
 }
 
 void BufferView::bufferChangedEvent() {
-    contentHeight(_buffer->lines().size());
+    rewrapLines();
+
+    contentHeight(_virtualLines.size());
 
     if (auto w = window()) {
         w->triggerRedraw();
     }
+}
+
+void BufferView::rewrapLines() {
+    if (!_shouldWrap) {
+        _virtualLines.assign(_buffer->lines().begin(), _buffer->lines().end());
+        return;
+    }
+    // TODO: Redo this
+    _virtualLines.assign(_buffer->lines().begin(), _buffer->lines().end());
 }
