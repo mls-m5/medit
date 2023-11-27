@@ -177,7 +177,6 @@ void BufferView::buffer(std::shared_ptr<Buffer> buffer) {
     unsubscribe();
     _buffer = std::move(buffer);
     subscribeToBuffer();
-    //    contentHeight(_buffer->lines().size());
     bufferChangedEvent();
 
     //    if (auto w = window()) { // Why does this not work?
@@ -209,8 +208,6 @@ void BufferView::unsubscribe() {
 void BufferView::bufferChangedEvent() {
     rewrapLines();
 
-    contentHeight(_virtualLines.size());
-
     if (auto w = window()) {
         w->triggerRedraw();
     }
@@ -221,6 +218,31 @@ void BufferView::rewrapLines() {
         _virtualLines.assign(_buffer->lines().begin(), _buffer->lines().end());
         return;
     }
-    // TODO: Redo this
-    _virtualLines.assign(_buffer->lines().begin(), _buffer->lines().end());
+
+    auto maxLineWidth = width() - _numberWidth;
+
+    _virtualLines.clear();
+
+    auto splitLine = [&](FStringView str) {
+        // Naive implementation
+        for (size_t i = 0; i < str.size(); i += maxLineWidth) {
+            _virtualLines.push_back(str.substr(i, maxLineWidth));
+        }
+    };
+
+    for (auto &line : _buffer->lines()) {
+        if (line.size() > maxLineWidth) {
+            splitLine(line);
+            continue;
+        }
+        _virtualLines.push_back(line);
+    }
+
+    contentHeight(_virtualLines.size());
+}
+
+void BufferView::onResize(size_t oldWidth, size_t oldHeight) {
+    if (oldWidth != width()) {
+        rewrapLines();
+    }
 }

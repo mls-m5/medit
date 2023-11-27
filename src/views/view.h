@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <views/iview.h>
 
 class View : public virtual IView {
@@ -14,6 +15,7 @@ public:
     View(View &&) = delete;
     View &operator=(const View &) = delete;
     View &operator=(View &&) = delete;
+    ~View() override = default;
 
     size_t x() const override {
         return _x;
@@ -40,11 +42,11 @@ public:
     }
 
     void width(size_t value) override {
-        _width = value;
+        onResize(std::exchange(_width, value), _height);
     }
 
     void height(size_t value) override {
-        _height = value;
+        onResize(_width, std::exchange(_height, value));
     }
 
     bool visible() const {
@@ -70,6 +72,10 @@ public:
             return _parent->window();
         }
         return nullptr;
+    }
+
+    void onResize(size_t oldWidth, size_t oldHeight) override {
+        // Default is to do nothing
     }
 
 private:

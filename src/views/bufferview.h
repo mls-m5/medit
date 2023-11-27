@@ -42,6 +42,8 @@ private:
 
     void rewrapLines();
 
+    void onResize(size_t oldWidth, size_t oldHeight) override;
+
     std::shared_ptr<Buffer> _buffer;
     std::vector<FStringView> _virtualLines;
 
