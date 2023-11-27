@@ -12,6 +12,7 @@ public:
     IView() = default;
 
     virtual void draw(IScreen &) = 0;
+    virtual void onResize(size_t oldWidth, size_t oldHeight) = 0;
 
     virtual ~IView() = default;
 
