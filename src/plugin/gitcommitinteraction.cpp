@@ -36,7 +36,7 @@ void handleGitCommitResponse(std::shared_ptr<IEnvironment> env,
 
     auto files = std::vector<std::string>{};
 
-    if (runCommand("git reset")) {
+    if (runCommandAndCapture("git reset")) {
         return;
     }
 
