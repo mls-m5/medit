@@ -8,6 +8,7 @@
 #include "core/logtype.h"
 #include "core/plugins.h"
 #include "files/config.h"
+#include "files/unsavablefile.h"
 #include "modes/insertmode.h"
 #include "navigation/inavigation.h"
 #include "screen/iscreen.h"
@@ -48,6 +49,7 @@ MainWindow::MainWindow(CoreEnvironment &core,
         editor->showLines(true);
     }
     _console.showLines(false);
+    _console.buffer().assignFile(std::make_unique<UnsavableFile>("Console"));
     _env->console(&_console);
     _env->core().subscribeToLogCallback(
         [this](LogType type, std::string data) {
