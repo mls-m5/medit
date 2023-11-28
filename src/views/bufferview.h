@@ -33,8 +33,11 @@ public:
 
     Position cursorFromScreenPosition(Position cursor) const;
 
-    // Convert a cursors position to a position on the screen
+    /// Convert a cursors position to a position on the screen
     Position cursorToScreen(Position) const;
+
+    /// Convert a cursor to a position local to the origin of the scroll view
+    Position cursorToLocal(Position) const;
 
 private:
     void subscribeToBuffer();
@@ -48,7 +51,14 @@ private:
     void onResize(size_t oldWidth, size_t oldHeight) override;
 
     std::shared_ptr<Buffer> _buffer;
-    std::vector<FStringView> _virtualLines;
+
+    struct VirtualLine {
+        FStringView line;
+        size_t start = 0;
+    };
+
+    std::vector<VirtualLine> _virtualLines;
+    std::vector<size_t> _virtualLineLookup;
 
     bool _showLines = false;
     size_t _numberWidth = 3;
