@@ -193,8 +193,13 @@ void BufferView::showLines(bool value) {
     _numberWidth = value * 3;
 }
 
-Position BufferView::cursorPosition(Position cursor) const {
+Position BufferView::cursorFromScreenPosition(Position cursor) const {
     return {x() + cursor.x() + _numberWidth, y() + cursor.y() - yScroll()};
+}
+
+Position BufferView::cursorToScreen(Position pos) const {
+    return {x() + numberWidth() + pos.x() - xScroll(),
+            y() + pos.y() - yScroll()};
 }
 
 void BufferView::subscribeToBuffer() {

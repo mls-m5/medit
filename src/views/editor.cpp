@@ -113,8 +113,8 @@ EditorCursor Editor::virtualCursor() {
     return {*this, _cursor};
 }
 
-Position Editor::cursorPosition(Position editorPos) const {
-    return _bufferView.cursorPosition(editorPos);
+Position Editor::cursorFromScreenPosition(Position editorPos) const {
+    return _bufferView.cursorFromScreenPosition(editorPos);
 }
 
 Cursor Editor::cursor(Cursor c, bool deselect) {
@@ -235,14 +235,11 @@ bool Editor::mouseDown(int x, int y) {
 }
 
 void Editor::updateCursor(IScreen &screen) const {
-
     // Make the cursor appear as it is on the line but can stay on same x
     // position between longer lines
-    auto tmpCursor = cursor(); // fix(_cursor);
+    auto position = _bufferView.cursorToScreen(cursor().pos());
 
-    screen.cursor(_bufferView.x() + _bufferView.numberWidth() + tmpCursor.x() -
-                      _bufferView.xScroll(),
-                  _bufferView.y() + tmpCursor.y() - _bufferView.yScroll());
+    screen.cursor(position.x(), position.y());
 }
 
 void Editor::draw(IScreen &screen) {
