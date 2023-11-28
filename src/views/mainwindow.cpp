@@ -375,7 +375,7 @@ void MainWindow::copy(bool shouldCut) {
 void MainWindow::triggerRedraw() {
     if (!_shouldRedraw) {
         _shouldRedraw = true;
-        _env->context().guiQueue().addTask([this] { /*refreshScreen();*/ });
+        _env->context().guiQueue().addTask([] {}); // Automatically redraws
     }
 }
 

@@ -116,8 +116,6 @@ struct User {
             mainWindow->open(settings.file);
             mainWindow->currentEditor()->removeEmptyUnsavedBufferHistory();
         }
-
-        screen->refresh();
     }
 
 #endif
@@ -234,10 +232,10 @@ void MainData::loop() {
     guiQueue->start();
 #else
     while (!medit::main::shouldQuit) {
-        guiQueue->work(true);
         for (auto &user : users) {
             user->mainWindow->refreshScreen();
         }
+        guiQueue->work(true);
     }
 #endif
 }
@@ -268,6 +266,7 @@ int main(int argc, char **argv) {
     mainData.start(settings);
     setThreadName("main loop"); // Renaming since all child threads inherits the
                                 // first name
+
     mainData.loop();
 #ifndef __EMSCRIPTEN__
     mainData.stop();

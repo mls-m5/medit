@@ -231,7 +231,8 @@ Position BufferView::localFromScreenPosition(Position pos) const {
 
 Position BufferView::cursorToScreen(Position pos) const {
     pos = cursorToLocal(pos);
-    return {x() + pos.x() - xScroll(), y() + pos.y() - yScroll()};
+    return {x() + _numberWidth + pos.x() - xScroll(),
+            y() + pos.y() - yScroll()};
 }
 
 Position BufferView::cursorToLocal(Position pos) const {
@@ -260,7 +261,7 @@ Position BufferView::cursorToLocal(Position pos) const {
 
     auto &vline = _virtualLines.at(virtualLineIndex);
 
-    return {pos.x() + _numberWidth - vline.start, virtualLineIndex};
+    return {pos.x() - vline.start, virtualLineIndex};
 }
 
 bool BufferView::shouldWrap() const {
