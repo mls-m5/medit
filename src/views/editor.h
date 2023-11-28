@@ -48,7 +48,9 @@ public:
     EditorCursor virtualCursor();
 
     /// Convert from cursor positiono to screen position
-    Position cursorFromScreenPosition(Position editorPos) const;
+    Position screenPositionFromCursor(Position editorPos) const;
+
+    Cursor cursorFromScreenPosition(Position screenPos) const;
 
     //! @param deselect = true if you want to disable the selectionAnchor
     Cursor cursor(Cursor c, bool deselect = false);

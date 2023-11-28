@@ -77,7 +77,7 @@ void CompleteView::setCursor(const Cursor cursor, const Editor &bufferView) {
     auto range = CursorRange{begin, cursor};
     currentText(content(range));
 
-    auto screenPosition = bufferView.cursorFromScreenPosition(begin);
+    auto screenPosition = bufferView.screenPositionFromCursor(begin);
 
     _list.x(screenPosition.x());
     _list.y(screenPosition.y() + 1);

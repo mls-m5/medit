@@ -113,8 +113,12 @@ EditorCursor Editor::virtualCursor() {
     return {*this, _cursor};
 }
 
-Position Editor::cursorFromScreenPosition(Position editorPos) const {
-    return _bufferView.cursorFromScreenPosition(editorPos);
+Position Editor::screenPositionFromCursor(Position editorPos) const {
+    return _bufferView.screenPositionFromCursor(editorPos);
+}
+
+Cursor Editor::cursorFromScreenPosition(Position screenPos) const {
+    return _bufferView.cursorFromScreenPosition(screenPos);
 }
 
 Cursor Editor::cursor(Cursor c, bool deselect) {
@@ -225,11 +229,13 @@ bool Editor::mouseDown(int x, int y) {
         return false;
     }
 
-    int relX = x - this->x() - _bufferView.numberWidth();
-    int relY = y - this->y();
+    //    int relX = x - this->x() - _bufferView.numberWidth();
+    //    int relY = y - this->y();
 
     // TODO: It does not seem to select when clicking where there is no text
-    cursor(::fix(Cursor(buffer(), relX, relY + _bufferView.yScroll())));
+    //    cursor(::fix(Cursor(buffer(), relX, relY + _bufferView.yScroll())));
+    cursor(::fix(_bufferView.cursorFromScreenPosition(
+        Position{static_cast<size_t>(x), static_cast<size_t>(y)})));
 
     return true;
 }

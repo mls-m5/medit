@@ -194,8 +194,37 @@ void BufferView::showLines(bool value) {
     _numberWidth = value * 3;
 }
 
-Position BufferView::cursorFromScreenPosition(Position cursor) const {
+Position BufferView::screenPositionFromCursor(Position cursor) const {
     return {x() + cursor.x() + _numberWidth, y() + cursor.y() - yScroll()};
+}
+
+Cursor BufferView::cursorFromScreenPosition(Position pos) const {
+    if (_virtualLines.empty()) {
+        return {*_buffer};
+    }
+
+    auto local = localFromScreenPosition(pos);
+
+    if (local.y() + 1 > _virtualLines.size()) {
+        local.y(_virtualLines.size() - 1);
+    }
+
+    auto &vline = _virtualLines.at(local.y());
+
+    if (local.x() > vline.line.size()) {
+        local.x(vline.line.size());
+    }
+
+    return {*_buffer, vline.start + local.x(), vline.lineNum};
+}
+
+Position BufferView::localFromScreenPosition(Position pos) const {
+    pos.y(pos.y() + yScroll());
+    auto offsetX = _numberWidth + x();
+    auto offsetY = y();
+    offsetX = std::min(pos.x(), offsetX);
+    offsetY = std::min(pos.y(), offsetY);
+    return {pos.x() - offsetX, pos.y() - offsetY};
 }
 
 Position BufferView::cursorToScreen(Position pos) const {
