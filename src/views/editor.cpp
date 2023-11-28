@@ -289,7 +289,7 @@ size_t Editor::y() const {
 }
 
 void Editor::fitCursor() {
-    _bufferView.fitPosition(::fix(_cursor));
+    _bufferView.fitPosition(_bufferView.cursorToLocal(cursor()));
 }
 
 bool Editor::closeBuffer() {

@@ -9,6 +9,7 @@
 #include "views/iwindow.h"
 #include <algorithm>
 #include <cstddef>
+#include <limits>
 #include <stdexcept>
 
 namespace {
@@ -61,7 +62,8 @@ void BufferView::draw(IScreen &screen) {
             auto hasLineDiagnostics =
                 buffer().diagnostics().findLineDiagnostic(l);
 
-            auto &line = lines.at(l);
+            auto &vline = lines.at(l);
+            auto &line = vline.line;
 
             if (overSize > 0) {
                 screen.draw(x() + _numberWidth + maxWidth - xScroll(),
@@ -116,7 +118,7 @@ void BufferView::drawSpecial(IScreen &screen,
         bool isAffected = false;
         bool shouldDrawNewline = false;
         if (l < lines.size()) {
-            auto line = FString{lines.at(l)};
+            auto line = FString{lines.at(l).line};
             if (range.begin().y() == range.end().y() &&
                 l == range.begin().y()) {
                 // Selection on a single line
@@ -198,8 +200,37 @@ Position BufferView::cursorFromScreenPosition(Position cursor) const {
 }
 
 Position BufferView::cursorToScreen(Position pos) const {
-    return {x() + numberWidth() + pos.x() - xScroll(),
-            y() + pos.y() - yScroll()};
+    pos = cursorToLocal(pos);
+    return {x() + pos.x() - xScroll(), y() + pos.y() - yScroll()};
+}
+
+Position BufferView::cursorToLocal(Position pos) const {
+    if (_virtualLineLookup.empty()) {
+        return {0, 0};
+    }
+
+    auto y = std::min(pos.y(), _virtualLineLookup.size() - 1);
+
+    auto virtualLineIndex = _virtualLineLookup.at(y);
+
+    auto nextLine = _virtualLines.size();
+    if (y + 1 < _virtualLineLookup.size()) {
+        nextLine = _virtualLineLookup.at(y + 1);
+    }
+
+    for (size_t i = virtualLineIndex; i < nextLine; ++i) {
+        auto &vline = _virtualLines.at(i);
+        if (pos.x() >= vline.start) {
+            virtualLineIndex = i;
+        }
+        else {
+            break;
+        }
+    }
+
+    auto &vline = _virtualLines.at(virtualLineIndex);
+
+    return {pos.x() + _numberWidth - vline.start, virtualLineIndex};
 }
 
 void BufferView::subscribeToBuffer() {
@@ -219,28 +250,31 @@ void BufferView::bufferChangedEvent() {
 }
 
 void BufferView::rewrapLines() {
+    auto maxLineWidth = width() - _numberWidth;
     if (!_shouldWrap) {
-        _virtualLines.assign(_buffer->lines().begin(), _buffer->lines().end());
-        return;
+        maxLineWidth = std::numeric_limits<size_t>::max();
     }
 
-    auto maxLineWidth = width() - _numberWidth;
-
     _virtualLines.clear();
+    _virtualLineLookup.clear();
 
     auto splitLine = [&](FStringView str) {
         // Naive implementation
         for (size_t i = 0; i < str.size(); i += maxLineWidth) {
-            _virtualLines.push_back(str.substr(i, maxLineWidth));
+            _virtualLines.push_back({str.substr(i, maxLineWidth), i});
         }
     };
 
-    for (auto &line : _buffer->lines()) {
+    auto &lines = _buffer->lines();
+    for (size_t i = 0; i < lines.size(); ++i) {
+        auto &line = lines.at(i);
+        _virtualLineLookup.push_back(_virtualLines.size());
         if (line.size() > maxLineWidth) {
             splitLine(line);
-            continue;
         }
-        _virtualLines.push_back(line);
+        else {
+            _virtualLines.push_back({line, 0});
+        }
     }
 
     contentHeight(_virtualLines.size());
