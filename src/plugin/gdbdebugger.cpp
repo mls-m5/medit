@@ -205,7 +205,9 @@ void GdbDebugger::changeState(DebuggerState state) {
 }
 
 void GdbDebugger::gdbExitedUnexpected() {
-    _gdbStatusCallback("gdb exited");
+    if (_gdbStatusCallback) {
+        _gdbStatusCallback("gdb exited");
+    }
     _isRunning = false;
     // TODO: Make sure that this works
 }

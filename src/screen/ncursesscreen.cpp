@@ -170,7 +170,7 @@ void NCursesScreen::subscribe(CallbackT f) {
     _callback = f;
 
     auto r = ResizeEvent();
-    r.width = ::COLS * 2; // TODO: Find out why * 2
+    r.width = ::COLS; // * 2; // TODO: Find out why * 2
     r.height = ::LINES;
     _callback({r});
 }
@@ -189,7 +189,7 @@ Event NCursesScreen::getInput() {
         ::clear();
         init();
         auto r = ResizeEvent();
-        r.width = ::COLS * 2; // TODO: Find out why * 2
+        r.width = ::COLS; // * 2; // TODO: Find out why * 2
         r.height = ::LINES;
         return r;
     }
@@ -244,8 +244,7 @@ Event NCursesScreen::getInput() {
 }
 
 size_t NCursesScreen::width() const {
-    return static_cast<size_t>(::COLS *
-                               2); // TODO: Figure out why 2 is required here
+    return static_cast<size_t>(::COLS);
 }
 
 size_t NCursesScreen::height() const {
