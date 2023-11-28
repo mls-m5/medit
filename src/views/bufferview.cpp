@@ -1,4 +1,5 @@
 #include "views/bufferview.h"
+#include "files/extensions.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
 #include "text/buffer.h"
@@ -263,7 +264,8 @@ Position BufferView::cursorToLocal(Position pos) const {
 }
 
 bool BufferView::shouldWrap() const {
-    return _shouldWrap;
+    auto path = _buffer->path();
+    return isMarkdown(path) || isTextFile(path);
 }
 
 void BufferView::subscribeToBuffer() {
@@ -285,7 +287,7 @@ void BufferView::bufferChangedEvent() {
 void BufferView::rewrapLines() {
     auto maxLineWidth = width() - _numberWidth;
     maxLineWidth = std::min(_maxWrapLength, maxLineWidth);
-    if (!_shouldWrap) {
+    if (!shouldWrap()) {
         maxLineWidth = std::numeric_limits<size_t>::max();
     }
 

@@ -68,6 +68,6 @@ private:
 
     bool _showLines = false;
     size_t _numberWidth = 3;
-    bool _shouldWrap = false;
+    //    bool _shouldWrap = false;
     size_t _maxWrapLength = 80;
 };
