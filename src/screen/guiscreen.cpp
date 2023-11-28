@@ -591,8 +591,7 @@ GuiScreen::GuiScreen() {
 
     _thread = std::thread([this, &cv] {
         setThreadName("gui screen");
-        _buffer = std::make_unique<Buffer>(80, 40, 14);
-        //        _buffer = std::make_unique<Buffer>(60, 10, 30);
+        _buffer = std::make_unique<Buffer>(85, 40, 14);
         cv.notify_one();
         _buffer->loop();
     });
