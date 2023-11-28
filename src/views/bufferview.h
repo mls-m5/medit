@@ -31,7 +31,10 @@ public:
 
     void showLines(bool value);
 
-    Position cursorPosition(Position cursor) const;
+    Position cursorFromScreenPosition(Position cursor) const;
+
+    // Convert a cursors position to a position on the screen
+    Position cursorToScreen(Position) const;
 
 private:
     void subscribeToBuffer();
