@@ -37,7 +37,6 @@ void BufferView::draw(IScreen &screen) {
         return;
     }
 
-    //    auto &lines = _buffer->lines();
     auto &lines = _virtualLines;
 
     _numberWidth = getLineNumWidth(lines.size()) + 2;
@@ -81,8 +80,8 @@ void BufferView::draw(IScreen &screen) {
                     FString{hasLineDiagnostics->message, Palette::comment});
             }
 
-            if (_showLines) {
-                const auto lineNum = l + 1;
+            if (_showLines && vline.start == 0) {
+                const auto lineNum = vline.lineNum + 1;
                 auto lineFormat = Palette::lineNumbers;
 
                 auto offset = 1;
@@ -233,6 +232,10 @@ Position BufferView::cursorToLocal(Position pos) const {
     return {pos.x() + _numberWidth - vline.start, virtualLineIndex};
 }
 
+bool BufferView::shouldWrap() const {
+    return _shouldWrap;
+}
+
 void BufferView::subscribeToBuffer() {
     _buffer->subscribe([this]() { bufferChangedEvent(); }, this);
 }
@@ -251,6 +254,7 @@ void BufferView::bufferChangedEvent() {
 
 void BufferView::rewrapLines() {
     auto maxLineWidth = width() - _numberWidth;
+    maxLineWidth = std::min(_maxWrapLength, maxLineWidth);
     if (!_shouldWrap) {
         maxLineWidth = std::numeric_limits<size_t>::max();
     }
@@ -258,10 +262,14 @@ void BufferView::rewrapLines() {
     _virtualLines.clear();
     _virtualLineLookup.clear();
 
-    auto splitLine = [&](FStringView str) {
+    auto splitLine = [&](FStringView str, size_t line) {
         // Naive implementation
         for (size_t i = 0; i < str.size(); i += maxLineWidth) {
-            _virtualLines.push_back({str.substr(i, maxLineWidth), i});
+            _virtualLines.push_back({
+                .line = str.substr(i, maxLineWidth),
+                .start = i,
+                .lineNum = line,
+            });
         }
     };
 
@@ -270,10 +278,14 @@ void BufferView::rewrapLines() {
         auto &line = lines.at(i);
         _virtualLineLookup.push_back(_virtualLines.size());
         if (line.size() > maxLineWidth) {
-            splitLine(line);
+            splitLine(line, i);
         }
         else {
-            _virtualLines.push_back({line, 0});
+            _virtualLines.push_back({
+                .line = line,
+                .start = 0,
+                .lineNum = i,
+            });
         }
     }
 

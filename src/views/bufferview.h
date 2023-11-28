@@ -39,6 +39,8 @@ public:
     /// Convert a cursor to a position local to the origin of the scroll view
     Position cursorToLocal(Position) const;
 
+    bool shouldWrap() const;
+
 private:
     void subscribeToBuffer();
 
@@ -55,6 +57,7 @@ private:
     struct VirtualLine {
         FStringView line;
         size_t start = 0;
+        size_t lineNum = 0;
     };
 
     std::vector<VirtualLine> _virtualLines;
@@ -63,4 +66,5 @@ private:
     bool _showLines = false;
     size_t _numberWidth = 3;
     bool _shouldWrap = true;
+    size_t _maxWrapLength = 80;
 };
