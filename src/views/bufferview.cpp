@@ -62,7 +62,7 @@ void BufferView::draw(IScreen &screen) {
                 buffer().diagnostics().findLineDiagnostic(l);
 
             auto &vline = lines.at(l);
-            auto &line = vline.line;
+            auto &line = vline.text;
 
             if (overSize > 0) {
                 screen.draw(x() + _numberWidth + maxWidth - xScroll(),
@@ -117,7 +117,7 @@ void BufferView::drawSpecial(IScreen &screen,
         bool isAffected = false;
         bool shouldDrawNewline = false;
         if (l < lines.size()) {
-            auto line = FString{lines.at(l).line};
+            auto line = FString{lines.at(l).text};
             if (range.begin().y() == range.end().y() &&
                 l == range.begin().y()) {
                 // Selection on a single line
@@ -211,14 +211,15 @@ Cursor BufferView::cursorFromScreenPosition(Position pos) const {
 
     auto &vline = _virtualLines.at(local.y());
 
-    if (local.x() > vline.line.size()) {
-        local.x(vline.line.size());
+    if (local.x() > vline.text.size()) {
+        local.x(vline.text.size());
     }
 
     return {*_buffer, vline.start + local.x(), vline.lineNum};
 }
 
 Position BufferView::localFromScreenPosition(Position pos) const {
+    pos.x(pos.x() + xScroll());
     pos.y(pos.y() + yScroll());
     auto offsetX = _numberWidth + x();
     auto offsetY = y();
@@ -295,7 +296,7 @@ void BufferView::rewrapLines() {
         // Naive implementation
         for (size_t i = 0; i < str.size(); i += maxLineWidth) {
             _virtualLines.push_back({
-                .line = str.substr(i, maxLineWidth),
+                .text = str.substr(i, maxLineWidth),
                 .start = i,
                 .lineNum = line,
             });
@@ -311,7 +312,7 @@ void BufferView::rewrapLines() {
         }
         else {
             _virtualLines.push_back({
-                .line = line,
+                .text = line,
                 .start = 0,
                 .lineNum = i,
             });

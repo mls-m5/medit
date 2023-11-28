@@ -58,7 +58,7 @@ private:
     std::shared_ptr<Buffer> _buffer;
 
     struct VirtualLine {
-        FStringView line;
+        FStringView text;
         size_t start = 0;
         size_t lineNum = 0;
     };
@@ -68,6 +68,6 @@ private:
 
     bool _showLines = false;
     size_t _numberWidth = 3;
-    bool _shouldWrap = true;
+    bool _shouldWrap = false;
     size_t _maxWrapLength = 80;
 };
