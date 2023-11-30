@@ -59,6 +59,9 @@ public:
         decltype(_queue) empty{};
         _queue.swap(empty);
         _waitMutex.unlock();
+        if (_thread.joinable()) {
+            _thread.join();
+        }
     }
 
     void start() override {
