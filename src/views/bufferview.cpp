@@ -1,4 +1,5 @@
 #include "views/bufferview.h"
+#include "core/profiler.h"
 #include "files/extensions.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
@@ -37,6 +38,7 @@ void BufferView::draw(IScreen &screen) {
     if (!visible()) {
         return;
     }
+    PROFILE_FUNCTION();
 
     auto &lines = _virtualLines;
 
@@ -107,6 +109,7 @@ void BufferView::draw(IScreen &screen) {
 void BufferView::drawSpecial(IScreen &screen,
                              const CursorRange &range,
                              FormatType f) const {
+    PROFILE_FUNCTION();
     if (!visible()) {
         return;
     }
@@ -286,6 +289,7 @@ void BufferView::bufferChangedEvent() {
 }
 
 void BufferView::rewrapLines() {
+    PROFILE_FUNCTION();
     auto maxLineWidth = width() - _numberWidth;
     maxLineWidth = std::min(_maxWrapLength, maxLineWidth);
     if (!shouldWrap()) {
