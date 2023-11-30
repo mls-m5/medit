@@ -1,4 +1,5 @@
 #include "profiler.h"
+#include "files/config.h"
 #include <chrono>
 #include <cstdint>
 #include <fstream>
@@ -88,13 +89,21 @@ struct GlobalData {
     }
 
     ~GlobalData() {
-        /// Collect all data
+        bool hasData = false;
+        for (auto &data : threadFrameDatas) {
+            if (!data->frames.empty()) {
+                hasData = true;
+                break;
+            }
+        }
 
-        if (!shouldEnableProfiling) {
+        if (!hasData) {
             return;
         }
 
-        auto file = std::ofstream{"medit_profile_log.json"};
+        auto path = *localConfigDirectory() / "medit_profile_log.json";
+        auto file = std::ofstream{path};
+        std::cout << "writing profile log to " << path << "\n";
         file << "[\n";
 
         for (auto &data : threadFrameDatas) {
@@ -201,6 +210,10 @@ ProfileDuration::~ProfileDuration() {
 
 void enableProfiling() {
     shouldEnableProfiling = true;
+}
+
+void disableProfiling() {
+    shouldEnableProfiling = false;
 }
 
 void profileInstant(std::string_view value) {

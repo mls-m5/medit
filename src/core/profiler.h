@@ -33,6 +33,8 @@ void profileInstant(std::string_view value);
 /// Just called once from main
 void enableProfiling();
 
+void disableProfiling();
+
 void setProfilerThreadName(std::string name);
 
 #define PROFILE_FUNCTION()                                                     \

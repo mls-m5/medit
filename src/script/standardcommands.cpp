@@ -1,6 +1,7 @@
 
 #include "standardcommands.h"
 #include "core/coreenvironment.h"
+#include "core/profiler.h"
 #include "core/registers.h"
 #include "files/project.h"
 #include "main.h"
@@ -581,6 +582,14 @@ StandardCommands create() {
 
     DEF(close_editor) {
         env->mainWindow().closeEditor();
+    };
+
+    DEF(start_profiling) {
+        enableProfiling();
+    };
+
+    DEF(stop_profiling) {
+        disableProfiling();
     };
 
     // ------------------------
