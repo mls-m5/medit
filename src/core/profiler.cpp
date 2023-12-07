@@ -148,6 +148,10 @@ struct ThreadData {
     ThreadData() = default;
 
     ~ThreadData() {
+        {
+            // Just mark when this is
+            auto duration = ProfileDuration{};
+        }
         isThreadInitialized = false;
     }
 
