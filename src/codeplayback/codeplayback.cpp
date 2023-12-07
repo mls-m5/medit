@@ -4,6 +4,7 @@
 #include "files/config.h"
 #include "files/file.h"
 #include "playbacksettings.h"
+#include "screen/cursorstyle.h"
 #include "syntax/basichighligting.h"
 #include "text/bufferedit.h"
 #include "text/cursorops.h"
@@ -14,6 +15,8 @@
 #include "views/window.h"
 #include <algorithm>
 #include <cctype>
+#include <cmath>
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -157,19 +160,63 @@ int main(int argc, char *argv[]) {
         std::cout << "insert code:\n" << edit.to << std::endl;
         auto edits = splitEdit(edit);
         int num = 1;
-        for (auto &e : edits) {
-            if (num % 10 == 0) {
-                std::cout << currentEdit << "/" << count << ": subframe " << num
-                          << "/" << edits.size() << std::endl;
-            }
-            auto cursor = apply(e);
-            BasicHighlighting::highlightStatic(buffer);
-            editor.cursor(cursor);
+
+        auto dump = [&] {
             editor.draw(screen);
             editor.updateCursor(screen);
             screen.refresh();
             videoDump.dump();
             ++num;
+        };
+
+        FString previousText;
+
+        for (auto &e : edits) {
+            if (num % 10 == 0) {
+                std::cout << currentEdit << "/" << count << ": subframe " << num
+                          << "/" << edits.size() << std::endl;
+            }
+            const auto oldCursor = editor.cursor();
+
+            auto dist = static_cast<ptrdiff_t>(e.position.y()) -
+                        static_cast<ptrdiff_t>(editor.cursor().y());
+            // Animate motion if the jump is to large
+            if (std::abs(dist) > 3) {
+                screen.cursorStyle(CursorStyle::Block);
+
+                const auto cursor = e.position;
+                ptrdiff_t sign = dist > 0 ? 1 : -1;
+
+                for (auto y = static_cast<ptrdiff_t>(oldCursor.y());
+                     y != static_cast<ptrdiff_t>(cursor.y());
+                     y += sign) {
+                    editor.cursor(Cursor{
+                        cursor.buffer(), cursor.x(), static_cast<size_t>(y)});
+                    dump();
+                }
+                screen.cursorStyle(CursorStyle::Beam);
+            }
+
+            const auto cursor = apply(e);
+
+            /// Skip taking so long time for indentations
+            if (e.to == " " && previousText == " " &&
+                content(Cursor{e.position.buffer(), 0, e.position.y()}) ==
+                    ' ') {
+                previousText = e.to;
+                continue;
+            }
+
+            if (e.to == "\n") {
+                previousText = e.to;
+                continue;
+            }
+
+            BasicHighlighting::highlightStatic(buffer);
+            editor.cursor(cursor);
+            dump();
+
+            previousText = e.to;
         }
     };
 
