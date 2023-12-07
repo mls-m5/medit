@@ -3,6 +3,7 @@
 #include "edit.h"
 #include "files/config.h"
 #include "files/file.h"
+#include "modes/insertmode.h"
 #include "playbacksettings.h"
 #include "screen/cursorstyle.h"
 #include "syntax/basichighligting.h"
@@ -88,6 +89,7 @@ int main(int argc, char *argv[]) {
 
     auto editor = Editor{&window, std::make_shared<Buffer>()};
     editor.showLines(settings.hasLineNumbers);
+    editor.mode(createInsertMode());
 
     auto &buffer = editor.buffer();
     /// Assigning for highlighting to be correct
@@ -198,22 +200,17 @@ int main(int argc, char *argv[]) {
             }
 
             const auto cursor = apply(e);
+            editor.cursor(cursor);
 
             /// Skip taking so long time for indentations
-            if (e.to == " " && previousText == " " &&
+            if (e.to == " " && (previousText == " " || previousText == "\n") &&
                 content(Cursor{e.position.buffer(), 0, e.position.y()}) ==
                     ' ') {
                 previousText = e.to;
                 continue;
             }
 
-            if (e.to == "\n") {
-                previousText = e.to;
-                continue;
-            }
-
             BasicHighlighting::highlightStatic(buffer);
-            editor.cursor(cursor);
             dump();
 
             previousText = e.to;
