@@ -36,7 +36,8 @@ bool formatClang(std::filesystem::path path, Editor &editor) {
         return false;
     }
     editor.save();
-    runCommand((findLatestClangFormat() + " " + std::string{path} + " -i"));
+    runCommandAndCapture(
+        (findLatestClangFormat() + " " + std::string{path} + " -i"));
     editor.load();
 
     return true;
@@ -52,9 +53,9 @@ bool formatHtmlAndXml(std::filesystem::path path, Editor &editor) {
     }
 
     editor.save();
-    runCommand("tidy -indent -m --tidy-mark no",
-               (isHtml(path) ? "" : "-xml "),
-               std::filesystem::absolute(path));
+    runCommandAndCapture("tidy -q -indent -m --tidy-mark no",
+                         (isHtml(path) ? "" : "-xml "),
+                         std::filesystem::absolute(path));
     editor.load();
 
     return true;
@@ -70,7 +71,8 @@ bool formatGo(std::filesystem::path path, Editor &editor) {
     }
 
     editor.save();
-    runCommand("gofmt -w " + std::string{std::filesystem::absolute(path)});
+    runCommandAndCapture("gofmt -w " +
+                         std::string{std::filesystem::absolute(path)});
     editor.load();
 
     return true;
@@ -86,8 +88,8 @@ bool formatCMake(std::filesystem::path path, Editor &editor) {
     }
 
     editor.save();
-    runCommand("cmake-format -i " +
-               std::string{std::filesystem::absolute(path)});
+    runCommandAndCapture("cmake-format -i " +
+                         std::string{std::filesystem::absolute(path)});
     editor.load();
 
     return true;
@@ -100,8 +102,8 @@ bool formatPython(std::filesystem::path path, Editor &editor) {
 
     editor.save();
     /// Use popenstream to parse error messages and annotate on line
-    runCommand("black -q " + std::string{std::filesystem::absolute(path)} +
-               " 2> " + standardConsoleTtyPipePath().string());
+    runCommandAndCapture("black -q " +
+                         std::string{std::filesystem::absolute(path)});
     editor.load();
 
     return true;
@@ -114,8 +116,8 @@ bool formatRust(std::filesystem::path path, Editor &editor) {
 
     editor.save();
     /// Use popenstream to parse error messages and annotate on line
-    runCommand("rustfmt " + std::string{std::filesystem::absolute(path)} +
-               " 2> " + standardConsoleTtyPipePath().string());
+    runCommandAndCapture("rustfmt " +
+                         std::string{std::filesystem::absolute(path)});
     editor.load();
 
     return true;
