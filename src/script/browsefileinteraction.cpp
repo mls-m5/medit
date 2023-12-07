@@ -42,7 +42,7 @@ void handleFileViewResponse(std::shared_ptr<IEnvironment> env,
         result = rootPath / lineAt(i.cursorPosition.y());
     }
     else { /// Project mode
-        result = lineAt(i.cursorPosition.y());
+        result = env->project().settings().root / lineAt(i.cursorPosition.y());
     }
 
     if (result.empty()) {
