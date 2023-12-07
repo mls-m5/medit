@@ -91,12 +91,21 @@ inline bool isRust(const std::filesystem::path &path) {
     return path.extension() == ".rs";
 }
 
+inline bool isGitIgnore(const std::filesystem::path &path) {
+    return path.has_filename() && path.filename() == ".gitignore";
+}
+
+inline bool isClangFormat(const std::filesystem::path &path) {
+    return path.has_filename() && path.filename() == ".clang-format";
+}
+
 inline bool isKnownExtension(const std::filesystem::path &path) {
     const auto checks = std::to_array(
-        {isCppHeader, isCppSource, isCSource,    isCpp,      isJson, isMarkdown,
-         isMake,      isMatmake,   isCmakeLists, isTextFile, isHtml, isJs,
-         isPython,    isJava,      isCSharp,     isPhp,      isGo,   isXml,
-         isSvg,       isXhtml,     isRust});
+        {isCppHeader, isCppSource, isCSource,    isCpp,        isJson,
+         isMarkdown,  isMake,      isMatmake,    isCmakeLists, isTextFile,
+         isHtml,      isJs,        isPython,     isJava,       isCSharp,
+         isPhp,       isGo,        isXml,        isSvg,        isXhtml,
+         isRust,      isGitIgnore, isClangFormat});
 
     for (const auto &check : checks) {
         if (check(path)) {

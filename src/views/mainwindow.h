@@ -1,6 +1,5 @@
 #pragma once
 
-#include "files/project.h"
 #include "interactionhandling.h"
 #include "meditfwd.h"
 #include "script/localenvironment.h"
