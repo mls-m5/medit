@@ -269,6 +269,11 @@ void GdbDebugger::inputThread(std::istream &in) {
             changeState(state);
         }
 
+        // Example line:
+        // Exception:
+        // *stopped,reason="signal-received",signal-name="SIGABRT",signal-meaning="Aborted",frame={addr="0x00007ffff78969fc",func="__pthread_kill_implementation",args=[{name="no_tid",value="0"},{name="signo",value="6"},{name="threadid",value="140737352606656"}],file="./nptl/pthread_kill.c",fullname="./nptl/./nptl/pthread_kill.c",line="44",arch="i386:x86-64"},thread-id="1",stopped-threads="all",core="9"
+        // After step:
+        // *stopped,reason="breakpoint-hit",disp="keep",bkptno="1",frame={addr="0x000055555555534c",func="main",args=[{name="argc",value="1"},{name="argv",value="0x7fffffffe448"}],file="/home/mattias/Prog/Experiment/observable-pointer/src/main.cpp",fullname="/home/mattias/Prog/Experiment/observable-pointer/src/main.cpp",line="18",arch="i386:x86-64"},thread-id="1",stopped-threads="all",core="25"
         static const auto stopExpression = std::regex(
             R"_(stopped,reason="([^"]+)",.*?addr="([^"]+)",.*?func="([^"]+)",.*?file="([^"]+)",.*?fullname="([^"]+)",.*?line="([^"]+)")_");
         if (std::regex_search(line, matches, stopExpression)) {
