@@ -73,6 +73,8 @@
     STD_DEF(rename_file)                                                       \
     STD_DEF(indent)                                                            \
     STD_DEF(deindent)                                                          \
+    STD_DEF(back)                                                              \
+    STD_DEF(forward)                                                           \
     STD_DEF(split_editor)                                                      \
     STD_DEF(close_editor)                                                      \
     STD_DEF(start_profiling)                                                   \

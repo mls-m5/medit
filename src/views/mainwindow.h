@@ -2,6 +2,7 @@
 
 #include "interactionhandling.h"
 #include "meditfwd.h"
+#include "script/jumplist.h"
 #include "script/localenvironment.h"
 #include "views/commandpalette.h"
 #include "views/completeview.h"
@@ -23,17 +24,22 @@ struct MainWindow : public Window {
     size_t _split = 10;
     FString _splitString;
     IKeySink *_inputFocus = nullptr;
-    std::unique_ptr<IWindow> _activePopup;
     std::vector<std::weak_ptr<Buffer>> _buffersToUpdate;
     size_t _currentEditor = 0;
     bool _shouldRedraw = true;
 
     FString _statusMessage;
-    int _statusTimerHandle = 0;
+    size_t _statusTimerHandle = 0;
+
+    JumpList _jumpList;
 
     MainWindow(CoreEnvironment &core, IScreen &screen, ThreadContext &context);
 
     ~MainWindow() override;
+
+    JumpList &jumpList() {
+        return _jumpList;
+    }
 
     //! Set width and height to refresh but keep old size
     void resize(size_t width = 0, size_t height = 0);
@@ -53,7 +59,7 @@ struct MainWindow : public Window {
               std::optional<int> x = {},
               std::optional<int> y = {});
 
-    void showPopup(std::unique_ptr<IWindow> popup);
+    // void showPopup(std::unique_ptr<IWindow> popup);
 
     Editor *currentEditor() override;
 

@@ -189,10 +189,6 @@ void MainWindow::draw(IScreen &screen) {
 
     _completeView.draw(screen);
 
-    if (_activePopup) {
-        _activePopup->draw(screen);
-    }
-
     {
         auto &editor = _editors.at(_currentEditor);
         auto statusMessage =
@@ -235,10 +231,7 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
     if (_inputFocus->keyPress(env)) {
         if (auto e = currentEditor()) {
             env->core().files().updateHighlighting();
-        }
-        if (_activePopup && _activePopup->isClosed()) {
-            _activePopup = nullptr;
-            resetFocus();
+            _jumpList.updatePosition(e->shared_from_this());
         }
         return true;
     }
@@ -258,10 +251,6 @@ void MainWindow::open(std::filesystem::path path,
                       std::optional<int> x,
                       std::optional<int> y) {
     if (path.empty()) {
-        return;
-    }
-
-    if (_activePopup) {
         return;
     }
 
@@ -299,18 +288,7 @@ void MainWindow::open(std::filesystem::path path,
     updateTitle();
 }
 
-void MainWindow::showPopup(std::unique_ptr<IWindow> popup) {
-    _activePopup = std::move(popup);
-    _inputFocus = _activePopup.get();
-}
-
 Editor *MainWindow::currentEditor() {
-    // Create some more generic layout management for this
-    if (_activePopup) {
-        if (auto e = _activePopup->currentEditor()) {
-            return e;
-        }
-    }
     if (_locator.visible()) {
         return &_locator;
     }
@@ -492,9 +470,9 @@ void MainWindow::format() {
 }
 
 void MainWindow::autoComplete() {
-    if (_activePopup) {
-        return;
-    }
+    // if (_activePopup) {
+    //     return;
+    // }
 
     if (auto editor = currentEditor()) {
         editor->cursor(fix(editor->cursor()));

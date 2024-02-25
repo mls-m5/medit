@@ -17,7 +17,7 @@ AutoComplete::AutoComplete(Plugins::ListT<ICompletionSource> sources) {
     });
 }
 
-AutoComplete::~AutoComplete() {}
+AutoComplete::~AutoComplete() = default;
 
 AutoComplete::CompletionList AutoComplete::getMatching(std::string beginning) {
     CompletionList ret;
