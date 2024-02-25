@@ -33,6 +33,10 @@ public:
         _contentHeight = value;
     }
 
+    size_t contentHeight() const {
+        return _contentHeight;
+    }
+
 private:
     size_t _yScroll = 0;
     size_t _contentHeight = 0;

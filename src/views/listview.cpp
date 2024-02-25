@@ -19,11 +19,13 @@ ListView::ListView(IView *parent)
 
 void ListView::addLine(FString text, std::any dataContent) {
     _lines.push_back({std::move(text), std::move(dataContent)});
+    contentHeight(_lines.size());
 }
 
 void ListView::clear() {
     _lines.clear();
     _current = 0;
+    contentHeight(0);
 }
 
 void ListView::draw(IScreen &screen) {
@@ -45,7 +47,11 @@ void ListView::draw(IScreen &screen) {
 
     for (size_t ty = 0, i = yScroll(); ty < height() && i < _lines.size();
          ++i, ++ty) {
-        auto &l = _lines.at(i);
+        auto lineNum = i;
+        if (lineNum >= _lines.size()) {
+            continue;
+        }
+        auto &l = _lines.at(lineNum);
         if (ty == height()) {
             break;
         }
@@ -69,7 +75,7 @@ bool ListView::keyPress(std::shared_ptr<IEnvironment> env) {
         }
         return true;
     case Key::Down:
-        if (_current < _lines.size() - 1) {
+        if (_current < contentHeight() - 1) {
             current(_current + 1);
         }
         return true;

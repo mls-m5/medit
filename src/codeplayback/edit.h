@@ -33,6 +33,15 @@ std::vector<BufferEdit> splitEdit(const BufferEdit &old) {
 
     auto position = old.position;
     for (auto c : old.to) {
+        //        if (c == ' ') {
+        //            if (!ret.empty() && !ret.back().to.empty() &&
+        //                ret.back().to.back() == ' ') {
+        //                ret.back().to += " ";
+        //                // Why does this not work?
+        //                continue;
+        //            }
+        //        }
+
         ret.push_back({
             .from = "",
             .to = FString{1, c},

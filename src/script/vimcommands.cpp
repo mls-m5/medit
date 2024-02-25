@@ -113,7 +113,6 @@ CursorRange around(char c, Cursor cursor) {
 VimCommandType getType(FStringView &buffer) {
     auto commandType = VimCommandType::Visual;
 
-    //    if (modeName == VimMode::Normal) {
     auto first = static_cast<uint32_t>(buffer.front().c);
 
     switch (first) {
@@ -133,14 +132,12 @@ VimCommandType getType(FStringView &buffer) {
     if (commandType != VimCommandType::Other) {
         buffer = buffer.substr(1);
     }
-    //    }
 
     return commandType;
 }
 
 std::optional<std::function<CursorRange(EditorCursor, VimMode, int)>>
 getSelection(FStringView buffer, VimCommandType type) {
-
     if (buffer.empty()) {
         throw "error";
     }

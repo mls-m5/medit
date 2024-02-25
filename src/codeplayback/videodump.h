@@ -57,7 +57,6 @@ struct VideoDump {
             surface.saveBMP(path.c_str());
             return path;
         }));
-        //        paths.push_back(path);
         ++imgNum;
     }
 
