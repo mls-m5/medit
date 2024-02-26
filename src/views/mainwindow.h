@@ -4,10 +4,6 @@
 #include "meditfwd.h"
 #include "script/jumplist.h"
 #include "script/localenvironment.h"
-#include "views/commandpalette.h"
-#include "views/completeview.h"
-#include "views/editor.h"
-#include "views/locator.h"
 #include "views/window.h"
 #include <memory>
 
@@ -17,10 +13,10 @@ struct MainWindow : public Window {
         _editors; // Shared ptr to allow for weak ptr
     InteractionHandling _interactions;
     std::shared_ptr<LocalEnvironment> _env;
-    Editor _console;
-    Locator _locator;
-    CommandPalette _commandPalette;
-    CompleteView _completeView;
+    std::shared_ptr<Editor> _console;
+    std::shared_ptr<Locator> _locator;
+    std::shared_ptr<CommandPalette> _commandPalette;
+    std::shared_ptr<CompleteView> _completeView;
     size_t _split = 10;
     FString _splitString;
     IKeySink *_inputFocus = nullptr;

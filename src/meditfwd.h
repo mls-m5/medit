@@ -30,6 +30,9 @@ class Archive;
 
 class MainWindow;
 class IWindow;
+class Locator;
+class CommandPalette;
+class CompleteView;
 
 class CoreEnvironment;
 class BufferEvent;

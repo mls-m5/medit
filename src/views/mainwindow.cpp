@@ -20,6 +20,10 @@
 #include "text/cursorrangeops.h"
 #include "text/fstring.h"
 #include "text/fstringview.h"
+#include "views/commandpalette.h"
+#include "views/completeview.h"
+#include "views/editor.h"
+#include "views/locator.h"
 #include <filesystem>
 #include <memory>
 #include <string_view>
@@ -33,10 +37,12 @@ MainWindow::MainWindow(CoreEnvironment &core,
     , _editors{}
     , _interactions{*this}
     , _env(std::make_unique<LocalEnvironment>(core, *this, context))
-    , _console(this, _env->core().files().create())
-    , _locator(this, core.project())
-    , _commandPalette(this, StandardCommands::get())
-    , _completeView(this, core.plugins().get<ICompletionSource>())
+    , _console(std::make_shared<Editor>(this, _env->core().files().create()))
+    , _locator(std::make_shared<Locator>(this, core.project()))
+    , _commandPalette(
+          std::make_shared<CommandPalette>(this, StandardCommands::get()))
+    , _completeView(std::make_shared<CompleteView>(
+          this, core.plugins().get<ICompletionSource>()))
     , _currentEditor(0) {
 
     for (int i = 0; i < 1; ++i) {
@@ -48,9 +54,9 @@ MainWindow::MainWindow(CoreEnvironment &core,
     for (auto &editor : _editors) {
         editor->showLines(true);
     }
-    _console.showLines(false);
-    _console.buffer().assignFile(std::make_unique<UnsavableFile>("Console"));
-    _env->console(&_console);
+    _console->showLines(false);
+    _console->buffer().assignFile(std::make_unique<UnsavableFile>("Console"));
+    _env->console(_console.get());
     _env->core().subscribeToLogCallback(
         [this](LogType type, std::string data) {
             _env->context().guiQueue().addTask(
@@ -62,11 +68,11 @@ MainWindow::MainWindow(CoreEnvironment &core,
                         showConsole();
                         // TODO: Create some nice formatting for errors and add
                         // that. The current is unusable
-                        _console.buffer().pushBack(FString{data});
-                        _console.cursor(
-                            Cursor(_console.buffer(),
+                        _console->buffer().pushBack(FString{data});
+                        _console->cursor(
+                            Cursor(_console->buffer(),
                                    0,
-                                   _console.buffer().lines().size() - 1));
+                                   _console->buffer().lines().size() - 1));
                     }
                 });
         },
@@ -78,12 +84,16 @@ MainWindow::MainWindow(CoreEnvironment &core,
         screen.palette(palette);
     }
 
-    _locator.visible(false);
-    _locator.mode(createInsertMode());
-    _locator.showLines(false);
+    _locator->visible(false); // #include "views/commandpalette.h"
+    // #include "views/completeview.h"
+    // #include "views/editor.h"
+    // #include "views/locator.h"
 
-    _locator.callback([this](auto &&path) {
-        _locator.visible(false);
+    _locator->mode(createInsertMode());
+    _locator->showLines(false);
+
+    _locator->callback([this](auto &&path) {
+        _locator->visible(false);
         _inputFocus = currentEditor();
         if (path.empty()) {
             return;
@@ -91,19 +101,19 @@ MainWindow::MainWindow(CoreEnvironment &core,
         open(env().project().settings().root / path);
     });
 
-    _commandPalette.visible(false);
-    _commandPalette.mode(createInsertMode());
-    _commandPalette.showLines(false);
-    _commandPalette.callback([this](auto &&path) {
-        _commandPalette.visible(false);
+    _commandPalette->visible(false);
+    _commandPalette->mode(createInsertMode());
+    _commandPalette->showLines(false);
+    _commandPalette->callback([this](auto &&path) {
+        _commandPalette->visible(false);
         if (!path.empty()) {
             StandardCommands::get().namedCommands.at(path)(_env);
         }
         _inputFocus = currentEditor();
     });
 
-    _completeView.visible(false);
-    _completeView.callback([this](auto &&result) {
+    _completeView->visible(false);
+    _completeView->callback([this](auto &&result) {
         auto editor = currentEditor();
         auto cursor = editor->cursor();
         for (auto c : result.value) {
@@ -147,21 +157,21 @@ void MainWindow::resize(size_t w, size_t h) {
         }
     }
 
-    _console.width(width());
-    _console.height(_split -
-                    2); // 1 character for toolbar - 2 for how numbers works
-    _console.x(0);
-    _console.y(height() - _split + 1);
+    _console->width(width());
+    _console->height(_split -
+                     2); // 1 character for toolbar - 2 for how numbers works
+    _console->x(0);
+    _console->y(height() - _split + 1);
 
-    _locator.x(0);
-    _locator.y(0);
-    _locator.width(width());
-    _locator.height(1);
+    _locator->x(0);
+    _locator->y(0);
+    _locator->width(width());
+    _locator->height(1);
 
-    _commandPalette.x(0);
-    _commandPalette.y(0);
-    _commandPalette.width(width());
-    _commandPalette.height(1);
+    _commandPalette->x(0);
+    _commandPalette->y(0);
+    _commandPalette->width(width());
+    _commandPalette->height(1);
 
     _splitString = FString{width(), FChar{'-', 6}};
 }
@@ -175,19 +185,19 @@ void MainWindow::draw(IScreen &screen) {
         editor->draw(screen);
     }
     if (_env->showConsole()) {
-        _console.draw(screen);
+        _console->draw(screen);
         screen.draw(0, height() - _split, _splitString);
     }
 
-    if (_inputFocus == &_locator) {
-        _locator.draw(screen);
+    if (_inputFocus == _locator.get()) {
+        _locator->draw(screen);
     }
 
-    if (_inputFocus == &_commandPalette) {
-        _commandPalette.draw(screen);
+    if (_inputFocus == _commandPalette.get()) {
+        _commandPalette->draw(screen);
     }
 
-    _completeView.draw(screen);
+    _completeView->draw(screen);
 
     {
         auto &editor = _editors.at(_currentEditor);
@@ -214,8 +224,8 @@ void MainWindow::updateCursor(IScreen &screen) const {
 }
 
 bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
-    if (_inputFocus == currentEditor() && _completeView.visible()) {
-        if (_completeView.keyPress(env)) {
+    if (_inputFocus == currentEditor() && _completeView->visible()) {
+        if (_completeView->keyPress(env)) {
             if (auto e = currentEditor()) {
                 env->core().files().updateHighlighting();
             }
@@ -289,14 +299,14 @@ void MainWindow::open(std::filesystem::path path,
 }
 
 Editor *MainWindow::currentEditor() {
-    if (_locator.visible()) {
-        return &_locator;
+    if (_locator->visible()) {
+        return _locator.get();
     }
-    if (_commandPalette.visible()) {
-        return &_commandPalette;
+    if (_commandPalette->visible()) {
+        return _commandPalette.get();
     }
-    if (_env->showConsole() && _inputFocus == &_console) {
-        return &_console;
+    if (_env->showConsole() && _inputFocus == _console.get()) {
+        return _console.get();
     }
     if (_currentEditor >= _editors.size()) {
         _currentEditor = _editors.size() - 1;
@@ -427,7 +437,7 @@ void MainWindow::escape() {
 
 void MainWindow::showConsole() {
     _env->showConsole(true);
-    _inputFocus = &_console;
+    _inputFocus = _console.get();
 }
 
 void MainWindow::splitEditor() {
@@ -470,25 +480,21 @@ void MainWindow::format() {
 }
 
 void MainWindow::autoComplete() {
-    // if (_activePopup) {
-    //     return;
-    // }
-
     if (auto editor = currentEditor()) {
         editor->cursor(fix(editor->cursor()));
 
         Cursor cursor = editor->cursor();
-        _completeView.setCursor(cursor, *editor);
-        _completeView.triggerShow(_env);
+        _completeView->setCursor(cursor, *editor);
+        _completeView->triggerShow(_env);
     }
 }
 
 void MainWindow::showLocator() {
-    _locator.visible(true);
-    _inputFocus = &_locator;
+    _locator->visible(true);
+    _inputFocus = _locator.get();
 }
 
 void MainWindow::showCommandPalette() {
-    _commandPalette.visible(true);
-    _inputFocus = &_commandPalette;
+    _commandPalette->visible(true);
+    _inputFocus = _commandPalette.get();
 }

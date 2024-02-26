@@ -1,4 +1,5 @@
 #include "browsefileinteraction.h"
+#include "files/project.h"
 #include "script/ienvironment.h"
 #include "script/interaction.h"
 #include "syntax/palette.h"
