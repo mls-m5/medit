@@ -296,6 +296,8 @@ void MainWindow::open(std::filesystem::path path,
     BasicHighlighting::highlightStatic(editor->buffer());
 
     updateTitle();
+
+    _jumpList.updatePosition(editor->shared_from_this());
 }
 
 Editor *MainWindow::currentEditor() {

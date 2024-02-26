@@ -19,21 +19,15 @@ struct JumpList {
         std::weak_ptr<Editor> editor;
         std::filesystem::path path;
         Position pos;
-        bool isCommited = false;
     };
 
     void updatePosition(std::shared_ptr<Editor> currentEditor) {
         if (!_positions.empty()) {
             auto &p = currentPosition();
-            if (p.isCommited) {
-                if (p.editor.lock() == currentEditor &&
-                    p.pos == currentEditor->cursor().pos()) {
-                    return;
-                }
-            }
-            if (p.editor.lock() == currentEditor &&
-                p.pos.y() < currentEditor->cursor().pos().y() + 2 &&
-                p.pos.y() > currentEditor->cursor().pos().y() - 2) {
+
+            auto cursorY = currentEditor->cursor().y();
+            if (p.path == currentEditor->path() && p.pos.y() <= cursorY + 1 &&
+                p.pos.y() + 1 >= cursorY) {
                 p.pos = currentEditor->cursor().pos();
                 return;
             }
@@ -52,6 +46,13 @@ struct JumpList {
         }
         else {
             _positions.push_back(p);
+
+            while (_positions.size() > maxLength) {
+                _positions.erase(_positions.begin());
+                if (_currentIndex > 0) {
+                    --_currentIndex;
+                }
+            }
         }
     }
 
@@ -94,4 +95,5 @@ private:
 
     std::vector<JumpPosition> _positions;
     size_t _currentIndex = 0;
+    static constexpr size_t maxLength = 100;
 };
