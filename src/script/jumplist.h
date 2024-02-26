@@ -22,11 +22,9 @@ struct JumpList {
         bool isCommited = false;
     };
 
-    std::vector<JumpPosition> _positions;
-
     void updatePosition(std::shared_ptr<Editor> currentEditor) {
         if (!_positions.empty()) {
-            auto &p = _positions.back();
+            auto &p = currentPosition();
             if (p.isCommited) {
                 if (p.editor.lock() == currentEditor &&
                     p.pos == currentEditor->cursor().pos()) {
@@ -36,28 +34,64 @@ struct JumpList {
             if (p.editor.lock() == currentEditor &&
                 p.pos.y() < currentEditor->cursor().pos().y() + 2 &&
                 p.pos.y() > currentEditor->cursor().pos().y() - 2) {
+                p.pos = currentEditor->cursor().pos();
                 return;
             }
         }
 
-        // TODO: First implementation. Update stuff
-        _positions.push_back(JumpPosition{
+        ++_currentIndex;
+
+        auto p = JumpPosition{
             .editor = currentEditor,
             .path = currentEditor->path(),
             .pos = currentEditor->cursor().pos(),
-        });
+        };
+
+        if (_currentIndex < _positions.size()) {
+            _positions.at(_currentIndex) = p;
+        }
+        else {
+            _positions.push_back(p);
+        }
     }
 
     std::optional<JumpPosition> back() {
+        if (_currentIndex <= 0) {
+            return std::nullopt;
+        }
+
         if (_positions.size() < 2) {
             return std::nullopt;
         }
-        _positions.pop_back();
-        return _positions.back();
+
+        --_currentIndex;
+
+        return _positions.at(_currentIndex);
     }
 
     std::optional<JumpPosition> forward() {
-        // Not implementedt
-        return std::nullopt;
+        if (_currentIndex >= _positions.size() - 1) {
+            return std::nullopt;
+        }
+
+        ++_currentIndex;
+
+        return _positions.at(_currentIndex);
     }
+
+private:
+    JumpPosition &currentPosition() {
+        if (_positions.empty()) {
+            return _positions.emplace_back();
+        }
+
+        if (_currentIndex >= _positions.size()) {
+            _currentIndex = _positions.size() - 1;
+        }
+
+        return _positions.at(_currentIndex);
+    }
+
+    std::vector<JumpPosition> _positions;
+    size_t _currentIndex = 0;
 };
