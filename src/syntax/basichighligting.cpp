@@ -94,6 +94,14 @@ const auto wordlistRust = std::vector<std::string_view>{
     "while",  "async", "await", "dyn",
 };
 
+const auto wordlistMsk = std::vector<std::string_view>{
+    "as",    "break",  "const",  "else",   "enum",   "extern",    "false",
+    "fn",    "for",    "if",     "impl",   "in",     "let",       "loop",
+    "match", "mod",    "move",   "mut",    "pub",    "ref",       "return",
+    "self",  "Self",   "static", "struct", "super",  "trait",     "true",
+    "type",  "unsafe", "use",    "where",  "while",  "async",     "await",
+    "dyn",   "export", "i32",    "i64",    "String", "StringView"};
+
 const auto wordlistMake = std::vector<std::string_view>{
     "$@",
     "$<",
@@ -312,6 +320,9 @@ const std::vector<std::string_view> *getWordList(
     }
     if (isRust(extension)) {
         return &wordlistRust;
+    }
+    if (isMsk(extension)) {
+        return &wordlistMsk;
     }
     if (isMake(extension)) {
         return &wordlistMake;

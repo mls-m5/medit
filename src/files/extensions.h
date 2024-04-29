@@ -99,13 +99,17 @@ inline bool isClangFormat(const std::filesystem::path &path) {
     return path.has_filename() && path.filename() == ".clang-format";
 }
 
+inline bool isMsk(const std::filesystem::path &path) {
+    return path.extension() == ".msk" || path.extension() == ".msp";
+}
+
 inline bool isKnownExtension(const std::filesystem::path &path) {
     const auto checks = std::to_array(
-        {isCppHeader, isCppSource, isCSource,    isCpp,        isJson,
-         isMarkdown,  isMake,      isMatmake,    isCmakeLists, isTextFile,
-         isHtml,      isJs,        isPython,     isJava,       isCSharp,
-         isPhp,       isGo,        isXml,        isSvg,        isXhtml,
-         isRust,      isGitIgnore, isClangFormat});
+        {isCppHeader, isCppSource, isCSource,     isCpp,        isJson,
+         isMarkdown,  isMake,      isMatmake,     isCmakeLists, isTextFile,
+         isHtml,      isJs,        isPython,      isJava,       isCSharp,
+         isPhp,       isGo,        isXml,         isSvg,        isXhtml,
+         isRust,      isGitIgnore, isClangFormat, isMsk});
 
     for (const auto &check : checks) {
         if (check(path)) {

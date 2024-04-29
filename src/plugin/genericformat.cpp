@@ -123,6 +123,16 @@ bool formatRust(std::filesystem::path path, Editor &editor) {
     return true;
 }
 
+bool formatMsk(std::filesystem::path path, Editor &editor) {
+    if (isMsk(path)) {
+        return false;
+    }
+
+    // Todo implement this
+
+    return true;
+}
+
 } // namespace
 
 bool GenericFormat::format(Editor &editor) {
@@ -136,7 +146,8 @@ bool GenericFormat::format(Editor &editor) {
                                           formatGo,
                                           formatCMake,
                                           formatPython,
-                                          formatRust};
+                                          formatRust,
+                                          formatMsk};
 
     for (auto &f : functions) {
         if (f(path, editor)) {
