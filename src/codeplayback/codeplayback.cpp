@@ -40,7 +40,7 @@
 // #else
 
 #include "screen/guiscreen.h"
-using ScreenType = GuiScreen;
+// using ScreenType = GuiScreen;
 
 // #endif
 
@@ -72,20 +72,20 @@ int main(int argc, char *argv[]) {
               << std::endl;
     std::cout << "output path " << settings.outputPath << std::endl;
 
-    auto screen = ScreenType{};
-    screen.fontSize(settings.fontSize);
+    auto screen = createGuiScreen();
+    screen->fontSize(settings.fontSize);
 
-    screen.resize(settings.viewportWidth, settings.viewportHeight);
+    screen->resize(settings.viewportWidth, settings.viewportHeight);
 
     {
         auto palette = Palette{};
         palette.load(findConfig("data/oblivion-bg-black.json"));
-        screen.palette(palette);
+        screen->palette(palette);
     }
 
     std::cout << "medit code playback" << std::endl;
 
-    auto window = PlaybackWindow{screen.width(), screen.height()};
+    auto window = PlaybackWindow{screen->width(), screen->height()};
 
     auto editor = Editor{&window, std::make_shared<Buffer>()};
     editor.showLines(settings.hasLineNumbers);
@@ -95,11 +95,11 @@ int main(int argc, char *argv[]) {
     /// Assigning for highlighting to be correct
     buffer.assignFile(std::make_unique<File>("/tmp/trashasthoeu.cpp"));
 
-    editor.width(screen.width());
-    editor.height(screen.height() - 1);
+    editor.width(screen->width());
+    editor.height(screen->height() - 1);
 
     bool isRunning = true;
-    screen.subscribe([&isRunning](IScreen::EventListT list) {
+    screen->subscribe([&isRunning](IScreen::EventListT list) {
         for (auto e : list) {
             if (auto k = std::get_if<KeyEvent>(&e)) {
                 if (k->key == Key::Quit) {
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
         }
     });
 
-    auto videoDump = VideoDump{screen};
+    auto videoDump = VideoDump{*screen};
     videoDump.fps = settings.fps;
 
     auto edits = std::vector<BufferEdit>{};
@@ -145,13 +145,13 @@ int main(int argc, char *argv[]) {
     videoDump.outputPath = outputPath;
 
     if (settings.cursor == "block") {
-        screen.cursorStyle(CursorStyle::Block);
+        screen->cursorStyle(CursorStyle::Block);
     }
     if (settings.cursor == "hidden" || settings.cursor == "off") {
-        screen.cursorStyle(CursorStyle::Hidden);
+        screen->cursorStyle(CursorStyle::Hidden);
     }
     else {
-        screen.cursorStyle(CursorStyle::Beam);
+        screen->cursorStyle(CursorStyle::Beam);
     }
 
     auto count = edits.size();
@@ -164,9 +164,9 @@ int main(int argc, char *argv[]) {
         int num = 1;
 
         auto dump = [&] {
-            editor.draw(screen);
-            editor.updateCursor(screen);
-            screen.refresh();
+            editor.draw(*screen);
+            editor.updateCursor(*screen);
+            screen->refresh();
             videoDump.dump();
             ++num;
         };
@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
                         static_cast<ptrdiff_t>(editor.cursor().y());
             // Animate motion if the jump is to large
             if (std::abs(dist) > 3) {
-                screen.cursorStyle(CursorStyle::Block);
+                screen->cursorStyle(CursorStyle::Block);
 
                 const auto cursor = e.position;
                 ptrdiff_t sign = dist > 0 ? 1 : -1;
@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
                         cursor.buffer(), cursor.x(), static_cast<size_t>(y)});
                     dump();
                 }
-                screen.cursorStyle(CursorStyle::Beam);
+                screen->cursorStyle(CursorStyle::Beam);
             }
 
             const auto cursor = apply(e);
@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
         videoDump.finish();
     }
 
-    screen.unsubscribe();
+    screen->unsubscribe();
 
     auto returnCode = videoDump.finish();
 

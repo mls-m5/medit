@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <thread>
 #include <vector>
+#include "screen/ipixelsource.h"
 
 struct VideoDump {
     std::vector<std::future<std::filesystem::path>> paths;
@@ -21,14 +22,14 @@ struct VideoDump {
     std::vector<std::thread> threads; // For encoding
     int fps = 24;
 
-    GuiScreen *screen = nullptr;
+    IPixelSource *screen = nullptr;
 
     VideoDump(const VideoDump &) = delete;
     VideoDump(VideoDump &&) = delete;
     VideoDump &operator=(const VideoDump &) = delete;
     VideoDump &operator=(VideoDump &&) = delete;
 
-    VideoDump(GuiScreen &screen)
+    VideoDump(IPixelSource &screen)
         : screen{&screen} {}
 
     ~VideoDump() {

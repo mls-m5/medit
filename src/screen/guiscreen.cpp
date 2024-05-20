@@ -10,20 +10,24 @@
 #ifndef __EMSCRIPTEN__
 
 #include "SDL2/SDL_keyboard.h"
-#include "condition_variable"
-#include "core/debugoutput.h"
 #include "core/os.h"
 #include "core/threadvalidation.h"
 #include "files/fontlocator.h"
 #include "matrixscreen.h"
+#include "screen/ipixelsource.h"
+#include "screen/iscreen.h"
 #include "sdlpp/events.hpp"
 #include "sdlpp/keyboard.hpp"
 #include "sdlpp/render.hpp"
 #include "sdlpp/window.hpp"
 #include "syntax/color.h"
+#include "syntax/palette.h"
+#include "text/fstringview.h"
 #include "text/position.h"
 #include <array>
-#include <iostream>
+#include <memory>
+#include <mutex>
+#include <thread>
 
 namespace {
 
@@ -108,22 +112,24 @@ Modifiers getModState() {
 }
 } // namespace
 
-struct GuiScreen::Buffer {
+/// The rendering and gui is running on one thread and assumes the application
+/// calls from one single thread
+struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
     std::vector<FString> lines;
     std::vector<FString> shownLines;
     std::mutex refreshMutex;
-    CursorStyle cursorStyle = CursorStyle::Block;
-    size_t width = 0;
-    size_t height = 0;
+    CursorStyle _cursorStyle = CursorStyle::Block;
+    size_t _width = 0;
+    size_t _height = 0;
     size_t pixelWidth = 0;
     size_t pixelHeight = 0;
-    Position cursorPos;
+    Position _cursorPos;
 
     sdl::Window window;
     sdl::Renderer renderer;
     matscreen::MatrixScreen screen;
 
-    CallbackT _callback;
+    IGuiScreen::CallbackT _callback;
 
     struct Style {
         sdl::Color fg = sdl::White;
@@ -131,15 +137,20 @@ struct GuiScreen::Buffer {
     };
 
     std::vector<Style> _styles;
-
-    std::thread _screenThread;
+    std::thread _thread;
 
     bool _isRunning = true;
     bool _shouldRefresh = true;
 
     ThreadValidation _tv{"gui screen"};
 
-    Buffer(int width, int height, int fontSize)
+    /// Mutex used in creation to make sure some functions used for setup is not
+    /// accessed to early
+    std::mutex _createMutex;
+
+    Palette _palette;
+
+    GuiScreen(int width, int height, int fontSize)
         : window{"medit",
                  SDL_WINDOWPOS_CENTERED,
                  SDL_WINDOWPOS_CENTERED,
@@ -150,9 +161,27 @@ struct GuiScreen::Buffer {
                    SDL_RENDERER_ACCELERATED,
                    0 * SDL_RENDERER_PRESENTVSYNC}
         , screen{width, height, fontPath(), fontSize} {
+        // std::condition_variable cv;
+
         sdl::startTextInput();
         _styles.resize(16);
-        resize(width, height);
+        resizeInternal(width, height);
+
+        auto lock = std::unique_lock{_createMutex};
+
+        _thread = std::thread([this] {
+            _tv.reset();
+            setThreadName("gui screen");
+            loop();
+        });
+    }
+
+    ~GuiScreen() {
+        // Just make the guiloop run and exit, and class is
+        // specified to avoid virtual function call in destructor
+        GuiScreen::refresh();
+        stop();
+        _thread.join();
     }
 
     void stop() {
@@ -160,7 +189,7 @@ struct GuiScreen::Buffer {
     }
 
     // Save data to be drawn
-    void draw(size_t x, size_t y, FStringView str) {
+    void draw(size_t x, size_t y, FStringView str) override {
         if (y >= lines.size()) {
             return;
         }
@@ -171,7 +200,7 @@ struct GuiScreen::Buffer {
         }
     }
 
-    void title(std::string title) {
+    void title(std::string title) override {
         window.title(title.c_str());
     }
 
@@ -197,7 +226,7 @@ struct GuiScreen::Buffer {
         auto dims = sdl::Dims{width / screen.cache.charWidth,
                               height / screen.cache.charHeight};
 
-        resize(dims.w, dims.h, shouldUpdateWindow);
+        resizeInternal(dims.w, dims.h, shouldUpdateWindow);
 
         pixelWidth = width;
         pixelHeight = height;
@@ -205,8 +234,12 @@ struct GuiScreen::Buffer {
         return dims;
     }
 
-    void resize(int width, int height, bool shouldUpdateWindow = true) {
-        if (width == this->width && height == this->height) {
+    void resize(int width, int height) override {
+        resizeInternal(width, height, true);
+    }
+
+    void resizeInternal(int width, int height, bool shouldUpdateWindow = true) {
+        if (width == this->_width && height == this->_height) {
             return;
         }
 
@@ -228,8 +261,8 @@ struct GuiScreen::Buffer {
             }
         }
 
-        this->width = width;
-        this->height = height;
+        this->_width = width;
+        this->_height = height;
 
         if (shouldUpdateWindow) {
             window.size(width * screen.cache.charWidth,
@@ -241,12 +274,12 @@ struct GuiScreen::Buffer {
         screen.resize(width, height);
     }
 
-    void fontSize(int size) {
+    void fontSize(int size) override {
         auto l = std::lock_guard{
             refreshMutex}; /// Make sure the lines is not currently being drawn
         screen.resizeFont(size);
-        pixelWidth = screen.cache.charWidth * width;
-        pixelHeight = screen.cache.charHeight * height;
+        pixelWidth = screen.cache.charWidth * _width;
+        pixelHeight = screen.cache.charHeight * _height;
     }
 
     void fill(FChar color) {
@@ -304,7 +337,7 @@ struct GuiScreen::Buffer {
     }
 
     // Update the screen
-    void refresh() {
+    void updateScreen() {
         auto duration = ProfileDuration{};
 
         auto l = std::lock_guard{refreshMutex};
@@ -335,11 +368,11 @@ struct GuiScreen::Buffer {
             auto cellWidth = screen.cache.charWidth;
             auto cellHeight = screen.cache.charHeight;
 
-            switch (cursorStyle) {
+            switch (_cursorStyle) {
             case CursorStyle::Beam:
                 renderer.fillRect(
-                    sdl::Rect{static_cast<int>(cellWidth * cursorPos.x()),
-                              static_cast<int>(cellHeight * cursorPos.y()),
+                    sdl::Rect{static_cast<int>(cellWidth * _cursorPos.x()),
+                              static_cast<int>(cellHeight * _cursorPos.y()),
                               1,
                               static_cast<int>(cellHeight)});
                 break;
@@ -347,7 +380,7 @@ struct GuiScreen::Buffer {
                 break;
             default:
                 screen.renderCursor(
-                    renderer, rect, cursorPos.x(), cursorPos.y());
+                    renderer, rect, _cursorPos.x(), _cursorPos.y());
                 break;
             }
         }
@@ -358,7 +391,7 @@ struct GuiScreen::Buffer {
         }
     }
 
-    size_t addStyle(const Color &fg, const Color &bg, size_t index) {
+    size_t addStyle(const Color &fg, const Color &bg, size_t index) override {
         if (index != std::numeric_limits<size_t>::max() &&
             index < _styles.size()) {
         }
@@ -377,11 +410,12 @@ struct GuiScreen::Buffer {
         return index;
     }
 
-    void subscribe(CallbackT f) {
+    void subscribe(IGuiScreen::CallbackT f) override {
+        auto lock = std::unique_lock{_createMutex};
         _callback = f;
     }
 
-    void unsubscribe() {
+    void unsubscribe() override {
         _callback = {};
     }
 
@@ -390,7 +424,7 @@ struct GuiScreen::Buffer {
         // TODO: Refactor this to use sdls wating functions
         using namespace std::literals;
         for (; _isRunning;) {
-            auto list = EventListT{};
+            auto list = IScreen::EventListT{};
 
             if (auto e = getInput(true);
                 !std::holds_alternative<NullEvent>(e)) {
@@ -406,7 +440,7 @@ struct GuiScreen::Buffer {
             }
 
             if (_shouldRefresh) {
-                refresh(); // TODO: Only refresh when changes
+                updateScreen(); // TODO: Only refresh when changes
                 _shouldRefresh = false;
             }
         }
@@ -509,8 +543,8 @@ struct GuiScreen::Buffer {
                 resizePixels(
                     sdlEvent.window.data1, sdlEvent.window.data2, false);
                 auto r = ResizeEvent{};
-                r.width = width;
-                r.height = height;
+                r.width = _width;
+                r.height = _height;
                 return r;
                 break;
             }
@@ -540,7 +574,7 @@ struct GuiScreen::Buffer {
         return NullEvent{};
     }
 
-    sdl::Surface readPixels() {
+    sdl::Surface readPixels() override {
         using namespace std::chrono_literals;
         while (_shouldRefresh) {
             std::this_thread::sleep_for(1ms);
@@ -563,99 +597,51 @@ struct GuiScreen::Buffer {
 
         return surface;
     }
-};
 
-void GuiScreen::draw(size_t x, size_t y, FStringView str) {
-    _buffer->draw(x, y, str);
-}
-
-void GuiScreen::refresh() {
-    auto duration = ProfileDuration{};
-    if (_palette.isChanged()) {
-        _palette.update(*this);
+    std::string clipboardData() override {
+        return SDL_GetClipboardText();
     }
-    _buffer->copyLines();
-}
 
-void GuiScreen::clear() {
-    _buffer->fill({});
-}
+    void clipboardData(std::string text) override {
+        SDL_SetClipboardText(text.data());
+    }
 
-void GuiScreen::cursor(size_t x, size_t y) {
-    _buffer->cursorPos.x(x);
-    _buffer->cursorPos.y(y);
-}
+    void clear() override {
+        fill({});
+    }
 
-GuiScreen::GuiScreen() {
-    std::condition_variable cv;
+    void cursor(size_t x, size_t y) override {
+        _cursorPos.x(x);
+        _cursorPos.y(y);
+    }
 
-    _thread = std::thread([this, &cv] {
-        setThreadName("gui screen");
-        _buffer = std::make_unique<Buffer>(85, 40, 14);
-        cv.notify_one();
-        _buffer->loop();
-    });
+    size_t width() const override {
+        return static_cast<size_t>(_width);
+    }
 
-    auto lock = std::unique_lock{_mutex};
-    cv.wait(lock);
-}
+    size_t height() const override {
+        return static_cast<size_t>(_height);
+    }
 
-GuiScreen::~GuiScreen() noexcept {
-    // Just make the guiloop run and exit, and class is
-    // specified to avoid virtual function call in destructor
-    GuiScreen::refresh();
-    _buffer->stop();
-    _thread.join();
-    _buffer.reset();
+    void cursorStyle(CursorStyle style) override {
+        _cursorStyle = style;
+    }
+
+    void palette(const Palette &palette) override {
+        _palette = palette;
+    }
+
+    void refresh() override {
+        auto duration = ProfileDuration{};
+        if (_palette.isChanged()) {
+            _palette.update(*this);
+        }
+        copyLines();
+    }
 };
 
-void GuiScreen::subscribe(CallbackT f) {
-    _buffer->subscribe(f);
-}
-
-void GuiScreen::unsubscribe() {
-    _buffer->unsubscribe();
-}
-
-size_t GuiScreen::width() const {
-    return static_cast<size_t>(_buffer->width);
-}
-
-size_t GuiScreen::height() const {
-    return static_cast<size_t>(_buffer->height);
-}
-
-void GuiScreen::title(std::string title) {
-    _buffer->title(title);
-}
-
-void GuiScreen::cursorStyle(CursorStyle style) {
-    _buffer->cursorStyle = style;
-    return;
-}
-
-size_t GuiScreen::addStyle(const Color &fg, const Color &bg, size_t index) {
-    return _buffer->addStyle(fg, bg, index);
-}
-
-std::string GuiScreen::clipboardData() {
-    return SDL_GetClipboardText();
-}
-
-void GuiScreen::clipboardData(std::string text) {
-    SDL_SetClipboardText(text.data());
-}
-
-void GuiScreen::fontSize(int fontSize) {
-    _buffer->fontSize(fontSize);
-}
-
-void GuiScreen::resize(int width, int height) {
-    _buffer->resize(width, height);
-}
-
-sdl::Surface GuiScreen::readPixels() {
-    return _buffer->readPixels();
+std::unique_ptr<IGuiScreen> createGuiScreen() {
+    return std::make_unique<GuiScreen>(85, 40, 14);
 }
 
 #endif

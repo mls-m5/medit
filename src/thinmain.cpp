@@ -7,7 +7,7 @@
 #include "screen/guiscreen.h"
 
 int thinMain(const Settings &settings) {
-    auto screen = std::make_shared<GuiScreen>();
+    auto screen = std::shared_ptr{createGuiScreen()};
     auto dscreen = std::make_shared<DeserializeScreen>(screen);
 
     auto connection = [&settings]() -> std::shared_ptr<IConnection> {

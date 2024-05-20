@@ -23,9 +23,13 @@
 #include "core/jstimer.h"
 #include "screen/htmlscreen.h"
 
-using ScreenType = HtmlScreen;
+// using ScreenType = HtmlScreen;
 using QueueType = JsJobQueue;
 using TimerType = JsTimer;
+
+std::unique_ptr<HtmlScreen> createScreen() {
+    return std::make_unique<HtmlScreen>();
+}
 
 #else
 
@@ -37,9 +41,13 @@ using TimerType = JsTimer;
 #include "screen/ncursesscreen.h"
 #include "screen/serializescreen.h"
 
-using ScreenType = GuiScreen;
+// using ScreenType = GuiScreen;
 using QueueType = JobQueue;
 using TimerType = Timer;
+
+std::unique_ptr<IGuiScreen> createScreen() {
+    return createGuiScreen();
+}
 
 #endif
 
@@ -63,8 +71,8 @@ struct User {
             nativeScreen = std::make_unique<NCursesScreen>();
         }
         else if (settings.style == UiStyle::Remote) {
-            auto deserializeScreen = std::make_shared<DeserializeScreen>(
-                std::make_unique<ScreenType>());
+            auto deserializeScreen =
+                std::make_shared<DeserializeScreen>(createScreen());
 
             nativeScreen = std::make_unique<SerializeScreen>(deserializeScreen);
         }
@@ -81,7 +89,7 @@ struct User {
             throw std::runtime_error{"server should be handled differently"};
         }
         else {
-            nativeScreen = std::make_unique<ScreenType>();
+            nativeScreen = createScreen();
         }
         setup(settings, core, context);
     }
