@@ -110,6 +110,11 @@ Modifiers getModState() {
         static_cast<int>(ctrl ? Modifiers::Ctrl : Modifiers::None) |
         static_cast<int>(alt ? Modifiers::Alt : Modifiers::None));
 }
+
+bool isNumericKey(SDL_Scancode code) {
+    return code >= SDL_SCANCODE_1 && code <= SDL_SCANCODE_0;
+}
+
 } // namespace
 
 /// The rendering and gui is running on one thread and assumes the application
@@ -161,7 +166,6 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
                    SDL_RENDERER_ACCELERATED,
                    0 * SDL_RENDERER_PRESENTVSYNC}
         , screen{width, height, fontPath(), fontSize} {
-        // std::condition_variable cv;
 
         sdl::startTextInput();
         _styles.resize(16);
@@ -481,7 +485,22 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
                 return NullEvent{};
             }
 
-            if (sdlEvent.key.keysym.mod == 64) {
+            auto mod = sdlEvent.key.keysym.mod;
+            bool isAltgr = (mod & KMOD_RALT);
+
+            if (isAltgr) {
+                if (isNumericKey(sdlEvent.key.keysym.scancode)) {
+                    // For some reason SDL2 outputs for example @ on a swedish
+                    // keyboard and then also passes the non text key event.
+                    // This just ignores the event that is not text
+                    // Note: This is checked on linux, but not for windows where
+                    // you could press ctrl+alt to have the same behaviour as
+                    // altgr
+                    return NullEvent{};
+                }
+            }
+
+            if (mod == 64) {
                 auto sym = sdlEvent.key.keysym.sym;
 
                 if (sym == 'v') {
