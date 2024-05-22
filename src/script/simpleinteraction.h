@@ -1,10 +1,7 @@
 #pragma once
 
 #include "text/fstring.h"
-#include <algorithm>
 #include <istream>
-#include <memory>
-#include <ostream>
 #include <string>
 #include <string_view>
 #include <vector>

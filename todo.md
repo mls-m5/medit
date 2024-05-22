@@ -73,9 +73,9 @@ Todo:
    - [x] Status
    - [ ] Blame
    - [ ] Commit (interaction where you select which files and write message)
-- [ ] GDB debugger integration
-   - [ ] Basic operations, run, set breakpoints step
-   - [ ] Visualize breakpoints (using annotation system)
+- [x] GDB debugger integration
+   - [x] Basic operations, run, set breakpoints step
+   - [x] Visualize breakpoints (using annotation system)
 - [ ] Console
    - [x] Interact with console (focus, scroll, keypresses etc)
    - [ ] Support for multiple consoles for different usages.

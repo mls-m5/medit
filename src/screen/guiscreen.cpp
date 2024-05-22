@@ -130,9 +130,9 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
     size_t pixelHeight = 0;
     Position _cursorPos;
 
-    sdl::Window window;
-    sdl::Renderer renderer;
-    matscreen::MatrixScreen screen;
+    sdl::Window _window;
+    sdl::Renderer _renderer;
+    matscreen::MatrixScreen _screen;
 
     IGuiScreen::CallbackT _callback;
 
@@ -156,16 +156,16 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
     Palette _palette;
 
     GuiScreen(int width, int height, int fontSize)
-        : window{"medit",
-                 SDL_WINDOWPOS_CENTERED,
-                 SDL_WINDOWPOS_CENTERED,
-                 width * 8,
-                 height * 8,
-                 SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN}
-        , renderer{window,
-                   SDL_RENDERER_ACCELERATED,
-                   0 * SDL_RENDERER_PRESENTVSYNC}
-        , screen{width, height, fontPath(), fontSize} {
+        : _window{"medit",
+                  SDL_WINDOWPOS_CENTERED,
+                  SDL_WINDOWPOS_CENTERED,
+                  width * 8,
+                  height * 8,
+                  SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN}
+        , _renderer{_window,
+                    SDL_RENDERER_ACCELERATED,
+                    0 * SDL_RENDERER_PRESENTVSYNC}
+        , _screen{width, height, fontPath(), fontSize} {
 
         sdl::startTextInput();
         _styles.resize(16);
@@ -205,7 +205,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
     }
 
     void title(std::string title) override {
-        window.title(title.c_str());
+        _window.title(title.c_str());
     }
 
     std::string fontPath() {
@@ -227,8 +227,8 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
     sdl::Dims resizePixels(int width,
                            int height,
                            bool shouldUpdateWindow = true) {
-        auto dims = sdl::Dims{width / screen.cache.charWidth,
-                              height / screen.cache.charHeight};
+        auto dims = sdl::Dims{width / _screen.cache.charWidth,
+                              height / _screen.cache.charHeight};
 
         resizeInternal(dims.w, dims.h, shouldUpdateWindow);
 
@@ -248,7 +248,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
         }
 
         if (width <= 0 || height <= 0) {
-            return;
+            throw std::runtime_error{"Invalid window size"};
         }
 
         lines.resize(height);
@@ -269,21 +269,21 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
         this->_height = height;
 
         if (shouldUpdateWindow) {
-            window.size(width * screen.cache.charWidth,
-                        height * screen.cache.charHeight);
-            pixelWidth = width * screen.cache.charWidth;
-            pixelHeight = height * screen.cache.charHeight;
+            _window.size(width * _screen.cache.charWidth,
+                         height * _screen.cache.charHeight);
+            pixelWidth = width * _screen.cache.charWidth;
+            pixelHeight = height * _screen.cache.charHeight;
         }
 
-        screen.resize(width, height);
+        _screen.resize(width, height);
     }
 
     void fontSize(int size) override {
         auto l = std::lock_guard{
             refreshMutex}; /// Make sure the lines is not currently being drawn
-        screen.resizeFont(size);
-        pixelWidth = screen.cache.charWidth * _width;
-        pixelHeight = screen.cache.charHeight * _height;
+        _screen.resizeFont(size);
+        pixelWidth = _screen.cache.charWidth * _width;
+        pixelHeight = _screen.cache.charHeight * _height;
     }
 
     void fill(FChar color) {
@@ -295,17 +295,17 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
     }
 
     void renderLine(size_t y, FStringView str) {
-        for (size_t x = 0; x < str.size() && x < screen.canvas.width; ++x) {
+        for (size_t x = 0; x < str.size() && x < _screen.canvas.width; ++x) {
             auto c = str.at(x);
 
             if (!static_cast<uint32_t>(c.c)) {
                 continue;
             }
-            auto &s = screen.canvas.at(x, y);
+            auto &s = _screen.canvas.at(x, y);
 
             // Todo: Check what needs to be updated in some smart way
             s.texture =
-                screen.cache.getCharacter(renderer, std::string_view{c.c});
+                _screen.cache.getCharacter(_renderer, std::string_view{c.c});
 
             auto style = [&]() -> Style & {
                 if (c.f < _styles.size()) {
@@ -322,10 +322,10 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
     // Make sure that the bottom line aligns with the window border
     void drawBottomLine(sdl::RendererView renderer) {
         auto d = ProfileDuration{};
-        screen.render(renderer,
-                      0,
-                      pixelHeight - screen.cache.charHeight,
-                      {0, screen.canvas.height - 1, screen.canvas.width, 1});
+        _screen.render(renderer,
+                       0,
+                       pixelHeight - _screen.cache.charHeight,
+                       {0, _screen.canvas.height - 1, _screen.canvas.width, 1});
     }
 
     // Copy lines to be refreshed, may be called from the applications thread
@@ -340,7 +340,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
         sdl::pushEvent(event);
     }
 
-    // Update the screen
+    // Update the _screen
     void updateScreen() {
         auto duration = ProfileDuration{};
 
@@ -356,25 +356,25 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
                 }
             }
 
-            renderer.drawColor(_styles.front().bg);
-            renderer.fillRect();
+            _renderer.drawColor(_styles.front().bg);
+            _renderer.fillRect();
 
-            auto rect =
-                sdl::Rect{0, 0, screen.canvas.width, screen.canvas.height - 1};
+            auto rect = sdl::Rect{
+                0, 0, _screen.canvas.width, _screen.canvas.height - 1};
             {
                 auto d = ProfileDuration{"RenderScreen"};
-                screen.render(renderer, 0, 0, rect);
+                _screen.render(_renderer, 0, 0, rect);
             }
-            drawBottomLine(renderer);
+            drawBottomLine(_renderer);
 
-            renderer.drawColor(sdl::White);
+            _renderer.drawColor(sdl::White);
 
-            auto cellWidth = screen.cache.charWidth;
-            auto cellHeight = screen.cache.charHeight;
+            auto cellWidth = _screen.cache.charWidth;
+            auto cellHeight = _screen.cache.charHeight;
 
             switch (_cursorStyle) {
             case CursorStyle::Beam:
-                renderer.fillRect(
+                _renderer.fillRect(
                     sdl::Rect{static_cast<int>(cellWidth * _cursorPos.x()),
                               static_cast<int>(cellHeight * _cursorPos.y()),
                               1,
@@ -383,15 +383,15 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
             case CursorStyle::Hidden:
                 break;
             default:
-                screen.renderCursor(
-                    renderer, rect, _cursorPos.x(), _cursorPos.y());
+                _screen.renderCursor(
+                    _renderer, rect, _cursorPos.x(), _cursorPos.y());
                 break;
             }
         }
 
         {
             auto d = ProfileDuration{"Present"};
-            renderer.present();
+            _renderer.present();
         }
     }
 
@@ -488,6 +488,17 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
             auto mod = sdlEvent.key.keysym.mod;
             bool isAltgr = (mod & KMOD_RALT);
 
+            if (mod & KMOD_CTRL) {
+                auto sym = sdlEvent.key.keysym.sym;
+
+                if (sym == 'v') {
+                    if (SDL_HasClipboardText()) {
+                        return PasteEvent{SDL_GetClipboardText()};
+                    }
+                    return NullEvent{};
+                }
+            }
+
             if (isAltgr) {
                 if (isNumericKey(sdlEvent.key.keysym.scancode)) {
                     // For some reason SDL2 outputs for example @ on a swedish
@@ -496,17 +507,6 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
                     // Note: This is checked on linux, but not for windows where
                     // you could press ctrl+alt to have the same behaviour as
                     // altgr
-                    return NullEvent{};
-                }
-            }
-
-            if (mod == 64) {
-                auto sym = sdlEvent.key.keysym.sym;
-
-                if (sym == 'v') {
-                    if (SDL_HasClipboardText()) {
-                        return PasteEvent{SDL_GetClipboardText()};
-                    }
                     return NullEvent{};
                 }
             }
@@ -549,6 +549,21 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
 
             auto ch = Utf8Char{text.text};
 
+            // For some reason the modifiers is not part of the text event
+            auto mod = SDL_GetModState();
+
+            if (mod & KMOD_CTRL) {
+                auto sym = sdlEvent.key.keysym.sym;
+                if (ch == '+') {
+                    enlargeText();
+                    return NullEvent{};
+                }
+                else if (ch == '-') {
+                    shrinkText();
+                    return NullEvent{};
+                }
+            }
+
             if (shouldIgnoreTextInput(ch[0])) {
                 return NullEvent{};
             }
@@ -584,13 +599,44 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
 
         case SDL_MOUSEBUTTONDOWN:
             return MouseDownEvent{1,
-                                  sdlEvent.button.x / screen.cache.charWidth,
-                                  sdlEvent.button.y / screen.cache.charHeight};
+                                  sdlEvent.button.x / _screen.cache.charWidth,
+                                  sdlEvent.button.y / _screen.cache.charHeight};
 
             break;
         }
 
         return NullEvent{};
+    }
+
+    void simulateWindowResizeEvent() {
+        auto size = _window.size();
+
+        auto event = SDL_Event{};
+        event.type = SDL_WINDOWEVENT;
+        event.window.event = SDL_WINDOWEVENT_RESIZED;
+        event.window.windowID = SDL_GetWindowID(_window);
+        event.window.data1 = size.w;
+        event.window.data2 = size.h;
+        sdl::pushEvent(event);
+        refresh();
+    }
+
+    void enlargeText() {
+        fontSize(_screen.fontSize() + 2);
+        auto size = _window.size();
+        resizePixels(size.w, size.h, true);
+        simulateWindowResizeEvent();
+    }
+
+    void shrinkText() {
+        auto oldSize = _screen.fontSize();
+        if (oldSize <= 4) {
+            return;
+        }
+        fontSize(_screen.fontSize() - 2);
+        auto size = _window.size();
+        resizePixels(size.w, size.h, true);
+        simulateWindowResizeEvent();
     }
 
     sdl::Surface readPixels() override {
@@ -610,7 +656,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
                                             0x000000FF,
                                             0xFF000000);
 
-        if (renderer.readPixels(sdl::SurfaceView{surface})) {
+        if (_renderer.readPixels(sdl::SurfaceView{surface})) {
             return nullptr;
         }
 

@@ -2,8 +2,6 @@
 
 #include "syntax/palette.h"
 #include "text/fstring.h"
-#include <functional>
-#include <memory>
 #include <sstream>
 
 FString SimpleInteraction::serialize() const {
