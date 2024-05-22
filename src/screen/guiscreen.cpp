@@ -624,7 +624,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
     void enlargeText() {
         fontSize(_screen.fontSize() + 2);
         auto size = _window.size();
-        resizePixels(size.w, size.h, true);
+        resizePixels(size.w, size.h, false);
         simulateWindowResizeEvent();
     }
 
@@ -635,7 +635,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
         }
         fontSize(_screen.fontSize() - 2);
         auto size = _window.size();
-        resizePixels(size.w, size.h, true);
+        resizePixels(size.w, size.h, false);
         simulateWindowResizeEvent();
     }
 
