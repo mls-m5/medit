@@ -11,11 +11,11 @@
 #include <istream>
 #include <memory>
 #include <string>
-#include <string_view>
 
 namespace {
 
-FString universalGitFormat(std::istream &stream) {
+FString universalGitFormat(
+    std::istream &stream, std::function<void(FString &)> extraLineFormat = {}) {
     auto ret = std::vector<FString>{};
     for (std::string line; std::getline(stream, line);) {
         auto fstr = FString{line};
@@ -39,6 +39,9 @@ FString universalGitFormat(std::istream &stream) {
         if (str.starts_with("Author: ") || str.starts_with("Date: ")) {
             fstr.format(Palette::comment);
         }
+        if (extraLineFormat) {
+            extraLineFormat(fstr);
+        }
         ret.push_back(std::move(fstr));
     }
 
@@ -56,16 +59,66 @@ void gitPush(std::shared_ptr<IEnvironment> env) {
     console.run(env);
 }
 
-void viewResultAsInteraction(std::shared_ptr<IEnvironment> env,
-                             const std::string &command) {
+void viewResultAsInteraction(
+    std::shared_ptr<IEnvironment> env,
+    const std::string &command,
+    std::function<void(FString &)> extraLineFormat = {}) {
     auto stream = POpenStream{command};
 
     auto interaction = Interaction{
-        .text = universalGitFormat(stream),
+        .text = universalGitFormat(stream, extraLineFormat),
         .title = command + "...",
     };
 
+    if (stream.returnCode()) {
+        interaction.text += ("\n command failed: " + command);
+    }
+
     interaction.begin(env->interactions(), {});
+}
+
+void gitBlame(std::shared_ptr<IEnvironment> env) {
+    auto file = env->editor().file();
+    if (!file) {
+        std::cerr << "could not diff file for editor: editor does not have a "
+                     "file associated\n";
+        return;
+    }
+
+    auto command = "git blame \"" + file->path().string() + "\"";
+
+    auto formatF = [](FString &line) {
+        auto f = line.find(' ');
+
+        if (f == FString::npos) {
+            return;
+        }
+        line.format(Palette::comment, 0, f);
+
+        auto f2 = line.find(')', f);
+        if (f2 == FString::npos) {
+            return;
+        }
+        line.format(Palette::string, f + 1, f2 + 1);
+    };
+
+    viewResultAsInteraction(env, command, formatF);
+}
+
+void gitAdd(std::shared_ptr<IEnvironment> env) {
+    auto file = env->editor().file();
+    if (!file) {
+        std::cerr << "could not add file for editor: editor does not have a "
+                     "file associated\n";
+        return;
+    }
+
+    std::cout << "adding current file\n";
+    auto command = "git add \"" + file->path().string() + "\"";
+    std::cout << command << std::endl;
+
+    auto stream = POpenStream{command};
+    std::cout << stream.rdbuf();
 }
 
 } // namespace
@@ -88,4 +141,6 @@ void registerGitCommands(StandardCommands &standardCommands) {
     standardCommands.namedCommands["git_log"] = wrapInteraction(git + " log");
     standardCommands.namedCommands["git_commit"] = beginGitCommit;
     standardCommands.namedCommands["git_commit_amend"] = beginGitCommitAmmend;
+    standardCommands.namedCommands["git_blame"] = gitBlame;
+    standardCommands.namedCommands["git_add"] = gitAdd;
 }

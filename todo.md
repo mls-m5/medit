@@ -71,7 +71,8 @@ Todo:
    - [x] Push
    - [ ] Diff
    - [x] Status
-   - [ ] Blame
+   - [x] Blame
+   - [x] Add
    - [ ] Commit (interaction where you select which files and write message)
 - [x] GDB debugger integration
    - [x] Basic operations, run, set breakpoints step
