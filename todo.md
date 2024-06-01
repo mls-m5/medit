@@ -41,9 +41,9 @@ Todo:
      - [ ] Prompt if buffer contains unsaved changes, otherwise replace
 - User interface
   - [x] Save unnamed buffers with popup with ctrl+s
-  - [ ] Jump to file under cursor (path, markdown links etc) `[[braces syntax]]`
+  - [x] Jump to file under cursor (path, markdown links etc) `[[braces syntax]]`
   - [x] Rename current document
-  - [ ] File view
+  - [x] File view
   - [ ] File name above buffers
   - [ ] Ctrl+tab switch between opened buffers
   - [ ] Layouts that handle splits
@@ -59,7 +59,7 @@ Todo:
   - [ ] ~~Replace mode logic with lua code~~
 - [x] ctrl+backspace to erase whole word
 - Editors
-  - [ ] Word wrapping
+  - [x] Word wrapping
   - [x] Horizontal scroll
 - [ ] Performance improvements for remote connections
    - [ ] Serialize to binary
@@ -73,7 +73,7 @@ Todo:
    - [x] Status
    - [x] Blame
    - [x] Add
-   - [ ] Commit (interaction where you select which files and write message)
+   - [x] Commit (interaction where you select which files and write message)
 - [x] GDB debugger integration
    - [x] Basic operations, run, set breakpoints step
    - [x] Visualize breakpoints (using annotation system)
@@ -99,11 +99,16 @@ Todo:
       for example lsp-plugin, the compiler or formatter (if it emits error messages)
 - [ ] Show error if formatting does not work
 
-# Prioritized changes
+
+## Prioritized changes
+
 - [ ] Faster navigation
    - [ ] Move between opened files in editor (ctrl+tab) show list of opened editors
 - [x] Highlighting 
 
+## Writer plugin
+
+- [ ] Simple word frequency analysis
 
 ## Feedback
 - [ ] Make sure build command works properly, add settings

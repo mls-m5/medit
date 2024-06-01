@@ -26,7 +26,7 @@ CoreEnvironment::CoreEnvironment(ThreadContext &context)
     , _errorInFile{_errorTtyPath, [this](std::string data) {
                        printToAllLogs(LogType::Error, data);
                    }} {
-    cleanUpLocalPipes();
+    cleanUpOldLocalPipes();
 
     std::ofstream{_consoleTtyPath.path()}
         << std::endl; // Prevent the listen file from waiting

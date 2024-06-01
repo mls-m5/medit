@@ -7,7 +7,6 @@
 #include "linux/inotify.h"
 #include "text/buffer.h"
 #include <filesystem>
-#include <iostream>
 
 Files::Files(CoreEnvironment &core)
     : _core{core}
@@ -85,8 +84,16 @@ bool Files::rename(std::filesystem::path from, std::filesystem::path to) {
 
     file->rename(to);
 
-    emitBufferSubscriptionEvent({nullptr, from, BufferEvent::Close});
-    emitBufferSubscriptionEvent({buffer, to, BufferEvent::Open});
+    emitBufferSubscriptionEvent({
+        .buffer = nullptr,
+        .path = from,
+        .type = BufferEvent::Close,
+    });
+    emitBufferSubscriptionEvent({
+        .buffer = buffer,
+        .path = to,
+        .type = BufferEvent::Open,
+    });
 
     return false;
 }

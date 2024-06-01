@@ -21,7 +21,7 @@ std::filesystem::path standardConsoleTtyPipePath();
 /// Same as standardConsoleTtyPipePath but for error messages
 std::filesystem::path standardErrorTtyPipePath();
 
-void cleanUpLocalPipes();
+void cleanUpOldLocalPipes();
 
 /// Fifo paths for the fifo server/server
 std::filesystem::path fifoClientInPath();

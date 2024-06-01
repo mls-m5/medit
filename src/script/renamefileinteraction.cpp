@@ -8,7 +8,6 @@
 #include "views/editor.h"
 #include "views/mainwindow.h"
 #include <memory>
-#include <stdexcept>
 
 namespace {
 

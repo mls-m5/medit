@@ -77,7 +77,7 @@ std::filesystem::path fifoClientOutPath() {
     return standardSharedFifoDirectory() / "fifo-client-out";
 }
 
-void cleanUpLocalPipes() {
+void cleanUpOldLocalPipes() {
     auto confPath = localConfigDirectory("process");
     if (!confPath) {
         return;
