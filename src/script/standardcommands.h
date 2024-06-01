@@ -6,9 +6,7 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <string_view>
 #include <unordered_map>
-#include <vector>
 
 #define STANDARD_COMMAND_LIST                                                  \
     STD_DEF(left)                                                              \
@@ -103,8 +101,16 @@ struct StandardCommands {
                  std::optional<int> x,
                  std::optional<int> y) = nullptr;
 
-    std::unordered_map<std::string, std::function<void(EnvPtrT env)>>
-        namedCommands;
+    struct FunctionStruct {
+        std::function<void(EnvPtrT)> f;
+        void *ref = nullptr;
+
+        void operator=(const decltype(f) &func) {
+            f = func;
+        }
+    };
+
+    std::unordered_map<std::string, FunctionStruct> namedCommands;
 
     /// Get a instance of the StandardCommands struct
     /// This function is only available for the main lib,
@@ -116,6 +122,12 @@ struct StandardCommands {
     static std::function<void(EnvPtrT)> combine(Args... args) {
         return [args...](EnvPtrT e) { ((args(e)), ...); };
     }
+
+    void addCommand(std::string_view name,
+                    std::function<void(EnvPtrT)> f,
+                    void *ref);
+
+    void removeCommand(void *ref);
 };
 
 #undef STD_DEF

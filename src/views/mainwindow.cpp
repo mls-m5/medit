@@ -107,7 +107,7 @@ MainWindow::MainWindow(CoreEnvironment &core,
     _commandPalette->callback([this](auto &&path) {
         _commandPalette->visible(false);
         if (!path.empty()) {
-            StandardCommands::get().namedCommands.at(path)(_env);
+            StandardCommands::get().namedCommands.at(path).f(_env);
         }
         _inputFocus = currentEditor();
     });
