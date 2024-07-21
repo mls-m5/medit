@@ -51,7 +51,9 @@ struct MainWindow : public Window {
 
     void updateLocatorBuffer();
 
-    void open(std::filesystem::path path,
+    /// Try to open a file
+    /// @return false if failed
+    bool open(std::filesystem::path path,
               std::optional<int> x = {},
               std::optional<int> y = {});
 

@@ -593,23 +593,33 @@ StandardCommands create() {
     };
 
     DEF(back) {
-        auto &window = env->mainWindow();
-        auto &list = window.jumpList();
-        auto b = list.back();
-        if (!b) {
-            return;
+        for (bool retry = true; retry;) {
+            retry = false;
+            auto &window = env->mainWindow();
+            auto &list = window.jumpList();
+            auto b = list.back();
+            if (!b) {
+                return;
+            }
+            if (!window.open(b->path, b->pos.x(), b->pos.y())) {
+                retry = true;
+            }
         }
-        window.open(b->path, b->pos.x(), b->pos.y());
     };
 
     DEF(forward) {
-        auto &window = env->mainWindow();
-        auto &list = window.jumpList();
-        auto b = list.forward();
-        if (!b) {
-            return;
+        for (bool retry = true; retry;) {
+            retry = false;
+            auto &window = env->mainWindow();
+            auto &list = window.jumpList();
+            auto b = list.forward();
+            if (!b) {
+                return;
+            }
+            if (!window.open(b->path, b->pos.x(), b->pos.y())) {
+                retry = true;
+            }
         }
-        window.open(b->path, b->pos.x(), b->pos.y());
     };
 
     // ------------------------

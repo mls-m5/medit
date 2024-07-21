@@ -257,16 +257,16 @@ void MainWindow::updateLocatorBuffer() {
             .root); // TODO: This should probably be handled somewhere else
 }
 
-void MainWindow::open(std::filesystem::path path,
+bool MainWindow::open(std::filesystem::path path,
                       std::optional<int> x,
                       std::optional<int> y) {
     if (path.empty()) {
-        return;
+        return false;
     }
 
     auto editor = currentEditor();
     if (!editor) {
-        return;
+        return false;
     }
 
     path = std::filesystem::absolute(path);
@@ -274,7 +274,7 @@ void MainWindow::open(std::filesystem::path path,
     if (!std::filesystem::is_regular_file(path)) {
         statusMessage(
             FString{"trying to open non existing path " + path.string()});
-        return;
+        return false;
     }
 
     editor->buffer(_env->core().files().open(path));
@@ -298,6 +298,7 @@ void MainWindow::open(std::filesystem::path path,
     updateTitle();
 
     _jumpList.updatePosition(editor->shared_from_this());
+    return true;
 }
 
 Editor *MainWindow::currentEditor() {
