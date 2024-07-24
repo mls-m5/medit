@@ -244,10 +244,10 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
 
 void LspPlugin::registerPlugin(CoreEnvironment &core, Plugins &plugins) {
     auto lsp = std::make_shared<LspPlugin>(&core);
-    plugins.loadPlugin<LspNavigation>(lsp);
-    plugins.loadPlugin<LspHighlight>(lsp);
-    plugins.loadPlugin<LspComplete>(lsp);
-    plugins.loadPlugin<LspRename>(lsp);
+    plugins.createPlugin<LspNavigation>(lsp);
+    plugins.createPlugin<LspHighlight>(lsp);
+    plugins.createPlugin<LspComplete>(lsp);
+    plugins.createPlugin<LspRename>(lsp);
 }
 
 LspPlugin::Instance *LspPlugin::createInstance(std::filesystem::path path) {
