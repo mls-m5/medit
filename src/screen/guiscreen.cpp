@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <mutex>
 #include <thread>
+#include <vector>
 
 #ifndef __EMSCRIPTEN__
 
@@ -116,6 +117,8 @@ bool isNumericKey(SDL_Scancode code) {
     return code >= SDL_SCANCODE_1 && code <= SDL_SCANCODE_0;
 }
 
+constexpr auto dummyEventNum = SDL_USEREVENT + 1;
+
 } // namespace
 
 /// The rendering and gui is running on one thread and assumes the application
@@ -124,6 +127,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
     std::vector<FString> lines;
     std::vector<FString> shownLines;
     std::mutex refreshMutex;
+    std::mutex _functionMutex;
     CursorStyle _cursorStyle = CursorStyle::Block;
     size_t _width = 0;
     size_t _height = 0;
@@ -137,6 +141,9 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
         _screen; // Optional because it needs to be initialized later
 
     IGuiScreen::CallbackT _callback;
+
+    // Function calls that is going to be called on the gui thread
+    std::vector<std::function<void()>> _functionList;
 
     struct Style {
         sdl::Color fg = sdl::White;
@@ -228,10 +235,13 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
         }
     }
 
-    void title(std::string title) override{
-#warning "removed for testing"
-        // _tv();
-        // _window.title(title.c_str());
+    void title(std::string title) override {
+        auto lock = std::unique_lock{_functionMutex};
+        _functionList.push_back([this, title]() {
+            _tv();
+            _window.title(title.c_str());
+        });
+        triggerEventLoop();
     }
 
     std::string fontPath() {
@@ -474,6 +484,14 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
                 _callback(std::move(list));
             }
 
+            if (!_functionList.empty()) {
+                auto lock = std::unique_lock{_functionMutex};
+                for (auto &f : _functionList) {
+                    f();
+                }
+                _functionList.clear();
+            }
+
             if (_shouldRefresh) {
                 updateScreen(); // TODO: Only refresh when changes
                 _shouldRefresh = false;
@@ -643,7 +661,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
     void simulateWindowResizeEvent() {
         auto size = _window.size();
 
-        auto event = SDL_Event{};
+        auto event = sdl::Event{};
         event.type = SDL_WINDOWEVENT;
         event.window.event = SDL_WINDOWEVENT_RESIZED;
         event.window.windowID = SDL_GetWindowID(_window);
@@ -651,6 +669,14 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
         event.window.data2 = size.h;
         sdl::pushEvent(event);
         refresh();
+    }
+
+    void triggerEventLoop() {
+        auto event = sdl::Event{};
+
+        event.type = SDL_USEREVENT + 0;
+
+        sdl::pushEvent(event);
     }
 
     void enlargeText() {
