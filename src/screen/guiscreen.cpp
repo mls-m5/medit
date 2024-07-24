@@ -25,6 +25,7 @@
 #include "text/fstringview.h"
 #include "text/position.h"
 #include <array>
+#include <condition_variable>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -132,7 +133,8 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
 
     sdl::Window _window;
     sdl::Renderer _renderer;
-    matscreen::MatrixScreen _screen;
+    std::optional<matscreen::MatrixScreen>
+        _screen; // Optional because it needs to be initialized later
 
     IGuiScreen::CallbackT _callback;
 
@@ -151,36 +153,57 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
 
     /// Mutex used in creation to make sure some functions used for setup is not
     /// accessed to early
-    std::mutex _createMutex;
+    // std::mutex _createMutex;
 
     Palette _palette;
 
-    GuiScreen(int width, int height, int fontSize)
-        : _window{"medit",
-                  SDL_WINDOWPOS_CENTERED,
-                  SDL_WINDOWPOS_CENTERED,
-                  width * 8,
-                  height * 8,
-                  SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN}
-        , _renderer{_window,
-                    SDL_RENDERER_ACCELERATED,
-                    0 * SDL_RENDERER_PRESENTVSYNC}
-        , _screen{width, height, fontPath(), fontSize} {
+    GuiScreen(int width, int height, int fontSize) {
 
-        sdl::startTextInput();
-        _styles.resize(16);
-        resizeInternal(width, height);
+        auto createMutex = std::mutex{};
+        bool initialized = false;
+        auto createCondition = std::condition_variable{};
 
-        auto lock = std::unique_lock{_createMutex};
-
-        _thread = std::thread([this] {
+        _thread = std::thread([this,
+                               width,
+                               height,
+                               fontSize,
+                               &initialized,
+                               &createCondition,
+                               &createMutex] {
             _tv.reset();
             setThreadName("gui screen");
+            // Rendering context needs to be created on the same thread as
+            // it is used
+            _window = sdl::Window{"medit",
+                                  SDL_WINDOWPOS_CENTERED,
+                                  SDL_WINDOWPOS_CENTERED,
+                                  width * 8,
+                                  height * 8,
+                                  SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN};
+            _renderer = sdl::Renderer{_window,
+                                      SDL_RENDERER_ACCELERATED,
+                                      0 * SDL_RENDERER_PRESENTVSYNC};
+            sdl::startTextInput();
+            _screen.emplace(width, height, fontPath(), fontSize);
+            _styles.resize(16);
+            resizeInternal(width, height);
+
+            {
+                auto lock = std::lock_guard{createMutex};
+                initialized = true;
+                createCondition.notify_one();
+            }
+
             loop();
         });
+
+        {
+            auto lock = std::unique_lock{createMutex};
+            createCondition.wait(lock, [&initialized] { return initialized; });
+        }
     }
 
-    ~GuiScreen() {
+    ~GuiScreen() override {
         // Just make the guiloop run and exit, and class is
         // specified to avoid virtual function call in destructor
         GuiScreen::refresh();
@@ -194,6 +217,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
 
     // Save data to be drawn
     void draw(size_t x, size_t y, FStringView str) override {
+        auto l = std::lock_guard{refreshMutex};
         if (y >= lines.size()) {
             return;
         }
@@ -204,8 +228,10 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
         }
     }
 
-    void title(std::string title) override {
-        _window.title(title.c_str());
+    void title(std::string title) override{
+#warning "removed for testing"
+        // _tv();
+        // _window.title(title.c_str());
     }
 
     std::string fontPath() {
@@ -227,8 +253,8 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
     sdl::Dims resizePixels(int width,
                            int height,
                            bool shouldUpdateWindow = true) {
-        auto dims = sdl::Dims{width / _screen.cache.charWidth,
-                              height / _screen.cache.charHeight};
+        auto dims = sdl::Dims{width / _screen->cache.charWidth,
+                              height / _screen->cache.charHeight};
 
         resizeInternal(dims.w, dims.h, shouldUpdateWindow);
 
@@ -269,24 +295,25 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
         this->_height = height;
 
         if (shouldUpdateWindow) {
-            _window.size(width * _screen.cache.charWidth,
-                         height * _screen.cache.charHeight);
-            pixelWidth = width * _screen.cache.charWidth;
-            pixelHeight = height * _screen.cache.charHeight;
+            _window.size(width * _screen->cache.charWidth,
+                         height * _screen->cache.charHeight);
+            pixelWidth = width * _screen->cache.charWidth;
+            pixelHeight = height * _screen->cache.charHeight;
         }
 
-        _screen.resize(width, height);
+        _screen->resize(width, height);
     }
 
     void fontSize(int size) override {
         auto l = std::lock_guard{
             refreshMutex}; /// Make sure the lines is not currently being drawn
-        _screen.resizeFont(size);
-        pixelWidth = _screen.cache.charWidth * _width;
-        pixelHeight = _screen.cache.charHeight * _height;
+        _screen->resizeFont(size);
+        pixelWidth = _screen->cache.charWidth * _width;
+        pixelHeight = _screen->cache.charHeight * _height;
     }
 
     void fill(FChar color) {
+        _tv();
         for (auto &line : lines) {
             for (auto &c : line) {
                 c = color;
@@ -295,17 +322,18 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
     }
 
     void renderLine(size_t y, FStringView str) {
-        for (size_t x = 0; x < str.size() && x < _screen.canvas.width; ++x) {
+        _tv();
+        for (size_t x = 0; x < str.size() && x < _screen->canvas.width; ++x) {
             auto c = str.at(x);
 
             if (!static_cast<uint32_t>(c.c)) {
                 continue;
             }
-            auto &s = _screen.canvas.at(x, y);
+            auto &s = _screen->canvas.at(x, y);
 
             // Todo: Check what needs to be updated in some smart way
             s.texture =
-                _screen.cache.getCharacter(_renderer, std::string_view{c.c});
+                _screen->cache.getCharacter(_renderer, std::string_view{c.c});
 
             auto style = [&]() -> Style & {
                 if (c.f < _styles.size()) {
@@ -321,11 +349,13 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
 
     // Make sure that the bottom line aligns with the window border
     void drawBottomLine(sdl::RendererView renderer) {
+        _tv();
         auto d = ProfileDuration{};
-        _screen.render(renderer,
-                       0,
-                       pixelHeight - _screen.cache.charHeight,
-                       {0, _screen.canvas.height - 1, _screen.canvas.width, 1});
+        _screen->render(
+            renderer,
+            0,
+            pixelHeight - _screen->cache.charHeight,
+            {0, _screen->canvas.height - 1, _screen->canvas.width, 1});
     }
 
     // Copy lines to be refreshed, may be called from the applications thread
@@ -342,6 +372,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
 
     // Update the _screen
     void updateScreen() {
+        _tv();
         auto duration = ProfileDuration{};
 
         auto l = std::lock_guard{refreshMutex};
@@ -360,17 +391,17 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
             _renderer.fillRect();
 
             auto rect = sdl::Rect{
-                0, 0, _screen.canvas.width, _screen.canvas.height - 1};
+                0, 0, _screen->canvas.width, _screen->canvas.height - 1};
             {
                 auto d = ProfileDuration{"RenderScreen"};
-                _screen.render(_renderer, 0, 0, rect);
+                _screen->render(_renderer, 0, 0, rect);
             }
             drawBottomLine(_renderer);
 
             _renderer.drawColor(sdl::White);
 
-            auto cellWidth = _screen.cache.charWidth;
-            auto cellHeight = _screen.cache.charHeight;
+            auto cellWidth = _screen->cache.charWidth;
+            auto cellHeight = _screen->cache.charHeight;
 
             switch (_cursorStyle) {
             case CursorStyle::Beam:
@@ -383,7 +414,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
             case CursorStyle::Hidden:
                 break;
             default:
-                _screen.renderCursor(
+                _screen->renderCursor(
                     _renderer, rect, _cursorPos.x(), _cursorPos.y());
                 break;
             }
@@ -415,7 +446,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
     }
 
     void subscribe(IGuiScreen::CallbackT f) override {
-        auto lock = std::unique_lock{_createMutex};
+        // auto lock = std::unique_lock{_createMutex};
         _callback = f;
     }
 
@@ -599,8 +630,9 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
 
         case SDL_MOUSEBUTTONDOWN:
             return MouseDownEvent{1,
-                                  sdlEvent.button.x / _screen.cache.charWidth,
-                                  sdlEvent.button.y / _screen.cache.charHeight};
+                                  sdlEvent.button.x / _screen->cache.charWidth,
+                                  sdlEvent.button.y /
+                                      _screen->cache.charHeight};
 
             break;
         }
@@ -622,18 +654,18 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
     }
 
     void enlargeText() {
-        fontSize(_screen.fontSize() + 2);
+        fontSize(_screen->fontSize() + 2);
         auto size = _window.size();
         resizePixels(size.w, size.h, false);
         simulateWindowResizeEvent();
     }
 
     void shrinkText() {
-        auto oldSize = _screen.fontSize();
+        auto oldSize = _screen->fontSize();
         if (oldSize <= 4) {
             return;
         }
-        fontSize(_screen.fontSize() - 2);
+        fontSize(_screen->fontSize() - 2);
         auto size = _window.size();
         resizePixels(size.w, size.h, false);
         simulateWindowResizeEvent();
