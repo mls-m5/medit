@@ -410,7 +410,10 @@ void MainWindow::updateTitle() {
 
     if (auto file = editor->file()) {
         auto path = file->path();
-        if (path.has_parent_path()) {
+        if (!path.empty() && *path.begin() == "tmp:") {
+            // Do nothing
+        }
+        else if (path.has_parent_path()) {
             path = std::filesystem::relative(
                 file->path(), _env->core().project().settings().root);
         }
