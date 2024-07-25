@@ -46,19 +46,15 @@ private:
     volatile std::atomic_long _currentRequest = 1;
     volatile std::atomic_long _receivedRequest = 0;
 
-    //    void send(const nlohmann::json &);
     void send(std::string_view str);
     std::string request(std::string_view method);
 
     //! Where the remote data enters this class
-    //    void receive(const nlohmann::json &);
-    //    void receive(Archive &);
     void receive(std::string_view data);
 
     std::mutex _mutex;
     std::condition_variable _cv;
 
-    //    nlohmann::json _receivedData;
     std::string _receivedData;
 
     CallbackT _callback;

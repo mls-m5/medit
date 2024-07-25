@@ -2,7 +2,6 @@
 
 /// This file is used as a precompiled header
 
-#include "nlohmann/json.hpp"
 #include <filesystem>
 #include <functional>
 #include <iostream>

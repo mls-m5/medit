@@ -74,6 +74,4 @@ private:
         }
         return 0;
     }
-
-    //    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Color, _r, _g, _b)
 };

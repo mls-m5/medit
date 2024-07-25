@@ -115,11 +115,6 @@ void DeserializeScreen::handle(std::string_view str) {
             oarch.set("value", _screen->clipboardData());
         }
         send(oss.str());
-
-        //        send(nlohmann::json{
-        //            {"id", id},
-        //            {"value", _screen->clipboardData()},
-        //        });
         return;
     }
 }
@@ -149,6 +144,4 @@ void DeserializeScreen::screenCallback(IScreen::EventListT list) {
         oarch("events", list);
     }
     send(ss.str());
-
-    //    send(nlohmann::json{{"events", list}});
 }
