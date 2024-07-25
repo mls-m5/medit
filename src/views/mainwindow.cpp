@@ -358,9 +358,16 @@ void MainWindow::copy(bool shouldCut) {
         }
 
         _screen.clipboardData(text);
+        if (shouldCut) {
+            _env->statusMessage({"cut to clipboard"});
+        }
+        else {
+            _env->statusMessage({"copied to clipboard"});
+        }
         return;
     }
     _screen.clipboardData("");
+    _env->statusMessage({"failed to copy to clipboard"});
 }
 
 void MainWindow::triggerRedraw() {
