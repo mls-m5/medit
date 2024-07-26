@@ -1,9 +1,9 @@
-#include "renamefileinteraction.h"
 #include "core/coreenvironment.h"
 #include "core/debugoutput.h"
 #include "script/ienvironment.h"
 #include "script/interaction.h"
 #include "script/simpleinteraction.h"
+#include "script/staticcommandregister.h"
 #include "text/fstring.h"
 #include "views/editor.h"
 #include "views/mainwindow.h"
@@ -38,8 +38,6 @@ void handleUserResponse(std::shared_ptr<IEnvironment> env,
     }
 }
 
-} // namespace
-
 void beginRenameFileInteraction(std::shared_ptr<IEnvironment> env) {
     auto &e = env->editor();
     auto file = e.file();
@@ -61,3 +59,7 @@ void beginRenameFileInteraction(std::shared_ptr<IEnvironment> env) {
         Interaction{si.serialize(), {3 + pathStr.size(), 2}, "rename file"},
         handleUserResponse);
 }
+
+StaticCommandRegister renameReg{"rename_file", beginRenameFileInteraction};
+
+} // namespace

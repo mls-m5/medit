@@ -9,5 +9,6 @@
 #include "script/saveinteraction.cpp"
 #include "script/simpleinteraction.cpp"
 #include "script/standardcommands.cpp"
+#include "script/staticcommandregister.cpp"
 #include "script/togglecomments.cpp"
 #include "script/vimcommands.cpp"

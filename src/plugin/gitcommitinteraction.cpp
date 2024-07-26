@@ -34,11 +34,13 @@ void handleGitCommitResponse(std::shared_ptr<IEnvironment> env,
         message += line + "\n";
     }
 
-    auto files = std::vector<std::string>{};
-
+    // Clear the cache so that only the files selected in the editor is selected
+    // by git
     if (runCommandAndCapture("git reset")) {
         return;
     }
+
+    auto files = std::vector<std::string>{};
 
     // Parse files
     for (std::string line; std::getline(ss, line);) {
@@ -49,16 +51,32 @@ void handleGitCommitResponse(std::shared_ptr<IEnvironment> env,
             continue;
         }
 
+        auto isDelete = line.at(0) == 'D' || line.at(1) == 'D';
         line = line.substr(3);
 
         if (line.empty()) {
             continue;
         }
 
-        if (runCommand(("git add \"" + line + "\"").c_str())) {
-            logError("Failed to add ", line, " to git");
-            return;
+        if (isDelete) {
+            if (runCommand(("git rm --cached \"" + line + "\"").c_str())) {
+                logError("Failed to cache removed file ", line, " to git");
+                return;
+            }
         }
+        else {
+            if (runCommand(("git add \"" + line + "\"").c_str())) {
+                logError("Failed to add ", line, " to git");
+                return;
+            }
+        }
+
+        files.push_back(line);
+    }
+
+    if (files.empty()) {
+        env->statusMessage({"No files selected for git commit. Abort..."});
+        return;
     }
 
     auto gitDir = localConfigDirectory("git", true);
@@ -80,6 +98,8 @@ void handleGitCommitResponse(std::shared_ptr<IEnvironment> env,
 
     runCommandAndCapture("git commit --file \"" + messagePath.string() + "\" " +
                          (isAmend ? "--amend" : ""));
+
+    env->statusMessage({"files commited to git"});
 }
 
 void beginGitCommitImpl(std::shared_ptr<IEnvironment> env, bool isGitAmend) {
@@ -100,7 +120,7 @@ void beginGitCommitImpl(std::shared_ptr<IEnvironment> env, bool isGitAmend) {
           "\n";
     ss << "# Press return when done\n\n";
     ss << "==============\n\n";
-    ss << "============== move files below, or remove this line\n";
+    ss << "============== move files up, or remove this line to select files\n";
     ss << stream.rdbuf();
 
     auto interaction = Interaction{

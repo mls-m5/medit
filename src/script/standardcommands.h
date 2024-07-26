@@ -52,7 +52,6 @@
     STD_DEF(build)                                                             \
     STD_DEF(run)                                                               \
     STD_DEF(quit)                                                              \
-    STD_DEF(browse_files)                                                      \
     STD_DEF(close_buffer)                                                      \
     STD_DEF(insert_mode)                                                       \
     STD_DEF(normal_mode)                                                       \
@@ -68,7 +67,6 @@
     STD_DEF(select_all)                                                        \
     STD_DEF(command_palette)                                                   \
     STD_DEF(new_file)                                                          \
-    STD_DEF(rename_file)                                                       \
     STD_DEF(indent)                                                            \
     STD_DEF(deindent)                                                          \
     STD_DEF(back)                                                              \
@@ -116,6 +114,10 @@ struct StandardCommands {
     /// This function is only available for the main lib,
     /// A reference can be obtained from IEnvironment for plugins
     static StandardCommands &get();
+
+    const std::function<void(EnvPtrT)> &f(const std::string &name) {
+        return namedCommands.at(name).f;
+    }
 
     /// Combine several standard commands into one single function
     template <typename... Args>

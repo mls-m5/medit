@@ -2,6 +2,7 @@
 #include "files/project.h"
 #include "script/ienvironment.h"
 #include "script/interaction.h"
+#include "script/staticcommandregister.h"
 #include "syntax/palette.h"
 #include "text/formattype.h"
 #include "text/fstring.h"
@@ -143,8 +144,10 @@ void internalBeginFileViewInteraction(std::shared_ptr<IEnvironment> env,
                                                     handleFileViewResponse);
 }
 
-} // namespace
-
 void beginBrowseFileInteraction(std::shared_ptr<IEnvironment> env) {
     internalBeginFileViewInteraction(env, {});
 }
+
+StaticCommandRegister browseReg{"browse_files", beginBrowseFileInteraction};
+
+} // namespace

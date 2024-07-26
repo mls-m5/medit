@@ -14,10 +14,8 @@
 #include "plugin/rundebug.h"
 #include "renameinteraction.h"
 #include "saveinteraction.h"
-#include "script/browsefileinteraction.h"
 #include "script/ienvironment.h"
 #include "script/indent.h"
-#include "script/renamefileinteraction.h"
 #include "text/cursorops.h"
 #include "text/cursorrange.h"
 #include "text/cursorrangeops.h"
@@ -502,9 +500,9 @@ StandardCommands create() {
         quitMedit(env->context());
     };
 
-    DEF(browse_files) {
-        beginBrowseFileInteraction(env);
-    };
+    // DEF(browse_files) {
+    //     beginBrowseFileInteraction(env);
+    // };
 
     DEF(close_buffer) {
         auto &buffer = env->editor();
@@ -542,10 +540,6 @@ StandardCommands create() {
     };
     DEF(new_file) {
         env->editor().buffer(env->core().files().create());
-    };
-
-    DEF(rename_file) {
-        beginRenameFileInteraction(env);
     };
 
     DEF(select_inner_word) {
@@ -660,7 +654,7 @@ StandardCommands create() {
     auto currentFileLocation = [](IEnvironment &env) {
         auto source = SourceLocation{};
         source.path = env.editor().path();
-        source.position = env.editor().cursor();
+        source.position = env.editor().cursor().pos();
         return source;
     };
 
@@ -680,4 +674,12 @@ StandardCommands create() {
 StandardCommands &StandardCommands::get() {
     static auto sc = create();
     return sc;
+}
+
+void StandardCommands::addCommand(std::string_view name,
+                                  std::function<void(EnvPtrT)> f,
+                                  void *ref) {
+    auto &fs = namedCommands[std::string(name)];
+    fs.f = f;
+    fs.ref = ref;
 }
