@@ -63,7 +63,6 @@
     STD_DEF(select_inner_word)                                                 \
     STD_DEF(select_inner_paren)                                                \
     STD_DEF(select_around_paren)                                               \
-    STD_DEF(rename_symbol)                                                     \
     STD_DEF(select_all)                                                        \
     STD_DEF(command_palette)                                                   \
     STD_DEF(new_file)                                                          \

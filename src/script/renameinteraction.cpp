@@ -1,8 +1,8 @@
-#include "renameinteraction.h"
 #include "core/coreenvironment.h"
 #include "ienvironment.h"
 #include "interaction.h"
 #include "script/simpleinteraction.h"
+#include "script/staticcommandregister.h"
 #include "syntax/irename.h"
 #include "text/changes.h"
 #include "text/cursorrangeops.h"
@@ -107,8 +107,6 @@ void renameVerifiedCallback(std::shared_ptr<IEnvironment> env,
                                                     handleUserRenameResponse);
 }
 
-} // namespace
-
 void beginRenameInteraction(std::shared_ptr<IEnvironment> env) {
     auto &e = env->editor();
     auto &renamePlugins = env->core().plugins().get<IRename>();
@@ -123,3 +121,7 @@ void beginRenameInteraction(std::shared_ptr<IEnvironment> env) {
 
     env->statusMessage(FString{"no rename plugin supports this file type"});
 }
+
+StaticCommandRegister renameSymbolReg{"rename_symbol", beginRenameInteraction};
+
+} // namespace

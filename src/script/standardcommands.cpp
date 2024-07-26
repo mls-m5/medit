@@ -12,7 +12,6 @@
 #include "plugin/idebugger.h"
 #include "plugin/run.h"
 #include "plugin/rundebug.h"
-#include "renameinteraction.h"
 #include "saveinteraction.h"
 #include "script/ienvironment.h"
 #include "script/indent.h"
@@ -500,10 +499,6 @@ StandardCommands create() {
         quitMedit(env->context());
     };
 
-    // DEF(browse_files) {
-    //     beginBrowseFileInteraction(env);
-    // };
-
     DEF(close_buffer) {
         auto &buffer = env->editor();
         if (!buffer.closeBuffer()) {
@@ -535,9 +530,6 @@ StandardCommands create() {
         e.selection(all(e.buffer()));
     };
 
-    DEF(rename_symbol) {
-        beginRenameInteraction(env);
-    };
     DEF(new_file) {
         env->editor().buffer(env->core().files().create());
     };
