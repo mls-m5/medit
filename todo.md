@@ -150,6 +150,8 @@ Todo:
 - [ ] Create interaction for open previous projects
     - [ ] Save information about window layout, zoom and other things in the project. The project should be saved somewhere in the home folder.
 - [ ] "List-tool" that creates lists, then checklists and then checks the list (ctrl+l or just space in normal mode in markdown files)
+- [ ] List issues in current document/on current line in console so they are more readable
+- [ ] Include all files that is recognized by git
       
 ## Bugs
 - [x] When open a file where there is no project/.git, the program freezes
