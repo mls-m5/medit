@@ -14,4 +14,5 @@ public:
     };
 
     StaticCommandRegister(std::string name, FunctionType function);
+    StaticCommandRegister(std::vector<Entity> entities);
 };

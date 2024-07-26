@@ -410,12 +410,12 @@ StandardCommands create() {
         env->editor().mode(createNormalMode());
         saveInteraction(env);
     };
-    DEF(copy) {
-        env->mainWindow().copy(false);
-    };
-    DEF(cut) {
-        env->mainWindow().copy(true);
-    };
+    // DEF(copy) {
+    //     env->mainWindow().copy(false);
+    // };
+    // DEF(cut) {
+    //     env->mainWindow().copy(true);
+    // };
     DEF(copy_indentation) {
         auto &e = env->editor();
         e.cursor(copyIndentation(e.cursor()));
@@ -558,25 +558,25 @@ StandardCommands create() {
         e.selection(range);
     };
 
-    DEF(command_palette) {
-        env->mainWindow().showCommandPalette();
-    };
+    // DEF(command_palette) {
+    //     env->mainWindow().showCommandPalette();
+    // };
 
-    DEF(split_editor) {
-        env->mainWindow().splitEditor();
-    };
+    // DEF(split_editor) {
+    //     env->mainWindow().splitEditor();
+    // };
 
-    DEF(close_editor) {
-        env->mainWindow().closeEditor();
-    };
+    // DEF(close_editor) {
+    //     env->mainWindow().closeEditor();
+    // };
 
-    DEF(start_profiling) {
-        enableProfiling();
-    };
+    // DEF(start_profiling) {
+    //     enableProfiling();
+    // };
 
-    DEF(stop_profiling) {
-        disableProfiling();
-    };
+    // DEF(stop_profiling) {
+    //     disableProfiling();
+    // };
 
     DEF(back) {
         for (bool retry = true; retry;) {

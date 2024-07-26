@@ -1,5 +1,6 @@
 #include "profiler.h"
 #include "files/config.h"
+#include "script/staticcommandregister.h"
 #include <chrono>
 #include <cstdint>
 #include <fstream>
@@ -232,4 +233,13 @@ void setProfilerThreadName(std::string name) {
         return;
     }
     localProfilingThreadData.data->name = std::move(name);
+}
+
+namespace {
+
+StaticCommandRegister profilerReg{{
+    {"start_profiling", [](auto env) { enableProfiling(); }},
+    {"stop_profiling", [](auto env) { disableProfiling(); }},
+}};
+
 }

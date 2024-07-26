@@ -8,6 +8,8 @@
 #include <string>
 #include <unordered_map>
 
+// This list should contain only core commands, the rest is registered through
+// StaticCommandRegister or some other method
 #define STANDARD_COMMAND_LIST                                                  \
     STD_DEF(left)                                                              \
     STD_DEF(right)                                                             \
@@ -42,8 +44,6 @@
     STD_DEF(toggle_case)                                                       \
     STD_DEF(format)                                                            \
     STD_DEF(save)                                                              \
-    STD_DEF(copy)                                                              \
-    STD_DEF(cut)                                                               \
     STD_DEF(copy_indentation)                                                  \
     STD_DEF(close_brace)                                                       \
     STD_DEF(undo)                                                              \
@@ -64,16 +64,11 @@
     STD_DEF(select_inner_paren)                                                \
     STD_DEF(select_around_paren)                                               \
     STD_DEF(select_all)                                                        \
-    STD_DEF(command_palette)                                                   \
     STD_DEF(new_file)                                                          \
     STD_DEF(indent)                                                            \
     STD_DEF(deindent)                                                          \
     STD_DEF(back)                                                              \
     STD_DEF(forward)                                                           \
-    STD_DEF(split_editor)                                                      \
-    STD_DEF(close_editor)                                                      \
-    STD_DEF(start_profiling)                                                   \
-    STD_DEF(stop_profiling)                                                    \
     STD_DEF(debug_run)                                                         \
     STD_DEF(debug_pause)                                                       \
     STD_DEF(debug_stop)                                                        \

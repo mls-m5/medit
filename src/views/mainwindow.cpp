@@ -13,6 +13,7 @@
 #include "navigation/inavigation.h"
 #include "screen/iscreen.h"
 #include "script/localenvironment.h"
+#include "script/staticcommandregister.h"
 #include "syntax/basichighligting.h"
 #include "syntax/iformat.h"
 #include "syntax/palette.h"
@@ -27,6 +28,20 @@
 #include <filesystem>
 #include <memory>
 #include <string_view>
+
+namespace {
+
+StaticCommandRegister MainWindowReg{{
+    {"command_palette",
+     [](auto &&env) { env->mainWindow().showCommandPalette(); }},
+    {"split_editor", [](auto &&env) { env->mainWindow().splitEditor(); }},
+    {"close_editor", [](auto &&env) { env->mainWindow().closeEditor(); }},
+    {"cut", [](auto &&env) { env->mainWindow().copy(true); }},
+    {"copy", [](auto &&env) { env->mainWindow().copy(false); }},
+    {"escape", [](auto &&env) { env->mainWindow().escape(); }},
+}};
+
+}
 
 MainWindow::MainWindow(CoreEnvironment &core,
                        IScreen &screen,
