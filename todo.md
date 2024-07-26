@@ -148,11 +148,14 @@ Todo:
 - [ ] Autocreate settings file with default settings to help user
 - [ ] When using git blame. Copy the formatting from the original document to the blamed document
 - [ ] Create interaction for open previous projects
+    - [ ] Save information about window layout, zoom and other things in the project. The project should be saved somewhere in the home folder.
+- [ ] "List-tool" that creates lists, then checklists and then checks the list (ctrl+l or just space in normal mode in markdown files)
       
 ## Bugs
 - [x] When open a file where there is no project/.git, the program freezes
 - [ ] Segmentation fault when using goto symbol on std::numeric::pi
 - [ ] Move cursor to the left when exiting input mode (like regular vim)
+- [ ] When creating a new file and saving it, it does not show up in the quick open bar
 
 
 
