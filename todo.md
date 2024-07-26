@@ -146,6 +146,8 @@ Todo:
 - [ ] Locator performance is really bad when opening large project
 - [ ] Make ctrl+c work again
 - [ ] Autocreate settings file with default settings to help user
+- [ ] When using git blame. Copy the formatting from the original document to the blamed document
+- [ ] Create interaction for open previous projects
       
 ## Bugs
 - [x] When open a file where there is no project/.git, the program freezes

@@ -1,7 +1,6 @@
 
 #include "standardcommands.h"
 #include "core/coreenvironment.h"
-#include "core/profiler.h"
 #include "core/registers.h"
 #include "files/project.h"
 #include "main.h"
@@ -557,26 +556,6 @@ StandardCommands create() {
         range.beginPosition(left(range.begin()));
         e.selection(range);
     };
-
-    // DEF(command_palette) {
-    //     env->mainWindow().showCommandPalette();
-    // };
-
-    // DEF(split_editor) {
-    //     env->mainWindow().splitEditor();
-    // };
-
-    // DEF(close_editor) {
-    //     env->mainWindow().closeEditor();
-    // };
-
-    // DEF(start_profiling) {
-    //     enableProfiling();
-    // };
-
-    // DEF(stop_profiling) {
-    //     disableProfiling();
-    // };
 
     DEF(back) {
         for (bool retry = true; retry;) {

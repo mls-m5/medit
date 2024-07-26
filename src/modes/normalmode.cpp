@@ -78,8 +78,7 @@ std::shared_ptr<IMode> createNormalMode() {
         {{"dw"}, sc.delete_word}, // Does not use normal w-motion on first
 
         {{"cc"}, sc.combine(sc.clear_line, sc.f("copy"), sc.copy_indentation)},
-        //        {{"cw"}, sc.combine(sc.select_word, sc.erase,
-        //        sc.insert_mode)},
+
         {{"ciw"}, sc.combine(sc.select_inner_word, sc.erase, sc.insert_mode)},
 
         {{"yy"}, sc.combine(sc.yank_line, sc.normal_mode)},
@@ -88,8 +87,6 @@ std::shared_ptr<IMode> createNormalMode() {
 
         {{"cc"}, sc.combine(sc.delete_line, sc.split, sc.left, sc.insert_mode)},
         {{"cw"}, sc.change_word},
-        //        {{"ciw"}, sc.combine(sc.select_inner_word, sc.erase,
-        //        sc.insert_mode)},
 
         {{"gd"}, {[](Ptr env) { env->mainWindow().gotoDefinition(); }}},
     }};
