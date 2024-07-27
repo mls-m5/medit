@@ -3,6 +3,7 @@
 #include "script/interaction.cpp"
 #include "script/localenvironment.cpp"
 #include "script/luastate.cpp"
+#include "script/recentprojectinteraction.cpp"
 #include "script/renamefileinteraction.cpp"
 #include "script/renameinteraction.cpp"
 #include "script/saveinteraction.cpp"

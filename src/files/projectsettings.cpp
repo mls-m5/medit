@@ -1,10 +1,27 @@
 #include "projectsettings.h"
+#include "config.h"
 #include "core/meditlog.h"
 #include "text/startswith.h"
+#include <algorithm>
 #include <filesystem>
+#include <fstream>
+#include <iostream>
 #include <json/json.h>
+#include <string>
+#include <vector>
 
 namespace {
+
+const auto projectListFilename = std::filesystem::path{"projects.txt"};
+
+std::filesystem::path projectDirectory() {
+    if (auto p = localConfigDirectory("project", true)) {
+        return *p;
+    }
+    else {
+        return "";
+    };
+}
 
 std::string translateInclude(std::string flag,
                              const std::filesystem::path &root) {
@@ -18,17 +35,31 @@ std::string translateInclude(std::string flag,
 }
 } // namespace
 
-void ProjectSettings::load(std::filesystem::path projectFile) {
+bool ProjectSettings::load(std::filesystem::path projectFile) {
     if (!std::filesystem::exists(projectFile)) {
-        return;
+        return false;
     }
+
+    settingsPath = projectFile;
 
     auto json = Json{};
     try {
-        std::fstream(projectFile) >> json;
+        std::fstream{projectFile} >> json;
     }
     catch (Json::ParsingError &error) {
         logStatusMessage(error.what());
+        return false;
+    }
+
+    makeProjectAvailable(projectFile);
+
+    if (auto it = json.find("root"); it != json.end()) {
+        root = it->value;
+    }
+    else {
+        if (projectFile.has_parent_path()) {
+            root = projectFile.parent_path();
+        }
     }
 
     // TODO: Add more multiple build configuration
@@ -45,11 +76,6 @@ void ProjectSettings::load(std::filesystem::path projectFile) {
         flags.clear();
 
         if (it->type == Json::String) {
-            // auto ss = std::istringstream();
-            // flags = std::vector<std::string>{};
-            // for (std::string s; ss >> s;) {
-            //     flags.push_back(s);
-            // }
             flags.push_back(it->value);
         }
         else if (it->type == Json::Array) {
@@ -69,5 +95,87 @@ void ProjectSettings::load(std::filesystem::path projectFile) {
         if (auto dir = it->find("working_dir"); dir != it->end()) {
             debug.workingDir = dir->string();
         }
+    }
+
+    return true;
+}
+
+void ProjectSettings::save() {
+    std::cerr << "saving project is not implemented yet" << std::endl;
+
+    auto json = Json{};
+
+    auto &flags = json["flags"] = Json{Json::Array};
+
+    for (auto &flag : flags) {
+        flags.push_back(flag);
+    }
+
+    // TODO: Continue implementing this
+}
+
+std::filesystem::path ProjectSettings::findProject(
+    std::filesystem::path fileInPath) {
+    auto projects = fetchRecentProjects();
+    for (auto &project : projects) {
+        if (fileInPath.parent_path().string().starts_with(
+                project.settingsPath.string())) {
+            return project.settingsPath;
+        }
+    }
+
+    return {};
+}
+
+std::vector<ProjectSettings> ProjectSettings::fetchRecentProjects() {
+    auto directory = projectDirectory();
+    if (directory.empty()) {
+        return {};
+    }
+
+    auto file = std::ifstream{directory / projectListFilename};
+    auto list = std::vector<ProjectSettings>{};
+
+    for (std::string line; std::getline(file, line);) {
+        list.push_back({});
+        auto &project = list.back();
+        if (!project.load(line)) {
+            list.pop_back();
+        }
+    }
+
+    return list;
+}
+
+void ProjectSettings::makeProjectAvailable(std::filesystem::path path) {
+    auto directory = projectDirectory();
+    if (directory.empty()) {
+        return;
+    }
+
+    auto list = std::vector<std::filesystem::path>{};
+
+    {
+        auto file = std::ifstream{directory / projectListFilename};
+
+        for (std::string line; std::getline(file, line);) {
+            auto path = std::filesystem::path{line};
+            if (std::filesystem::exists(path)) {
+                list.push_back(path);
+            }
+        }
+    }
+
+    if (std::find(list.begin(), list.end(), path) != list.end()) {
+        // The project is already added
+        return;
+    }
+
+    auto file = std::ofstream{directory / projectListFilename};
+
+    list.insert(list.begin(), path);
+
+    for (auto &item : list) {
+        file << item.string() << "\n";
     }
 }

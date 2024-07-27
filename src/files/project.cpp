@@ -3,6 +3,7 @@
 #include "core/ijobqueue.h"
 #include "files/directorynotifications.h"
 #include "files/extensions.h"
+#include "files/projectsettings.h"
 #include <algorithm>
 #include <cmath>
 #include <filesystem>
@@ -10,15 +11,6 @@
 #include <sstream>
 #include <string_view>
 #include <unordered_map>
-
-namespace {
-
-const std::string_view projectFileName = ".medit.json";
-
-// When the project files are named
-const std::string_view projectExtension = ".medit";
-
-} // namespace
 
 Project::Project(DirectoryNotifications &directoryNotifications,
                  IJobQueue &guiQueue)
@@ -51,7 +43,7 @@ std::filesystem::path Project::findRoot(std::filesystem::path arg) const {
     auto path = std::filesystem::absolute(arg);
 
     do {
-        if (std::filesystem::exists(path / projectFileName)) {
+        if (std::filesystem::exists(path / ProjectSettings::projectFileName)) {
             return path;
         }
 
@@ -123,7 +115,11 @@ Project::ProjectLanguage Project::getProjectLanguage() const {
 
 void Project::loadProjectFile() {
     _tv();
-    auto projectFile = _settings.root / projectFileName;
+
+    auto projectFile = _settings.settingsPath;
+    if (projectFile.empty()) {
+        projectFile = _settings.root / ProjectSettings::projectFileName;
+    }
     _settings.load(projectFile);
 }
 
@@ -166,7 +162,9 @@ std::vector<std::filesystem::path> Project::findProjectFiles(
 #endif
 
     auto &root = _settings.root;
-    root = this->findRoot(pathInProject);
+    if (root.empty()) {
+        root = this->findRoot(pathInProject);
+    }
 
     if (root.empty()) {
         return {};
