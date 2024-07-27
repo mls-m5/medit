@@ -19,7 +19,8 @@
 /// Environment shared with all user of the program/server
 class CoreEnvironment {
 public:
-    CoreEnvironment(ThreadContext &context);
+    CoreEnvironment(ThreadContext &context,
+                    std::filesystem::path projectToOpen);
     ~CoreEnvironment();
 
     CoreEnvironment(const CoreEnvironment &) = delete;

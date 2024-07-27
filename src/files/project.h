@@ -16,7 +16,9 @@ public:
         Unknown,
     };
 
-    Project(DirectoryNotifications &files, IJobQueue &guiQueue);
+    Project(std::filesystem::path projectFile,
+            DirectoryNotifications &files,
+            IJobQueue &guiQueue);
 
     void updateCache(const std::filesystem::path &pathInProject,
                      size_t max = 100000);
@@ -64,7 +66,7 @@ private:
     ProjectLanguage guessProjectLanguage() const;
 
     // Set the current root
-    std::filesystem::path findRoot(std::filesystem::path) const;
+    // std::filesystem::path findRoot(std::filesystem::path) const;
 
     /// When there is no build command provided. Try to guess what it could be
     /// based on what files are in the project

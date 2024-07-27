@@ -12,7 +12,8 @@
 #include <string_view>
 #include <unordered_map>
 
-Project::Project(DirectoryNotifications &directoryNotifications,
+Project::Project(std::filesystem::path projectPath,
+                 DirectoryNotifications &directoryNotifications,
                  IJobQueue &guiQueue)
     : _tv{"Project"}
     , _guiQueue{&guiQueue} {
@@ -35,31 +36,9 @@ Project::Project(DirectoryNotifications &directoryNotifications,
             });
         },
         this);
-}
 
-std::filesystem::path Project::findRoot(std::filesystem::path arg) const {
-    _tv();
-
-    auto path = std::filesystem::absolute(arg);
-
-    do {
-        if (std::filesystem::exists(path / ProjectSettings::projectFileName)) {
-            return path;
-        }
-
-        if (std::filesystem::exists(path / ".git")) {
-            return path;
-        }
-
-        path = path.parent_path();
-
-    } while (!path.empty() && path != "/");
-
-    if (path.empty() || path == "/") {
-        return {};
-    }
-
-    return arg.parent_path();
+    auto projectFile = ProjectSettings::findProject(projectPath, true);
+    _settings.load(projectFile);
 }
 
 void Project::updateCache(const std::filesystem::path &pathInProject,
@@ -162,9 +141,9 @@ std::vector<std::filesystem::path> Project::findProjectFiles(
 #endif
 
     auto &root = _settings.root;
-    if (root.empty()) {
-        root = this->findRoot(pathInProject);
-    }
+    // if (root.empty()) {
+    //     root = this->findRoot(pathInProject);
+    // }
 
     if (root.empty()) {
         return {};

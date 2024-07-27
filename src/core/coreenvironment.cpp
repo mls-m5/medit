@@ -13,10 +13,11 @@
 #include <ostream>
 #include <string_view>
 
-CoreEnvironment::CoreEnvironment(ThreadContext &context)
+CoreEnvironment::CoreEnvironment(ThreadContext &context,
+                                 std::filesystem::path projectPath)
     : _context{&context}
-    , _project{std::make_unique<Project>(files().directoryNotifications(),
-                                         context.guiQueue())}
+    , _project{std::make_unique<Project>(
+          projectPath, files().directoryNotifications(), context.guiQueue())}
     , _consoleTtyPath{createFifo(standardConsoleTtyPipePath())}
     , _errorTtyPath{createFifo(standardErrorTtyPipePath())}
     , _consoleInFile{_consoleTtyPath,

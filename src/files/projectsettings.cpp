@@ -58,7 +58,10 @@ bool ProjectSettings::load(std::filesystem::path projectFile) {
     }
     else {
         if (projectFile.has_parent_path()) {
-            root = projectFile.parent_path();
+            root = std::filesystem::absolute(projectFile.parent_path());
+        }
+        else {
+            root = findRoot(projectFile);
         }
     }
 
@@ -115,7 +118,7 @@ void ProjectSettings::save() {
 }
 
 std::filesystem::path ProjectSettings::findProject(
-    std::filesystem::path fileInPath) {
+    std::filesystem::path fileInPath, bool createIfDoesNotExist) {
     auto projects = fetchRecentProjects();
     for (auto &project : projects) {
         if (fileInPath.parent_path().string().starts_with(
@@ -124,7 +127,19 @@ std::filesystem::path ProjectSettings::findProject(
         }
     }
 
-    return {};
+    auto foundRoot = findRoot(fileInPath);
+    if (foundRoot.empty()) {
+        return {};
+    }
+
+    if (std::filesystem::exists(foundRoot / projectFileName)) {
+        return foundRoot / projectFileName;
+    }
+
+    if (!createIfDoesNotExist) {
+        return {};
+    }
+    return createAnonymousProject(foundRoot);
 }
 
 std::vector<ProjectSettings> ProjectSettings::fetchRecentProjects() {
@@ -178,4 +193,37 @@ void ProjectSettings::makeProjectAvailable(std::filesystem::path path) {
     for (auto &item : list) {
         file << item.string() << "\n";
     }
+}
+
+std::filesystem::path ProjectSettings::findRoot(std::filesystem::path arg) {
+    auto path = std::filesystem::absolute(arg);
+
+    do {
+        if (std::filesystem::exists(path / ProjectSettings::projectFileName)) {
+            return path;
+        }
+
+        if (std::filesystem::exists(path / ".git")) {
+            return path;
+        }
+
+        path = path.parent_path();
+
+    } while (!path.empty() && path != "/");
+
+    if (path.empty() || path == "/") {
+        return {};
+    }
+
+    return arg.parent_path();
+}
+
+std::filesystem::path ProjectSettings::createAnonymousProject(
+    std::filesystem::path root) {
+    auto settings = ProjectSettings{};
+    settings.settingsPath = (projectDirectory() / root.stem().string())
+                                .replace_extension(projectExtension);
+    settings.save();
+    settings.makeProjectAvailable(settings.settingsPath);
+    return settings.settingsPath;
 }

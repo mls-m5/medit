@@ -12,6 +12,7 @@
 #include "settings.h"
 #include "thinmain.h"
 #include "views/mainwindow.h"
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include <thread>
@@ -120,6 +121,9 @@ struct User {
         if (settings.file.empty()) {
             mainWindow->updateLocatorBuffer();
         }
+        else if (std::filesystem::is_directory(settings.file)) {
+            // Handled elsewhere
+        }
         else {
             mainWindow->open(settings.file);
             mainWindow->currentEditor()->removeEmptyUnsavedBufferHistory();
@@ -203,7 +207,7 @@ void MainData::start(const Settings &settings) {
 
     context = std::make_shared<ThreadContext>(*jobQueue, *guiQueue, *timer);
 
-    mainData.core = std::make_unique<CoreEnvironment>(*context);
+    mainData.core = std::make_unique<CoreEnvironment>(*context, settings.file);
 
     registerDefaultPlugins(*core);
     core->plugins().sort();

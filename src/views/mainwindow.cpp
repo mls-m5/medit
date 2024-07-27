@@ -99,11 +99,7 @@ MainWindow::MainWindow(CoreEnvironment &core,
         screen.palette(palette);
     }
 
-    _locator->visible(false); // #include "views/commandpalette.h"
-    // #include "views/completeview.h"
-    // #include "views/editor.h"
-    // #include "views/locator.h"
-
+    _locator->visible(false);
     _locator->mode(createInsertMode());
     _locator->showLines(false);
 

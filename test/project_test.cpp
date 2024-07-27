@@ -17,7 +17,7 @@ TEST_CASE("load") {
 
     auto jobQueue = JobQueue{};
 
-    auto project = Project{dirNotifications, jobQueue};
+    auto project = Project{path, dirNotifications, jobQueue};
 
     project.updateCache(path);
 

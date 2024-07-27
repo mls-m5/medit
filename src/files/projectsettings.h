@@ -21,7 +21,8 @@ struct ProjectSettings {
     bool load(std::filesystem::path path);
     void save();
 
-    std::filesystem::path findProject(std::filesystem::path fileInPath);
+    static std::filesystem::path findProject(std::filesystem::path fileInPath,
+                                             bool createIfDoesNotExist);
 
     static std::vector<ProjectSettings> fetchRecentProjects();
     static void makeProjectAvailable(std::filesystem::path settingsPath);
@@ -29,4 +30,9 @@ struct ProjectSettings {
     static inline const std::string_view projectFileName = ".medit.json";
     // When the project files are named
     static inline const std::string_view projectExtension = ".medit";
+
+    static std::filesystem::path findRoot(std::filesystem::path);
+
+    static std::filesystem::path createAnonymousProject(
+        std::filesystem::path root);
 };
