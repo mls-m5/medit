@@ -7,6 +7,7 @@
 #include "plugin/git.h"
 #include "plugin/jsonformat.h"
 #include "plugin/lsp/lspplugin.h"
+#include "plugin/markdowntools.h"
 #include "plugin/wordstatistics.h"
 #include "script/standardcommands.h"
 #include "syntax/basichighligting.h"
@@ -36,4 +37,5 @@ void registerDefaultPlugins(CoreEnvironment &core) {
     // TODO: Move standardcommands to live in core environment
     registerGitCommands(StandardCommands::get());
     registerWordStatistics(StandardCommands::get());
+    registerMarkdownTools(StandardCommands::get());
 }

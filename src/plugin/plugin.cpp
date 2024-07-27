@@ -4,6 +4,7 @@
 #include "git.cpp"
 #include "gitcommitinteraction.cpp"
 #include "jsonformat.cpp"
+#include "markdowntools.cpp"
 #include "run.cpp"
 #include "rundebug.cpp"
 #include "wordstatistics.cpp"

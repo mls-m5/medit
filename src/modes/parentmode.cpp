@@ -54,6 +54,8 @@ std::shared_ptr<IMode> createParentMode() {
         {KeyEvent{Key::KeyCombination, 'N', Modifiers::Ctrl}, sc.new_file},
         {KeyEvent{Key::Left, {}, Modifiers::Alt}, sc.back},
         {KeyEvent{Key::Right, {}, Modifiers::Alt}, sc.forward},
+        {KeyEvent{Key::KeyCombination, 'L', Modifiers::Ctrl},
+         sc.f("toggle_checkmark")},
     }};
 
     map.defaultAction({});

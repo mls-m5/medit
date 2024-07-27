@@ -123,7 +123,7 @@ void gitAdd(std::shared_ptr<IEnvironment> env) {
 
 } // namespace
 
-void registerGitCommands(StandardCommands &standardCommands) {
+void registerGitCommands(StandardCommands &sc) {
     //    auto git = std::string{"git -c color.status=always "};
     auto git = std::string{"git "};
 
@@ -132,28 +132,14 @@ void registerGitCommands(StandardCommands &standardCommands) {
         return [command](auto env) { viewResultAsInteraction(env, command); };
     };
 
-    standardCommands.addCommand(
-        "git_status", wrapInteraction(git + " status"), nullptr);
-    standardCommands.addCommand(
-        "git_diff", wrapInteraction(git + " diff"), nullptr);
-    standardCommands.addCommand(
+    sc.addCommand("git_status", wrapInteraction(git + " status"), nullptr);
+    sc.addCommand("git_diff", wrapInteraction(git + " diff"), nullptr);
+    sc.addCommand(
         "git_diff_cached", wrapInteraction(git + " diff --cached"), nullptr);
-    standardCommands.addCommand("git_push", gitPush, nullptr);
-    standardCommands.addCommand(
-        "git_log", wrapInteraction(git + " log"), nullptr);
-    standardCommands.addCommand("git_commit", beginGitCommit, nullptr);
-    standardCommands.addCommand(
-        "git_commit_amend", beginGitCommitAmmend, nullptr);
-    standardCommands.addCommand("git_blame", gitBlame, nullptr);
-    standardCommands.addCommand("git_add", gitAdd, nullptr);
-
-    // standardCommands.namedCommands["git_diff"] = wrapInteraction(git + "
-    // diff"); standardCommands.namedCommands["git_diff_cached"] =
-    //     wrapInteraction(git + " diff --cached");
-    // standardCommands.namedCommands["git_push"] = gitPush;
-    // standardCommands.namedCommands["git_log"] = wrapInteraction(git + "
-    // log"); standardCommands.namedCommands["git_commit"] = beginGitCommit;
-    // standardCommands.namedCommands["git_commit_amend"] =
-    // beginGitCommitAmmend; standardCommands.namedCommands["git_blame"] =
-    // gitBlame; standardCommands.namedCommands["git_add"] = gitAdd;
+    sc.addCommand("git_push", gitPush, nullptr);
+    sc.addCommand("git_log", wrapInteraction(git + " log"), nullptr);
+    sc.addCommand("git_commit", beginGitCommit, nullptr);
+    sc.addCommand("git_commit_amend", beginGitCommitAmmend, nullptr);
+    sc.addCommand("git_blame", gitBlame, nullptr);
+    sc.addCommand("git_add", gitAdd, nullptr);
 }

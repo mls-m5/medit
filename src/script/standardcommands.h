@@ -110,9 +110,10 @@ struct StandardCommands {
     /// A reference can be obtained from IEnvironment for plugins
     static StandardCommands &get();
 
-    const std::function<void(EnvPtrT)> &f(const std::string &name) {
-        return namedCommands.at(name).f;
-    }
+    // TODO: Handle commands not loaded in some better way
+    static inline const std::function<void(EnvPtrT)> doNothing = [](EnvPtrT) {};
+
+    const std::function<void(EnvPtrT)> &f(const std::string &name);
 
     /// Combine several standard commands into one single function
     template <typename... Args>

@@ -25,6 +25,7 @@
 #include "views/editor.h"
 #include "views/mainwindow.h"
 #include <functional>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -650,6 +651,17 @@ StandardCommands create() {
 StandardCommands &StandardCommands::get() {
     static auto sc = create();
     return sc;
+}
+
+const std::function<void(StandardCommands::EnvPtrT)> &StandardCommands::f(
+    const std::string &name) {
+    if (auto f = namedCommands.find(name); f != namedCommands.end()) {
+        return f->second.f;
+    }
+
+    std::cerr << "could not bind to non existing command " << name << std::endl;
+
+    return doNothing;
 }
 
 void StandardCommands::addCommand(std::string_view name,
