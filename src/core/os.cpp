@@ -29,6 +29,14 @@ void setupSignals(std::function<void()> f) {
     static_static_assert(false, "not implemented");
 }
 
+void restartWithArguments(std::vector<std::string> arguments) {
+    std::cout << "restart is not implemented in windows yet";
+}
+
+void revealInExplorer(std::filesystem::path path) {
+    std::cout << "showing folder is not implemented in windows yet";
+}
+
 #else
 
 #include <filesystem>
@@ -106,4 +114,29 @@ void restartWithArguments(std::vector<std::string> arguments) {
     // If execv returns, it must have failed
     std::cerr << "failed to restart\n" << std::endl;
     std::exit(EXIT_FAILURE);
+}
+
+void revealInExplorer(std::filesystem::path path) {
+    if (path.empty()) {
+        return;
+    }
+
+    std::filesystem::path directory =
+        path.has_parent_path() ? path.parent_path() : path;
+
+    // List of commands to try
+    std::vector<std::string> commands = {
+        "thunar \"" + path.string() + "\"",
+        "nautilus --select \"" + path.string() + "\"",
+        "dolphin --select \"" + path.string() + "\"",
+        "xdg-open \"" + directory.string() + "\"",
+    };
+
+    for (const auto &command : commands) {
+        if (std::system(command.c_str()) == 0) {
+            return;
+        }
+    }
+
+    std::cerr << "Failed to reveal file: " << path << std::endl;
 }

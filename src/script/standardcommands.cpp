@@ -1,6 +1,7 @@
 
 #include "standardcommands.h"
 #include "core/coreenvironment.h"
+#include "core/os.h"
 #include "core/registers.h"
 #include "files/project.h"
 #include "main.h"
@@ -506,6 +507,10 @@ StandardCommands create() {
             return;
         }
         env->mainWindow().updateTitle();
+    };
+
+    DEF(reveal_file_in_explorer) {
+        revealInExplorer(env->editor().file()->path());
     };
 
     DEF(indent) {

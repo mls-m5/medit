@@ -80,3 +80,5 @@ int runCommandAndCapture(Args &&...args) {
 
 // Internal function you do probably not want to use this, checkout main.h
 void restartWithArguments(std::vector<std::string> arguments);
+
+void revealInExplorer(std::filesystem::path path);
