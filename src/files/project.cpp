@@ -1,11 +1,8 @@
 
 #include "project.h"
 #include "core/ijobqueue.h"
-#include "core/meditlog.h"
 #include "files/directorynotifications.h"
 #include "files/extensions.h"
-#include "text/startswith.h"
-#include "json/json.h"
 #include <algorithm>
 #include <cmath>
 #include <filesystem>
@@ -18,16 +15,8 @@ namespace {
 
 const std::string_view projectFileName = ".medit.json";
 
-std::string translateInclude(std::string flag,
-                             const std::filesystem::path &root) {
-    if (starts_with(flag, "-I") && flag.size() > 2) {
-        if (flag.at(2) != '/') {
-            flag = "-I" + (root / flag.substr(2)).string();
-        }
-    }
-
-    return flag;
-}
+// When the project files are named
+const std::string_view projectExtension = ".medit";
 
 } // namespace
 
@@ -132,6 +121,12 @@ Project::ProjectLanguage Project::getProjectLanguage() const {
     return guessProjectLanguage();
 }
 
+void Project::loadProjectFile() {
+    _tv();
+    auto projectFile = _settings.root / projectFileName;
+    _settings.load(projectFile);
+}
+
 Project::ProjectLanguage Project::guessProjectLanguage() const {
     for (auto &ext : _extensions) {
         auto testFile = std::filesystem::path{"x"};
@@ -225,60 +220,6 @@ std::vector<std::filesystem::path> Project::findProjectFiles(
     });
 
     return paths;
-}
-
-void Project::loadProjectFile() {
-    _tv();
-    auto projectFile = _settings.root / projectFileName;
-    if (!std::filesystem::exists(projectFile)) {
-        return;
-    }
-
-    auto json = Json{};
-    try {
-        std::fstream(projectFile) >> json;
-    }
-    catch (Json::ParsingError &error) {
-        logStatusMessage(error.what());
-    }
-
-    if (auto it = json.find("build"); it != json.end()) {
-        _settings.buildCommand = it->value;
-    }
-
-    if (auto it = json.find("run"); it != json.end()) {
-        _settings.runCommand = it->value;
-    }
-
-    if (auto it = json.find("flags"); it != json.end()) {
-        _settings.flags.clear();
-
-        if (it->type == Json::String) {
-            auto ss = std::istringstream();
-            _settings.flags = std::vector<std::string>{};
-            for (std::string s; ss >> s;) {
-                _settings.flags.push_back(s);
-            }
-        }
-        else if (it->type == Json::Array) {
-            _settings.flags.clear();
-            for (auto &value : *it) {
-                if (value.type == Json::String) {
-                    _settings.flags.push_back(
-                        translateInclude(value.value, _settings.root));
-                }
-            }
-        }
-    }
-
-    if (auto it = json.find("debug"); it != json.end()) {
-        if (auto command = it->find("command"); command != it->end()) {
-            _settings.debug.command = command->string();
-        }
-        if (auto dir = it->find("working_dir"); dir != it->end()) {
-            _settings.debug.workingDir = dir->string();
-        }
-    }
 }
 
 void Project::addCachedFile(std::filesystem::path path) {

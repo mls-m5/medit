@@ -3,6 +3,7 @@
 #include "core/ijobqueue.h"
 #include "core/threadvalidation.h"
 #include "meditfwd.h"
+#include "projectsettings.h"
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -17,25 +18,10 @@ public:
 
     Project(DirectoryNotifications &files, IJobQueue &guiQueue);
 
-    struct Settings {
-        std::filesystem::path root;
-        std::string buildCommand;
-        std::string runCommand;
-        std::vector<std::string> flags;
-        std::string formatCommand;
-
-        struct DebugInfo {
-            std::string command;
-            std::filesystem::path workingDir;
-        };
-
-        DebugInfo debug;
-    };
-
     void updateCache(const std::filesystem::path &pathInProject,
                      size_t max = 100000);
 
-    const Settings &settings() const {
+    const ProjectSettings &settings() const {
         return _settings;
     }
 
@@ -73,6 +59,8 @@ public:
     }
 
 private:
+    void loadProjectFile();
+
     ProjectLanguage guessProjectLanguage() const;
 
     // Set the current root
@@ -87,9 +75,7 @@ private:
     std::vector<std::filesystem::path> findProjectFiles(
         const std::filesystem::path &pathInProject, size_t max = 100000);
 
-    void loadProjectFile();
-
-    Settings _settings;
+    ProjectSettings _settings;
 
     void addCachedFile(std::filesystem::path);
     void removeCachedFile(std::filesystem::path);

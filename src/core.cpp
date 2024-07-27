@@ -14,6 +14,7 @@
 #include "files/config.cpp"
 #include "files/popenstream.cpp"
 #include "files/project.cpp"
+#include "files/projectsettings.cpp"
 #include "keys/event.cpp"
 #include "linux/inotify.cpp"
 #include "syntax/palette.cpp"
