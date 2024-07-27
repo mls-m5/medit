@@ -81,22 +81,6 @@ bool ProjectSettings::load(std::filesystem::path projectFile) {
         runCommand = it->value;
     }
 
-    // if (auto it = json.find("flags"); it != json.end()) {
-    //     flags.clear();
-
-    //     if (it->type == Json::String) {
-    //         flags.push_back(it->value);
-    //     }
-    //     else if (it->type == Json::Array) {
-    //         flags.clear();
-    //         for (auto &value : *it) {
-    //             if (value.type == Json::String) {
-    //                 flags.push_back(translateInclude(value.value, root));
-    //             }
-    //         }
-    //     }
-    // }
-
     if (auto it = json.find("debug"); it != json.end()) {
         if (auto command = it->find("command"); command != it->end()) {
             debug.command = command->string();
@@ -110,16 +94,9 @@ bool ProjectSettings::load(std::filesystem::path projectFile) {
 }
 
 void ProjectSettings::save() {
-    // std::cerr << "saving project is not implemented yet" << std::endl;
+    // TODO: Implement all of the settings
 
     auto json = Json{};
-
-    // auto &flags = json["flags"];
-    // flags.type = Json::Array;
-
-    // for (auto &flag : flags) {
-    //     flags.push_back(flag);
-    // }
 
     if (settingsPath.empty()) {
         // Cannot save project

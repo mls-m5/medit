@@ -124,7 +124,7 @@ bool formatRust(std::filesystem::path path, Editor &editor) {
 }
 
 bool formatMsk(std::filesystem::path path, Editor &editor) {
-    if (isMsk(path)) {
+    if (!isMsk(path)) {
         return false;
     }
 
