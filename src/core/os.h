@@ -5,6 +5,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 enum Os {
     Linux,
@@ -76,3 +77,6 @@ int runCommandAndCapture(Args &&...args) {
     str.pop_back();
     return runCommandAndCapture(static_cast<const std::string &>(str));
 }
+
+// Internal function you do probably not want to use this, checkout main.h
+void restartWithArguments(std::vector<std::string> arguments);

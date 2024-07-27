@@ -21,4 +21,9 @@ struct Interaction {
     /// Alternative syntax for opening a new interaction. It is possible that
     /// this is redundant. Well well...
     void begin(InteractionHandling &, InteractionCallback callback);
+
+    std::string lineAt(size_t line) const;
+    std::string lineAtCursor() const {
+        return lineAt(cursorPosition.y());
+    }
 };

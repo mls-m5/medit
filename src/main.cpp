@@ -285,5 +285,9 @@ int main(int argc, char **argv) {
     mainData = {};
 #endif
 
+    if (medit::main::shouldRestart) {
+        restartWithArguments(medit::main::restartArguments);
+    }
+
     return 0;
 }

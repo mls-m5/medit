@@ -2,6 +2,7 @@
 
 #include "files/projectsettings.h"
 #include "interaction.h"
+#include "main.h"
 #include "script/staticcommandregister.h"
 #include "views/interactionhandling.h"
 #include <iostream>
@@ -10,8 +11,16 @@ namespace {
 
 void handleRecentProjectResponse(std::shared_ptr<IEnvironment> env,
                                  const Interaction &i) {
-    // TODO: Implement this
-    std::cout << "recent projects... to be implemented" << std::endl;
+    auto project = i.lineAtCursor();
+    auto settings = ProjectSettings{};
+
+    if (!settings.load(project)) {
+        std::cout << "cannot open project file " + i.lineAtCursor()
+                  << std::endl;
+        return;
+    }
+
+    restartMedit(env->context(), {project});
 }
 
 void beginRecentProjectInteraction(std::shared_ptr<IEnvironment> env) {

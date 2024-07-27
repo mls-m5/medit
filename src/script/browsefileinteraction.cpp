@@ -18,18 +18,18 @@ void internalBeginFileViewInteraction(std::shared_ptr<IEnvironment> env,
 void handleFileViewResponse(std::shared_ptr<IEnvironment> env,
                             const Interaction &i) {
 
-    auto lineAt = [&](size_t targetNum) {
-        auto ss = std::istringstream{i.text};
-        auto lineNum = std::size_t{};
-        auto result = std::string{};
-        for (std::string line; std::getline(ss, line); ++lineNum) {
-            if (lineNum == targetNum) {
-                result = line;
-                break;
-            }
-        }
-        return result;
-    };
+    // auto lineAt = [&](size_t targetNum) {
+    //     auto ss = std::istringstream{i.text};
+    //     auto lineNum = std::size_t{};
+    //     auto result = std::string{};
+    //     for (std::string line; std::getline(ss, line); ++lineNum) {
+    //         if (lineNum == targetNum) {
+    //             result = line;
+    //             break;
+    //         }
+    //     }
+    //     return result;
+    // };
 
     if (i.text.empty()) {
         return;
@@ -39,11 +39,12 @@ void handleFileViewResponse(std::shared_ptr<IEnvironment> env,
 
     /// Filesystem mode
     if (i.text.front() == '/') {
-        auto rootPath = std::filesystem::path(lineAt(1));
-        result = rootPath / lineAt(i.cursorPosition.y());
+        auto rootPath = std::filesystem::path(i.lineAt(1));
+        result = rootPath / i.lineAt(i.cursorPosition.y());
     }
     else { /// Project mode
-        result = env->project().settings().root / lineAt(i.cursorPosition.y());
+        result =
+            env->project().settings().root / i.lineAt(i.cursorPosition.y());
     }
 
     if (result.empty()) {

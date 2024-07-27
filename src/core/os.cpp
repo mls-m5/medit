@@ -4,6 +4,8 @@
 #include <array>
 #include <cstdlib>
 #include <functional>
+#include <iostream>
+#include <ostream>
 
 namespace {
 
@@ -85,4 +87,23 @@ int runCommandAndCapture(const std::string &command) {
         (command + " >\"" + standardConsoleTtyPipePath().string() + "\" 2>\"" +
          standardErrorTtyPipePath().string() + "\"");
     return std::system(newCommand.c_str());
+}
+
+void restartWithArguments(std::vector<std::string> arguments) {
+    auto program = executablePath();
+
+    // Convert std::vector<std::string> to char* array
+    auto argv = std::vector<char *>{};
+    argv.push_back(const_cast<char *>(program.c_str()));
+    for (const auto &arg : arguments) {
+        argv.push_back(const_cast<char *>(arg.c_str()));
+    }
+    argv.push_back(nullptr); // null-terminated array
+
+    // Execute the new program
+    execv(program.c_str(), argv.data());
+
+    // If execv returns, it must have failed
+    std::cerr << "failed to restart\n" << std::endl;
+    std::exit(EXIT_FAILURE);
 }

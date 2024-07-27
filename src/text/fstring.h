@@ -35,6 +35,10 @@ public:
     FString(const FChar *begin, const FChar *end);
     operator std::string() const;
 
+    std::string string() const {
+        return std::string{*this};
+    }
+
     [[nodiscard]] size_t size() const {
         return _content.size();
     }
