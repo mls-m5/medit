@@ -19,7 +19,7 @@ TEST_CASE("load") {
 
     auto project = Project{path, dirNotifications, jobQueue};
 
-    project.updateCache(path);
+    project.updateCache();
 
     ASSERT_EQ(project.settings().root, std::filesystem::absolute(root));
 

@@ -41,11 +41,10 @@ Project::Project(std::filesystem::path projectPath,
     _settings.load(projectFile);
 }
 
-void Project::updateCache(const std::filesystem::path &pathInProject,
-                          size_t max) {
+void Project::updateCache(size_t max) {
     _tv();
-    _fileCache = findProjectFiles(pathInProject, max);
     loadProjectFile();
+    _fileCache = findProjectFiles(_settings.root, max);
     if (_settings.buildCommand.empty()) {
         _settings.buildCommand = guessBuildCommand();
     }
@@ -141,9 +140,6 @@ std::vector<std::filesystem::path> Project::findProjectFiles(
 #endif
 
     auto &root = _settings.root;
-    // if (root.empty()) {
-    //     root = this->findRoot(pathInProject);
-    // }
 
     if (root.empty()) {
         return {};
@@ -189,6 +185,8 @@ std::vector<std::filesystem::path> Project::findProjectFiles(
             return paths;
         }
     }
+
+    paths.push_back(_settings.settingsPath);
 
     _extensions.clear();
     _extensions.assign(extensions.begin(), extensions.end());

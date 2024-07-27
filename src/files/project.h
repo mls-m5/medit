@@ -20,8 +20,7 @@ public:
             DirectoryNotifications &files,
             IJobQueue &guiQueue);
 
-    void updateCache(const std::filesystem::path &pathInProject,
-                     size_t max = 100000);
+    void updateCache(size_t max = 100000);
 
     const ProjectSettings &settings() const {
         return _settings;

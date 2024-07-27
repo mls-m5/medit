@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <json/json.h>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -44,7 +45,12 @@ bool ProjectSettings::load(std::filesystem::path projectFile) {
 
     auto json = Json{};
     try {
-        std::fstream{projectFile} >> json;
+        auto file = std::ifstream{projectFile};
+        if (!file.is_open()) {
+            throw std::runtime_error{"could not open file " +
+                                     projectFile.string()};
+        }
+        file >> json;
     }
     catch (Json::ParsingError &error) {
         logStatusMessage(error.what());
@@ -65,31 +71,31 @@ bool ProjectSettings::load(std::filesystem::path projectFile) {
         }
     }
 
-    // TODO: Add more multiple build configuration
+    // TODO: Add multiple build configuration
     if (auto it = json.find("build"); it != json.end()) {
         buildCommand = it->value;
     }
 
-    // TODO: Add more multiple build configuration
+    // TODO: Add multiple build configuration
     if (auto it = json.find("run"); it != json.end()) {
         runCommand = it->value;
     }
 
-    if (auto it = json.find("flags"); it != json.end()) {
-        flags.clear();
+    // if (auto it = json.find("flags"); it != json.end()) {
+    //     flags.clear();
 
-        if (it->type == Json::String) {
-            flags.push_back(it->value);
-        }
-        else if (it->type == Json::Array) {
-            flags.clear();
-            for (auto &value : *it) {
-                if (value.type == Json::String) {
-                    flags.push_back(translateInclude(value.value, root));
-                }
-            }
-        }
-    }
+    //     if (it->type == Json::String) {
+    //         flags.push_back(it->value);
+    //     }
+    //     else if (it->type == Json::Array) {
+    //         flags.clear();
+    //         for (auto &value : *it) {
+    //             if (value.type == Json::String) {
+    //                 flags.push_back(translateInclude(value.value, root));
+    //             }
+    //         }
+    //     }
+    // }
 
     if (auto it = json.find("debug"); it != json.end()) {
         if (auto command = it->find("command"); command != it->end()) {
@@ -104,15 +110,25 @@ bool ProjectSettings::load(std::filesystem::path projectFile) {
 }
 
 void ProjectSettings::save() {
-    std::cerr << "saving project is not implemented yet" << std::endl;
+    // std::cerr << "saving project is not implemented yet" << std::endl;
 
     auto json = Json{};
 
-    auto &flags = json["flags"] = Json{Json::Array};
+    // auto &flags = json["flags"];
+    // flags.type = Json::Array;
 
-    for (auto &flag : flags) {
-        flags.push_back(flag);
+    // for (auto &flag : flags) {
+    //     flags.push_back(flag);
+    // }
+
+    if (settingsPath.empty()) {
+        // Cannot save project
+        return;
     }
+
+    json["root"] = root;
+
+    std::ofstream{settingsPath} << json;
 
     // TODO: Continue implementing this
 }
@@ -196,6 +212,9 @@ void ProjectSettings::makeProjectAvailable(std::filesystem::path path) {
 }
 
 std::filesystem::path ProjectSettings::findRoot(std::filesystem::path arg) {
+    if (arg.empty()) {
+        arg = std::filesystem::current_path();
+    }
     auto path = std::filesystem::absolute(arg);
 
     do {
@@ -223,6 +242,7 @@ std::filesystem::path ProjectSettings::createAnonymousProject(
     auto settings = ProjectSettings{};
     settings.settingsPath = (projectDirectory() / root.stem().string())
                                 .replace_extension(projectExtension);
+    settings.root = root;
     settings.save();
     settings.makeProjectAvailable(settings.settingsPath);
     return settings.settingsPath;

@@ -32,7 +32,7 @@ CoreEnvironment::CoreEnvironment(ThreadContext &context,
     std::ofstream{_consoleTtyPath.path()}
         << std::endl; // Prevent the listen file from waiting
 
-    _project->updateCache(std::filesystem::current_path());
+    _project->updateCache();
 
     subscribeToLog([this](LogType type, std::string_view str) {
         printToAllLogs(type, std::string{str});

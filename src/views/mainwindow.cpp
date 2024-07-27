@@ -134,7 +134,7 @@ MainWindow::MainWindow(CoreEnvironment &core,
         _inputFocus = editor;
     });
 
-    updateLocatorBuffer();
+    // updateLocatorBuffer();
 }
 
 MainWindow::~MainWindow() {
@@ -262,7 +262,7 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
 
 void MainWindow::updateLocatorBuffer() {
     auto &project = _env->core().project();
-    project.updateCache(std::filesystem::current_path());
+    project.updateCache();
     _env->core().files().directoryNotifications().path(
         project.settings()
             .root); // TODO: This should probably be handled somewhere else
