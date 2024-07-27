@@ -1,10 +1,12 @@
 
 
+#include "files/project.h"
 #include "files/projectsettings.h"
 #include "interaction.h"
 #include "main.h"
 #include "script/staticcommandregister.h"
 #include "views/interactionhandling.h"
+#include <filesystem>
 #include <iostream>
 
 namespace {
@@ -17,6 +19,11 @@ void handleRecentProjectResponse(std::shared_ptr<IEnvironment> env,
     if (!settings.load(project)) {
         std::cout << "cannot open project file " + i.lineAtCursor()
                   << std::endl;
+        return;
+    }
+
+    if (std::filesystem::equivalent(project,
+                                    env->project().settings().settingsPath)) {
         return;
     }
 
