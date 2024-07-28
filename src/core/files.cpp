@@ -98,6 +98,28 @@ bool Files::rename(std::filesystem::path from, std::filesystem::path to) {
     return false;
 }
 
+bool Files::deleteFile(std::filesystem::path path) {
+    // if (auto buffer = find(path); !buffer) {
+
+    // }
+
+    // auto file = buffer->file()
+
+#warning "continue here"
+
+    if (std::filesystem::remove(path)) {
+        return false;
+    }
+
+    emitBufferSubscriptionEvent({
+        .buffer = nullptr,
+        .path = from,
+        .type = BufferEvent::Close,
+    });
+
+    return true;
+}
+
 void Files::fileChangeCallback(DirectoryNotifications::EventType type,
                                std::filesystem::path path,
                                std::filesystem::file_time_type time) {
