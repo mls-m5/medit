@@ -12,7 +12,6 @@
 #include "lsp/requests.h"
 #include "lsp/servernotifications.h"
 #include "lspconfiguration.h"
-#include "nlohmann/json.hpp"
 #include "script/ienvironment.h"
 #include "script/standardcommands.h"
 #include "syntax/basichighligting.h"

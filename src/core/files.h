@@ -51,11 +51,14 @@ public:
     // Return a buffer only if it is loaded
     std::shared_ptr<Buffer> find(std::filesystem::path path);
 
-    DirectoryNotifications &directoryNotifications() {
-        return *_dirNotifications;
-    }
+    DirectoryNotifications &directoryNotifications();
 
+    /// Returns true on error
+    /// TODO: Change to true on success
     bool rename(std::filesystem::path from, std::filesystem::path to);
+
+    /// Returns true on success
+    bool deleteFile(std::filesystem::path);
 
 private:
     CoreEnvironment &_core;

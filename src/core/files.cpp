@@ -99,23 +99,18 @@ bool Files::rename(std::filesystem::path from, std::filesystem::path to) {
 }
 
 bool Files::deleteFile(std::filesystem::path path) {
-    // if (auto buffer = find(path); !buffer) {
-
-    // }
-
-    // auto file = buffer->file()
-
-#warning "continue here"
-
     if (std::filesystem::remove(path)) {
         return false;
     }
 
-    emitBufferSubscriptionEvent({
-        .buffer = nullptr,
-        .path = from,
-        .type = BufferEvent::Close,
-    });
+    auto buffer = find(path);
+    if (buffer) {
+        emitBufferSubscriptionEvent({
+            .buffer = buffer,
+            .path = path,
+            .type = BufferEvent::Close,
+        });
+    }
 
     return true;
 }

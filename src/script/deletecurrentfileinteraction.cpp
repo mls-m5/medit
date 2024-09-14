@@ -1,4 +1,7 @@
 
+#include "core/coreenvironment.h"
+#include "core/files.h"
+#include "files/project.h"
 #include "ienvironment.h"
 #include "interaction.h"
 #include "staticcommandregister.h"
@@ -6,10 +9,14 @@
 
 namespace {
 
-void handleFileViewResponse(std::shared_ptr<IEnvironment> env,
-                            const Interaction &i) {
-    auto &editor = env->editor();
-    editor.path();
+void handleDeleteFileResponseResponse(std::shared_ptr<IEnvironment> env,
+                                      const Interaction &i) {
+    auto path = std::filesystem::path(i.lineAt(1));
+    if (i.lineAtCursor() != "yes") {
+        return;
+    }
+
+    env->core().files().deleteFile(path);
 }
 
 void beginDeleteCurrentFileInteraction(std::shared_ptr<IEnvironment> env) {

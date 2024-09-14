@@ -7,7 +7,6 @@
 #include "text/fstring.h"
 #include "views/mainwindow.h"
 #include <filesystem>
-#include <sstream>
 #include <string>
 
 namespace {
@@ -17,20 +16,6 @@ void internalBeginFileViewInteraction(std::shared_ptr<IEnvironment> env,
 
 void handleFileViewResponse(std::shared_ptr<IEnvironment> env,
                             const Interaction &i) {
-
-    // auto lineAt = [&](size_t targetNum) {
-    //     auto ss = std::istringstream{i.text};
-    //     auto lineNum = std::size_t{};
-    //     auto result = std::string{};
-    //     for (std::string line; std::getline(ss, line); ++lineNum) {
-    //         if (lineNum == targetNum) {
-    //             result = line;
-    //             break;
-    //         }
-    //     }
-    //     return result;
-    // };
-
     if (i.text.empty()) {
         return;
     }
