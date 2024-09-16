@@ -12,9 +12,9 @@ std::unique_ptr<DirectoryNotifications> createDirectoryNotifications(
 
 #else
 
-inline std::unique_ptr<DirectorynDirectoryNotifications>
-createDirectoryNotifications(IJobQueue &guiQueue) {
-    return {}
+inline std::unique_ptr<DirectoryNotifications> createDirectoryNotifications(
+    IJobQueue &guiQueue) {
+    return {};
 }
 
 #endif

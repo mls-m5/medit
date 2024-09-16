@@ -94,6 +94,6 @@ std::filesystem::path standardConsoleTtyPipePath() {
     return standardLocalFifoDirectory() / "console-tty-in";
 }
 
-std::filesystem::__cxx11::path standardErrorTtyPipePath() {
+std::filesystem::path standardErrorTtyPipePath() {
     return standardLocalFifoDirectory() / "error-tty-in";
 }

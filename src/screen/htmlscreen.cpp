@@ -46,8 +46,8 @@ struct CellContent {
 EMSCRIPTEN_KEEPALIVE
 extern "C" void keyCallback(int type, char c1, char c2, char c3, char c4) {
     auto str = std::string{c1, c2, c3, c4};
-    auto c = Utf8Char{str.data(), str.size()};
-    std::cout << c.toString() << std::endl;
+    // auto c = Utf8Char{str.data(), str.size()};
+    // std::cout << c.toString() << std::endl;
 
     if (staticPointer) {
         if (type == 1) {
@@ -158,21 +158,21 @@ void HtmlScreen::cursor(size_t x, size_t y) {
     moveCursor(x, y);
 }
 
-size_t HtmlScreen::x() const {
-    return 0;
-}
+// size_t HtmlScreen::x() const {
+//     return 0;
+// }
 
-size_t HtmlScreen::y() const {
-    return 0;
-}
+// size_t HtmlScreen::y() const {
+//     return 0;
+// }
 
-size_t HtmlScreen::width() const {
-    return _grid->width;
-}
+// size_t HtmlScreen::width() const {
+//     return _grid->width;
+// }
 
-size_t HtmlScreen::height() const {
-    return _grid->height;
-}
+// size_t HtmlScreen::height() const {
+//     return _grid->height;
+// }
 
 void HtmlScreen::title(std::string title) {}
 
