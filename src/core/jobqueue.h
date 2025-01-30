@@ -27,7 +27,7 @@ public:
             throw std::runtime_error{"trying to add empty function"};
         }
         _queue.push(std::move(f));
-        _waitMutex.try_lock();
+        (void)_waitMutex.try_lock();
         _waitMutex.unlock();
     }
 
@@ -55,7 +55,7 @@ public:
             return;
         }
         _running = false;
-        _waitMutex.try_lock();
+        (void)_waitMutex.try_lock();
         decltype(_queue) empty{};
         _queue.swap(empty);
         _waitMutex.unlock();

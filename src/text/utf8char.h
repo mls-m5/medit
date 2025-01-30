@@ -1,8 +1,8 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <cstring> // for memcpy
-// #include <ostream>
 #include <iosfwd>
 #include <string>
 #include <string_view>

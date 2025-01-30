@@ -5,7 +5,6 @@
 #include "interaction.h"
 #include "main.h"
 #include "script/staticcommandregister.h"
-#include "views/interactionhandling.h"
 #include <filesystem>
 #include <iostream>
 
