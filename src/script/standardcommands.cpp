@@ -500,15 +500,15 @@ StandardCommands create() {
         quitMedit(env->context());
     };
 
-    DEF(close_buffer) {
-        auto &buffer = env->editor();
-        if (!buffer.closeBuffer()) {
-            env->statusMessage(FString{"closing editor..."});
-            quitMedit(env->context());
-            return;
-        }
-        env->mainWindow().updateTitle();
-    };
+    // DEF(close_buffer) {
+    //     auto &buffer = env->editor();
+    //     if (!buffer.closeBuffer()) {
+    //         env->statusMessage(FString{"closing editor..."});
+    //         quitMedit(env->context());
+    //         return;
+    //     }
+    //     env->mainWindow().updateTitle();
+    // };
 
     DEF(reveal_file_in_explorer) {
         revealInExplorer(env->editor().file()->path());
@@ -660,6 +660,7 @@ const std::function<void(StandardCommands::EnvPtrT)> &StandardCommands::f(
     }
 
     std::cerr << "could not bind to non existing command " << name << std::endl;
+#warning TODO: Create lazybinding
 
     return doNothing;
 }

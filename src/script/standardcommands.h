@@ -52,7 +52,6 @@
     STD_DEF(build)                                                             \
     STD_DEF(run)                                                               \
     STD_DEF(quit)                                                              \
-    STD_DEF(close_buffer)                                                      \
     STD_DEF(reveal_file_in_explorer)                                           \
     STD_DEF(insert_mode)                                                       \
     STD_DEF(normal_mode)                                                       \
