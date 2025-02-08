@@ -112,7 +112,7 @@ struct StandardCommands {
     // TODO: Handle commands not loaded in some better way
     static inline const std::function<void(EnvPtrT)> doNothing = [](EnvPtrT) {};
 
-    const std::function<void(EnvPtrT)> &f(const std::string &name);
+    const std::function<void(EnvPtrT)> f(const std::string &name);
 
     /// Combine several standard commands into one single function
     template <typename... Args>

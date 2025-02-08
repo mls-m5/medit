@@ -653,14 +653,34 @@ StandardCommands &StandardCommands::get() {
     return sc;
 }
 
-const std::function<void(StandardCommands::EnvPtrT)> &StandardCommands::f(
+const std::function<void(StandardCommands::EnvPtrT)> StandardCommands::f(
     const std::string &name) {
     if (auto f = namedCommands.find(name); f != namedCommands.end()) {
         return f->second.f;
     }
 
-    std::cerr << "could not bind to non existing command " << name << std::endl;
-#warning TODO: Create lazybinding
+    return
+        [foundFunction =
+             std::function<void(std::shared_ptr<IEnvironment> env)>{},
+         name = std::string{name}](std::shared_ptr<IEnvironment> env) mutable {
+            if (foundFunction) {
+                foundFunction(env);
+                return;
+            }
+            if (auto f = get().namedCommands.find(name);
+                f != get().namedCommands.end()) {
+                foundFunction = f->second.f;
+
+                foundFunction(env);
+
+                return;
+            }
+
+            std::cerr << "could not bind to non existing command " << name
+                      << std::endl;
+        };
+
+    // #warning TODO: Create lazybinding
 
     return doNothing;
 }
