@@ -1,20 +1,20 @@
 
 
 #include "inotify.h"
-#include "core/threadname.h"
-#include <filesystem>
-#include <system_error>
 
 #ifdef MEDIT_USING_LINUX
 
 #include "core/ijobqueue.h"
+#include "core/threadname.h"
 #include "inotify.h"
 #include <algorithm>
 #include <atomic>
+#include <filesystem>
 #include <iostream>
 #include <limits.h>
 #include <poll.h>
 #include <sys/inotify.h>
+#include <system_error>
 #include <thread>
 #include <unistd.h>
 #include <vector>
@@ -31,8 +31,8 @@ public:
     std::filesystem::path directory;
 
     InotifyDirectoryNotifications(IJobQueue &jobQueue)
-        : guiQueue{jobQueue} {
-        inotify_fd = inotify_init();
+        : inotify_fd(inotify_init())
+        , guiQueue{jobQueue} {
 
         if (inotify_fd < 0) {
             std::cerr << "Error initializing inotify" << std::endl;
@@ -40,7 +40,7 @@ public:
         }
     }
 
-    ~InotifyDirectoryNotifications() {
+    ~InotifyDirectoryNotifications() override {
         stop();
         close(inotify_fd);
     }

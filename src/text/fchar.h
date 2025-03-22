@@ -29,7 +29,7 @@ public:
     }
 
     operator std::string_view() const {
-        return c;
+        return std::string_view{c};
     }
 
     operator std::string() const {
