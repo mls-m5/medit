@@ -5,7 +5,6 @@
 #include "fstring.h"
 #include <algorithm>
 #include <stdexcept>
-#include <string_view>
 
 class FStringView {
     const FChar *_data = nullptr;

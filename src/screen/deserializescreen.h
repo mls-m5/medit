@@ -15,7 +15,7 @@ public:
     DeserializeScreen(DeserializeScreen &&) = delete;
     DeserializeScreen &operator=(const DeserializeScreen &) = delete;
     DeserializeScreen &operator=(DeserializeScreen &&) = delete;
-    ~DeserializeScreen() = default;
+    ~DeserializeScreen() override = default;
 
     // IConnection interface
     void subscribe(std::function<void(std::string_view)> callback) override;

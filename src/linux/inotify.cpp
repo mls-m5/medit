@@ -30,6 +30,14 @@ public:
     IJobQueue &guiQueue;
     std::filesystem::path directory;
 
+    InotifyDirectoryNotifications(const InotifyDirectoryNotifications &) =
+        delete;
+    InotifyDirectoryNotifications(InotifyDirectoryNotifications &&) = delete;
+    InotifyDirectoryNotifications &operator=(
+        const InotifyDirectoryNotifications &) = delete;
+    InotifyDirectoryNotifications &operator=(InotifyDirectoryNotifications &&) =
+        delete;
+
     InotifyDirectoryNotifications(IJobQueue &jobQueue)
         : inotify_fd(inotify_init())
         , guiQueue{jobQueue} {

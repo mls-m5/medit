@@ -202,7 +202,7 @@ Cursor copyIndentation(Cursor cursor, std::string autoIndentString) {
 
     auto &lines = cursor.buffer().lines();
 
-    auto line = cursor.buffer().lineAt(cursor.y());
+    // auto line = cursor.buffer().lineAt(cursor.y());
     auto &lineAbove = lines.at(cursor.y() - 1);
     auto indentationStr = indentation({cursor.buffer(), 0, cursor.y() - 1});
 

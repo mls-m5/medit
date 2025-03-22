@@ -11,9 +11,14 @@ public:
     constexpr span(span &&) = default;
     constexpr span &operator=(const span &) = default;
     constexpr span &operator=(span &&) = default;
+    ~span();
 
-    constexpr span(T *begin, T *end) : _begin(begin), _end(end) {}
-    constexpr span(T *begin, size_t size) : _begin(begin), _end(begin + size) {}
+    constexpr span(T *begin, T *end)
+        : _begin(begin)
+        , _end(end) {}
+    constexpr span(T *begin, size_t size)
+        : _begin(begin)
+        , _end(begin + size) {}
 
     constexpr auto begin() {
         return _begin;

@@ -33,7 +33,7 @@
 
 namespace {
 
-auto keyMap = std::array<std::pair<int, Key>, 24>{{
+const auto keyMap = std::array<std::pair<int, Key>, 24>{{
     {SDLK_UNKNOWN, Key::Unknown},
     {SDLK_ESCAPE, Key::Escape},
     {SDLK_UP, Key::Up},
@@ -61,7 +61,7 @@ auto keyMap = std::array<std::pair<int, Key>, 24>{{
 }};
 
 // Characters that does also insert text
-auto specialCharactersMap = std::array<std::pair<int, KeyEvent>, 3>{{
+const auto specialCharactersMap = std::array<std::pair<int, KeyEvent>, 3>{{
     {SDLK_RETURN, KeyEvent{Key::Text, "\n"}},
     {SDLK_TAB, KeyEvent{Key::Tab, "\t"}},
     {SDLK_SPACE, KeyEvent{Key::Space, " "}},
@@ -147,7 +147,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
 
     struct Style {
         sdl::Color fg = sdl::White;
-        sdl::Color bg;
+        sdl::Color bg = {};
     };
 
     std::vector<Style> _styles;
@@ -601,7 +601,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
         case SDL_TEXTINPUT: {
             auto text = sdlEvent.text;
 
-            auto ch = Utf8Char{text.text};
+            auto ch = Utf8Char{&text.text[0]};
 
             // For some reason the modifiers is not part of the text event
             auto mod = SDL_GetModState();

@@ -9,6 +9,13 @@
 
 class IScreen {
 public:
+    IScreen(const IScreen &) = default;
+    IScreen(IScreen &&) = delete;
+    IScreen &operator=(const IScreen &) = default;
+    IScreen &operator=(IScreen &&) = delete;
+    IScreen() = default;
+    virtual ~IScreen() = default;
+
     virtual void draw(size_t x, size_t y, FStringView str) = 0;
     virtual void refresh() = 0;
     virtual void clear() = 0;
@@ -34,8 +41,6 @@ public:
         size_t index = std::numeric_limits<size_t>::max()) = 0;
 
     virtual void cursorStyle(CursorStyle) = 0;
-
-    virtual ~IScreen() = default;
 
     using EventListT = std::vector<Event>;
     using CallbackT = std::function<void(EventListT)>;

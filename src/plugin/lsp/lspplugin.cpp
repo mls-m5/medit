@@ -276,7 +276,7 @@ void LspPlugin::handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
     auto duration = ProfileDuration{};
 
     struct Item {
-        long *data;
+        long *data = {};
 
         /// at index 5*i - deltaLine: token line number, relative to the
         /// previous

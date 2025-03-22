@@ -2,7 +2,6 @@
 
 #include "meditfwd.h"
 #include "text/position.h"
-#include <optional>
 
 class Cursor : public Position {
 private:
@@ -30,8 +29,9 @@ public:
     constexpr Cursor &operator=(const Cursor &) = default;
     constexpr Cursor &operator=(Cursor &&) = default;
 
-    Cursor &operator++();
+    ~Cursor() = default;
 
+    Cursor &operator++();
 
     //! Returns a pointer because somtimes there is no character (like when
     //! there is a line-break

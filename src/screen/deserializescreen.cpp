@@ -43,40 +43,27 @@ void DeserializeScreen::handle(std::string_view str) {
 
     arch("id", id);
 
-    //    if (auto f = json.find("id"); f != json.end()) {
-    //        id = *f;
-    //    }
-
     auto method = arch.get<std::string>("method");
-
-    //    auto method = std::string{};
-    //    if (auto f = json.find("method"); f != json.end()) {
-    //        method = *f;
-    //    }
 
     if (method == "draw") {
         _screen->draw(arch.get<size_t>("x"),
                       arch.get<size_t>("y"),
                       arch.get<FString>("text"));
-        //        _screen->draw(json["x"], json["y"], FString{json["text"]});
         return;
     }
 
     if (method == "cursor") {
         _screen->cursor(arch.get<size_t>("x"), arch.get<size_t>("y"));
-        //        _screen->cursor(json["x"], json["y"]);
         return;
     }
 
     if (method == "cursorStyle") {
         _screen->cursorStyle(arch.get<CursorStyle>("value"));
-        //        _screen->cursorStyle(json["value"]);
         return;
     }
 
     if (method == "title") {
         _screen->title(arch.get<std::string>("value"));
-        //        _screen->title(json["value"]);
         return;
     }
 
@@ -97,13 +84,11 @@ void DeserializeScreen::handle(std::string_view str) {
 
     if (method == "palette") {
         _screen->palette(arch.get<Palette>("value"));
-        //        _screen->palette(json["value"]);
         return;
     }
 
     if (method == "set/clipboard") {
         _screen->clipboardData(arch.get<std::string>("value"));
-        //        _screen->clipboardData(json["value"]);
     }
 
     if (method == "get/clipboard") {

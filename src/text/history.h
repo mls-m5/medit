@@ -1,7 +1,6 @@
 #pragma once
 
 #include "text/bufferedit.h"
-#include <string>
 #include <vector>
 
 class Buffer;
@@ -9,7 +8,7 @@ class Buffer;
 class History {
 public:
     History(Buffer &buffer)
-        : _buffer{buffer} {}
+        : _buffer{&buffer} {}
 
     struct Item {
         BufferEdit edit;
@@ -43,7 +42,7 @@ public:
 private:
     long _revision = 1;
 
-    Buffer &_buffer;
+    Buffer *_buffer = nullptr;
 
     std::vector<Item> _history;
     std::vector<Item> _redo;

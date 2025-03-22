@@ -9,9 +9,14 @@
 //! connection
 class FifoConnection : public IConnection {
 public:
+    FifoConnection(const FifoConnection &) = delete;
+    FifoConnection(FifoConnection &&) = delete;
+    FifoConnection &operator=(const FifoConnection &) = delete;
+    FifoConnection &operator=(FifoConnection &&) = delete;
+
     FifoConnection(std::filesystem::path in, std::filesystem::path out);
 
-    ~FifoConnection();
+    ~FifoConnection() override;
 
     void write(std::string_view str) override;
     void subscribe(IConnection::CallbackT) override;
