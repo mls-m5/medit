@@ -5,6 +5,11 @@
 
 class DirectoryNotifications {
 public:
+    DirectoryNotifications() = default;
+    DirectoryNotifications(const DirectoryNotifications &) = delete;
+    DirectoryNotifications(DirectoryNotifications &&) = delete;
+    DirectoryNotifications &operator=(const DirectoryNotifications &) = delete;
+    DirectoryNotifications &operator=(DirectoryNotifications &&) = delete;
     virtual ~DirectoryNotifications() = default;
 
     enum EventType { Added, Removed, Changed };

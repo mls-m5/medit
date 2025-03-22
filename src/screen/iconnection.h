@@ -5,6 +5,14 @@
 
 class IConnection {
 public:
+    IConnection() = default;
+    virtual ~IConnection() = default;
+
+    IConnection(const IConnection &) = delete;
+    IConnection(IConnection &&) = delete;
+    IConnection &operator=(const IConnection &) = delete;
+    IConnection &operator=(IConnection &&) = delete;
+
     using CallbackT = std::function<void(std::string_view)>;
 
     //! Listen to received data

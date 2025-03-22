@@ -8,6 +8,11 @@ class TcpServer {
 public:
     using CallbackT = std::function<void(std::shared_ptr<IConnection>)>;
 
+    TcpServer(const TcpServer &) = delete;
+    TcpServer(TcpServer &&) = delete;
+    TcpServer &operator=(const TcpServer &) = delete;
+    TcpServer &operator=(TcpServer &&) = delete;
+
     TcpServer(int port);
     ~TcpServer();
 

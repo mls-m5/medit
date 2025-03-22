@@ -14,6 +14,11 @@ class ListView : public ScrollView, public IKeySink {
     size_t _current = 0;
 
 public:
+    ListView(const ListView &) = delete;
+    ListView(ListView &&) = delete;
+    ListView &operator=(const ListView &) = delete;
+    ListView &operator=(ListView &&) = delete;
+
     ListView(IView *parent);
     ~ListView() override;
 

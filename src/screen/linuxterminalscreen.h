@@ -7,7 +7,12 @@
 class LinuxTerminalScreen : public IScreen {
 public:
     LinuxTerminalScreen();
-    ~LinuxTerminalScreen();
+    LinuxTerminalScreen(const LinuxTerminalScreen &) = delete;
+    LinuxTerminalScreen(LinuxTerminalScreen &&) = delete;
+    LinuxTerminalScreen &operator=(const LinuxTerminalScreen &) = delete;
+    LinuxTerminalScreen &operator=(LinuxTerminalScreen &&) = delete;
+
+    ~LinuxTerminalScreen() override;
 
     //! IScreen
     void draw(size_t x, size_t y, FStringView) override;

@@ -3,7 +3,6 @@
 #include "core/threadvalidation.h"
 #include "screen/iscreen.h"
 #include <memory>
-#include <thread>
 
 class BufferedScreen : public IScreen {
     IScreen *_backend;
@@ -13,6 +12,10 @@ class BufferedScreen : public IScreen {
     ThreadValidation _tv{"BufferedScreen"};
 
 public:
+    BufferedScreen(const BufferedScreen &) = delete;
+    BufferedScreen(BufferedScreen &&) = delete;
+    BufferedScreen &operator=(const BufferedScreen &) = delete;
+    BufferedScreen &operator=(BufferedScreen &&) = delete;
     BufferedScreen(IScreen *backend);
     ~BufferedScreen() override;
 

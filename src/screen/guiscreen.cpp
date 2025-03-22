@@ -164,6 +164,11 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
 
     Palette _palette;
 
+    GuiScreen(const GuiScreen &) = delete;
+    GuiScreen(GuiScreen &&) = delete;
+    GuiScreen &operator=(const GuiScreen &) = delete;
+    GuiScreen &operator=(GuiScreen &&) = delete;
+
     GuiScreen(int width, int height, int fontSize) {
 
         auto createMutex = std::mutex{};

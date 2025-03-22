@@ -13,6 +13,11 @@ class AutoComplete {
 public:
     using CompletionList = ICompletionSource::CompletionList;
 
+    AutoComplete(const AutoComplete &) = delete;
+    AutoComplete(AutoComplete &&) = delete;
+    AutoComplete &operator=(const AutoComplete &) = delete;
+    AutoComplete &operator=(AutoComplete &&) = delete;
+
     AutoComplete(Plugins::ListT<ICompletionSource>);
     ~AutoComplete();
 

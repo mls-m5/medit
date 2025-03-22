@@ -13,7 +13,7 @@ public:
 
     struct Item {
         BufferEdit edit;
-        long revision;
+        long revision = {};
 
         bool isMajor = false;
 

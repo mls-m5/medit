@@ -105,9 +105,10 @@ public:
             setThreadName("inotify");
             constexpr size_t buffer_size =
                 sizeof(struct inotify_event) + NAME_MAX + 1;
-            char buffer[buffer_size];
+            // char buffer[buffer_size];
+            auto buffer = std::array<char, buffer_size>{};
 
-            struct pollfd pfd;
+            struct pollfd pfd = {};
             pfd.fd = inotify_fd;
             pfd.events = POLLIN;
 
@@ -127,7 +128,7 @@ public:
                 }
 
                 if (pfd.revents & POLLIN) {
-                    int length = read(inotify_fd, buffer, buffer_size);
+                    int length = read(inotify_fd, buffer.data(), buffer.size());
                     if (length < 0) {
                         std::cerr << "Error reading inotify events"
                                   << std::endl;

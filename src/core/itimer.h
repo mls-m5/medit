@@ -8,6 +8,11 @@ public:
     using TimeT = std::chrono::system_clock::time_point;
     using DurationT = TimeT::duration;
 
+    ITimer() = default;
+    ITimer(const ITimer &) = delete;
+    ITimer(ITimer &&) = delete;
+    ITimer &operator=(const ITimer &) = delete;
+    ITimer &operator=(ITimer &&) = delete;
     virtual ~ITimer() = default;
 
     virtual size_t setTimeout(DurationT duration, std::function<void()> f) = 0;

@@ -15,13 +15,14 @@ public:
     DeserializeScreen(DeserializeScreen &&) = delete;
     DeserializeScreen &operator=(const DeserializeScreen &) = delete;
     DeserializeScreen &operator=(DeserializeScreen &&) = delete;
+    ~DeserializeScreen() = default;
 
     // IConnection interface
     void subscribe(std::function<void(std::string_view)> callback) override;
     void close() override;
     void write(std::string_view data) override;
     void unsubscribe() override;
-    void waitForClose() override{};
+    void waitForClose() override {};
 
 private:
     void handle(std::string_view);

@@ -29,6 +29,11 @@ struct MainWindow : public Window {
 
     JumpList _jumpList;
 
+    MainWindow(const MainWindow &) = delete;
+    MainWindow(MainWindow &&) = delete;
+    MainWindow &operator=(const MainWindow &) = delete;
+    MainWindow &operator=(MainWindow &&) = delete;
+
     MainWindow(CoreEnvironment &core, IScreen &screen, ThreadContext &context);
 
     ~MainWindow() override;

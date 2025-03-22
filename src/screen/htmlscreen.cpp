@@ -49,12 +49,14 @@ extern "C" void keyCallback(int type, char c1, char c2, char c3, char c4) {
     // auto c = Utf8Char{str.data(), str.size()};
     // std::cout << c.toString() << std::endl;
 
-    if (staticPointer) {
-        if (type == 1) {
-            staticPointer->sendKeyEvent(
-                KeyEvent{Key::Text, {str.data(), str.size()}});
-        }
-    }
+#warning "implement this, there is some problem with it"
+
+    // if (staticPointer) {
+    //     if (type == 1) {
+    //         staticPointer->sendKeyEvent(
+    //             KeyEvent{Key::Text, {str.data(), str.size()}});
+    //     }
+    // }
 }
 
 struct HtmlScreen::Grid {

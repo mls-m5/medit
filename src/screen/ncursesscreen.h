@@ -19,6 +19,11 @@ public:
     void cursor(size_t x, size_t y) override;
 
     NCursesScreen();
+    NCursesScreen(const NCursesScreen &) = delete;
+    NCursesScreen(NCursesScreen &&) = delete;
+    NCursesScreen &operator=(const NCursesScreen &) = delete;
+    NCursesScreen &operator=(NCursesScreen &&) = delete;
+
     ~NCursesScreen() override;
 
     void subscribe(CallbackT f) override;

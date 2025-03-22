@@ -21,6 +21,11 @@ struct BufferEvent {
 class Files {
 public:
     Files(CoreEnvironment &core);
+
+    Files(const Files &) = delete;
+    Files(Files &&) = delete;
+    Files &operator=(const Files &) = delete;
+    Files &operator=(Files &&) = delete;
     ~Files();
 
     std::shared_ptr<Buffer> open(std::filesystem::path);
