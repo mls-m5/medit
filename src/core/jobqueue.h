@@ -1,8 +1,10 @@
 #pragma once
 
 #include "core/threadname.h"
+#include "core/threadvalidation.h"
 #include "ijobqueue.h"
 #include "profiler.h"
+#include <condition_variable>
 #include <functional>
 #include <mutex>
 #include <queue>
@@ -12,11 +14,14 @@
 class JobQueue : public IJobQueue {
 
 public:
-    JobQueue() = default;
+    JobQueue()
+        : _tv{"JobQueue"} {};
+    JobQueue(JobQueue &&) = delete;
+    JobQueue &operator=(JobQueue &&) = delete;
     JobQueue(const JobQueue &) = delete;
     JobQueue &operator=(const JobQueue &) = delete;
 
-    ~JobQueue() {
+    ~JobQueue() override {
         if (_thread.joinable()) {
             _thread.join();
         }
@@ -26,27 +31,40 @@ public:
         if (!f) {
             throw std::runtime_error{"trying to add empty function"};
         }
+
+        auto lock = std::unique_lock{_mutex};
+
+        if (!_running) {
+            return;
+        }
         _queue.push(std::move(f));
-        _waitMutex.try_lock();
-        _waitMutex.unlock();
+        lock.unlock();
+        _cv.notify_all();
     }
 
-    void work(bool shouldWait = true) override {
+    void work(bool shouldWait = true,
+              std::function<void()> afterWork = {}) override {
         {
             auto duration = ProfileDuration{};
-            if (shouldWait) {
-                _waitMutex.lock();
-            }
-            while (!_queue.empty() && _running) {
+            for (; _running;) {
+                auto lock = std::unique_lock{_mutex};
+                if (_queue.empty()) {
+                    break;
+                }
                 auto task = std::move(_queue.front());
                 _queue.pop();
+                lock.unlock();
                 task();
             }
         }
 
+        if (afterWork) {
+            afterWork();
+        }
+
         if (shouldWait) {
-            //            auto duration = ProfileDuration{"JobQueue-wait"};
-            wait();
+            auto l = std::unique_lock(_mutex);
+            _cv.wait(l, [this]() { return !_running || !_queue.empty(); });
         }
     }
 
@@ -55,15 +73,20 @@ public:
             return;
         }
         _running = false;
-        _waitMutex.try_lock();
-        decltype(_queue) empty{};
-        _queue.swap(empty);
-        _waitMutex.unlock();
+        {
+            auto lock = std::unique_lock{_mutex};
+            decltype(_queue) empty{};
+            _queue.swap(empty);
+        }
+
+        _cv.notify_all();
+
         if (_thread.joinable()) {
             _thread.join();
         }
     }
 
+    /// Start new thread to process incomming tasks
     void start() override {
         _thread = std::thread{[this] { loop(); }};
     }
@@ -71,33 +94,17 @@ public:
 private:
     //! Run and lock the current thread
     void loop() {
-        //        auto profileDuration = ProfileDuration{};
         setThreadName("jobs");
-        _threadId = std::this_thread::get_id();
+        _tv.reset();
         while (_running) {
             work();
         }
     }
 
-    //! Wait for another task to come in
-    void wait() {
-        auto l = std::scoped_lock(_waitMutex);
-    }
-
-    void forceThisThread() {
-        if (!isThisThread()) {
-            throw std::runtime_error("function called from wrong thread");
-        }
-    }
-
-    //! @returns true if the calling thread is the same as the one called loop
-    bool isThisThread() {
-        return std::this_thread::get_id() == _threadId;
-    }
-
     std::queue<std::function<void()>> _queue;
-    std::mutex _waitMutex;
+    std::mutex _mutex;
+    std::condition_variable _cv;
     bool _running = true;
-    std::thread::id _threadId = {};
+    ThreadValidation _tv;
     std::thread _thread;
 };

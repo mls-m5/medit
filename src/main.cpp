@@ -244,10 +244,11 @@ void MainData::loop() {
     guiQueue->start();
 #else
     while (!medit::main::shouldQuit) {
-        for (auto &user : users) {
-            user->mainWindow->refreshScreen();
-        }
-        guiQueue->work(true);
+        guiQueue->work(true, [this]() {
+            for (auto &user : users) {
+                user->mainWindow->refreshScreen();
+            }
+        });
     }
 #endif
 }
