@@ -10,5 +10,6 @@
 #include "script/simpleinteraction.cpp"
 #include "script/standardcommands.cpp"
 #include "script/staticcommandregister.cpp"
+#include "script/switchfilecommand.cpp"
 #include "script/togglecomments.cpp"
 #include "script/vimcommands.cpp"
