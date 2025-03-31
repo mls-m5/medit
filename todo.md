@@ -161,7 +161,11 @@ Todo:
 - [ ] Segmentation fault when using goto symbol on std::numeric::pi
 - [x] Move cursor to the left when exiting input mode (like regular vim)
 - [ ] When creating a new file and saving it, it does not show up in the quick open bar
+- [ ] When scrolling horizontally, selection is not moved like it should
+- [ ] Back history does not update when file is changed. Maybe make some way to update the cursor from revisions that could also be used for networking.
 
 
-
+- [ ] Mark where on the line a annotation from lsp occucrs
+- [ ] Option to show annotiation in tab below editor
+    - [ ] When showing it center annotation from the current line
 

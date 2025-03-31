@@ -1,4 +1,5 @@
 #include "files/project.h"
+#include "ienvironment.h"
 #include "script/ienvironment.h"
 #include "script/interaction.h"
 #include "script/staticcommandregister.h"

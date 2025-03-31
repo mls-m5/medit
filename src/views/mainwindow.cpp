@@ -39,9 +39,10 @@ StaticCommandRegister MainWindowReg{{
     {"cut", [](auto &&env) { env->mainWindow().copy(true); }},
     {"copy", [](auto &&env) { env->mainWindow().copy(false); }},
     {"escape", [](auto &&env) { env->mainWindow().escape(); }},
+    {"show_locator", [](auto &&env) { env->mainWindow().showLocator(); }},
 }};
 
-}
+} // namespace
 
 MainWindow::MainWindow(CoreEnvironment &core,
                        IScreen &screen,
