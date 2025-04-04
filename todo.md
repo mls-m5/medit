@@ -168,4 +168,4 @@ Todo:
 - [ ] Mark where on the line a annotation from lsp occucrs
 - [ ] Option to show annotiation in tab below editor
     - [ ] When showing it center annotation from the current line
-
+- [ ] Quicklist, consider using inheritance instead of function pointers for clarity

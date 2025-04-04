@@ -9,6 +9,7 @@
 #include "text/history.h"
 #include <filesystem>
 #include <memory>
+#include "history.h"
 
 // Text stored in memory with assosiated undo/redo-history and associated
 // filename information

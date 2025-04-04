@@ -24,10 +24,10 @@
 #include "views/commandpalette.h"
 #include "views/completeview.h"
 #include "views/editor.h"
+#include "views/fileswitcher.h"
 #include "views/locator.h"
 #include <filesystem>
 #include <memory>
-#include <string_view>
 
 namespace {
 
@@ -40,6 +40,7 @@ StaticCommandRegister MainWindowReg{{
     {"copy", [](auto &&env) { env->mainWindow().copy(false); }},
     {"escape", [](auto &&env) { env->mainWindow().escape(); }},
     {"show_locator", [](auto &&env) { env->mainWindow().showLocator(); }},
+    {"switch_file", [](auto &&env) { env->mainWindow().showFileSwitcher(); }},
 }};
 
 } // namespace
@@ -55,6 +56,7 @@ MainWindow::MainWindow(CoreEnvironment &core,
     , _env(std::make_unique<LocalEnvironment>(core, *this, context))
     , _console(std::make_shared<Editor>(this, _env->core().files().create()))
     , _locator(std::make_shared<Locator>(this, core.project()))
+    , _fileSwitcher{} // Continue here
     , _commandPalette(
           std::make_shared<CommandPalette>(this, StandardCommands::get()))
     , _completeView(std::make_shared<CompleteView>(
@@ -517,6 +519,11 @@ void MainWindow::autoComplete() {
 void MainWindow::showLocator() {
     _locator->visible(true);
     _inputFocus = _locator.get();
+}
+
+void MainWindow::showFileSwitcher() {
+    _fileSwitcher->visible(true);
+    _inputFocus = _fileSwitcher.get();
 }
 
 void MainWindow::showCommandPalette() {

@@ -5,6 +5,7 @@
 #include "script/jumplist.h"
 #include "script/localenvironment.h"
 #include "views/window.h"
+#include "views/fileswitcher.h"
 #include <memory>
 
 struct MainWindow : public Window {
@@ -15,6 +16,7 @@ struct MainWindow : public Window {
     std::shared_ptr<LocalEnvironment> _env;
     std::shared_ptr<Editor> _console;
     std::shared_ptr<Locator> _locator;
+    std::shared_ptr<FileSwitcher> _fileSwitcher;
     std::shared_ptr<CommandPalette> _commandPalette;
     std::shared_ptr<CompleteView> _completeView;
     size_t _split = 10;
@@ -119,6 +121,8 @@ struct MainWindow : public Window {
     void autoComplete();
 
     void showLocator();
+
+    void showFileSwitcher();
 
     void showCommandPalette();
 };
