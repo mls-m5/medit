@@ -43,7 +43,7 @@ public:
     [[nodiscard]] const LspConfiguration *config(
         std::filesystem::path path) const {
         if (auto i = instance(path)) {
-            return &i->_config;
+            return &i->config;
         }
         return nullptr;
     }
@@ -62,7 +62,7 @@ public:
         Instance(Instance &&) = default;
         ~Instance() = default;
 
-        LspConfiguration _config;
+        LspConfiguration config;
         std::unique_ptr<lsp::LspClient> client;
     };
 
@@ -74,7 +74,7 @@ public:
         }
 
         for (auto &instance : _instances) {
-            if (instance->_config.isFileSupported(path)) {
+            if (instance->config.isFileSupported(path)) {
                 return instance.get();
             }
         }
@@ -99,7 +99,7 @@ private:
 
     [[nodiscard]] Instance *instance(std::filesystem::path path) const {
         for (auto &instance : _instances) {
-            if (instance->_config.isFileSupported(path)) {
+            if (instance->config.isFileSupported(path)) {
                 return instance.get();
             }
         }

@@ -102,9 +102,9 @@ Position clangPositionToMeditPosition(lsp::Position pos) {
 
 using namespace lsp;
 
-LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
-    : _config{std::move(config)} {
-    client = std::make_unique<LspClient>(_config.command);
+LspPlugin::Instance::Instance(LspConfiguration c, LspPlugin *parent)
+    : config{std::move(c)} {
+    client = std::make_unique<LspClient>(config.command);
 
     auto initializedPromise = std::promise<bool>{};
     auto initializedFuture = initializedPromise.get_future();
@@ -201,7 +201,7 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
     }
 
     auto client = ins->client.get();
-    auto &config = ins->_config;
+    auto &config = ins->config;
 
     if (event.type == BufferEvent::Open) {
         if (!config.isFileSupported) {
@@ -394,7 +394,7 @@ bool LspPlugin::updateBuffer(Buffer &buffer) {
         return false;
     }
 
-    auto &config = i->_config;
+    auto &config = i->config;
 
     auto &oldVersion = _bufferVersions[buffer.path().string()];
 
