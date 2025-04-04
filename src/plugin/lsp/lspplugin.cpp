@@ -23,8 +23,8 @@
 #include "views/editor.h"
 #include <cctype>
 #include <filesystem>
-#include <future>
-#include <iomanip>
+// #include <future>
+// #include <iomanip>
 #include <iostream>
 #include <memory>
 #include <ostream>
@@ -104,6 +104,7 @@ using namespace lsp;
 
 LspPlugin::Instance::Instance(LspConfiguration c, LspPlugin *parent)
     : config{std::move(c)} {
+
     client = std::make_unique<LspClient>(config.command);
 
     auto initializedPromise = std::promise<bool>{};
@@ -248,6 +249,19 @@ void LspPlugin::registerPlugin(CoreEnvironment &core, Plugins &plugins) {
     plugins.createPlugin<LspHighlight>(lsp);
     plugins.createPlugin<LspComplete>(lsp);
     plugins.createPlugin<LspRename>(lsp);
+
+    StandardCommands::get().addCommand(
+        "lsp state info",
+        [lsp = lsp.get()](std::shared_ptr<IEnvironment> env) {
+            if (auto instance = lsp->instance(env->editor().path())) {
+                std::cout << instance->config.command << std::endl;
+            }
+            else {
+                std::cout << "no diagnostics for " << env->editor().path()
+                          << std::endl;
+            }
+        },
+        lsp.get());
 }
 
 LspPlugin::Instance *LspPlugin::createInstance(std::filesystem::path path) {
