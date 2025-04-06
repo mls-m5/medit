@@ -169,3 +169,4 @@ Todo:
 - [ ] Option to show annotiation in tab below editor
     - [ ] When showing it center annotation from the current line
 - [ ] Quicklist, consider using inheritance instead of function pointers for clarity
+- [ ] Opened files interactions where you can view, goto and close (by deleting lines) opened buffers.
