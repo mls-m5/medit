@@ -24,7 +24,6 @@
 #include "views/commandpalette.h"
 #include "views/completeview.h"
 #include "views/editor.h"
-#include "views/fileswitcher.h"
 #include "views/locator.h"
 #include <filesystem>
 #include <memory>

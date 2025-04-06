@@ -1,9 +1,7 @@
 #pragma once
 
 #include "fchar.h"
-#include "syntax/palette.h"
 #include "text/utf8char.h"
-#include <ios>
 #include <ostream>
 #include <vector>
 

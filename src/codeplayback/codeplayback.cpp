@@ -7,6 +7,7 @@
 #include "playbacksettings.h"
 #include "screen/cursorstyle.h"
 #include "syntax/basichighligting.h"
+#include "syntax/palette.h"
 #include "text/bufferedit.h"
 #include "text/cursorops.h"
 #include "videodump.h"
