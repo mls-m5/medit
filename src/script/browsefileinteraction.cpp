@@ -4,11 +4,9 @@
 #include "script/interaction.h"
 #include "script/staticcommandregister.h"
 #include "syntax/palette.h"
-#include "text/formattype.h"
 #include "text/fstring.h"
 #include "views/mainwindow.h"
 #include <filesystem>
-#include <sstream>
 #include <string>
 
 namespace {

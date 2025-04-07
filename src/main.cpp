@@ -254,7 +254,6 @@ void MainData::loop() {
 void MainData::quit() {
     quitMedit(*context);
 }
-
 } // namespace
 
 int main(int argc, char **argv) {

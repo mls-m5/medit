@@ -2,6 +2,7 @@ build
 bin/
 .vscode/
 
+*.user
 *.creator.user
 *.cflags
 *.config
@@ -11,3 +12,6 @@ bin/
 *.includes
 
 .qtc_clangd/
+
+.cache
+.idea/
