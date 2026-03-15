@@ -97,7 +97,7 @@ struct Diagnostic {
      * The diagnostic's severity. Can be omitted. If omitted it is up to the
      * client to interpret diagnostics as error, warning, info or hint.
      */
-    DiagnosticSeverity severity;
+    DiagnosticSeverity severity = DiagnosticSeverity::Undefined;
 
     /**
      * The diagnostic's code, which might appear in the user interface.
