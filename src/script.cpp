@@ -7,6 +7,7 @@
 #include "script/renamefileinteraction.cpp"
 #include "script/renameinteraction.cpp"
 #include "script/saveinteraction.cpp"
+#include "script/shouldclosebufferinteraction.cpp"
 #include "script/simpleinteraction.cpp"
 #include "script/standardcommands.cpp"
 #include "script/staticcommandregister.cpp"

@@ -52,7 +52,6 @@
     STD_DEF(build)                                                             \
     STD_DEF(run)                                                               \
     STD_DEF(quit)                                                              \
-    STD_DEF(close_buffer)                                                      \
     STD_DEF(reveal_file_in_explorer)                                           \
     STD_DEF(insert_mode)                                                       \
     STD_DEF(normal_mode)                                                       \
@@ -114,7 +113,7 @@ struct StandardCommands {
     // TODO: Handle commands not loaded in some better way
     static inline const std::function<void(EnvPtrT)> doNothing = [](EnvPtrT) {};
 
-    const std::function<void(EnvPtrT)> &f(const std::string &name);
+    const std::function<void(EnvPtrT)> f(const std::string &name);
 
     /// Combine several standard commands into one single function
     template <typename... Args>

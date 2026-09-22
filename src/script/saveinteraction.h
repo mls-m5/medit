@@ -1,6 +1,10 @@
 #pragma once
 
 #include "meditfwd.h"
+#include <functional>
 #include <memory>
 
-void saveInteraction(std::shared_ptr<IEnvironment>);
+using SaveInteractionCallback = std::function<void(bool)>;
+
+void saveInteraction(std::shared_ptr<IEnvironment>,
+                     SaveInteractionCallback callback = {});

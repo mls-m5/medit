@@ -13,7 +13,8 @@ namespace {
 
 void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
                                 const Interaction &i,
-                                std::shared_ptr<Buffer> buffer) {
+                                std::shared_ptr<Buffer> buffer,
+                                SaveInteractionCallback callback) {
     auto si = SimpleInteraction{};
 
     si.deserialize(i.text);
@@ -21,6 +22,9 @@ void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
     auto path = si.at("file");
 
     if (path.empty()) {
+        if (callback) {
+            callback(false);
+        }
         return;
     }
 
@@ -35,8 +39,8 @@ void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
         auto ni = Interaction{si.serialize(), {100000, 1}};
 
         env->mainWindow().interactions().newInteraction(
-            ni, [buffer](auto &&a, auto &&b) {
-                handleUserFileNameResponse(a, b, buffer);
+            ni, [buffer, callback](auto &&a, auto &&b) {
+                handleUserFileNameResponse(a, b, buffer, callback);
             });
         return;
     }
@@ -48,29 +52,45 @@ void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
         }
         env->mainWindow().statusMessage(FString{"saved to "} +
                                         buffer->file()->path().string());
+        if (callback) {
+            callback(true);
+        }
     }
     catch (std::runtime_error &e) {
         env->statusMessage(FString{"Could not save file "} + FString{path} +
                            ": " + e.what());
+        if (callback) {
+            callback(false);
+        }
     }
 }
 
 } // namespace
 
-void saveInteraction(std::shared_ptr<IEnvironment> env) {
+void saveInteraction(std::shared_ptr<IEnvironment> env,
+                     SaveInteractionCallback callback) {
     auto &e = env->editor();
     if (e.file()) {
         if (!e.save()) {
             env->mainWindow().statusMessage(FString{"Could not save "} +
                                             e.file()->path().string());
+            if (callback) {
+                callback(false);
+            }
             return;
         }
         env->mainWindow().statusMessage(FString{"Saved to "} +
                                         e.file()->path().string());
+        if (callback) {
+            callback(true);
+        }
         return;
     }
 
     if (env->mainWindow().interactions().isOperationBuffer(&e.buffer())) {
+        if (callback) {
+            callback(false);
+        }
         return;
     }
 
@@ -89,7 +109,7 @@ void saveInteraction(std::shared_ptr<IEnvironment> env) {
     auto buffer = e.buffer().shared_from_this();
 
     env->mainWindow().interactions().newInteraction(
-        i, [buffer](auto &&a, auto &&b) {
-            handleUserFileNameResponse(a, b, buffer);
+        i, [buffer, callback](auto &&a, auto &&b) {
+            handleUserFileNameResponse(a, b, buffer, callback);
         });
 }
