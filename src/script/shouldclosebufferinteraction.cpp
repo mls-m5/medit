@@ -1,5 +1,6 @@
 #include "main.h"
 #include "script/interaction.h"
+#include "script/saveinteraction.h"
 #include "script/staticcommandregister.h"
 #include "views/editor.h"
 #include "views/mainwindow.h"
@@ -19,15 +20,35 @@ void actuallyClose(std::shared_ptr<IEnvironment> env) {
 
 void handleCloseBufferResponse(std::shared_ptr<IEnvironment> env,
                                const Interaction &i) {
-    if (i.lineAtCursor().find("Yes") == std::string::npos) {
+    auto response = i.lineAtCursor();
+
+    if (response.find("No") != std::string::npos) {
+        actuallyClose(env);
         return;
     }
 
-    actuallyClose(env);
+    if (response.find("Yes") != std::string::npos) {
+        saveInteraction(env, [env](bool saved) {
+            if (saved) {
+                actuallyClose(env);
+            }
+        });
+    }
 }
 
 void beginCloseBufferInteraction(std::shared_ptr<IEnvironment> env) {
     auto &editor = env->editor();
+
+    // Interaction buffers are temporary and must not trigger another
+    // save-confirmation interaction. Close the interaction and restore the
+    // buffer that was active before it.
+    if (env->mainWindow().interactions().isOperationBuffer(
+            &editor.buffer())) {
+        env->mainWindow().interactions().close();
+        env->mainWindow().updateTitle();
+        return;
+    }
+
     if (!editor.buffer().isChanged()) {
         actuallyClose(env);
         return;
@@ -39,8 +60,13 @@ void beginCloseBufferInteraction(std::shared_ptr<IEnvironment> env) {
         .title = "close buffer " + editor.path().filename().string(),
     };
 
-    i.text += "Do you want to close the buffer?\n\n";
-    i.text += "path: " + editor.path().string() + "\n\n";
+    auto path = editor.path().string();
+    if (path.empty()) {
+        path = "<unnamed>";
+    }
+
+    i.text += "Do you want to save the buffer?\n\n";
+    i.text += "path: " + path + "\n\n";
     i.text += " - Yes\n";
     i.text += " - No\n";
     i.text += " - Cancel\n";
