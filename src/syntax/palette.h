@@ -41,7 +41,7 @@ struct Style {
     }
 };
 
-class Palette /*: public IPalette*/ {
+class Palette {
     bool _isChanged = true;
 
     std::map<std::string, Color> _palette;
@@ -52,6 +52,11 @@ class Palette /*: public IPalette*/ {
 
 public:
     Palette();
+    Palette(const Palette &) = default;
+    Palette(Palette &&) = default;
+    Palette &operator=(const Palette &) = default;
+    Palette &operator=(Palette &&) = default;
+
     ~Palette();
 
     friend std::istream &operator>>(std::istream &stream, Palette &palette) {
@@ -99,6 +104,7 @@ public:
     };
 
     void visit(Archive &arch);
+    void visit(Archive &arch) const;
 };
 
 void visit(Archive &arch, std::map<std::string, Color> &);

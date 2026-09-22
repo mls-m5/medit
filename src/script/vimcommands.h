@@ -9,8 +9,6 @@
 #include <functional>
 #include <meditfwd.h>
 #include <memory>
-#include <optional>
-#include <stdexcept>
 
 enum class VimMode {
     Normal,

@@ -148,6 +148,11 @@ struct ThreadData {
 
     ThreadData() = default;
 
+    ThreadData(const ThreadData &) = delete;
+    ThreadData(ThreadData &&) = delete;
+    ThreadData &operator=(const ThreadData &) = delete;
+    ThreadData &operator=(ThreadData &&) = delete;
+
     ~ThreadData() {
         {
             // Just mark when this is
@@ -242,4 +247,4 @@ StaticCommandRegister profilerReg{{
     {"stop_profiling", [](auto env) { disableProfiling(); }},
 }};
 
-}
+} // namespace

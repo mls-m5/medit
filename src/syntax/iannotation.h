@@ -2,10 +2,14 @@
 
 #include "meditfwd.h"
 #include <filesystem>
-#include <memory>
 
 class IAnnotation {
 public:
+    IAnnotation() = default;
+    IAnnotation(const IAnnotation &) = delete;
+    IAnnotation(IAnnotation &&) = delete;
+    IAnnotation &operator=(const IAnnotation &) = delete;
+    IAnnotation &operator=(IAnnotation &&) = delete;
     virtual ~IAnnotation() = default;
 
     //! Returns 0 if there is a error or true else

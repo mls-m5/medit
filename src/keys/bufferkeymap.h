@@ -4,7 +4,6 @@
 #include "text/fstring.h"
 #include "text/fstringview.h"
 #include <functional>
-#include <optional>
 
 class BufferKeyMap {
 public:
@@ -55,6 +54,7 @@ public:
     BufferKeyMap &operator=(const BufferKeyMap &) = default;
     BufferKeyMap(BufferKeyMap &&) = default;
     BufferKeyMap &operator=(BufferKeyMap &&) = default;
+    ~BufferKeyMap() = default;
 
     void customMatchFunction(MappingFunctionT f) {
         _customMatchFunction = f;

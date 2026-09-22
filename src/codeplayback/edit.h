@@ -3,8 +3,10 @@
 #include "core/profiler.h"
 #include "text/bufferedit.h"
 #include <cctype>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <regex>
 #include <string>
 

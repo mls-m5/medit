@@ -36,6 +36,7 @@ protected:
 public:
     CustomStreamBuf(LogType type)
         : type{type} {};
+
     ~CustomStreamBuf() override {
         // Ensure everything is flushed
         CustomStreamBuf::sync();

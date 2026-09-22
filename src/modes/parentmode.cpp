@@ -31,8 +31,11 @@ std::shared_ptr<IMode> createParentMode() {
          sc.toggle_comment},
         //        {KeyEvent{Key::KeyCombination, 'O', Modifiers::Ctrl},
         //         {[](Ptr env) { env->mainWindow().showOpen(); }}},
+        //         {KeyEvent{ey::KeyCombination, 'O', Modifiers::Ctrl |
+        //         Modifiers::Alt},
+        //          sc.f("browse_files")},
         {KeyEvent{Key::KeyCombination, 'O', Modifiers::Ctrl},
-         sc.f("browse_files")},
+         sc.f("show_locator")},
         {KeyEvent{Key::KeyCombination, 'S', Modifiers::Ctrl},
          sc.combine(sc.format, sc.save)},
         {KeyEvent{Key::KeyCombination, 'C', Modifiers::Ctrl}, sc.f("copy")},
@@ -57,6 +60,8 @@ std::shared_ptr<IMode> createParentMode() {
         {KeyEvent{Key::Right, {}, Modifiers::Alt}, sc.forward},
         {KeyEvent{Key::KeyCombination, 'L', Modifiers::Ctrl},
          sc.f("toggle_checkmark")},
+        {KeyEvent{Key::KeyCombination, '\t', Modifiers::Ctrl},
+         sc.f("switch_file")},
     }};
 
     map.defaultAction({});

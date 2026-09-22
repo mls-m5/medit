@@ -9,8 +9,8 @@
 #include "text/utf8caseconversion.h"
 #include <algorithm>
 
-AutoComplete::AutoComplete(Plugins::ListT<ICompletionSource> sources) {
-    _sources = std::move(sources);
+AutoComplete::AutoComplete(Plugins::ListT<ICompletionSource> sources)
+    : _sources{std::move(sources)} {
 
     std::sort(_sources.begin(), _sources.end(), [](auto &&a, auto &&b) {
         return a->priority() > b->priority();

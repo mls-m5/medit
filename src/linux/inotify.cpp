@@ -1,20 +1,20 @@
 
 
 #include "inotify.h"
-#include "core/threadname.h"
-#include <filesystem>
-#include <system_error>
 
 #ifdef MEDIT_USING_LINUX
 
 #include "core/ijobqueue.h"
+#include "core/threadname.h"
 #include "inotify.h"
 #include <algorithm>
 #include <atomic>
+#include <filesystem>
 #include <iostream>
 #include <limits.h>
 #include <poll.h>
 #include <sys/inotify.h>
+#include <system_error>
 #include <thread>
 #include <unistd.h>
 #include <vector>
@@ -30,9 +30,17 @@ public:
     IJobQueue &guiQueue;
     std::filesystem::path directory;
 
+    InotifyDirectoryNotifications(const InotifyDirectoryNotifications &) =
+        delete;
+    InotifyDirectoryNotifications(InotifyDirectoryNotifications &&) = delete;
+    InotifyDirectoryNotifications &operator=(
+        const InotifyDirectoryNotifications &) = delete;
+    InotifyDirectoryNotifications &operator=(InotifyDirectoryNotifications &&) =
+        delete;
+
     InotifyDirectoryNotifications(IJobQueue &jobQueue)
-        : guiQueue{jobQueue} {
-        inotify_fd = inotify_init();
+        : inotify_fd(inotify_init())
+        , guiQueue{jobQueue} {
 
         if (inotify_fd < 0) {
             std::cerr << "Error initializing inotify" << std::endl;
@@ -40,7 +48,7 @@ public:
         }
     }
 
-    ~InotifyDirectoryNotifications() {
+    ~InotifyDirectoryNotifications() override {
         stop();
         close(inotify_fd);
     }
@@ -105,9 +113,10 @@ public:
             setThreadName("inotify");
             constexpr size_t buffer_size =
                 sizeof(struct inotify_event) + NAME_MAX + 1;
-            char buffer[buffer_size];
+            // char buffer[buffer_size];
+            auto buffer = std::array<char, buffer_size>{};
 
-            struct pollfd pfd;
+            struct pollfd pfd = {};
             pfd.fd = inotify_fd;
             pfd.events = POLLIN;
 
@@ -127,7 +136,7 @@ public:
                 }
 
                 if (pfd.revents & POLLIN) {
-                    int length = read(inotify_fd, buffer, buffer_size);
+                    int length = read(inotify_fd, buffer.data(), buffer.size());
                     if (length < 0) {
                         std::cerr << "Error reading inotify events"
                                   << std::endl;

@@ -11,8 +11,14 @@ using namespace std::literals;
 
 class Timer : public ITimer {
 public:
+    Timer() = default;
+    Timer(const Timer &) = delete;
+    Timer(Timer &&) = delete;
+    Timer &operator=(const Timer &) = delete;
+    Timer &operator=(Timer &&) = delete;
+
     //! Destroy and join thread
-    ~Timer();
+    ~Timer() override;
 
     size_t setTimeout(DurationT duration, std::function<void()> f) override;
 

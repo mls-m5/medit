@@ -1,10 +1,14 @@
 #pragma once
 
 #include "meditfwd.h"
-#include <filesystem>
 
 class IHighlight {
 public:
+    IHighlight() = default;
+    IHighlight(const IHighlight &) = delete;
+    IHighlight(IHighlight &&) = delete;
+    IHighlight &operator=(const IHighlight &) = delete;
+    IHighlight &operator=(IHighlight &&) = delete;
     virtual ~IHighlight() = default;
 
     //! If this specific highlighting should be used for this file

@@ -12,7 +12,6 @@
 #include "lsp/requests.h"
 #include "lsp/servernotifications.h"
 #include "lspconfiguration.h"
-#include "nlohmann/json.hpp"
 #include "script/ienvironment.h"
 #include "script/standardcommands.h"
 #include "syntax/basichighligting.h"
@@ -23,8 +22,6 @@
 #include "views/editor.h"
 #include <cctype>
 #include <filesystem>
-#include <future>
-#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <ostream>
@@ -102,9 +99,10 @@ Position clangPositionToMeditPosition(lsp::Position pos) {
 
 using namespace lsp;
 
-LspPlugin::Instance::Instance(LspConfiguration config, LspPlugin *parent)
-    : _config{std::move(config)} {
-    client = std::make_unique<LspClient>(_config.command);
+LspPlugin::Instance::Instance(LspConfiguration c, LspPlugin *parent)
+    : config{std::move(c)} {
+
+    client = std::make_unique<LspClient>(config.command);
 
     auto initializedPromise = std::promise<bool>{};
     auto initializedFuture = initializedPromise.get_future();
@@ -201,7 +199,7 @@ void LspPlugin::bufferEvent(BufferEvent &event) {
     }
 
     auto client = ins->client.get();
-    auto &config = ins->_config;
+    auto &config = ins->config;
 
     if (event.type == BufferEvent::Open) {
         if (!config.isFileSupported) {
@@ -248,6 +246,19 @@ void LspPlugin::registerPlugin(CoreEnvironment &core, Plugins &plugins) {
     plugins.createPlugin<LspHighlight>(lsp);
     plugins.createPlugin<LspComplete>(lsp);
     plugins.createPlugin<LspRename>(lsp);
+
+    StandardCommands::get().addCommand(
+        "lsp state info",
+        [lsp = lsp.get()](std::shared_ptr<IEnvironment> env) {
+            if (auto instance = lsp->instance(env->editor().path())) {
+                std::cout << instance->config.command << std::endl;
+            }
+            else {
+                std::cout << "no diagnostics for " << env->editor().path()
+                          << std::endl;
+            }
+        },
+        lsp.get());
 }
 
 LspPlugin::Instance *LspPlugin::createInstance(std::filesystem::path path) {
@@ -276,7 +287,7 @@ void LspPlugin::handleSemanticsTokens(std::shared_ptr<Buffer> buffer,
     auto duration = ProfileDuration{};
 
     struct Item {
-        long *data;
+        long *data = {};
 
         /// at index 5*i - deltaLine: token line number, relative to the
         /// previous
@@ -394,7 +405,7 @@ bool LspPlugin::updateBuffer(Buffer &buffer) {
         return false;
     }
 
-    auto &config = i->_config;
+    auto &config = i->config;
 
     auto &oldVersion = _bufferVersions[buffer.path().string()];
 

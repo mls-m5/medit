@@ -5,5 +5,5 @@
 class JsonFormat : public IFormat {
 public:
     //! @see IFormat
-    bool format(Editor &);
+    bool format(Editor &) override;
 };

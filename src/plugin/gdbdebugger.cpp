@@ -4,7 +4,6 @@
 #include <iostream>
 #include <istream>
 #include <mutex>
-#include <ostream>
 #include <regex>
 #include <string>
 #include <string_view>

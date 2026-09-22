@@ -10,6 +10,11 @@
 class POpenStream : public std::istream {
 private:
     struct POpenStreamBuf : public std::streambuf {
+        POpenStreamBuf(const POpenStreamBuf &) = delete;
+        POpenStreamBuf(POpenStreamBuf &&) = delete;
+        POpenStreamBuf &operator=(const POpenStreamBuf &) = delete;
+        POpenStreamBuf &operator=(POpenStreamBuf &&) = delete;
+
         POpenStreamBuf(std::string command,
                        bool captureStdErr = false,
                        size_t bufferSize = 1024);

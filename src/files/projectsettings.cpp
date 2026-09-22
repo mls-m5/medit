@@ -194,7 +194,7 @@ std::filesystem::path ProjectSettings::findRoot(std::filesystem::path arg) {
     }
     auto path = std::filesystem::absolute(arg);
 
-    do {
+    while (!path.empty() && path != "/") {
         if (std::filesystem::exists(path / ProjectSettings::projectFileName)) {
             return path;
         }
@@ -204,8 +204,7 @@ std::filesystem::path ProjectSettings::findRoot(std::filesystem::path arg) {
         }
 
         path = path.parent_path();
-
-    } while (!path.empty() && path != "/");
+    }
 
     if (path.empty() || path == "/") {
         return {};

@@ -15,7 +15,6 @@
 #include <filesystem>
 #include <iostream>
 #include <string>
-#include <thread>
 #include <vector>
 
 #ifdef __EMSCRIPTEN__
@@ -182,7 +181,6 @@ struct MainData {
     std::shared_ptr<ITimer> guiLoopTimer;
     std::shared_ptr<ThreadContext> context;
     std::unique_ptr<TcpServer> server;
-
     std::vector<std::unique_ptr<User>> users;
 
     MainData() = default; // Static initialization
@@ -198,7 +196,7 @@ struct MainData {
 
 // Its defined publicly so that emscripten can keep it after the main function
 // exits
-MainData mainData;
+std::unique_ptr<MainData> mainData;
 
 void MainData::start(const Settings &settings) {
     jobQueue = std::make_shared<QueueType>();
@@ -207,7 +205,7 @@ void MainData::start(const Settings &settings) {
 
     context = std::make_shared<ThreadContext>(*jobQueue, *guiQueue, *timer);
 
-    mainData.core = std::make_unique<CoreEnvironment>(*context, settings.file);
+    mainData->core = std::make_unique<CoreEnvironment>(*context, settings.file);
 
     registerDefaultPlugins(*core);
     core->plugins().sort();
@@ -244,10 +242,11 @@ void MainData::loop() {
     guiQueue->start();
 #else
     while (!medit::main::shouldQuit) {
-        for (auto &user : users) {
-            user->mainWindow->refreshScreen();
-        }
-        guiQueue->work(true);
+        guiQueue->work(true, [this]() {
+            for (auto &user : users) {
+                user->mainWindow->refreshScreen();
+            }
+        });
     }
 #endif
 }
@@ -255,14 +254,13 @@ void MainData::loop() {
 void MainData::quit() {
     quitMedit(*context);
 }
-
 } // namespace
 
 int main(int argc, char **argv) {
     auto settings = Settings{argc, argv};
 
     setThreadName("main");
-    setupSignals([]() { mainData.quit(); });
+    setupSignals([]() { mainData->quit(); });
 
     if (settings.enablePerformanceProfiling) {
         enableProfiling();
@@ -275,13 +273,14 @@ int main(int argc, char **argv) {
     }
 #endif
 
-    mainData.start(settings);
+    mainData = std::make_unique<MainData>();
+    mainData->start(settings);
     setThreadName("main loop"); // Renaming since all child threads inherits the
                                 // first name
 
-    mainData.loop();
+    mainData->loop();
 #ifndef __EMSCRIPTEN__
-    mainData.stop();
+    mainData->stop();
     mainData = {};
 #endif
 

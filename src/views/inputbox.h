@@ -7,8 +7,13 @@
 
 class InputBox : public Window {
 public:
+    InputBox(const InputBox &) = delete;
+    InputBox(InputBox &&) = delete;
+    InputBox &operator=(const InputBox &) = delete;
+    InputBox &operator=(InputBox &&) = delete;
+
     InputBox(IWindow *parent, FString title, std::string defaultValue = {});
-    ~InputBox();
+    ~InputBox() override;
 
     //! @see IKeySink interface
     bool keyPress(std::shared_ptr<IEnvironment>) override;

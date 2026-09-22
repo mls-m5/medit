@@ -5,6 +5,11 @@
 
 class Locator : public QuickList {
 public:
+    Locator(const Locator &) = delete;
+    Locator(Locator &&) = delete;
+    Locator &operator=(const Locator &) = delete;
+    Locator &operator=(Locator &&) = delete;
+
     Locator(IView *parent, Project &projectFiles);
     ~Locator() override;
 

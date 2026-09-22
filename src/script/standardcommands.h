@@ -97,8 +97,9 @@ struct StandardCommands {
         std::function<void(EnvPtrT)> f;
         void *ref = nullptr;
 
-        void operator=(const decltype(f) &func) {
+        FunctionStruct &operator=(const decltype(f) &func) {
             f = func;
+            return *this;
         }
     };
 
