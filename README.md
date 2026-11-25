@@ -12,8 +12,31 @@
 
 ## Requirements
 
-clangd for c++ parsing
+For a native Linux build: CMake 3.23 or newer, a C++20 compiler, Git (including
+submodules), SDL2 with SDL2_ttf and SDL2_image development files, Boost.System,
+and wide-character ncurses development files (`ncursesw`). CMake downloads
+nlohmann/json 3.12.0 during configuration, so the first build needs network
+access. For `medit --cli`, use a UTF-8 locale (check with `locale charmap`).
 
+`clangd` is needed at runtime for C++ language-server features, but not to
+build or run the editor. Git, `gdb` and `clang-format` are used by their
+respective optional editor commands.
+
+On Ubuntu 24.04, for example:
+
+```sh
+sudo apt update
+sudo apt install build-essential cmake git libgl-dev libsdl2-dev \
+    libsdl2-ttf-dev libsdl2-image-dev libboost-system-dev libncurses-dev
+# Optional editor tools:
+sudo apt install clangd gdb clang-format
+
+git submodule update --init --recursive
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j2
+ctest --test-dir build --output-on-failure
+./build/medit --cli  # or ./build/medit for the GUI
+```
 
 ## How to configure clangd
 
