@@ -12,6 +12,7 @@ std::shared_ptr<IMode> createParentMode() {
     auto map = KeyMap{{
         {KeyEvent{Key::F2},
          {[](Ptr env) { env->mainWindow().gotoDefinition(); }}},
+        {KeyEvent{Key::F3}, sc.f("toggle_sidebar")},
         {KeyEvent{Key::F4}, sc.switch_header},
         {KeyEvent{Key::F5}, sc.debug_run},
         {KeyEvent{Key::F9}, sc.debug_toggle_breakpoint},

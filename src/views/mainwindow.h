@@ -4,8 +4,10 @@
 #include "meditfwd.h"
 #include "script/jumplist.h"
 #include "script/localenvironment.h"
-#include "views/window.h"
 #include "views/fileswitcher.h"
+#include "views/mainwindowlayout.h"
+#include "views/sidebar.h"
+#include "views/window.h"
 #include <memory>
 
 struct MainWindow : public Window {
@@ -19,6 +21,9 @@ struct MainWindow : public Window {
     std::shared_ptr<FileSwitcher> _fileSwitcher;
     std::shared_ptr<CommandPalette> _commandPalette;
     std::shared_ptr<CompleteView> _completeView;
+    SideBar _sidebar{this};
+    bool _sidebarRequested = false;
+    MainWindowLayout _layout;
     size_t _split = 10;
     FString _splitString;
     IKeySink *_inputFocus = nullptr;
@@ -105,6 +110,8 @@ struct MainWindow : public Window {
     // Commands --------------------
     void escape();
     void showConsole();
+
+    void toggleSidebar();
 
     ///! Create a new editor
     void splitEditor();

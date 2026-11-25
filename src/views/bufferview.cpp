@@ -290,8 +290,10 @@ void BufferView::bufferChangedEvent() {
 
 void BufferView::rewrapLines() {
     PROFILE_FUNCTION();
-    auto maxLineWidth = width() - _numberWidth;
-    maxLineWidth = std::min(_maxWrapLength, maxLineWidth);
+    // A narrow split can leave no text columns beside the line numbers.
+    // Keep wrapping progress positive, without unsigned subtraction overflow.
+    auto maxLineWidth = width() > _numberWidth ? width() - _numberWidth : 1;
+    maxLineWidth = std::max<size_t>(1, std::min(_maxWrapLength, maxLineWidth));
     if (!shouldWrap()) {
         maxLineWidth = std::numeric_limits<size_t>::max();
     }

@@ -33,6 +33,7 @@ namespace {
 StaticCommandRegister MainWindowReg{{
     {"command_palette",
      [](auto &&env) { env->mainWindow().showCommandPalette(); }},
+    {"toggle_sidebar", [](auto &&env) { env->mainWindow().toggleSidebar(); }},
     {"split_editor", [](auto &&env) { env->mainWindow().splitEditor(); }},
     {"close_editor", [](auto &&env) { env->mainWindow().closeEditor(); }},
     {"cut", [](auto &&env) { env->mainWindow().copy(true); }},
@@ -152,29 +153,30 @@ void MainWindow::resize(size_t w, size_t h) {
         height(h);
     }
 
-    {
-        size_t index = 0;
-        auto w = width() / _editors.size();
-        for (auto &editor : _editors) {
-            editor->x(index * w);
-            editor->y(0);
-            editor->width(w);
-            if (_env->showConsole()) {
-                editor->height(height() - _split);
-            }
-            else {
-                editor->height(height() - 1);
-            }
+    _layout = MainWindowLayout::calculate(width(),
+                                          height(),
+                                          _editors.size(),
+                                          _sidebarRequested,
+                                          _env->showConsole(),
+                                          _split);
+    _sidebar.visible(_layout.sidebarWidth > 0);
+    _sidebar.x(0);
+    _sidebar.y(0);
+    _sidebar.width(_layout.sidebarWidth);
+    _sidebar.height(_layout.editorHeight);
 
-            ++index;
-        }
+    for (size_t index = 0; index < _editors.size(); ++index) {
+        auto &editor = _editors[index];
+        editor->x(_layout.editorX(index, _editors.size()));
+        editor->y(0);
+        editor->width(_layout.editorColumns(index, _editors.size()));
+        editor->height(_layout.editorHeight);
     }
 
     _console->width(width());
-    _console->height(_split -
-                     2); // 1 character for toolbar - 2 for how numbers works
+    _console->height(_layout.consoleRows > 0 ? _layout.consoleRows - 1 : 0);
     _console->x(0);
-    _console->y(height() - _split + 1);
+    _console->y(_layout.editorHeight + 1);
 
     _locator->x(0);
     _locator->y(0);
@@ -194,12 +196,17 @@ void MainWindow::draw(IScreen &screen) {
         screen.cursorStyle(e->mode().cursorStyle());
     }
 
+    _sidebar.draw(screen);
     for (auto &editor : _editors) {
-        editor->draw(screen);
+        if (editor->height() > 0 && editor->width() >= 8) {
+            editor->draw(screen);
+        }
     }
-    if (_env->showConsole()) {
-        _console->draw(screen);
-        screen.draw(0, height() - _split, _splitString);
+    if (_layout.consoleRows > 0) {
+        if (_console->height() > 0 && _console->width() >= 8) {
+            _console->draw(screen);
+        }
+        screen.draw(0, _layout.editorHeight, _splitString);
     }
 
     if (_inputFocus == _locator.get()) {
@@ -212,14 +219,14 @@ void MainWindow::draw(IScreen &screen) {
 
     _completeView->draw(screen);
 
-    {
+    if (height() > 0 && width() > 0) {
         auto &editor = _editors.at(_currentEditor);
         auto statusMessage =
             FString{" - " + std::string{editor->mode().name()} + " - "} +
             _statusMessage;
         auto fill = FString{width(), FChar{" "}};
         _screen.draw(0, height() - 1, fill);
-        _screen.draw(0, height() - 1, statusMessage);
+        _screen.draw(0, height() - 1, statusMessage.substr(0, width()));
 
         auto cur = editor->cursor();
         auto cursorMessage =
@@ -227,12 +234,24 @@ void MainWindow::draw(IScreen &screen) {
                     std::to_string(cur.buffer().lines().size()) + ", " +
                     std::to_string(cur.x() + 1)};
 
-        _screen.draw(
-            width() - cursorMessage.size() - 1, height() - 1, cursorMessage);
+        if (cursorMessage.size() < width()) {
+            _screen.draw(width() - cursorMessage.size() - 1,
+                         height() - 1,
+                         cursorMessage);
+        }
     }
 }
 
 void MainWindow::updateCursor(IScreen &screen) const {
+    const auto *focusedView = dynamic_cast<const IView *>(_inputFocus);
+    if (width() < 8 || _layout.editorHeight == 0 ||
+        (focusedView &&
+         (focusedView->width() < 8 || focusedView->height() == 0))) {
+        if (width() > 0 && height() > 0) {
+            screen.cursor(0, 0);
+        }
+        return;
+    }
     _inputFocus->updateCursor(screen);
 }
 
@@ -350,6 +369,11 @@ void MainWindow::paste(std::string text) {
 }
 
 bool MainWindow::mouseDown(int x, int y) {
+    // The prototype sidebar is not interactive and must not move editor focus.
+    if (x >= 0 && y >= 0 && static_cast<size_t>(x) < _layout.sidebarWidth &&
+        static_cast<size_t>(y) < _layout.editorHeight) {
+        return true;
+    }
     for (size_t i = 0; i < _editors.size(); ++i) {
         auto &e = *_editors.at(i);
         if (e.mouseDown(x, y)) {
@@ -396,7 +420,7 @@ void MainWindow::refreshScreen() {
 
         {
             constexpr auto debug = true;
-            if (debug) {
+            if (debug && height() > 0 && width() > 1) {
                 if (auto e = currentEditor()) {
                     auto cursor = e->cursor();
                     _screen.draw(1,
@@ -459,11 +483,21 @@ void MainWindow::statusMessage(FStringView str) {
 void MainWindow::escape() {
     _env->showConsole(false);
     _inputFocus = currentEditor();
+    resize();
+    triggerRedraw();
 }
 
 void MainWindow::showConsole() {
     _env->showConsole(true);
     _inputFocus = _console.get();
+    resize();
+    triggerRedraw();
+}
+
+void MainWindow::toggleSidebar() {
+    _sidebarRequested = !_sidebarRequested;
+    resize();
+    triggerRedraw();
 }
 
 void MainWindow::splitEditor() {
