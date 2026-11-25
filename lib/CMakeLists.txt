@@ -14,6 +14,9 @@ include(FetchContent)
 FetchContent_Declare(
     json
     URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+# nlohmann/json 3.11.2 declares a CMake 3.1 policy baseline. CMake 4
+# otherwise rejects it before the dependency can be configured.
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 FetchContent_MakeAvailable(json)
 
 # --- json.h ----------------------------
