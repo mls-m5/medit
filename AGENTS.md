@@ -1,0 +1,10 @@
+# Agent instructions for medit
+
+- Keep changes small and coherent; commit a completed change separately from unrelated work. Preserve existing local edits, untracked files, and dirty submodules. Inspect `git status` before editing and before committing; stage only files belonging to the task.
+- Commit as the responsible human operator. For the current operator, use `Mattias Larsson Sköld <mattias.l.sk@gmail.com>` as both author and committer. Do not add AI co-author trailers. Set the identity per commit command; do not alter global Git configuration or rewrite history without explicit approval.
+- Do not push, force-update remotes, or change hosted services without separate authorization. Report exactly what was built or tested and what could not be verified.
+- Reuse existing editor abstractions before creating new implementations. Editor logic belongs in the shared model/views; screen backends implement `IScreen` and translate input into medit `Event` types. Keep CLI and GUI behavior in mind when changing shared code.
+- For bugs, add a focused regression test where feasible. Use the existing test setup under `test/`, run the relevant build and `ctest`, and format changed C++ files with the project's `.clang-format`. Do not reformat third-party submodules.
+- Keep documentation in English. When changing dependencies or build options, update `README.md` and check both the native GitHub Actions workflow and the separate container build as appropriate. CI may use a newer CMake than the local installation; test with a fresh build directory when updating a `FetchContent` dependency.
+- `lib/` contains Git submodules. Do not modify their contents or record a changed gitlink accidentally. The matterm integration is deferred on `feature/matterm-on-hold`; do not merge it into `master` unless explicitly requested.
+- Terminal text uses UTF-8: use wide-character ncurses with a UTF-8 locale for `--cli`. A `FChar` is not necessarily one terminal column; test cursor position, clipping, resize, and mouse coordinates with both single- and double-width characters when changing screen or text layout code.
