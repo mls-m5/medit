@@ -1,3 +1,5 @@
+#include "files/file.h"
+#include "helpers/temporaryproject.h"
 #include "mls-unit-test/unittest.h"
 #include "text/buffer.h"
 #include <string_view>
@@ -5,6 +7,15 @@
 using namespace std::literals;
 
 TEST_SUIT_BEGIN(Buffer)
+
+TEST_CASE("failed file save keeps the buffer marked changed") {
+    test_helpers::TemporaryProject project;
+    Buffer buffer{"changed"};
+    buffer.isChanged(true);
+    buffer.assignFile(std::make_unique<File>(project.path("missing/file.txt")));
+    EXPECT_FALSE(buffer.save());
+    EXPECT_TRUE(buffer.isChanged());
+}
 
 TEST_CASE("instantiate") {
     Buffer buffer;
