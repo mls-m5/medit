@@ -101,8 +101,10 @@ void NCursesScreen::init() {
 
 void NCursesScreen::draw(size_t x, size_t y, FStringView rstr) {
     PROFILE_FUNCTION();
-    auto str = rstr;
-    _threadQueue.push_back([str, this, x, y] {
+    // Drawing runs later on the terminal thread. The caller may redraw or
+    // resize its buffer before then, so never queue a borrowed FStringView.
+    auto str = FString{rstr.begin(), rstr.end()};
+    _threadQueue.push_back([str = std::move(str), this, x, y] {
         _tv();
         ::move(y, x);
         for (size_t tx = x, i = 0; i < str.size() && tx < width(); ++tx, ++i) {
@@ -243,7 +245,8 @@ Event NCursesScreen::getInput() {
         // get_wch returns a Unicode character, not one byte of UTF-8.
         char bytes[MB_LEN_MAX] = {};
         std::mbstate_t state{};
-        const auto count = std::wcrtomb(bytes, static_cast<wchar_t>(input), &state);
+        const auto count =
+            std::wcrtomb(bytes, static_cast<wchar_t>(input), &state);
         if (count == static_cast<size_t>(-1) || count > 4) {
             return NullEvent{};
         }
