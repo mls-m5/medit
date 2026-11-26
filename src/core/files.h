@@ -62,6 +62,13 @@ public:
     // Return a buffer only if it is loaded
     std::shared_ptr<Buffer> find(std::filesystem::path path);
 
+    // Includes buffers no longer shown in an editor, which can still hold
+    // unsaved content. The GUI thread owns this list.
+    std::vector<std::shared_ptr<Buffer>> buffers() const {
+        _tv();
+        return _buffers;
+    }
+
     DirectoryNotifications &directoryNotifications() {
         return *_dirNotifications;
     }

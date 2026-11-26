@@ -8,3 +8,6 @@ using SaveInteractionCallback = std::function<void(bool)>;
 
 void saveInteraction(std::shared_ptr<IEnvironment>,
                      SaveInteractionCallback callback = {});
+void saveInteraction(std::shared_ptr<IEnvironment>,
+                     std::shared_ptr<Buffer>,
+                     SaveInteractionCallback callback = {});

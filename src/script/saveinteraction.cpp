@@ -39,8 +39,13 @@ void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
         auto ni = Interaction{si.serialize(), {100000, 1}};
 
         env->mainWindow().interactions().newInteraction(
-            ni, [buffer, callback](auto &&a, auto &&b) {
+            ni,
+            [buffer, callback](auto &&a, auto &&b) {
                 handleUserFileNameResponse(a, b, buffer, callback);
+            },
+            [callback] {
+                if (callback)
+                    callback(false);
             });
         return;
     }
@@ -68,12 +73,11 @@ void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
 } // namespace
 
 void saveInteraction(std::shared_ptr<IEnvironment> env,
+                     std::shared_ptr<Buffer> buffer,
                      SaveInteractionCallback callback) {
-    auto &e = env->editor();
-    if (e.file()) {
-        if (e.buffer().hasExternalChanges()) {
-            auto buffer = e.buffer().shared_from_this();
-            auto path = e.file()->path().string();
+    if (auto *file = buffer->file()) {
+        if (buffer->hasExternalChanges()) {
+            auto path = file->path().string();
             auto interaction = Interaction{
                 .text = "The file changed on disk. Overwrite it?\n\npath: " +
                         path + "\n\n - Yes\n - No\n - Cancel\n",
@@ -81,7 +85,8 @@ void saveInteraction(std::shared_ptr<IEnvironment> env,
                 .title = "file changed on disk",
             };
             env->mainWindow().interactions().newInteraction(
-                interaction, [buffer, callback, path](auto env, const auto &i) {
+                interaction,
+                [buffer, callback, path](auto env, const auto &i) {
                     if (i.lineAtCursor().find("Yes") == std::string::npos) {
                         if (callback)
                             callback(false);
@@ -93,26 +98,30 @@ void saveInteraction(std::shared_ptr<IEnvironment> env,
                         path);
                     if (callback)
                         callback(saved);
+                },
+                [callback] {
+                    if (callback)
+                        callback(false);
                 });
             return;
         }
-        if (!e.save()) {
+        if (!buffer->save()) {
             env->mainWindow().statusMessage(FString{"Could not save "} +
-                                            e.file()->path().string());
+                                            file->path().string());
             if (callback) {
                 callback(false);
             }
             return;
         }
         env->mainWindow().statusMessage(FString{"Saved to "} +
-                                        e.file()->path().string());
+                                        file->path().string());
         if (callback) {
             callback(true);
         }
         return;
     }
 
-    if (env->mainWindow().interactions().isOperationBuffer(&e.buffer())) {
+    if (env->mainWindow().interactions().isOperationBuffer(buffer.get())) {
         if (callback) {
             callback(false);
         }
@@ -131,10 +140,19 @@ void saveInteraction(std::shared_ptr<IEnvironment> env,
 
     i.text = si.serialize();
 
-    auto buffer = e.buffer().shared_from_this();
-
     env->mainWindow().interactions().newInteraction(
-        i, [buffer, callback](auto &&a, auto &&b) {
+        i,
+        [buffer, callback](auto &&a, auto &&b) {
             handleUserFileNameResponse(a, b, buffer, callback);
+        },
+        [callback] {
+            if (callback)
+                callback(false);
         });
+}
+
+void saveInteraction(std::shared_ptr<IEnvironment> env,
+                     SaveInteractionCallback callback) {
+    saveInteraction(
+        env, env->editor().buffer().shared_from_this(), std::move(callback));
 }

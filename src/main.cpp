@@ -9,6 +9,7 @@
 #include "files/config.h"
 #include "registerdefaultplugins.h"
 #include "screen/bufferedscreen.h"
+#include "script/closewindowinteraction.h"
 #include "settings.h"
 #include "thinmain.h"
 #include "views/mainwindow.h"
@@ -57,6 +58,7 @@ struct User {
     std::shared_ptr<IScreen> nativeScreen;
     std::shared_ptr<IScreen> screen;
     std::shared_ptr<MainWindow> mainWindow;
+    bool closing = false;
 
     ~User() {
 #ifndef __EMSCRIPTEN__
@@ -153,7 +155,18 @@ struct User {
             }
             if (auto key = std::get_if<KeyEvent>(&c)) {
                 if (*key == Key::Quit) {
-                    quitMedit(mainWindow->env().context());
+                    if (!closing) {
+                        closing = true;
+                        beginCloseWindowInteraction(
+                            mainWindow->env().shared_from_this(),
+                            [this](bool confirmed) {
+                                if (confirmed)
+                                    quitMedit(mainWindow->env().context());
+                                else
+                                    closing = false;
+                            });
+                        mainWindow->triggerRedraw();
+                    }
                     return;
                 }
 

@@ -12,8 +12,10 @@
 #include <sstream>
 
 void InteractionHandling::newInteraction(const Interaction &i,
-                                         InteractionCallback callback) {
-    _callback = callback;
+                                         InteractionCallback callback,
+                                         std::function<void()> onCancel) {
+    _callback = std::move(callback);
+    _onCancel = std::move(onCancel);
 
     // TODO: Open in some special window
     auto editor = _window.currentEditor();
@@ -44,6 +46,10 @@ bool InteractionHandling::keyPress(std::shared_ptr<IEnvironment> env) {
     if (!buffer) {
         return false;
     }
+    if (env->key().key == Key::Escape) {
+        close();
+        return true;
+    }
 
     /// This is when the user has edited the response and wants to accept it
     if (env->key().symbol == "\n") {
@@ -61,23 +67,23 @@ bool InteractionHandling::keyPress(std::shared_ptr<IEnvironment> env) {
                 });
         }
 
-        close();
+        close(false);
         return true;
     }
-    //    if (env->key().key == Key::Escape) {
-    //        close();
-    //        return true;
-    //    }
     return false;
 }
 
-void InteractionHandling::close() {
+void InteractionHandling::close(bool cancelled) {
+    auto onCancel = std::move(_onCancel);
     _operationBuffer = {};
     _callback = {};
+    _onCancel = {};
     if (auto editor = _editor.lock()) {
         editor->closeBuffer();
         editor.reset();
     }
+    if (cancelled && onCancel)
+        onCancel();
 }
 
 bool InteractionHandling::isOperationBuffer(const Buffer *buffer) {

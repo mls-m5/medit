@@ -4,6 +4,7 @@
 #include "core/timer.h"
 #include "mls-unit-test/unittest.h"
 #include "mock/screen/mockscreen.h"
+#include "script/closewindowinteraction.h"
 #include "script/interaction.h"
 #include "script/saveinteraction.h"
 #include "views/commandpalette.h"
@@ -84,11 +85,87 @@ struct WindowFixture {
         }
         key({Key::Text, '\n'});
     }
+
+    void answer(size_t row) {
+        window.currentEditor()->cursor({0, row});
+        key({Key::Text, '\n'});
+        gui.work(false);
+    }
 };
 
 } // namespace sidebar_focus_test
 
 TEST_SUIT_BEGIN(SidebarFocus)
+
+TEST_CASE("window close checks hidden buffers and supports cancel and retry") {
+    sidebar_focus_test::WindowFixture f;
+    const auto firstPath = f.home.path / "first.cpp";
+    const auto secondPath = f.home.path / "second.cpp";
+    std::ofstream{firstPath} << "first\n";
+    std::ofstream{secondPath} << "second\n";
+    auto first = f.core.files().open(firstPath);
+    auto second = f.core.files().open(secondPath);
+    first->text(std::string{"edited first\n"});
+    second->text(std::string{"edited second\n"});
+    std::optional<bool> completed;
+    beginCloseWindowInteraction(f.window._env,
+                                [&](bool confirmed) { completed = confirmed; });
+    EXPECT_TRUE(f.window.interactions().active());
+    EXPECT_FALSE(completed.has_value());
+    f.answer(5); // No: leave the first file untouched and ask about the next.
+    EXPECT_TRUE(f.window.interactions().active());
+    f.answer(6); // Cancel: keep the window and both buffers.
+    EXPECT_FALSE(completed.value());
+    EXPECT_TRUE(first->isChanged());
+    EXPECT_TRUE(second->isChanged());
+
+    completed.reset();
+    beginCloseWindowInteraction(f.window._env,
+                                [&](bool confirmed) { completed = confirmed; });
+    f.answer(4); // Yes: save first, then ask about the second.
+    EXPECT_TRUE(f.window.interactions().active());
+    f.answer(5); // No: discard only upon confirmed window close.
+    EXPECT_TRUE(completed.value());
+    EXPECT_FALSE(first->isChanged());
+    EXPECT_TRUE(second->isChanged());
+    std::ifstream firstDisk{firstPath};
+    std::string line;
+    std::getline(firstDisk, line);
+    ASSERT_EQ(line, "edited first");
+    std::ifstream secondDisk{secondPath};
+    std::getline(secondDisk, line);
+    ASSERT_EQ(line, "second");
+}
+
+TEST_CASE("window close treats a missing unchanged file as a conflict") {
+    sidebar_focus_test::WindowFixture f;
+    const auto path = f.home.path / "missing.cpp";
+    std::ofstream{path} << "original\n";
+    auto buffer = f.core.files().open(path);
+    std::filesystem::remove(path);
+    std::optional<bool> completed;
+    beginCloseWindowInteraction(f.window._env,
+                                [&](bool confirmed) { completed = confirmed; });
+    EXPECT_TRUE(f.window.interactions().active());
+    f.answer(6); // Cancel rather than silently losing the buffer.
+    EXPECT_FALSE(completed.value());
+    EXPECT_FALSE(std::filesystem::exists(path));
+    EXPECT_FALSE(buffer->isChanged());
+}
+
+TEST_CASE("window close can be cancelled with Escape") {
+    sidebar_focus_test::WindowFixture f;
+    auto buffer = f.core.files().create();
+    buffer->text(std::string{"unsaved unnamed text\n"});
+    std::optional<bool> completed;
+    beginCloseWindowInteraction(f.window._env,
+                                [&](bool confirmed) { completed = confirmed; });
+    EXPECT_TRUE(f.window.interactions().active());
+    f.key(Key::Escape);
+    EXPECT_FALSE(f.window.interactions().active());
+    EXPECT_FALSE(completed.value());
+    EXPECT_TRUE(buffer->isChanged());
+}
 
 TEST_CASE("leaving a text view saves its modified file immediately") {
     sidebar_focus_test::WindowFixture f;
