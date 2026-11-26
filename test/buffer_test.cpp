@@ -17,6 +17,49 @@ TEST_CASE("failed file save keeps the buffer marked changed") {
     EXPECT_TRUE(buffer.isChanged());
 }
 
+TEST_CASE("external changes block saving until explicitly overwritten") {
+    test_helpers::TemporaryProject project;
+    project.write("example.cpp", "original\n");
+    const auto path = project.path("example.cpp");
+    const auto originalTime = std::filesystem::last_write_time(path);
+    auto buffer = Buffer::open(path);
+    buffer->text(std::string{"editor version\n"});
+    project.write("example.cpp", "external version\n");
+    std::filesystem::last_write_time(path,
+                                     originalTime + std::chrono::seconds{2});
+    EXPECT_TRUE(buffer->hasExternalChanges());
+    EXPECT_FALSE(buffer->save());
+    EXPECT_TRUE(buffer->isChanged());
+    std::ifstream disk{project.path("example.cpp")};
+    std::string line;
+    std::getline(disk, line);
+    ASSERT_EQ(line, "external version");
+    EXPECT_TRUE(buffer->save(true));
+    EXPECT_FALSE(buffer->hasExternalChanges());
+    EXPECT_FALSE(buffer->isChanged());
+}
+
+TEST_CASE("an unchanged empty file can be saved") {
+    test_helpers::TemporaryProject project;
+    project.write("empty.cpp", "");
+    auto buffer = Buffer::open(project.path("empty.cpp"));
+    buffer->text(std::string{"new contents\n"});
+    EXPECT_FALSE(buffer->hasExternalChanges());
+    EXPECT_TRUE(buffer->save());
+    EXPECT_FALSE(buffer->hasExternalChanges());
+}
+
+TEST_CASE("a removed backing file is an external change") {
+    test_helpers::TemporaryProject project;
+    project.write("example.cpp", "original\n");
+    auto buffer = Buffer::open(project.path("example.cpp"));
+    buffer->text(std::string{"editor version\n"});
+    std::filesystem::remove(project.path("example.cpp"));
+    EXPECT_TRUE(buffer->hasExternalChanges());
+    EXPECT_FALSE(buffer->save());
+    EXPECT_FALSE(std::filesystem::exists(project.path("example.cpp")));
+}
+
 TEST_CASE("instantiate") {
     Buffer buffer;
 }

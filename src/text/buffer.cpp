@@ -19,16 +19,21 @@ std::unique_ptr<Buffer> Buffer::open(std::filesystem::path path) {
     return buffer;
 }
 
-bool Buffer::save() {
+bool Buffer::save(bool overwriteExternal) {
     _tv();
     if (_file) {
-        if (_file->save(*this)) {
+        if (_file->save(*this, overwriteExternal)) {
             _raw.isChanged(false);
             return true;
         }
         return false;
     }
     return false;
+}
+
+bool Buffer::hasExternalChanges() const {
+    _tv();
+    return _file && _file->hasExternalChanges();
 }
 
 void Buffer::assignFile(std::unique_ptr<IFile> file) {

@@ -101,6 +101,9 @@ Todo:
       make it so that each source replace its content when there is something new
       for example lsp-plugin, the compiler or formatter (if it emits error messages)
 - [ ] Show error if formatting does not work
+- [ ] Strengthen external file change detection beyond modification timestamps.
+      Timestamp resolution, preserved timestamps and concurrent writes can hide
+      conflicts; recheck changes during overwrite confirmation and save.
 
 
 ## Prioritized changes

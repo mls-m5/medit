@@ -5,6 +5,7 @@
 #include "mls-unit-test/unittest.h"
 #include "mock/screen/mockscreen.h"
 #include "script/interaction.h"
+#include "script/saveinteraction.h"
 #include "views/commandpalette.h"
 #include "views/locator.h"
 #include "views/mainwindow.h"
@@ -213,6 +214,39 @@ TEST_CASE("tool input and paste cannot modify the background text editor") {
     EXPECT_TRUE(&editor->buffer() == buffer);
     ASSERT_EQ(editor->buffer().text(), "unchanged");
     EXPECT_TRUE(f.window._sidebar.focused());
+}
+
+TEST_CASE("manual save asks before overwriting an external change") {
+    sidebar_focus_test::WindowFixture f;
+    const auto path = f.home.path / "conflict.cpp";
+    std::ofstream{path} << "original\n";
+    const auto originalTime = std::filesystem::last_write_time(path);
+    auto buffer = f.core.files().open(path);
+    f.window.currentEditor()->buffer(buffer);
+    buffer->text(std::string{"editor\n"});
+    std::ofstream{path} << "external\n";
+    std::filesystem::last_write_time(path,
+                                     originalTime + std::chrono::seconds{2});
+    bool called = false;
+    bool saved = false;
+    saveInteraction(f.window._env, [&](bool result) {
+        called = true;
+        saved = result;
+    });
+    EXPECT_TRUE(f.window.interactions().isOperationBuffer(
+        &f.window.currentEditor()->buffer()));
+    EXPECT_FALSE(called);
+    std::ifstream before{path};
+    std::string text;
+    std::getline(before, text);
+    ASSERT_EQ(text, "external");
+    f.key({Key::Text, '\n'}); // Default selection is Yes.
+    f.gui.work(false);
+    EXPECT_TRUE(called);
+    EXPECT_TRUE(saved);
+    std::ifstream after{path};
+    std::getline(after, text);
+    ASSERT_EQ(text, "editor");
 }
 
 TEST_CASE("sidebar Enter cannot accept a background interaction") {

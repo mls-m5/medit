@@ -71,6 +71,31 @@ void saveInteraction(std::shared_ptr<IEnvironment> env,
                      SaveInteractionCallback callback) {
     auto &e = env->editor();
     if (e.file()) {
+        if (e.buffer().hasExternalChanges()) {
+            auto buffer = e.buffer().shared_from_this();
+            auto path = e.file()->path().string();
+            auto interaction = Interaction{
+                .text = "The file changed on disk. Overwrite it?\n\npath: " +
+                        path + "\n\n - Yes\n - No\n - Cancel\n",
+                .cursorPosition = {0, 4},
+                .title = "file changed on disk",
+            };
+            env->mainWindow().interactions().newInteraction(
+                interaction, [buffer, callback, path](auto env, const auto &i) {
+                    if (i.lineAtCursor().find("Yes") == std::string::npos) {
+                        if (callback)
+                            callback(false);
+                        return;
+                    }
+                    const auto saved = buffer->save(true);
+                    env->statusMessage(
+                        FString{saved ? "Saved to " : "Could not save "} +
+                        path);
+                    if (callback)
+                        callback(saved);
+                });
+            return;
+        }
         if (!e.save()) {
             env->mainWindow().statusMessage(FString{"Could not save "} +
                                             e.file()->path().string());

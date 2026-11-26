@@ -3,13 +3,13 @@
 #include "core/threadvalidation.h"
 #include "files/ifile.h"
 #include "files/path.h"
+#include "history.h"
 #include "rawbuffer.h"
 #include "text/diagnostics.h"
 #include "text/fstringview.h"
 #include "text/history.h"
 #include <filesystem>
 #include <memory>
-#include "history.h"
 
 // Text stored in memory with assosiated undo/redo-history and associated
 // filename information
@@ -43,7 +43,9 @@ public:
     [[nodiscard]] static std::unique_ptr<Buffer> open(
         std::filesystem::path path);
 
-    bool save();
+    bool save(bool overwriteExternal = false);
+
+    [[nodiscard]] bool hasExternalChanges() const;
 
     /// Used when saving a buffer that is not saved yet. Check usage in the
     /// project to se how it is used

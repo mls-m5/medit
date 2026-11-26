@@ -15,7 +15,12 @@ public:
     virtual void load(Buffer &) = 0;
 
     /// Save buffer. @returns true on success
-    virtual bool save(const Buffer &) = 0;
+    virtual bool save(const Buffer &, bool overwriteExternal = false) = 0;
+    // True when the backing file differs from the last observed version, or
+    // when it cannot be checked reliably.
+    virtual bool hasExternalChanges() const {
+        return false;
+    }
     virtual std::string representation() const = 0;
     virtual std::filesystem::path path() const = 0;
 

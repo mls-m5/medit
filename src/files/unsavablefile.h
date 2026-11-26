@@ -15,7 +15,7 @@ public:
     }
 
     void load(Buffer &) override {}
-    bool save(const Buffer &) override {
+    bool save(const Buffer &, bool = false) override {
         return false;
     }
     std::string representation() const override {
