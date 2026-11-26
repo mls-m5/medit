@@ -346,11 +346,7 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
 }
 
 void MainWindow::updateLocatorBuffer() {
-    auto &project = _env->core().project();
-    project.updateCache();
-    _env->core().files().directoryNotifications().path(
-        project.settings()
-            .root); // TODO: This should probably be handled somewhere else
+    _env->core().project().updateCache();
 }
 
 bool MainWindow::open(std::filesystem::path path,

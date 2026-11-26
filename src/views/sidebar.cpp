@@ -1,4 +1,5 @@
 #include "sidebar.h"
+#include "files/path.h"
 #include "files/project.h"
 #include "keys/event.h"
 #include "screen/iscreen.h"
@@ -16,21 +17,30 @@ void SideBar::project(Project &project) {
     if (_project)
         _project->unsubscribeFromFilesChanged(this);
     _project = &project;
-    _tree.files(project.settings().root, project.files());
+    updateProjectFiles();
     project.subscribeToFilesChanged(
         [this] {
-            _tree.files(_project->settings().root, _project->files());
-            if (_followActiveFile && _pendingFollow)
-                _pendingFollow = !_tree.reveal(_activeFile);
+            updateProjectFiles();
             if (window())
                 window()->triggerRedraw();
         },
         this);
 }
 
+void SideBar::updateProjectFiles() {
+    const auto root = normalizedAbsolutePath(_project->settings().root);
+    const auto rootChanged = root != _tree.root();
+    _tree.files(root, _project->files());
+    if (_followActiveFile && !_activeFile.empty()) {
+        if (_pendingFollow || rootChanged)
+            _pendingFollow = !_tree.reveal(_activeFile);
+        else
+            _pendingFollow = !_tree.containsFile(_activeFile);
+    }
+}
+
 void SideBar::activeFile(std::filesystem::path path) {
-    if (!path.empty())
-        path = std::filesystem::absolute(path).lexically_normal();
+    path = normalizedAbsolutePath(path);
     if (path == _activeFile)
         return;
     _activeFile = std::move(path);
@@ -68,11 +78,9 @@ void SideBar::draw(IScreen &screen) {
         return;
     // A settings-only root change need not change Project::files().
     if (_project) {
-        auto root = _project->settings().root;
-        if (!root.empty())
-            root = std::filesystem::absolute(root).lexically_normal();
+        const auto root = normalizedAbsolutePath(_project->settings().root);
         if (_tree.root() != root)
-            _tree.files(root, _project->files());
+            updateProjectFiles();
     }
     layoutTree();
     const auto contentWidth = width() - 1;

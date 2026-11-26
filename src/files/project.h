@@ -110,6 +110,7 @@ private:
     // Both the notifier and GUI queue must outlive Project. Queued events
     // check this token on the GUI thread before accessing the project.
     DirectoryNotifications *_directoryNotifications = nullptr;
+    std::filesystem::path _watchedRoot;
     std::shared_ptr<int> _lifetime = std::make_shared<int>(0);
 
     struct FilesSubscriber {

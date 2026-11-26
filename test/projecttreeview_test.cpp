@@ -280,6 +280,25 @@ TEST_CASE("empty and tiny trees keep drawing and cursor coordinates bounded") {
     }
 }
 
+TEST_CASE(
+    "trailing separators and filesystem roots retain stable path identity") {
+    ProjectTreeView tree{nullptr};
+    tree.files("/project/./", {"/project/src/a.cpp"});
+    ASSERT_EQ(tree.root(), std::filesystem::path{"/project"});
+    tree.handleKey({Key::Text, '\n'});
+    EXPECT_FALSE(tree.expanded("/project"));
+    EXPECT_TRUE(tree.reveal("/project/src/a.cpp"));
+    EXPECT_TRUE(tree.expanded("/project"));
+    ASSERT_EQ(project_tree_test::selected(tree),
+              std::filesystem::path{"/project/src/a.cpp"});
+    tree.files("/", {"/src/a.cpp"});
+    tree.handleKey({Key::Text, '\n'});
+    EXPECT_TRUE(tree.reveal("/src/a.cpp"));
+    EXPECT_TRUE(tree.expanded("/"));
+    ASSERT_EQ(project_tree_test::selected(tree),
+              std::filesystem::path{"/src/a.cpp"});
+}
+
 TEST_CASE("deep trees and UTF-8 labels stay bounded at every tiny size") {
     ProjectTreeView tree{nullptr};
     std::filesystem::path file = "/project";

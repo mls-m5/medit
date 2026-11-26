@@ -1,7 +1,9 @@
 #include "core/jobqueue.h"
 #include "files/project.h"
+#include "helpers/temporaryproject.h"
 #include "mls-unit-test/unittest.h"
 #include "mock/files/mockdirectorynotifications.h"
+#include "mock/screen/mockscreen.h"
 #include "views/sidebar.h"
 #include <algorithm>
 #include <cstdlib>
@@ -12,40 +14,7 @@
 
 namespace project_test {
 
-struct Environment {
-    std::optional<std::string> previousHome;
-    std::filesystem::path directory;
-    std::filesystem::path root;
-
-    Environment() {
-        if (const auto *home = std::getenv("HOME")) {
-            previousHome = home;
-        }
-        auto pattern = (std::filesystem::temp_directory_path() /
-                        "medit-project-test-XXXXXX")
-                           .string();
-        const auto *created = mkdtemp(pattern.data());
-        if (!created) {
-            throw std::runtime_error("Cannot create temporary project");
-        }
-        directory = created;
-        root = directory / "project";
-        std::filesystem::create_directory(root);
-        std::ofstream{root / ".medit.json"} << R"({"build":"matmake"})";
-        setenv("HOME", directory.c_str(), 1);
-    }
-
-    ~Environment() {
-        if (previousHome) {
-            setenv("HOME", previousHome->c_str(), 1);
-        }
-        else {
-            unsetenv("HOME");
-        }
-        std::error_code error;
-        std::filesystem::remove_all(directory, error);
-    }
-};
+using Environment = test_helpers::TemporaryProject;
 
 struct Fixture {
     Environment environment;
@@ -53,9 +22,13 @@ struct Fixture {
     JobQueue queue;
     DirectoryNotifications::CallbackT notify;
     void *notificationRef = nullptr;
+    std::vector<std::filesystem::path> watchedRoots;
     std::unique_ptr<Project> project;
 
     explicit Fixture(bool readCache = true) {
+        notifications.mock_path_1.nice();
+        notifications.mock_path_1.onCall(
+            [this](auto path) { watchedRoots.push_back(path); });
         notifications.mock_subscribe_2.expectNum(1);
         notifications.mock_subscribe_2.onCall([this](auto callback, void *ref) {
             notify = std::move(callback);
@@ -72,13 +45,11 @@ struct Fixture {
     }
 
     std::filesystem::path path(std::filesystem::path relative) const {
-        return (environment.root / relative).lexically_normal();
+        return environment.path(relative);
     }
 
     void write(std::filesystem::path relative, std::string_view text = "") {
-        const auto file = path(relative);
-        std::filesystem::create_directories(file.parent_path());
-        std::ofstream{file} << text;
+        environment.write(relative, text);
     }
 
     void event(DirectoryNotifications::EventType type,
@@ -315,6 +286,61 @@ TEST_CASE("changing project root refreshes files and keeps external settings") {
     EXPECT_TRUE(f.contains("../other/new.cpp"));
     EXPECT_TRUE(f.contains(".medit.json"));
     ASSERT_EQ(f.project->files().size(), 2u);
+    ASSERT_EQ(f.watchedRoots.size(), 2u);
+    ASSERT_EQ(f.watchedRoots.front(), f.environment.root);
+    ASSERT_EQ(f.watchedRoots.back(), newRoot);
+}
+
+TEST_CASE("rescan reconciles populated directories and missing roots") {
+    project_test::Fixture f;
+    f.write("src/nested/a.cpp");
+    f.event(DirectoryNotifications::Rescan, "");
+    f.drain();
+    EXPECT_TRUE(f.contains("src/nested/a.cpp"));
+    f.event(DirectoryNotifications::Removed, "src");
+    f.drain();
+    EXPECT_FALSE(f.contains("src/nested/a.cpp"));
+    f.event(DirectoryNotifications::Added, "src");
+    f.drain();
+    EXPECT_TRUE(f.contains("src/nested/a.cpp"));
+    std::filesystem::remove_all(f.environment.root);
+    f.event(DirectoryNotifications::Rescan, "");
+    f.drain();
+    EXPECT_TRUE(f.project->files().empty());
+}
+
+TEST_CASE(
+    "roots with trailing separators share scan update and watch identity") {
+    project_test::Fixture f;
+    f.write("src/a.cpp");
+    f.project->updateCache();
+    f.write(".medit.json",
+            "{\"root\":\"" + f.environment.root.string() + "/./\"}");
+    f.event(DirectoryNotifications::Changed, ".medit.json");
+    f.drain();
+    f.write("src/b.cpp");
+    f.event(DirectoryNotifications::Added, "src/b.cpp");
+    f.drain();
+    f.project->updateCache();
+    EXPECT_TRUE(f.contains("src/a.cpp"));
+    EXPECT_TRUE(f.contains("src/b.cpp"));
+    ASSERT_EQ(f.watchedRoots.size(), 1u);
+}
+
+TEST_CASE(
+    "CMake build-directory classification changes reconcile old membership") {
+    project_test::Fixture f;
+    f.write("build/old.cpp");
+    f.project->updateCache();
+    EXPECT_TRUE(f.contains("build/old.cpp"));
+    f.write("build/CMakeCache.txt");
+    f.event(DirectoryNotifications::Added, "build/CMakeCache.txt");
+    f.drain();
+    EXPECT_FALSE(f.contains("build/old.cpp"));
+    std::filesystem::remove(f.path("build/CMakeCache.txt"));
+    f.event(DirectoryNotifications::Removed, "build/CMakeCache.txt");
+    f.drain();
+    EXPECT_TRUE(f.contains("build/old.cpp"));
 }
 
 TEST_SUIT_END
@@ -388,6 +414,36 @@ TEST_CASE("destroying a sidebar unsubscribes before queued project changes") {
     }
     f.drain();
     EXPECT_TRUE(f.contains("new.cpp"));
+}
+
+TEST_CASE("follow recovers from exclusion and root changes with unchanged "
+          "membership") {
+    project_test::Fixture f;
+    f.write("src/deep/active.cpp");
+    f.project->updateCache();
+    SideBar sidebar{nullptr};
+    sidebar.width(25);
+    sidebar.height(4);
+    sidebar.project(*f.project);
+    const auto active = f.path("src/deep/active.cpp");
+    sidebar.activeFile(active);
+    f.write("src/CMakeCache.txt");
+    f.event(DirectoryNotifications::Added, "src/CMakeCache.txt");
+    f.drain();
+    EXPECT_FALSE(sidebar.tree().containsFile(active));
+    std::filesystem::remove(f.path("src/CMakeCache.txt"));
+    f.event(DirectoryNotifications::Removed, "src/CMakeCache.txt");
+    f.drain();
+    ASSERT_EQ(sidebar.tree().entries()[sidebar.tree().current()].path, active);
+    f.write(".medit.json", "{\"root\":\"" + f.path("src").string() + "\"}");
+    f.event(DirectoryNotifications::Changed, ".medit.json");
+    f.drain();
+    MockScreen screen;
+    screen.mock_draw_3.expectNum(9);
+    sidebar.draw(screen);
+    ASSERT_EQ(sidebar.tree().root(), f.path("src"));
+    ASSERT_EQ(sidebar.tree().entries()[sidebar.tree().current()].path, active);
+    EXPECT_FALSE(sidebar.focused());
 }
 
 TEST_SUIT_END

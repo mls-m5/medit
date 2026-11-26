@@ -57,8 +57,10 @@ panel. Window shortcuts such as Ctrl+P (command palette) still work in the panel
 The tree uses the shared project's registered files, with the existing known-file
 and CMake build-directory filtering. Empty directories and files outside the
 project root are not displayed. Configurable ignore patterns and Git-status
-filtering are not implemented. Until recursive watching is added, changes in
-subdirectories can be refreshed by hiding and showing the panel again.
+filtering are not implemented. Linux watches the project recursively, including
+new and moved directories. Changes update the tree automatically; showing the
+panel also refreshes the snapshot. If watches fail, a warning is logged and the
+watcher retries and requests recovery snapshots instead of silently going stale.
 
 UTF-8 single-column filenames are displayed directly. Characters that do not fit
 one cell (including double-width/combining characters), controls, and invalid

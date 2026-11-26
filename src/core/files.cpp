@@ -11,7 +11,7 @@
 Files::Files(CoreEnvironment &core)
     : _core{core}
     , _dirNotifications{
-          createDirectoryNotifications(_core.context().jobQueue())} {
+          createDirectoryNotifications(_core.context().guiQueue())} {
     _dirNotifications->subscribe(
         [this](auto a, auto b, auto c) { fileChangeCallback(a, b, c); }, this);
 }

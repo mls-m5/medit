@@ -3,6 +3,7 @@
 #include "core/ijobqueue.h"
 #include "files/directorynotifications.h"
 #include "files/extensions.h"
+#include "files/path.h"
 #include "files/projectsettings.h"
 #include <algorithm>
 #include <cmath>
@@ -15,8 +16,7 @@
 namespace {
 
 std::filesystem::path normalizedProjectPath(const std::filesystem::path &path) {
-    return path.empty() ? path
-                        : std::filesystem::absolute(path).lexically_normal();
+    return normalizedAbsolutePath(path);
 }
 
 bool isProjectBuildDirectory(const std::filesystem::path &path) {
@@ -47,7 +47,15 @@ Project::Project(std::filesystem::path projectPath,
                     return;
                 }
                 _tv();
-                if (type == DirectoryNotifications::Added) {
+                std::error_code error;
+                if (type == DirectoryNotifications::Rescan ||
+                    (path.filename() == "CMakeCache.txt" &&
+                     type != DirectoryNotifications::Changed) ||
+                    (type == DirectoryNotifications::Added &&
+                     std::filesystem::is_directory(path, error))) {
+                    updateCache();
+                }
+                else if (type == DirectoryNotifications::Added) {
                     addCachedFile(path);
                 }
                 else if (type == DirectoryNotifications::Removed) {
@@ -103,7 +111,12 @@ void Project::emitFilesChanged() {
 void Project::updateCache(size_t max) {
     _tv();
     loadProjectFile();
-    auto paths = findProjectFiles(_settings.root, max);
+    const auto root = normalizedProjectPath(_settings.root);
+    if (root != _watchedRoot) {
+        _directoryNotifications->path(root);
+        _watchedRoot = root;
+    }
+    auto paths = findProjectFiles(root, max);
     if (_settings.buildCommand.empty()) {
         _settings.buildCommand = guessBuildCommand();
     }
@@ -248,13 +261,16 @@ std::vector<std::filesystem::path> Project::findProjectFiles(
 
     std::vector<std::filesystem::path> paths;
 
+    // Directories may disappear between a kernel event and GUI delivery.
+    std::error_code error;
     for (auto it =
              std::filesystem::recursive_directory_iterator{
                  root,
-                 std::filesystem::directory_options::skip_permission_denied};
-         it != std::filesystem::recursive_directory_iterator{} &&
+                 std::filesystem::directory_options::skip_permission_denied,
+                 error};
+         !error && it != std::filesystem::recursive_directory_iterator{} &&
          paths.size() < max;
-         ++it) {
+         it.increment(error)) {
         const auto path = normalizedProjectPath(it->path());
 
         if (isProjectBuildDirectory(path)) {
@@ -296,8 +312,13 @@ void Project::addCachedFile(std::filesystem::path path) {
 
 void Project::removeCachedFile(std::filesystem::path path) {
     _tv();
-    const auto end = std::remove(
-        _fileCache.begin(), _fileCache.end(), normalizedProjectPath(path));
+    path = normalizedProjectPath(path);
+    const auto end = std::remove_if(
+        _fileCache.begin(), _fileCache.end(), [&](const auto &file) {
+            const auto relative = file.lexically_relative(path);
+            return !relative.empty() && !relative.is_absolute() &&
+                   *relative.begin() != "..";
+        });
     if (end != _fileCache.end()) {
         _fileCache.erase(end, _fileCache.end());
         updateExtensions();

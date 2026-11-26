@@ -7,6 +7,7 @@
 #include "cursorrangeops_test.cpp"
 #include "fstring_test.cpp"
 #include "history_test.cpp"
+#include "inotify_test.cpp"
 #include "jumplist_test.cpp"
 #include "keysettings_test.cpp"
 #include "palette_test.cpp"

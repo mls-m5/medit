@@ -36,6 +36,7 @@ public:
         return _expanded.contains(path);
     }
     bool reveal(const Path &path);
+    bool containsFile(const Path &path) const;
 
     void onOpen(std::function<void(const Path &)> callback) {
         _onOpen = std::move(callback);
@@ -69,6 +70,7 @@ private:
     std::function<void(const Path &)> _onOpen;
     std::function<bool(const Path &)> _isOpen;
 
+    const Node *findNode(const Path &path) const;
     void appendVisible(const Node &node, size_t depth);
     void rebuildVisible(Path selection);
     void fitSelection();

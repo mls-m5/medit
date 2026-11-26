@@ -17,6 +17,7 @@ class SideBar : public View, public IKeySink {
     ProjectTreeView _tree{this};
 
     void layoutTree();
+    void updateProjectFiles();
 
 public:
     explicit SideBar(IView *parent)

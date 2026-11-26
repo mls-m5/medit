@@ -1,4 +1,5 @@
 #include "projecttreeview.h"
+#include "files/path.h"
 #include "screen/iscreen.h"
 #include "script/ienvironment.h"
 #include "syntax/palette.h"
@@ -68,8 +69,7 @@ std::string treeDisplayName(const std::string &name) {
 }
 
 std::filesystem::path treeAbsolutePath(const std::filesystem::path &path) {
-    return path.empty() ? path
-                        : std::filesystem::absolute(path).lexically_normal();
+    return normalizedAbsolutePath(path);
 }
 
 } // namespace
@@ -185,22 +185,33 @@ void ProjectTreeView::onResize(size_t, size_t) {
     fitSelection();
 }
 
-bool ProjectTreeView::reveal(const Path &path) {
-    const auto normalized = treeAbsolutePath(path);
-    // Follow must not add unregistered files or expand unrelated directories.
+const ProjectTreeView::Node *ProjectTreeView::findNode(const Path &path) const {
     auto *node = &_root;
-    const auto relative = normalized.lexically_relative(_root.path);
+    const auto relative = treeAbsolutePath(path).lexically_relative(_root.path);
     if (_root.path.empty() || relative.empty() || relative.is_absolute() ||
         *relative.begin() == "..")
-        return false;
+        return nullptr;
     if (relative != ".") {
         for (const auto &part : relative) {
             const auto child = node->children.find(part);
             if (child == node->children.end())
-                return false;
+                return nullptr;
             node = &child->second;
         }
     }
+    return node;
+}
+
+bool ProjectTreeView::containsFile(const Path &path) const {
+    const auto *node = findNode(path);
+    return node && !node->directory;
+}
+
+bool ProjectTreeView::reveal(const Path &path) {
+    const auto normalized = treeAbsolutePath(path);
+    // Follow must not add unregistered files or expand unrelated directories.
+    if (!findNode(normalized))
+        return false;
     for (auto parent = normalized.parent_path();
          _directories.contains(parent);) {
         _expanded.insert(parent);
@@ -338,7 +349,7 @@ void ProjectTreeView::draw(IScreen &screen) {
             if (name.empty())
                 name = entry.path.string();
             label += treeDisplayName(name);
-            if (entry.directory)
+            if (entry.directory && entry.path.has_filename())
                 label += '/';
             auto text = FString{label,
                                 selected          ? format

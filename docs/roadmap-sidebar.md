@@ -136,8 +136,9 @@ Implementation notes:
   scans and new-file admission. The settings file is included once, even when an
   anonymous project's settings live outside the root. Configurable ignore rules
   and dynamic directory/watch reconciliation are still deferred.
-- Changing the configured project root refreshes the model's file list, but does
-  not reconfigure filesystem watches; watcher root changes belong to step 5.
+- Changing the configured project root refreshes the model's file list. Step 5
+  also moves ownership of the watch root into the model, so it is reconfigured
+  without relying on a view being reopened.
 - Twelve project tests cover refresh/add/remove, duplicate/equivalent paths,
   filtering, content-only changes, extension metadata, subscription changes,
   queued-event lifetime, and settings reload. Release build and both CTest entries
@@ -191,7 +192,7 @@ Implementation notes:
   because the shared screen buffers still index FChars rather than columns. Real
   file paths are retained. Full-width/grapheme rendering is separate backend work,
   not a reason to draw past the panel boundary.
-- Thirteen deterministic tree tests, four project/sidebar subscription tests, and
+- Fourteen deterministic tree tests, five project/sidebar subscription tests, and
   three additional window integration tests cover hierarchy, navigation, opening,
   updates, follow, mouse coordinates, narrow/deep layouts, and UTF-8 labels.
 - Release build and CTest pass in `build/json-upgrade`. CLI PTY checks cover
@@ -208,19 +209,76 @@ Implementation notes:
 
 ## 5. Recursive filesystem notifications
 
-- [ ] Implement recursive watching behind `DirectoryNotifications` in
+- [x] Implement recursive watching behind `DirectoryNotifications` in
       `src/linux/inotify.cpp`, not in the tree view.
-- [ ] Track watch descriptors and their directory paths.
-- [ ] Watch existing directories and directories created or moved into the tree.
-- [ ] Handle directory deletion/moves and reconcile descendant project entries.
-- [ ] Make watcher shutdown and changing the watched root safe.
-- [ ] Handle queue overflow/watch failures with an explicit recovery or refresh
+- [x] Track watch descriptors and their directory paths.
+- [x] Watch existing directories and directories created or moved into the tree.
+- [x] Handle directory deletion/moves and reconcile descendant project entries.
+- [x] Make watcher shutdown and changing the watched root safe.
+- [x] Handle queue overflow/watch failures with an explicit recovery or refresh
       strategy; avoid silently leaving the project index stale.
 
 Tests: temporary-directory integration tests for nested add/remove/rename,
 moving populated directories in/out, new directories, changing root, and clean
 shutdown. Use bounded waits with useful failure messages rather than fixed sleeps.
 Keep these tests separate from deterministic model/view tests.
+
+Implementation notes:
+
+- The Linux backend tracks descriptors and directory paths, installs watches
+  before scanning the initial project snapshot, and watches new/moved-in
+  subtrees before requesting a refresh. Child directory symlinks are not followed.
+  Directory moves/removals discard descendant watches, not just the parent watch.
+- `DirectoryNotifications::Rescan` requests a fresh membership snapshot after
+  directory changes or lost events. At most one such callback is queued per watch
+  generation; ordinary file add/remove/change events retain their existing types.
+  Recovery refreshes membership, not lost per-file content-change notifications.
+- Queue overflow rebuilds watches and requests a snapshot. Watch/stream failures
+  log a warning, retry registration, and request recovery snapshots once per
+  second while degraded. A missing or moved-away root can therefore recover
+  when recreated. Kernel overflow and watch-limit exhaustion were not forced in
+  tests; unavailable-root recovery exercises the retry/snapshot path.
+- Subscriptions and callback dispatch are GUI-thread operations. The core supplies
+  the GUI queue, not the background jobs queue. Snapshot dispatch tolerates
+  unsubscription, and weak lifetime/generation tokens reject queued work after
+  root changes, stop, or destruction. Application shutdown stops the watcher
+  producer before tearing down queues.
+- `Project::updateCache()` owns the watched root. Views only request refreshes;
+  reloading changed project settings reconfigures watches even if membership is
+  unchanged. Settings files outside the root are read on refresh, not watched as
+  extra filesystem roots. Scanning tolerates disappearing directories. Directory events reconcile
+  descendants, and creation/removal of a CMake cache marker re-evaluates the
+  existing build-directory exclusion rule.
+- Model, tree, and watcher share lexical absolute-path normalization, including
+  trailing-separator handling. This avoids an ancestor-walk loop and inconsistent
+  expansion when a configured root ends in `/` or `/.`. Follow also recovers when
+  the active file re-enters the list; settings-only root changes are recognized
+  on the next redraw even when membership is unchanged.
+- Twelve bounded, condition-variable-driven Linux integration tests exercise
+  nested add/remove/rename, populated directory moves, content-only callbacks,
+  root changes, queued-event lifetime, stop/destruction, subscription mutation,
+  recovery, and symlinks. Additional deterministic regressions cover directory
+  snapshots, CMake classification changes, normalized roots, and follow recovery.
+- Release build and CTest pass. The test executable passed twenty stress runs;
+  after the final follow/root regressions, both CTest entries passed five repeat
+  runs. ASan/UBSan validation and the final CLI/GUI startup checks are recorded
+  below. No dependencies or submodule contents/gitlinks are part of this change.
+
+### Final panel validation
+
+- ASan/UBSan: all editor tests passed ten repeated runs with leak detection and
+  halt-on-error enabled in `build/sidebar-sanitize`. This validation build links
+  with `-no-pie`: default PIE sanitizer executables intermittently failed before
+  `main` here, also reproduced with a minimal unrelated program (15/30 failed;
+  non-PIE 0/30). No project build defaults were changed for this workaround.
+- CLI PTY: hidden startup, F3/F6, keyboard opening of ASCII and double-width-named
+  files, automatic nested file changes and directory moves, resize, divider
+  coordinates, mouse input, and show/hide passed. The terminal screen was decoded
+  including ncurses scrolling/differential updates, not only searched as raw bytes.
+- Headless SDL GUI startup passed with the dummy/software driver and a bundled
+  font supplied to the executable's font search path. Visual GUI review is still
+  manual. The pre-existing lsp-client shutdown-helper limitation and missing
+  `clangd` noted in step 4 remain outside the panel changes.
 
 ## 6. Configurable project file selection
 
@@ -235,6 +293,18 @@ Keep these tests separate from deterministic model/view tests.
 
 Tests: included/excluded extensions and directories, nested paths, settings
 reload, and identical results from initial scans and incremental updates.
+
+## Deferred follow-ups
+
+- Git-based tree subsets: uncommitted working-tree changes and files changed in a
+  selected commit. Define whether staged changes and commit ranges are included
+  before adding a selection policy.
+- Diff and merge-conflict views are separate editor features, not part of this
+  first file panel.
+- Shared screen support for terminal columns/graphemes, allowing double-width and
+  combining filenames to be displayed directly instead of safely escaped labels.
+- Styling the editor filename heading and bottom panel remains separate from the
+  approved sidebar/divider appearance.
 
 ## Validation and completion
 

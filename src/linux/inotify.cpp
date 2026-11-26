@@ -1,18 +1,20 @@
-
-
 #include "inotify.h"
 
 #ifdef MEDIT_USING_LINUX
 
 #include "core/ijobqueue.h"
 #include "core/threadname.h"
-#include "inotify.h"
+#include "core/threadvalidation.h"
+#include "files/path.h"
 #include <algorithm>
+#include <array>
 #include <atomic>
-#include <filesystem>
+#include <cerrno>
+#include <chrono>
 #include <iostream>
-#include <limits.h>
+#include <map>
 #include <poll.h>
+#include <set>
 #include <sys/inotify.h>
 #include <system_error>
 #include <thread>
@@ -21,177 +23,311 @@
 
 namespace {
 
+bool inotifyContainsPath(const std::filesystem::path &parent,
+                         const std::filesystem::path &path) {
+    const auto relative = path.lexically_relative(parent);
+    return !relative.empty() && !relative.is_absolute() &&
+           *relative.begin() != "..";
+}
+
 class InotifyDirectoryNotifications : public DirectoryNotifications {
 public:
-    int inotify_fd = 0;
-    int watch_desc = 0;
-    std::atomic<bool> stop_thread{false};
-    std::thread event_thread;
-    IJobQueue &guiQueue;
-    std::filesystem::path directory;
-
-    InotifyDirectoryNotifications(const InotifyDirectoryNotifications &) =
-        delete;
-    InotifyDirectoryNotifications(InotifyDirectoryNotifications &&) = delete;
-    InotifyDirectoryNotifications &operator=(
-        const InotifyDirectoryNotifications &) = delete;
-    InotifyDirectoryNotifications &operator=(InotifyDirectoryNotifications &&) =
-        delete;
-
-    InotifyDirectoryNotifications(IJobQueue &jobQueue)
-        : inotify_fd(inotify_init())
-        , guiQueue{jobQueue} {
-
-        if (inotify_fd < 0) {
-            std::cerr << "Error initializing inotify" << std::endl;
-            return;
-        }
-    }
+    explicit InotifyDirectoryNotifications(IJobQueue &guiQueue)
+        : _guiQueue{guiQueue} {}
 
     ~InotifyDirectoryNotifications() override {
         stop();
-        close(inotify_fd);
-    }
-
-    EventType decodeEventMask(uint32_t mask) {
-        if (mask & IN_CREATE || mask & IN_MOVED_TO) {
-            return EventType::Added;
-        }
-        else if (mask & IN_DELETE || mask & IN_MOVED_FROM) {
-            return EventType::Removed;
-        }
-        else if (mask & IN_MODIFY) {
-            return EventType::Changed;
-        }
-        else {
-            throw std::runtime_error("Unsupported event mask");
-        }
-    }
-
-    void handleEvent(struct inotify_event *event) {
-        if (event) {
-            EventType type = decodeEventMask(event->mask);
-            std::filesystem::path filepath(directory / event->name);
-
-            auto ec = std::error_code{};
-
-            emitChanges(
-                type, filepath, std::filesystem::last_write_time(filepath, ec));
-        }
-    }
-
-    void emitChanges(EventType type,
-                     const std::filesystem::path &filepath,
-                     std::filesystem::file_time_type changedTime) {
-        guiQueue.addTask([this, type, filepath, changedTime]() {
-            for (const auto &subscriber : _subscribers) {
-                subscriber.f(type, filepath, changedTime);
-            }
-        });
+        _generation.reset();
+        _lifetime.reset();
+        for (const auto &subscriber : _subscribers)
+            subscriber->active = false;
     }
 
     void path(std::filesystem::path directory) override {
-        if (directory == this->directory) {
+        _tv();
+        directory = normalizedAbsolutePath(directory);
+        if (directory == _directory)
             return;
-        }
-        this->directory = directory;
-        if (inotify_fd < 0) {
+        stop();
+        _generation = std::make_shared<Generation>();
+        _directory = std::move(directory);
+        _retry = false;
+        _reportedFailure = false;
+        if (_directory.empty())
             return;
-        }
-
-        watch_desc = inotify_add_watch(inotify_fd,
-                                       directory.c_str(),
-                                       IN_CREATE | IN_DELETE | IN_MODIFY |
-                                           IN_MOVED_FROM | IN_MOVED_TO);
-
-        if (watch_desc < 0) {
-            std::cerr << "Error adding inotify watch" << std::endl;
-            return;
-        }
-
-        event_thread = std::thread([this]() {
-            setThreadName("inotify");
-            constexpr size_t buffer_size =
-                sizeof(struct inotify_event) + NAME_MAX + 1;
-            // char buffer[buffer_size];
-            auto buffer = std::array<char, buffer_size>{};
-
-            struct pollfd pfd = {};
-            pfd.fd = inotify_fd;
-            pfd.events = POLLIN;
-
-            while (!stop_thread.load()) {
-                int poll_result =
-                    poll(&pfd, 1, 1000); // 1000ms (1 second) timeout
-
-                if (poll_result < 0) {
-                    perror("poll");
-                    break;
-                }
-
-                if (poll_result == 0) {
-                    // Timeout occurred, no events to process, check if the loop
-                    // should continue
-                    continue;
-                }
-
-                if (pfd.revents & POLLIN) {
-                    int length = read(inotify_fd, buffer.data(), buffer.size());
-                    if (length < 0) {
-                        std::cerr << "Error reading inotify events"
-                                  << std::endl;
-                        break;
-                    }
-
-                    int i = 0;
-                    while (i < length) {
-                        struct inotify_event *event =
-                            (struct inotify_event *)&buffer[i];
-                        handleEvent(event);
-                        i += sizeof(struct inotify_event) + event->len;
-                    }
-                }
-            }
-            inotify_rm_watch(inotify_fd, watch_desc);
-        });
+        _stopping = false;
+        _fd = inotify_init1(IN_NONBLOCK | IN_CLOEXEC);
+        if (_fd < 0)
+            failure(_directory,
+                    std::error_code{errno, std::generic_category()});
+        else
+            addDirectoryTree(_directory);
+        if (_retry)
+            emitChanges(Rescan, _directory);
+        _thread = std::thread{[this] { run(); }};
     }
 
-    void subscribe(CallbackT f, void *ref) override {
-        _subscribers.push_back({f, ref});
+    void subscribe(CallbackT callback, void *ref) override {
+        _tv();
+        _subscribers.push_back(
+            std::make_shared<Subscriber>(Subscriber{std::move(callback), ref}));
     }
 
     void unsubcribe(void *ref) override {
-        auto it = std::remove_if(_subscribers.begin(),
-                                 _subscribers.end(),
-                                 [ref](auto &s) { return s.ref == ref; });
-        _subscribers.erase(it, _subscribers.end());
+        _tv();
+        std::erase_if(_subscribers, [ref](const auto &subscriber) {
+            if (subscriber->ref != ref)
+                return false;
+            subscriber->active = false;
+            return true;
+        });
     }
 
-    void stop() {
-        if (stop_thread.exchange(true)) {
-            return; // Already stopped
-        }
-        if (event_thread.joinable()) {
-            event_thread.join();
-        }
-    }
-
-    std::filesystem::path _path;
-
+private:
     struct Subscriber {
-        CallbackT f;
-        void *ref = nullptr;
+        CallbackT callback;
+        void *ref;
+        bool active = true;
+    };
+    struct Generation {
+        std::atomic<bool> refreshQueued{false};
     };
 
-    // Define thread here
-    std::vector<Subscriber> _subscribers;
+    IJobQueue &_guiQueue;
+    ThreadValidation _tv{"directory notifications GUI thread"};
+    std::vector<std::shared_ptr<Subscriber>> _subscribers;
+    std::shared_ptr<int> _lifetime = std::make_shared<int>(0);
+    std::shared_ptr<Generation> _generation = std::make_shared<Generation>();
+    std::filesystem::path _directory;
+    std::map<int, std::filesystem::path> _watches;
+    std::set<std::filesystem::path> _watchedDirectories;
+    int _fd = -1;
+    std::atomic<bool> _stopping{true};
+    std::thread _thread;
+    // Watch state belongs to the worker, except while stopped or before start.
+    bool _retry = false;
+    bool _reportedFailure = false;
+
+    void stop() {
+        _stopping = true;
+        if (_thread.joinable())
+            _thread.join();
+        if (_fd >= 0)
+            close(_fd);
+        _fd = -1;
+        _watches.clear();
+        _watchedDirectories.clear();
+    }
+
+    void failure(const std::filesystem::path &path, std::error_code error) {
+        _retry = true;
+        if (!_reportedFailure) {
+            std::cerr << "Cannot watch " << path << ": " << error.message()
+                      << "; retrying watches and refreshing the project every "
+                         "second\n";
+            _reportedFailure = true;
+        }
+    }
+
+    void addWatch(const std::filesystem::path &path) {
+        if (_watchedDirectories.contains(path))
+            return;
+        constexpr auto mask = IN_CREATE | IN_DELETE | IN_MODIFY | IN_ATTRIB |
+                              IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE_SELF |
+                              IN_MOVE_SELF;
+        // An explicitly selected root may be a symlink, but never follow child
+        // directory symlinks (including a replacement racing with traversal).
+        const auto flags =
+            IN_ONLYDIR | (path == _directory ? 0 : IN_DONT_FOLLOW);
+        const auto descriptor =
+            inotify_add_watch(_fd, path.c_str(), mask | flags);
+        if (descriptor < 0)
+            failure(path, std::error_code{errno, std::generic_category()});
+        else {
+            if (const auto old = _watches.find(descriptor);
+                old != _watches.end())
+                _watchedDirectories.erase(old->second);
+            _watches[descriptor] = path;
+            _watchedDirectories.insert(path);
+        }
+    }
+
+    void addDirectoryTree(const std::filesystem::path &root) {
+        std::error_code error;
+        if (!std::filesystem::is_directory(root, error)) {
+            failure(root,
+                    error ? error
+                          : std::make_error_code(
+                                std::errc::no_such_file_or_directory));
+            return;
+        }
+        addWatch(root);
+        auto it = std::filesystem::recursive_directory_iterator{
+            root,
+            std::filesystem::directory_options::skip_permission_denied,
+            error};
+        for (; !_stopping && !error &&
+               it != std::filesystem::recursive_directory_iterator{};
+             it.increment(error)) {
+            const auto status = it->symlink_status(error);
+            if (error)
+                break;
+            if (std::filesystem::is_symlink(status))
+                it.disable_recursion_pending();
+            else if (std::filesystem::is_directory(status))
+                addWatch(it->path());
+        }
+        if (error)
+            failure(root, error);
+    }
+
+    void removeDirectoryTree(const std::filesystem::path &root) {
+        std::erase_if(_watches, [&](const auto &watch) {
+            if (!inotifyContainsPath(root, watch.second))
+                return false;
+            inotify_rm_watch(_fd, watch.first);
+            _watchedDirectories.erase(watch.second);
+            return true;
+        });
+    }
+
+    void emitChanges(EventType type, const std::filesystem::path &path) {
+        if (type == Rescan && _generation->refreshQueued.exchange(true))
+            return;
+        std::error_code error;
+        const auto time = std::filesystem::last_write_time(path, error);
+        _guiQueue.addTask([this,
+                           lifetime = std::weak_ptr{_lifetime},
+                           generation = std::weak_ptr{_generation},
+                           type,
+                           path,
+                           time] {
+            const auto currentGeneration = generation.lock();
+            if (lifetime.expired() || !currentGeneration)
+                return;
+            _tv();
+            if (type == Rescan)
+                currentGeneration->refreshQueued = false;
+            const auto subscribers = _subscribers;
+            for (const auto &subscriber : subscribers)
+                if (subscriber->active && subscriber->callback)
+                    subscriber->callback(type, path, time);
+        });
+    }
+
+    void streamFailure(std::error_code error) {
+        if (_fd >= 0)
+            close(_fd);
+        _fd = -1;
+        _watches.clear();
+        _watchedDirectories.clear();
+        failure(_directory, error);
+        emitChanges(Rescan, _directory);
+    }
+
+    void recover() {
+        // Also catches directories populated before their watches were
+        // installed.
+        _retry = false;
+        if (_fd < 0)
+            _fd = inotify_init1(IN_NONBLOCK | IN_CLOEXEC);
+        if (_fd < 0)
+            failure(_directory,
+                    std::error_code{errno, std::generic_category()});
+        else
+            addDirectoryTree(_directory);
+        if (!_retry)
+            _reportedFailure = false;
+        emitChanges(Rescan, _directory);
+    }
+
+    void handleEvent(const inotify_event &event) {
+        if (event.mask & IN_Q_OVERFLOW) {
+            removeDirectoryTree(_directory);
+            recover();
+            return;
+        }
+        const auto found = _watches.find(event.wd);
+        if (found == _watches.end())
+            return; // includes explicitly removed watches
+        const auto directory = found->second;
+        if (event.mask &
+            (IN_IGNORED | IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)) {
+            removeDirectoryTree(directory);
+            _retry = true;
+            emitChanges(Rescan, _directory);
+            return;
+        }
+        if (event.len == 0)
+            return;
+        const auto path = directory / event.name;
+        if (event.mask & IN_ISDIR) {
+            if (event.mask & (IN_DELETE | IN_MOVED_FROM))
+                removeDirectoryTree(path);
+            if (event.mask & (IN_CREATE | IN_MOVED_TO | IN_ATTRIB))
+                addDirectoryTree(path);
+            emitChanges(Rescan, _directory);
+        }
+        else if (event.mask & (IN_CREATE | IN_MOVED_TO))
+            emitChanges(Added, path);
+        else if (event.mask & (IN_DELETE | IN_MOVED_FROM))
+            emitChanges(Removed, path);
+        else if (event.mask & (IN_MODIFY | IN_ATTRIB))
+            emitChanges(Changed, path);
+    }
+
+    void run() {
+        setThreadName("inotify");
+        auto retryAt =
+            std::chrono::steady_clock::now() + std::chrono::seconds{1};
+        // The buffer must be suitably aligned for inotify_event, not just char.
+        alignas(inotify_event) std::array<char, 64 * 1024> buffer{};
+        while (!_stopping) {
+            pollfd descriptor{_fd, POLLIN, 0};
+            const auto ready = poll(&descriptor, 1, 50);
+            if (_stopping)
+                break;
+            if (ready < 0 && errno != EINTR) {
+                streamFailure(std::error_code{errno, std::generic_category()});
+            }
+            else if (ready > 0 &&
+                     (descriptor.revents & (POLLERR | POLLHUP | POLLNVAL))) {
+                streamFailure(std::make_error_code(std::errc::io_error));
+            }
+            else if (ready > 0 && (descriptor.revents & POLLIN)) {
+                const auto count = read(_fd, buffer.data(), buffer.size());
+                if (count < 0 && errno != EAGAIN && errno != EINTR)
+                    streamFailure(
+                        std::error_code{errno, std::generic_category()});
+                else if (count == 0)
+                    streamFailure(std::make_error_code(std::errc::io_error));
+                for (size_t offset = 0; !_stopping && count > 0 &&
+                                        offset + sizeof(inotify_event) <=
+                                            static_cast<size_t>(count);) {
+                    const auto &event =
+                        *reinterpret_cast<const inotify_event *>(buffer.data() +
+                                                                 offset);
+                    if (offset + sizeof(inotify_event) + event.len >
+                        static_cast<size_t>(count))
+                        break;
+                    handleEvent(event);
+                    offset += sizeof(inotify_event) + event.len;
+                }
+            }
+            if (_retry && std::chrono::steady_clock::now() >= retryAt) {
+                recover();
+                retryAt =
+                    std::chrono::steady_clock::now() + std::chrono::seconds{1};
+            }
+        }
+    }
 };
 
 } // namespace
 
 std::unique_ptr<DirectoryNotifications> createDirectoryNotifications(
-    IJobQueue &jobQueue) {
-    return std::make_unique<InotifyDirectoryNotifications>(jobQueue);
+    IJobQueue &guiQueue) {
+    return std::make_unique<InotifyDirectoryNotifications>(guiQueue);
 }
 
 #endif

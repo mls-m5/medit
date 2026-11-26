@@ -231,6 +231,9 @@ void MainData::start(const Settings &settings) {
 }
 
 void MainData::stop() {
+    // The watcher may queue GUI work; stop its producer before destroying
+    // queues.
+    core->files().directoryNotifications().path({});
     jobQueue->stop();
     timer->stop();
     guiQueue->stop();
