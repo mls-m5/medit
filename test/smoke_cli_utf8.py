@@ -5,6 +5,7 @@ Run with: python3 test/smoke_cli_utf8.py build/utf8-review/medit
 Requires a UTF-8 locale and xterm-256color terminfo.
 """
 
+import curses
 import fcntl
 import os
 import pathlib
@@ -36,6 +37,7 @@ def collect(master, process, needle, timeout=5):
 
 def main(binary):
     with tempfile.TemporaryDirectory(prefix="medit-utf8-") as root:
+        (pathlib.Path(root) / ".medit.json").write_text("{}")
         path = pathlib.Path(root) / "note.md"
         path.write_text("ASCII\n")
         master, slave = pty.openpty()
@@ -53,6 +55,11 @@ def main(binary):
         os.close(slave)
         try:
             assert b"ASCII" in collect(master, process, b"ASCII"), "no first frame"
+            curses.setupterm("xterm-256color")
+            os.write(master, curses.tigetstr("kf3"))
+            panel = collect(master, process, b"note.md")
+            assert b"Project" in panel and b"note.md" in panel, "broken tree frame"
+            os.write(master, b"\x1b")  # Escape returns focus to the editor.
             # Normal mode -> insert mode, then one single- and one double-width char.
             os.write(master, "iå界".encode("utf-8"))
             output = collect(master, process, "å界".encode("utf-8"))
@@ -71,4 +78,4 @@ def main(binary):
 
 if __name__ == "__main__":
     main(pathlib.Path(sys.argv[1]).resolve())
-    print("CLI UTF-8 input/output: OK")
+    print("CLI UTF-8 input/output and project tree: OK")
