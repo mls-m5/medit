@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <functional>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -20,7 +21,9 @@ public:
 
     Project(std::filesystem::path projectFile,
             DirectoryNotifications &files,
-            IJobQueue &guiQueue);
+            IJobQueue &guiQueue,
+            IJobQueue *backgroundQueue = nullptr,
+            ITimer *timer = nullptr);
     ~Project();
 
     Project(const Project &) = delete;
@@ -35,6 +38,12 @@ public:
     void unsubscribeFromFilesChanged(void *ref);
 
     void updateCache(size_t max = 100000);
+
+    void enableGitStatus();
+    void requestGitStatusRefresh();
+    bool gitChanged(const std::filesystem::path &) const;
+    void subscribeToGitStatusChanged(FilesChangedCallbackT, void *ref);
+    void unsubscribeFromGitStatusChanged(void *ref);
 
     const ProjectSettings &settings() const {
         return _settings;
@@ -79,6 +88,7 @@ private:
     bool shouldIncludeFile(const std::filesystem::path &path) const;
     void updateExtensions();
     void emitFilesChanged();
+    void emitGitStatusChanged();
 
     ProjectLanguage guessProjectLanguage() const;
 
@@ -112,6 +122,13 @@ private:
     DirectoryNotifications *_directoryNotifications = nullptr;
     std::filesystem::path _watchedRoot;
     std::shared_ptr<int> _lifetime = std::make_shared<int>(0);
+    IJobQueue *_guiQueue = nullptr;
+    IJobQueue *_backgroundQueue = nullptr;
+    ITimer *_timer = nullptr;
+    size_t _gitStatusTimer = 0;
+    size_t _gitGeneration = 0;
+    bool _gitEnabled = false;
+    std::set<std::filesystem::path> _gitChanged;
 
     struct FilesSubscriber {
         FilesChangedCallbackT callback;
@@ -119,4 +136,5 @@ private:
         bool active = true;
     };
     std::vector<std::shared_ptr<FilesSubscriber>> _filesSubscribers;
+    std::vector<std::shared_ptr<FilesSubscriber>> _gitSubscribers;
 };

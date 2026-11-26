@@ -44,6 +44,9 @@ public:
     void isOpen(std::function<bool(const Path &)> callback) {
         _isOpen = std::move(callback);
     }
+    void gitChanged(std::function<bool(const Path &)> callback) {
+        _gitChanged = std::move(callback);
+    }
     void focused(bool value) {
         _focused = value;
     }
@@ -69,6 +72,7 @@ private:
     bool _focused = false;
     std::function<void(const Path &)> _onOpen;
     std::function<bool(const Path &)> _isOpen;
+    std::function<bool(const Path &)> _gitChanged;
 
     const Node *findNode(const Path &path) const;
     void appendVisible(const Node &node, size_t depth);

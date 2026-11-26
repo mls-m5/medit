@@ -351,8 +351,11 @@ void ProjectTreeView::draw(IScreen &screen) {
             label += treeDisplayName(name);
             if (entry.directory && entry.path.has_filename())
                 label += '/';
+            const auto changed =
+                !entry.directory && _gitChanged && _gitChanged(entry.path);
             auto text = FString{label,
-                                selected          ? format
+                                changed           ? Palette::warning
+                                : selected        ? format
                                 : entry.directory ? Palette::identifier
                                 : open            ? Palette::string
                                                   : Palette::standard};

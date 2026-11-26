@@ -7,6 +7,7 @@
 #include "cursorops_test.cpp"
 #include "cursorrangeops_test.cpp"
 #include "fstring_test.cpp"
+#include "gitstatus_test.cpp"
 #include "history_test.cpp"
 #include "inotify_test.cpp"
 #include "jumplist_test.cpp"

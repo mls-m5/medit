@@ -9,18 +9,30 @@
 #include "views/mainwindow.h"
 
 SideBar::~SideBar() {
-    if (_project)
+    if (_project) {
         _project->unsubscribeFromFilesChanged(this);
+        _project->unsubscribeFromGitStatusChanged(this);
+    }
 }
 
 void SideBar::project(Project &project) {
-    if (_project)
+    if (_project) {
         _project->unsubscribeFromFilesChanged(this);
+        _project->unsubscribeFromGitStatusChanged(this);
+    }
     _project = &project;
+    _tree.gitChanged(
+        [&project](const auto &path) { return project.gitChanged(path); });
     updateProjectFiles();
     project.subscribeToFilesChanged(
         [this] {
             updateProjectFiles();
+            if (window())
+                window()->triggerRedraw();
+        },
+        this);
+    project.subscribeToGitStatusChanged(
+        [this] {
             if (window())
                 window()->triggerRedraw();
         },

@@ -158,6 +158,8 @@ Todo:
 - [x] "List-tool" that creates lists, then checklists and then checks the list (ctrl+l or just space in normal mode in markdown files)
 - [ ] List issues in current document/on current line in console so they are more readable
 - [ ] Include all files that is recognized by git
+- [ ] Decide whether to hide Git-ignored files from the project tree; current
+      Git status integration only colors files already in the registered list.
 - [ ] Interaction for listing and opening any buffer that is loaded into memory
     - [ ] Links between interactions with  `[[]]`  syntax
 - [ ] Add checkbocks asking if you want to push in commit interaction

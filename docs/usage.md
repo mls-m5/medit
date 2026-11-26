@@ -47,7 +47,12 @@ panel. Window shortcuts such as Ctrl+P (command palette) still work in the panel
 
 The tree uses the shared project's registered files, filtering known file types
 and skipping directories named `build` (including nested ones) and CMake build
-directories. Empty directories and files outside the
+directories. Files that Git reports as changed (including staged and untracked
+files) use the palette's warning color; clean files retain their existing
+appearance. On Linux, Git status is cached in the background, refreshed after filesystem
+changes and when showing the panel, never queried while drawing. Outside a Git
+repository, or on platforms without this backend, no Git color is shown. This only colors the existing file list:
+Git-ignored files already present there are not filtered out by this feature. Empty directories and files outside the
 project root are not displayed. Configurable ignore patterns and Git-status
 filtering are not implemented. Linux watches the project recursively, including
 new and moved directories. Changes update the tree automatically; showing the

@@ -1,8 +1,10 @@
 
 #include "project.h"
 #include "core/ijobqueue.h"
+#include "core/itimer.h"
 #include "files/directorynotifications.h"
 #include "files/extensions.h"
+#include "files/gitstatus.h"
 #include "files/path.h"
 #include "files/projectsettings.h"
 #include <algorithm>
@@ -31,9 +33,14 @@ bool isProjectBuildDirectory(const std::filesystem::path &path) {
 
 Project::Project(std::filesystem::path projectPath,
                  DirectoryNotifications &directoryNotifications,
-                 IJobQueue &guiQueue)
+                 IJobQueue &guiQueue,
+                 IJobQueue *backgroundQueue,
+                 ITimer *timer)
     : _tv{"Project"}
-    , _directoryNotifications{&directoryNotifications} {
+    , _directoryNotifications{&directoryNotifications}
+    , _guiQueue{&guiQueue}
+    , _backgroundQueue{backgroundQueue}
+    , _timer{timer} {
     auto projectFile = ProjectSettings::findProject(projectPath, true);
     _settings.load(projectFile);
 
@@ -50,6 +57,7 @@ Project::Project(std::filesystem::path projectPath,
                     return;
                 }
                 _tv();
+                requestGitStatusRefresh();
                 std::error_code error;
                 if (type == DirectoryNotifications::Rescan ||
                     (path.filename() == "CMakeCache.txt" &&
@@ -75,10 +83,87 @@ Project::Project(std::filesystem::path projectPath,
 Project::~Project() {
     _tv();
     _lifetime.reset();
+    if (_timer)
+        _timer->cancel(_gitStatusTimer);
     _directoryNotifications->unsubcribe(this);
-    for (auto &subscriber : _filesSubscribers) {
+    for (auto &subscriber : _filesSubscribers)
         subscriber->active = false;
-    }
+    for (auto &subscriber : _gitSubscribers)
+        subscriber->active = false;
+}
+
+void Project::enableGitStatus() {
+    _tv();
+    if (_gitEnabled)
+        return;
+    _gitEnabled = true;
+    requestGitStatusRefresh();
+}
+
+void Project::requestGitStatusRefresh() {
+    _tv();
+    if (!_gitEnabled || !_timer || !_backgroundQueue)
+        return;
+    _timer->cancel(_gitStatusTimer);
+    const auto generation = ++_gitGeneration;
+    const auto root = normalizedProjectPath(_settings.root);
+    auto lifetime = std::weak_ptr{_lifetime};
+    auto *background = _backgroundQueue;
+    auto *gui = _guiQueue;
+    _gitStatusTimer = _timer->setTimeout(
+        std::chrono::milliseconds{200},
+        [this, generation, root, lifetime, background, gui] {
+            background->addTask([this, generation, root, lifetime, gui] {
+                if (lifetime.expired())
+                    return;
+                auto changed = changedGitFiles(root);
+                gui->addTask([this,
+                              generation,
+                              root,
+                              lifetime,
+                              changed = std::move(changed)]() mutable {
+                    if (lifetime.expired() || generation != _gitGeneration ||
+                        root != normalizedProjectPath(_settings.root))
+                        return;
+                    if (_gitChanged != changed) {
+                        _gitChanged = std::move(changed);
+                        emitGitStatusChanged();
+                    }
+                });
+            });
+        });
+}
+
+bool Project::gitChanged(const std::filesystem::path &path) const {
+    _tv();
+    // Tree paths and cached paths are already normalized; no filesystem work
+    // or Git invocation belongs in the drawing path.
+    return _gitChanged.contains(path);
+}
+
+void Project::subscribeToGitStatusChanged(FilesChangedCallbackT callback,
+                                          void *ref) {
+    _tv();
+    _gitSubscribers.push_back(std::make_shared<FilesSubscriber>(
+        FilesSubscriber{std::move(callback), ref}));
+}
+
+void Project::unsubscribeFromGitStatusChanged(void *ref) {
+    _tv();
+    std::erase_if(_gitSubscribers, [ref](const auto &subscriber) {
+        if (subscriber->ref != ref)
+            return false;
+        subscriber->active = false;
+        return true;
+    });
+}
+
+void Project::emitGitStatusChanged() {
+    _tv();
+    const auto subscribers = _gitSubscribers;
+    for (const auto &subscriber : subscribers)
+        if (subscriber->active && subscriber->callback)
+            subscriber->callback();
 }
 
 void Project::subscribeToFilesChanged(FilesChangedCallbackT callback,
@@ -118,7 +203,12 @@ void Project::updateCache(size_t max) {
     if (root != _watchedRoot) {
         _directoryNotifications->path(root);
         _watchedRoot = root;
+        if (!_gitChanged.empty()) {
+            _gitChanged.clear();
+            emitGitStatusChanged();
+        }
     }
+    requestGitStatusRefresh();
     auto paths = findProjectFiles(root, max);
     if (_settings.buildCommand.empty()) {
         _settings.buildCommand = guessBuildCommand();

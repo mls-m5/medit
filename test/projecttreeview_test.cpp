@@ -224,6 +224,33 @@ TEST_CASE(
     EXPECT_TRUE(expanded);
 }
 
+TEST_CASE("Git changes color only registered changed files") {
+    ProjectTreeView tree{nullptr};
+    tree.files("/project", {"/project/clean.cpp", "/project/changed.cpp"});
+    tree.gitChanged(
+        [](const auto &path) { return path == "/project/changed.cpp"; });
+    tree.width(32);
+    tree.height(3);
+    tree.reveal("/project/changed.cpp");
+    bool changed = false, clean = false, directory = false;
+    MockScreen screen;
+    screen.mock_draw_3.expectNum(3);
+    screen.mock_draw_3.expectArgs([&](auto, auto, FStringView text) {
+        const auto str = std::string{text};
+        if (str.find("changed.cpp") != std::string::npos)
+            changed = text.front().f == Palette::warning;
+        if (str.find("clean.cpp") != std::string::npos)
+            clean = text.front().f == Palette::standard;
+        if (str.find("project/") != std::string::npos)
+            directory = text.front().f != Palette::warning;
+        return true;
+    });
+    tree.draw(screen);
+    EXPECT_TRUE(changed);
+    EXPECT_TRUE(clean);
+    EXPECT_TRUE(directory);
+}
+
 TEST_CASE("filenames with double width controls and invalid bytes cannot move "
           "layout") {
     ProjectTreeView tree{nullptr};

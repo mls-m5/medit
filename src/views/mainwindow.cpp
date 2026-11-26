@@ -597,8 +597,11 @@ void MainWindow::showConsole() {
 
 void MainWindow::toggleSidebar() {
     _sidebarRequested = !_sidebarRequested;
-    if (_sidebarRequested)
+    if (_sidebarRequested) {
         updateLocatorBuffer();
+        _env->core().project().enableGitStatus();
+        _env->core().project().requestGitStatusRefresh();
+    }
     resize();
     if (_sidebarRequested && _sidebar.visible())
         setInputFocus(&_sidebar);
@@ -606,8 +609,11 @@ void MainWindow::toggleSidebar() {
 }
 
 void MainWindow::focusSidebar() {
-    if (!_sidebarRequested)
+    if (!_sidebarRequested) {
         updateLocatorBuffer();
+        _env->core().project().enableGitStatus();
+        _env->core().project().requestGitStatusRefresh();
+    }
     _sidebarRequested = true;
     resize();
     if (_sidebar.visible()) {

@@ -20,7 +20,8 @@ nlohmann/json 3.12.0 during configuration, so the first build needs network
 access. For `medit --cli`, use a UTF-8 locale (check with `locale charmap`).
 
 `clangd` is needed at runtime for C++ language-server features, but not to
-build or run the editor. Git, `gdb` and `clang-format` are used by their
+build or run the editor. Git is also used at runtime for project-tree change
+colors and optional Git commands; `gdb` and `clang-format` support their
 respective optional editor commands.
 
 On Ubuntu 24.04, for example:
