@@ -86,6 +86,8 @@ Todo:
    - [ ] Support backspace characters for popen
    - [ ] Make Popenstream support colors in linux
 - [ ] Lsp-plugin
+    - [ ] Capture clangd stderr instead of overwriting the CLI alternate screen
+          ([cause and follow-up checks](docs/lsp-stderr.md)).
     - [ ] Lsp-plugin diagnostics
        - [ ] Command that prints state of lsp-server and also command flags for
              current document
