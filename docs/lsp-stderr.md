@@ -1,7 +1,8 @@
 # Follow-up: clangd output overwrites the CLI screen
 
-Status: recorded for later implementation. The output-routing cause was
-identified by source inspection; no LSP/submodule code is changed here.
+Status: stderr is routed into the existing console as an error. Further work
+is needed to investigate the reported compiler-invocation errors and to verify
+real clangd behavior.
 
 ## Reported behavior
 
@@ -17,7 +18,7 @@ The output must be captured by the application's logging/console routing, not
 written directly to the terminal while ncurses owns the screen. Compiler errors
 may remain useful diagnostics; suppressing them is not the routing fix.
 
-## Confirmed output-routing cause
+## Original output-routing cause
 
 In `lib/lsp-client/src/connection.cpp`, `Connection::startProcess()` redirects the
 language server's stderr to `_errorPath`, a FIFO. However, `_errorThread` runs:
@@ -34,13 +35,12 @@ Changing the shell command to `cat ... >&2` alone would still bypass that captur
 
 ## Later work
 
-- Replace the external `cat` with parent-process stderr consumption and an error
-  callback/stream that the host can route through its existing log mechanism.
-  This requires an intentional upstream change in the `lsp-client` submodule.
+- The external `cat` has been replaced with a parent-process stderr reader and
+  callback. The LSP plugin posts lines to the existing console as errors.
 - Preserve the language server's stdout for LSP protocol messages. Do not redirect
   all process stdout/stderr indiscriminately: ncurses also needs terminal access.
-- Check stderr-reader ownership and shutdown. The current connection keeps a FIFO
-  writer open while joining the stderr helper, which can also block shutdown.
+- Exercise server shutdown and failure paths further. The connection still uses
+  shell commands and named pipes; it does not forcibly terminate a stuck server.
 - Investigate the compiler-invocation errors separately, starting with the chosen
   `compile_commands.json`, its source/output fields, and compiler flags. Paths
   ending in `.cpp.o` in the reported indexing messages are a clue, not a confirmed
@@ -48,8 +48,8 @@ Changing the shell command to `cat ... >&2` alone would still bypass that captur
 
 ## Acceptance checks
 
-- A fake language server writes recognizable stderr lines; they reach the host's
-  logging/console route exactly once, without direct terminal output.
+- Verify the complete host logging/console route using a fake language server.
+  A connection-level fake server test already checks separate stderr delivery.
 - Valid LSP stdout remains parseable, including while stderr is busy.
 - Opening C++ files in `--cli` never lets child-process logs overwrite the screen.
 - Connection shutdown does not hang, including missing/crashed server cases.

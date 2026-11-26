@@ -63,6 +63,7 @@ public:
         ~Instance() = default;
 
         LspConfiguration config;
+        std::shared_ptr<int> logLifetime = std::make_shared<int>(0);
         std::unique_ptr<lsp::LspClient> client;
     };
 

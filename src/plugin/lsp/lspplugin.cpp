@@ -102,7 +102,16 @@ using namespace lsp;
 LspPlugin::Instance::Instance(LspConfiguration c, LspPlugin *parent)
     : config{std::move(c)} {
 
-    client = std::make_unique<LspClient>(config.command);
+    client = std::make_unique<LspClient>(
+        config.command,
+        [core = parent->_core,
+         lifetime = std::weak_ptr{logLifetime}](std::string line) {
+            core->context().guiQueue().addTask(
+                [core, lifetime, line = std::move(line)] {
+                    if (!lifetime.expired())
+                        core->printToAllLogs(LogType::Error, line);
+                });
+        });
 
     auto initializedPromise = std::promise<bool>{};
     auto initializedFuture = initializedPromise.get_future();
