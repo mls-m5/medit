@@ -327,6 +327,24 @@ TEST_CASE("unmapped window keys reach the editor's existing mode") {
     EXPECT_FALSE(f.window._locator->visible());
 }
 
+TEST_CASE("background errors appear in the console without taking focus") {
+    sidebar_focus_test::WindowFixture f;
+    auto *editor = f.window.currentEditor();
+    for (int i = 0; i < 3; ++i)
+        f.core.printToAllLogs(LogType::Error, "language server error");
+    f.gui.work(false);
+    EXPECT_TRUE(f.window._env->showConsole());
+    EXPECT_TRUE(f.window._inputFocus == editor);
+    EXPECT_TRUE(f.window._console->buffer().text().find(
+                    "language server error") != std::string::npos);
+    f.window.focusSidebar();
+    f.core.printToAllLogs(LogType::Error, "another error");
+    f.gui.work(false);
+    EXPECT_TRUE(f.window._inputFocus == &f.window._sidebar);
+    f.window.showConsole();
+    EXPECT_TRUE(f.window._inputFocus == f.window._console.get());
+}
+
 TEST_CASE("window shortcuts work while the console has focus") {
     sidebar_focus_test::WindowFixture f;
     f.window.showConsole();

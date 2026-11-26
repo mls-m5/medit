@@ -106,9 +106,13 @@ MainWindow::MainWindow(CoreEnvironment &core,
                         _env->statusMessage(FString{data});
                     }
                     else {
-                        showConsole();
-                        // TODO: Create some nice formatting for errors and add
-                        // that. The current is unusable
+                        if (!_env->showConsole()) {
+                            _env->showConsole(true);
+                            resize();
+                        }
+                        // Logging must not steal keyboard focus from the editor
+                        // or a tool, even if a server emits many messages.
+                        // TODO: Add distinct error formatting.
                         _console->buffer().pushBack(FString{data});
                         _console->cursor(
                             Cursor(_console->buffer(),
