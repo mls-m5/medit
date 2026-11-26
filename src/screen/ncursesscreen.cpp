@@ -102,6 +102,9 @@ void NCursesScreen::init() {
 void NCursesScreen::draw(size_t x, size_t y, FStringView rstr) {
     PROFILE_FUNCTION();
     // Drawing runs later on the terminal thread; own the text until then.
+    // TODO(performance): This allocates and copies for every draw. Consider a
+    // reusable allocator or bounded ring buffer; do not reuse a slot until
+    // the terminal thread has finished drawing from it.
     auto str = FString{rstr.begin(), rstr.end()};
     _threadQueue.push_back([str = std::move(str), this, x, y] {
         _tv();
