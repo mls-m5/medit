@@ -59,6 +59,7 @@ def main(binary):
             os.write(master, curses.tigetstr("kf3"))
             panel = collect(master, process, b"note.md")
             assert b"Project" in panel and b"note.md" in panel, "broken tree frame"
+            assert "›▾".encode() in panel and "│".encode() in panel, "missing tree markers"
             os.write(master, b"\x1b")  # Escape returns focus to the editor.
             # Normal mode -> insert mode, then one single- and one double-width char.
             os.write(master, "iå界".encode("utf-8"))
