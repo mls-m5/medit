@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdlib>
 #include <filesystem>
 #include <iostream>
 #include <string>
@@ -29,6 +30,9 @@ usage:
 
 medit -[flags] [file]
 
+On Linux, terminal mode is selected automatically when neither DISPLAY nor
+WAYLAND_DISPLAY is set to a nonempty value. Explicit UI flags override this.
+
 flags:
 
 --gui                 force start with graphic interface
@@ -44,6 +48,13 @@ flags:
     )_";
 
     Settings(int argc, char **argv) {
+#if defined(__linux__) && !defined(__EMSCRIPTEN__)
+        const auto *display = std::getenv("DISPLAY");
+        const auto *waylandDisplay = std::getenv("WAYLAND_DISPLAY");
+        if ((!display || !*display) && (!waylandDisplay || !*waylandDisplay)) {
+            style = UiStyle::Terminal;
+        }
+#endif
         if (argc < 1) {
             return;
         }
