@@ -101,8 +101,9 @@ void NCursesScreen::init() {
 
 void NCursesScreen::draw(size_t x, size_t y, FStringView rstr) {
     PROFILE_FUNCTION();
-    auto str = rstr;
-    _threadQueue.push_back([str, this, x, y] {
+    // Drawing runs later on the terminal thread; own the text until then.
+    auto str = FString{rstr.begin(), rstr.end()};
+    _threadQueue.push_back([str = std::move(str), this, x, y] {
         _tv();
         ::move(y, x);
         for (size_t tx = 0, i = 0; i < str.size() && tx < width(); ++tx, ++i) {
