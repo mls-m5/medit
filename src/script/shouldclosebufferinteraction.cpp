@@ -1,10 +1,13 @@
+#include "files/file.h"
 #include "main.h"
 #include "script/interaction.h"
 #include "script/saveinteraction.h"
 #include "script/staticcommandregister.h"
 #include "views/editor.h"
 #include "views/mainwindow.h"
+#include <filesystem>
 #include <string>
+#include <system_error>
 
 namespace {
 
@@ -42,14 +45,21 @@ void beginCloseBufferInteraction(std::shared_ptr<IEnvironment> env) {
     // Interaction buffers are temporary and must not trigger another
     // save-confirmation interaction. Close the interaction and restore the
     // buffer that was active before it.
-    if (env->mainWindow().interactions().isOperationBuffer(
-            &editor.buffer())) {
+    if (env->mainWindow().interactions().isOperationBuffer(&editor.buffer())) {
         env->mainWindow().interactions().close();
         env->mainWindow().updateTitle();
         return;
     }
 
-    if (!editor.buffer().isChanged()) {
+    // A loaded file can disappear without any edits in its buffer. The text
+    // still needs an explicit save/discard decision before closing.
+    bool missingFile = false;
+    if (auto *file = dynamic_cast<File *>(editor.file())) {
+        std::error_code error;
+        missingFile = !std::filesystem::is_regular_file(file->path(), error) ||
+                      bool(error);
+    }
+    if (!editor.buffer().isChanged() && !missingFile) {
         actuallyClose(env);
         return;
     }

@@ -216,6 +216,31 @@ TEST_CASE("tool input and paste cannot modify the background text editor") {
     EXPECT_TRUE(f.window._sidebar.focused());
 }
 
+TEST_CASE("closing an unchanged buffer asks when its disk file was deleted") {
+    sidebar_focus_test::WindowFixture f;
+    const auto path = f.home.path / "deleted.cpp";
+    std::ofstream{path} << "keep this text\n";
+    auto buffer = f.core.files().open(path);
+    f.window.currentEditor()->buffer(buffer);
+    EXPECT_FALSE(buffer->isChanged());
+    std::filesystem::remove(path);
+    f.paletteCommand("close buffer");
+    EXPECT_TRUE(f.window.interactions().isOperationBuffer(
+        &f.window.currentEditor()->buffer()));
+    EXPECT_TRUE(f.window.currentEditor()->buffer().text().find(
+                    "Do you want to save") != std::string::npos);
+    EXPECT_TRUE(buffer->text().find("keep this text") != std::string::npos);
+    EXPECT_FALSE(std::filesystem::exists(path));
+    f.key({Key::Text, '\n'}); // Choose Yes in the close prompt.
+    f.gui.work(false);
+    EXPECT_TRUE(f.window.interactions().isOperationBuffer(
+        &f.window.currentEditor()->buffer()));
+    EXPECT_TRUE(f.window.currentEditor()->buffer().text().find(
+                    "Overwrite it?") != std::string::npos);
+    EXPECT_FALSE(std::filesystem::exists(path));
+    EXPECT_TRUE(buffer->text().find("keep this text") != std::string::npos);
+}
+
 TEST_CASE("manual save asks before overwriting an external change") {
     sidebar_focus_test::WindowFixture f;
     const auto path = f.home.path / "conflict.cpp";
