@@ -3,6 +3,9 @@
 #ifndef __EMSCRIPTEN__
 #include "ncursesscreen.h"
 #include "syntax/color.h"
+#include <climits>
+#include <clocale>
+#include <cwchar>
 #include <map>
 #include <ncurses.h>
 
@@ -63,6 +66,9 @@ void reducedPalette() {
 
 void NCursesScreen::init() {
     PROFILE_FUNCTION();
+    // ncurses must know the terminal's multibyte locale before initscr().
+    // Otherwise printw counts UTF-8 bytes as cells and the cursor drifts.
+    std::setlocale(LC_CTYPE, "");
     ::initscr();
 
     _tv.reset();
@@ -95,8 +101,12 @@ void NCursesScreen::init() {
 
 void NCursesScreen::draw(size_t x, size_t y, FStringView rstr) {
     PROFILE_FUNCTION();
-    auto str = rstr;
-    _threadQueue.push_back([str, this, x, y] {
+    // Drawing runs later on the terminal thread; own the text until then.
+    // TODO(performance): This allocates and copies for every draw. Consider a
+    // reusable allocator or bounded ring buffer; do not reuse a slot until
+    // the terminal thread has finished drawing from it.
+    auto str = FString{rstr.begin(), rstr.end()};
+    _threadQueue.push_back([str = std::move(str), this, x, y] {
         _tv();
         ::move(y, x);
         for (size_t tx = 0, i = 0; i < str.size() && tx < width(); ++tx, ++i) {
@@ -178,12 +188,14 @@ void NCursesScreen::subscribe(CallbackT f) {
 Event NCursesScreen::getInput() {
     PROFILE_FUNCTION();
     _tv();
-    const auto c = getch();
-    if (c == ERR) {
+    wint_t input = 0;
+    const auto result = get_wch(&input);
+    if (result == ERR) {
         return NullEvent{};
     }
+    const auto c = static_cast<int>(input);
 
-    if (c == KEY_RESIZE) {
+    if (result == KEY_CODE_YES && c == KEY_RESIZE) {
         ::endwin();
         ::refresh();
         ::clear();
@@ -194,7 +206,7 @@ Event NCursesScreen::getInput() {
         return r;
     }
 
-    if (c == KEY_MOUSE) {
+    if (result == KEY_CODE_YES && c == KEY_MOUSE) {
         MEVENT event;
         getmouse(&event);
 
@@ -205,11 +217,13 @@ Event NCursesScreen::getInput() {
         return MouseDownEvent{1, event.x, event.y};
     }
 
-    if (c == 409) { // Seems to come with scrool wheel
+    if (result == KEY_CODE_YES && c == 409) { // Seems to come with scroll wheel
         return NullEvent{};
     }
 
-    else if (auto f = keytranslations.find(c); f != keytranslations.end()) {
+    else if (auto f = keytranslations.find(c);
+             f != keytranslations.end() &&
+             (result == KEY_CODE_YES || c < 128)) {
         return KeyEvent{f->second.key, f->second.text};
     }
     else if (c < 27) { // ctrl-characters
@@ -229,18 +243,18 @@ Event NCursesScreen::getInput() {
                         static_cast<char>('4' + c - 28),
                         Modifiers::Ctrl};
     }
-    else if ((c & 0b11111111) == c) {
-        Utf8Char uc{static_cast<char>(c)};
-        auto size = utf8size(static_cast<char>(c));
-        for (size_t i = 1; i < size; ++i) {
-            uc[i] = static_cast<char>(getch());
+    else if (result == OK) {
+        // get_wch returns a Unicode character, not one byte of UTF-8.
+        char bytes[MB_LEN_MAX] = {};
+        std::mbstate_t state{};
+        const auto count =
+            std::wcrtomb(bytes, static_cast<wchar_t>(input), &state);
+        if (count == static_cast<size_t>(-1) || count > 4) {
+            return NullEvent{};
         }
-
-        return KeyEvent{Key::Text, uc};
+        return KeyEvent{Key::Text, Utf8Char{std::string_view{bytes, count}}};
     }
-    else {
-        return KeyEvent{Key::Text, static_cast<char>(c)};
-    }
+    return NullEvent{};
 }
 
 size_t NCursesScreen::width() const {

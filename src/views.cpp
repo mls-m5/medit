@@ -13,3 +13,4 @@
 #include "views/messagebox.cpp"
 #include "views/quicklist.cpp"
 #include "views/scrollview.cpp"
+#include "views/sidebar.cpp"
