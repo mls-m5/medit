@@ -1,9 +1,13 @@
 #include "lsp/connection.h"
 #include "lsp/randomutil.h"
 #include <filesystem>
+#include <fcntl.h>
+#include <unistd.h>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <string_view>
+#include <utility>
 
 using namespace std::literals;
 
@@ -18,7 +22,8 @@ namespace lsp {
 
 Connection::Connection(std::string command,
                        HandleFunctionT handle,
-                       ExitedFunctionT exitF)
+                       ExitedFunctionT exitF,
+                       ErrorFunctionT error)
     : _exitedCallback{exitF} {
     auto tmp = std::filesystem::temp_directory_path();
     _inPath = tmp / ("lsp-in-pipe-" + std::to_string(randomNumber(100000)));
@@ -32,18 +37,28 @@ Connection::Connection(std::string command,
     createFifo(_errorPath);
 
     _clangdThread = std::thread{[this, command] { startProcess(command); }};
-    _errorThread = std::thread{
-        [this] { std::system(("cat " + _errorPath.string()).c_str()); }};
+    _errorThread = std::thread{[this, error = std::move(error)] {
+        std::ifstream stream{_errorPath};
+        for (std::string line; std::getline(stream, line);) {
+            if (error)
+                error(std::move(line));
+            else
+                std::cerr << line << '\n';
+        }
+    }};
 
     _thread = std::thread{[handle, this] { readIn(handle); }};
 
     _out.open(_outPath);
-    _error.open(_errorPath);
 }
 
 Connection::~Connection() {
-    std::ofstream{_inPath}
-        << std::endl; // Force the in thread to check if abort is called
+    // Wake a still-running protocol reader without blocking if it has already
+    // reached EOF after a server crash.
+    if (const int fd = ::open(_inPath.c_str(), O_WRONLY | O_NONBLOCK); fd >= 0) {
+        (void)::write(fd, "\n", 1);
+        ::close(fd);
+    }
 
     _thread.join();
     _clangdThread.join();
@@ -66,7 +81,6 @@ bool Connection::send(std::string_view str) {
 void Connection::closePipes() {
     _in.close();
     _out.close();
-    _error.close();
 }
 
 Connection::operator bool() const {
@@ -81,8 +95,7 @@ void Connection::readIn(HandleFunctionT f) {
 
 void Connection::startProcess(std::string_view command) {
     auto ss = std::ostringstream{};
-    auto clangd = getClangVersion();
-    ss << command << " > " << _inPath << " < " << _outPath << " 2> "
+    ss << "( " << command << " ) > " << _inPath << " < " << _outPath << " 2> "
        << _errorPath;
     _isServerRunning = true;
     auto ret =

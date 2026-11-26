@@ -1,14 +1,15 @@
 #include "lsp/lspclient.h"
 #include <sstream>
 
-lsp::LspClient::LspClient(std::string command)
+lsp::LspClient::LspClient(std::string command, Connection::ErrorFunctionT error)
     : _connection{command,
                   [this](auto &in) { inputThread(in); },
                   [this]() {
                       if (_unexpectedExitCallback) {
                           _unexpectedExitCallback();
                       }
-                  }} {}
+                  },
+                  std::move(error)} {}
 
 lsp::LspClient::~LspClient() {
     _abort = true;

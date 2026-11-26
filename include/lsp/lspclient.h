@@ -29,7 +29,7 @@ public:
     LspClient &operator=(LspClient &&) = delete;
 
     /// @param command   the command to start with, including the arguments
-    LspClient(std::string command);
+    LspClient(std::string command, Connection::ErrorFunctionT error = {});
     ~LspClient();
 
     using CallbackT = std::function<void(const nlohmann::json &)>;
