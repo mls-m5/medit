@@ -1,5 +1,6 @@
 
 #include "archive_test.cpp"
+#include "autosave_test.cpp"
 #include "basichighlighting_test.cpp"
 #include "buffer_test.cpp"
 #include "bufferkeymap_test.cpp"

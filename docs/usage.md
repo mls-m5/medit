@@ -13,6 +13,19 @@ modes are unchanged. Other platforms keep their existing GUI default.
 
 For terminal mode, use a UTF-8 locale (check with `locale charmap`).
 
+## Autosave
+
+Edited files that already have a filename are saved after two seconds without
+further edits, including files open in the background. Unnamed buffers and
+temporary console/interaction buffers are not saved automatically. Autosave
+runs on the editor thread; diagnostics and redraws do not postpone it.
+
+If the file's modification time differs from the version last read or saved,
+autosave leaves both versions alone and reports the conflict in the existing
+console. A manual save uses the existing overwrite confirmation. Modification
+times are a lightweight check, not a guarantee against simultaneous writes.
+Saving when changing views or when a window loses focus is not implemented yet.
+
 ## Project file panel
 
 The panel is hidden initially. F3 shows and focuses it, or hides it; F6 moves

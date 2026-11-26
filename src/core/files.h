@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <functional>
 #include <memory>
+#include <unordered_map>
 
 struct BufferEvent {
     std::shared_ptr<Buffer> buffer;
@@ -69,6 +70,17 @@ private:
     std::unique_ptr<DirectoryNotifications> _dirNotifications;
 
     // Function that is called by the DirectoryNotifications
+    void trackAutosave(const std::shared_ptr<Buffer> &);
+    void bufferChanged(const std::shared_ptr<Buffer> &);
+
+    struct AutosaveState {
+        size_t timer = 0;
+        size_t generation = 0;
+        size_t editRevision = 0;
+    };
+    std::unordered_map<Buffer *, AutosaveState> _autosave;
+    std::shared_ptr<int> _lifetime = std::make_shared<int>(0);
+
     void fileChangeCallback(DirectoryNotifications::EventType,
                             std::filesystem::path,
                             std::filesystem::file_time_type);

@@ -166,6 +166,11 @@ public:
 
     void format(const CursorRange &range, FormatType f);
 
+    [[nodiscard]] size_t editRevision() const {
+        _tv();
+        return _editRevision;
+    }
+
     [[nodiscard]] bool isChanged() const {
         _tv();
         return _raw.isChanged();
@@ -210,10 +215,12 @@ public:
     }
 
 private:
+    size_t _editRevision = 0;
     // The function history class uses with undo/redo
     void applyWithoutHistory(BufferEdit edit) {
         _tv();
         _raw.apply(std::move(edit));
+        ++_editRevision;
         emitChangeSignal();
     }
 

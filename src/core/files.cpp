@@ -3,6 +3,7 @@
 #include "core/coreenvironment.h"
 #include "core/ijobqueue.h"
 #include "core/itimer.h"
+#include "core/logtype.h"
 #include "files/file.h"
 #include "linux/inotify.h"
 #include "text/buffer.h"
@@ -16,7 +17,68 @@ Files::Files(CoreEnvironment &core)
         [this](auto a, auto b, auto c) { fileChangeCallback(a, b, c); }, this);
 }
 
-Files::~Files() = default;
+Files::~Files() {
+    _lifetime.reset();
+    for (auto &[buffer, state] : _autosave) {
+        buffer->unsubscribe(this);
+        _core.context().timer().cancel(state.timer);
+    }
+}
+
+void Files::trackAutosave(const std::shared_ptr<Buffer> &buffer) {
+    if (!_autosave.try_emplace(buffer.get()).second)
+        return;
+    buffer->subscribe(
+        [this, weak = std::weak_ptr{buffer}] {
+            if (auto tracked = weak.lock())
+                bufferChanged(tracked);
+        },
+        this);
+}
+
+void Files::bufferChanged(const std::shared_ptr<Buffer> &buffer) {
+    _tv();
+    auto &state = _autosave.at(buffer.get());
+    if (state.editRevision == buffer->editRevision())
+        return; // Diagnostics, formatting and other redraws are not edits.
+    state.editRevision = buffer->editRevision();
+    ++state.generation;
+    _core.context().timer().cancel(state.timer);
+    state.timer = 0;
+    // Only disk-backed files: no unnamed or console/interaction buffers.
+    if (!buffer->isChanged() || !dynamic_cast<File *>(buffer->file()))
+        return;
+    const auto generation = state.generation;
+    const auto weak = std::weak_ptr{buffer};
+    const auto lifetime = std::weak_ptr{_lifetime};
+    auto *queue = &_core.context().guiQueue();
+    state.timer = _core.context().timer().setTimeout(
+        std::chrono::seconds{2}, [this, queue, lifetime, weak, generation] {
+            queue->addTask([this, lifetime, weak, generation] {
+                if (lifetime.expired())
+                    return;
+                const auto buffer = weak.lock();
+                if (!buffer || !buffer->isChanged())
+                    return;
+                const auto state = _autosave.find(buffer.get());
+                if (state == _autosave.end() ||
+                    state->second.generation != generation)
+                    return;
+                state->second.timer = 0;
+                if (buffer->hasExternalChanges()) {
+                    _core.printToAllLogs(
+                        LogType::Error,
+                        "Autosave skipped: file changed on disk: " +
+                            buffer->path().string());
+                }
+                else if (!buffer->save()) {
+                    _core.printToAllLogs(LogType::Error,
+                                         "Autosave failed: " +
+                                             buffer->path().string());
+                }
+            });
+        });
+}
 
 std::shared_ptr<Buffer> Files::open(std::filesystem::path path) {
     _tv();
@@ -31,6 +93,7 @@ std::shared_ptr<Buffer> Files::open(std::filesystem::path path) {
     // use theme to update highlighting
 
     _buffers.push_back(Buffer::open(path));
+    trackAutosave(_buffers.back());
     emitBufferSubscriptionEvent(
         {_buffers.back(), _buffers.back()->file()->path(), BufferEvent::Open});
     return _buffers.back();
@@ -123,6 +186,7 @@ void Files::fileChangeCallback(DirectoryNotifications::EventType type,
 std::shared_ptr<Buffer> Files::create() {
     _tv();
     _buffers.push_back(std::make_shared<Buffer>());
+    trackAutosave(_buffers.back());
     emitBufferSubscriptionEvent({_buffers.back(), {}, BufferEvent::Open});
     return _buffers.back();
 }
@@ -138,6 +202,7 @@ bool Files::save(Buffer &buffer, std::filesystem::path path) {
     buffer.assignFile(std::move(file));
     buffer.isChanged(false);
 
+    trackAutosave(buffer.shared_from_this());
     _buffers.push_back(buffer.shared_from_this());
     emitBufferSubscriptionEvent(
         {_buffers.back(), _buffers.back()->file()->path(), BufferEvent::Open});

@@ -21,12 +21,11 @@ of the scenarios below.
    messages available in the existing console without taking keyboard focus
    away from the editor or sidebar. Test repeated stderr messages while typing.
 
-3. **Autosave and early-save triggers are not implemented.**
-   The current work checks for disk conflicts but does not schedule a save
-   after inactivity or save when leaving a file/view or losing window focus.
-   Implement those only after the failure and conflict paths are sound;
-   ensure timers act on the GUI thread and do not save unnamed or temporary
-   interaction buffers. Terminal window-focus notifications may be unavailable.
+3. **Early-save triggers are not implemented.**
+   Autosave after two seconds without edits is implemented for named file
+   buffers, with conflict and failure checks on the GUI thread. Saving sooner
+   when leaving a file/view or losing window focus remains to be done.
+   Terminal window-focus notifications may be unavailable.
 
 ## Performance and conflict correctness
 
