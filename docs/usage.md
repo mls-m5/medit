@@ -28,8 +28,9 @@ panel. Window shortcuts such as Ctrl+P (command palette) still work in the panel
   file** in the command palette to turn it off/on. Following reveals registered
   files without changing keyboard focus or repeatedly resetting tree navigation.
 
-The tree uses the shared project's registered files, with the existing known-file
-and CMake build-directory filtering. Empty directories and files outside the
+The tree uses the shared project's registered files, filtering known file types
+and skipping directories named `build` (including nested ones) and CMake build
+directories. Empty directories and files outside the
 project root are not displayed. Configurable ignore patterns and Git-status
 filtering are not implemented. Linux watches the project recursively, including
 new and moved directories. Changes update the tree automatically; showing the

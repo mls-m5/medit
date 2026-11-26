@@ -166,6 +166,10 @@ private:
         while (!_stopping && !pending.empty()) {
             const auto directory = std::move(pending.back());
             pending.pop_back();
+            // The parent watch still observes a build/ directory being added
+            // or removed; contents never enter the project file list.
+            if (directory != _directory && directory.filename() == "build")
+                continue;
             std::error_code error;
             const auto status =
                 directory == _directory

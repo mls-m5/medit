@@ -72,6 +72,23 @@ struct Fixture {
 
 TEST_SUIT_BEGIN(Project)
 
+TEST_CASE(
+    "build directories are excluded before and after CMake configuration") {
+    project_test::Fixture f;
+    f.write("build/generated.cpp");
+    f.write("src/build/generated.cpp");
+    f.write("src/real.cpp");
+    f.project->updateCache();
+    EXPECT_FALSE(f.contains("build/generated.cpp"));
+    EXPECT_FALSE(f.contains("src/build/generated.cpp"));
+    EXPECT_TRUE(f.contains("src/real.cpp"));
+    f.event(DirectoryNotifications::Added, "build/generated.cpp");
+    f.event(DirectoryNotifications::Added, "src/build/generated.cpp");
+    f.drain();
+    EXPECT_FALSE(f.contains("build/generated.cpp"));
+    EXPECT_FALSE(f.contains("src/build/generated.cpp"));
+}
+
 TEST_CASE("load and refresh publish a complete deduplicated list") {
     project_test::Fixture f{false};
     int calls = 0;
@@ -330,17 +347,17 @@ TEST_CASE(
 TEST_CASE(
     "CMake build-directory classification changes reconcile old membership") {
     project_test::Fixture f;
-    f.write("build/old.cpp");
+    f.write("cmake-output/old.cpp");
     f.project->updateCache();
-    EXPECT_TRUE(f.contains("build/old.cpp"));
-    f.write("build/CMakeCache.txt");
-    f.event(DirectoryNotifications::Added, "build/CMakeCache.txt");
+    EXPECT_TRUE(f.contains("cmake-output/old.cpp"));
+    f.write("cmake-output/CMakeCache.txt");
+    f.event(DirectoryNotifications::Added, "cmake-output/CMakeCache.txt");
     f.drain();
-    EXPECT_FALSE(f.contains("build/old.cpp"));
-    std::filesystem::remove(f.path("build/CMakeCache.txt"));
-    f.event(DirectoryNotifications::Removed, "build/CMakeCache.txt");
+    EXPECT_FALSE(f.contains("cmake-output/old.cpp"));
+    std::filesystem::remove(f.path("cmake-output/CMakeCache.txt"));
+    f.event(DirectoryNotifications::Removed, "cmake-output/CMakeCache.txt");
     f.drain();
-    EXPECT_TRUE(f.contains("build/old.cpp"));
+    EXPECT_TRUE(f.contains("cmake-output/old.cpp"));
 }
 
 TEST_SUIT_END

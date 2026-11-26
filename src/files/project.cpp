@@ -20,6 +20,9 @@ std::filesystem::path normalizedProjectPath(const std::filesystem::path &path) {
 }
 
 bool isProjectBuildDirectory(const std::filesystem::path &path) {
+    // A build/ subtree is excluded even before CMakeCache.txt exists.
+    if (path.filename() == "build")
+        return true;
     std::error_code error;
     return std::filesystem::exists(path / "CMakeCache.txt", error);
 }
