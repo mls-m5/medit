@@ -145,6 +145,14 @@ Implementation notes:
 
 ## 4. Dedicated project tree
 
+Styling proposal: run `bash docs/mockups/sidebar-tree.sh --color` for a static
+preview based on the Oblivion palette. Add `--editor-focus` for inactive tree
+selection, `--no-follow` to show selection separately from the open file, or
+`--plain` for uncolored output. This is only a mockup; it does not implement tree
+navigation or change editor files. Only the sidebar, divider, and tree glyphs are
+approved styling references; the editor filename heading and bottom hints are
+illustrative and are not part of the current implementation scope.
+
 - [ ] Implement a specialized tree view rather than adapting the search-oriented
       `QuickList` or turning `ListView` into a tree.
 - [ ] Build directory nodes from `Project::files()`, relative to the project root.
