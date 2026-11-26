@@ -108,17 +108,40 @@ GUI and precise double-width terminal-coordinate review remain manual checks.
 
 ## 3. Observable project file list
 
-- [ ] Add subscription and unsubscription for project file-list changes.
-- [ ] Notify after a cache refresh or a real membership change, on the GUI
+- [x] Add subscription and unsubscription for project file-list changes.
+- [x] Notify after a cache refresh or a real membership change, on the GUI
       thread. File-content-only changes should not produce membership events.
-- [ ] Apply consistent file-selection rules to the initial scan and added paths.
-- [ ] Fix cache removal to erase the full removed range and safely handle absent
+- [x] Apply consistent file-selection rules to the initial scan and added paths.
+- [x] Fix cache removal to erase the full removed range and safely handle absent
       paths. Ignore duplicate additions.
-- [ ] Define subscriber lifetime and queued-callback behavior explicitly.
+- [x] Define subscriber lifetime and queued-callback behavior explicitly.
 
 Tests in `test/project_test.cpp`, using the existing directory-notification mock:
 refresh, add, duplicate add, remove, absent remove, content-only change, filtering,
 and unsubscribe. Drain the job queue deterministically; do not rely on sleeps.
+
+Implementation notes:
+
+- `subscribeToFilesChanged(callback, ref)` and
+  `unsubscribeFromFilesChanged(ref)` follow the existing callback/reference
+  pattern. They are GUI-thread operations; subscribing does not invoke a callback.
+- A callback observes the updated, sorted, unique list of normalized absolute
+  paths and updated extension counts. Refreshes with unchanged membership do not
+  emit a signal, nor do ordinary content changes.
+- Callbacks may unsubscribe during notification; newly registered callbacks start
+  with the next change. Unsubscribe before destroying a view. Project destruction
+  unsubscribes from directory notifications, and a weak lifetime token prevents
+  already queued or late directory events from accessing the destroyed project.
+- The existing known-file-type and CMake build-directory selection is shared by
+  scans and new-file admission. The settings file is included once, even when an
+  anonymous project's settings live outside the root. Configurable ignore rules
+  and dynamic directory/watch reconciliation are still deferred.
+- Changing the configured project root refreshes the model's file list, but does
+  not reconfigure filesystem watches; watcher root changes belong to step 5.
+- Twelve project tests cover refresh/add/remove, duplicate/equivalent paths,
+  filtering, content-only changes, extension metadata, subscription changes,
+  queued-event lifetime, and settings reload. Release build and both CTest entries
+  passed in `build/json-upgrade`. No GUI styling or view behavior changes here.
 
 ## 4. Dedicated project tree
 

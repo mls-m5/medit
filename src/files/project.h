@@ -5,6 +5,8 @@
 #include "meditfwd.h"
 #include "projectsettings.h"
 #include <filesystem>
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -19,6 +21,18 @@ public:
     Project(std::filesystem::path projectFile,
             DirectoryNotifications &files,
             IJobQueue &guiQueue);
+    ~Project();
+
+    Project(const Project &) = delete;
+    Project &operator=(const Project &) = delete;
+    Project(Project &&) = delete;
+    Project &operator=(Project &&) = delete;
+
+    // GUI-thread API. Callbacks see the updated list; subscribing does not
+    // invoke the callback. Unsubscribe before destroying the subscriber.
+    using FilesChangedCallbackT = std::function<void()>;
+    void subscribeToFilesChanged(FilesChangedCallbackT callback, void *ref);
+    void unsubscribeFromFilesChanged(void *ref);
 
     void updateCache(size_t max = 100000);
 
@@ -26,7 +40,8 @@ public:
         return _settings;
     }
 
-    const auto &files() {
+    const auto &files() const {
+        _tv();
         return _fileCache;
     }
 
@@ -61,6 +76,9 @@ public:
 
 private:
     void loadProjectFile();
+    bool shouldIncludeFile(const std::filesystem::path &path) const;
+    void updateExtensions();
+    void emitFilesChanged();
 
     ProjectLanguage guessProjectLanguage() const;
 
@@ -89,5 +107,15 @@ private:
 
     ThreadValidation _tv;
 
-    IJobQueue *_guiQueue = nullptr;
+    // Both the notifier and GUI queue must outlive Project. Queued events
+    // check this token on the GUI thread before accessing the project.
+    DirectoryNotifications *_directoryNotifications = nullptr;
+    std::shared_ptr<int> _lifetime = std::make_shared<int>(0);
+
+    struct FilesSubscriber {
+        FilesChangedCallbackT callback;
+        void *ref;
+        bool active = true;
+    };
+    std::vector<std::shared_ptr<FilesSubscriber>> _filesSubscribers;
 };
