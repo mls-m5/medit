@@ -586,6 +586,8 @@ void MainWindow::toggleSidebar() {
     if (_sidebarRequested)
         updateLocatorBuffer();
     resize();
+    if (_sidebarRequested && _sidebar.visible())
+        setInputFocus(&_sidebar);
     triggerRedraw();
 }
 

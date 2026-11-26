@@ -89,6 +89,31 @@ struct WindowFixture {
 
 TEST_SUIT_BEGIN(SidebarFocus)
 
+TEST_CASE("F3 opens and focuses the sidebar, then returns to the editor") {
+    sidebar_focus_test::WindowFixture f;
+    f.window.splitEditor();
+    f.window.resize();
+    auto *editor = f.window._editors[1].get();
+    f.window.mouseDown(editor->x() + 4, 0);
+    f.key(Key::F3);
+    EXPECT_TRUE(f.window._sidebar.visible());
+    EXPECT_TRUE(f.window._sidebar.focused());
+    EXPECT_TRUE(f.window._inputFocus == &f.window._sidebar);
+    EXPECT_TRUE(f.window.currentEditor() == editor);
+    f.key(Key::F3);
+    EXPECT_FALSE(f.window._sidebar.visible());
+    EXPECT_TRUE(f.window._inputFocus == editor);
+}
+
+TEST_CASE("F3 does not focus a sidebar hidden by a narrow window") {
+    sidebar_focus_test::WindowFixture f;
+    f.window.resize(20, 6);
+    auto *editor = f.window.currentEditor();
+    f.key(Key::F3);
+    EXPECT_FALSE(f.window._sidebar.visible());
+    EXPECT_TRUE(f.window._inputFocus == editor);
+}
+
 TEST_CASE("F6 opens the sidebar and returns to the last text editor") {
     sidebar_focus_test::WindowFixture f;
     auto *editor = f.window.currentEditor();

@@ -15,8 +15,8 @@ For terminal mode, use a UTF-8 locale (check with `locale charmap`).
 
 ## Project file panel
 
-The panel is hidden initially. F3 shows or hides it; F6 moves focus between the
-panel and the last text editor. Escape returns to the editor without hiding the
+The panel is hidden initially. F3 shows and focuses it, or hides it; F6 moves
+focus between the panel and the last text editor. Escape returns to the editor without hiding the
 panel. Window shortcuts such as Ctrl+P (command palette) still work in the panel.
 
 - Up/down or j/k select rows; left/right or h/l collapse/expand directories or
