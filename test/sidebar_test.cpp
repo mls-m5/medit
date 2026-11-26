@@ -95,4 +95,25 @@ TEST_CASE("tree rendering clips and escapes multicolumn filenames") {
     ASSERT_EQ(escaped, true);
 }
 
+TEST_CASE("sidebar keeps file labels intact through rendering") {
+    SideBar sidebar{nullptr};
+    sidebar.width(20);
+    sidebar.height(4);
+    sidebar.files("/tmp/tree", {"/tmp/tree/note.md"});
+    sidebar.handleKey(KeyEvent{Key::Down});
+    MockScreen screen;
+    bool found = false;
+    screen.mock_draw_3.expectNum(8);
+    screen.mock_draw_3.expectArgs([&](auto x, auto y, FStringView text) {
+        if (x == 0 && y == 2) {
+            const auto line = static_cast<std::string>(text);
+            found = line.front() == '>' &&
+                    line.find("note.md") != std::string::npos;
+        }
+        return true;
+    });
+    sidebar.draw(screen);
+    ASSERT_EQ(found, true);
+}
+
 TEST_SUIT_END

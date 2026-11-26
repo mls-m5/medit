@@ -233,7 +233,8 @@ void SideBar::draw(IScreen &screen) {
                 const auto name = entry.path.filename().string();
                 label += safeLabel(name.empty() ? entry.path.string() : name);
             }
-            const auto clipped = FString{label, format}.substr(0, contentWidth);
+            const auto text = FString{label, format};
+            const auto clipped = text.substr(0, contentWidth);
             std::copy(clipped.begin(), clipped.end(), line.begin());
             screen.draw(x(), y() + row, line);
         }
