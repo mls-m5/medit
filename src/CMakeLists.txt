@@ -46,6 +46,8 @@ endif()
 # ---------------------- ncurses screen --------------------
 
 if (NOT EMSCRIPTEN)
+    set(CURSES_NEED_WIDE TRUE)
+    find_package(Curses REQUIRED)
     add_library(
         medit_terminal_screen
         STATIC
@@ -58,8 +60,9 @@ if (NOT EMSCRIPTEN)
             medit_common
             medit_core
         PRIVATE
-            ncurses
+            ${CURSES_LIBRARIES}
         )
+    target_include_directories(medit_terminal_screen PRIVATE ${CURSES_INCLUDE_DIRS})
 endif()
 
 # --------------------- remote screen ----------------------
