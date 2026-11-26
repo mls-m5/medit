@@ -153,22 +153,58 @@ navigation or change editor files. Only the sidebar, divider, and tree glyphs ar
 approved styling references; the editor filename heading and bottom hints are
 illustrative and are not part of the current implementation scope.
 
-- [ ] Implement a specialized tree view rather than adapting the search-oriented
+- [x] Implement a specialized tree view rather than adapting the search-oriented
       `QuickList` or turning `ListView` into a tree.
-- [ ] Build directory nodes from `Project::files()`, relative to the project root.
+- [x] Build directory nodes from `Project::files()`, relative to the project root.
       This initially shows registered files and their parent directories, not
       every disk entry or empty directory.
-- [ ] Support expand/collapse, selection, scrolling, clipped rendering, and mouse
+- [x] Support expand/collapse, selection, scrolling, clipped rendering, and mouse
       selection. Keep persistent selection/expansion keyed by path, not row index.
-- [ ] Support arrows and h/j/k/l; Enter opens a file in the last active text editor.
-- [ ] Subscribe to project-list changes and preserve navigation state on refresh.
-- [ ] Add a toggleable "follow active file" mode: expand ancestors and scroll the
+- [x] Support arrows and h/j/k/l; Enter opens a file in the last active text editor.
+- [x] Subscribe to project-list changes and preserve navigation state on refresh.
+- [x] Add a toggleable "follow active file" mode: expand ancestors and scroll the
       active file into view without stealing keyboard focus. Handle files outside
       the project and files excluded from the list without errors.
 
 Tests: hierarchy building, stable ordering, expansion, empty trees, navigation,
 opening the correct path, state preservation, clipping, and follow mode on/off.
 Test follow mode independently from focus changes.
+
+Implementation notes:
+
+- `ProjectTreeView` is a dedicated `ScrollView`, not a locator/list adapter. It
+  builds implicit directories from a supplied registered-file snapshot, without
+  filesystem traversal. Siblings are sorted directories-first, then by filename.
+- `SideBar` owns the view and its project subscription. File opening delegates to
+  the existing `MainWindow::open` after restoring the last text-editor split.
+  Clicking a file does not accidentally restore sidebar focus afterward.
+- Root starts expanded; other directories start collapsed. Refreshes preserve
+  expansion and selection by normalized absolute path, falling back to a visible
+  parent when the selected path disappears. Anonymous settings outside the root
+  cannot be placed under the tree and are omitted from this view.
+- Follow defaults to on and is toggleable through the command palette. It reacts
+  to active-file changes, not every redraw. A pending follow can reveal a file
+  when it later enters the registered list; ordinary list changes do not reset
+  subsequent user navigation. Following does not change input focus.
+- Drawing uses the existing Oblivion palette and single-column UTF-8 markers.
+  Labels escape double-width/combining/control characters and invalid UTF-8 bytes
+  because the shared screen buffers still index FChars rather than columns. Real
+  file paths are retained. Full-width/grapheme rendering is separate backend work,
+  not a reason to draw past the panel boundary.
+- Thirteen deterministic tree tests, four project/sidebar subscription tests, and
+  three additional window integration tests cover hierarchy, navigation, opening,
+  updates, follow, mouse coordinates, narrow/deep layouts, and UTF-8 labels.
+- Release build and CTest pass in `build/json-upgrade`. CLI PTY checks cover
+  hidden startup, F3/F6, opening ordinary and double-width-named files, resize,
+  divider coordinates, mouse input, and repeated show/hide. Headless SDL GUI
+  startup is checked with the dummy/software driver and supplied bundled font;
+  visual GUI review remains manual.
+- CLI resize testing exposed a borrowed-string lifetime bug in queued ncurses
+  drawing, fixed separately by making queued drawing text owned. Normal quit
+  restores the terminal but the existing lsp-client stderr helper can block final
+  process shutdown in this environment; smoke processes then require termination.
+  C++ LSP startup was not verified because `clangd` is absent. No submodules were
+  modified for these checks.
 
 ## 5. Recursive filesystem notifications
 

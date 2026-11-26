@@ -38,6 +38,12 @@ StaticCommandRegister MainWindowReg{{
     {"focus_editor", [](auto &&env) { env->mainWindow().focusEditor(); }},
     {"toggle_sidebar_focus",
      [](auto &&env) { env->mainWindow().toggleSidebarFocus(); }},
+    {"toggle_follow_active_file",
+     [](auto &&env) {
+         auto &window = env->mainWindow();
+         window._sidebar.toggleFollowActiveFile();
+         window.triggerRedraw();
+     }},
     {"split_editor", [](auto &&env) { env->mainWindow().splitEditor(); }},
     {"close_editor", [](auto &&env) { env->mainWindow().closeEditor(); }},
     {"cut", [](auto &&env) { env->mainWindow().copy(true); }},
@@ -159,7 +165,15 @@ MainWindow::MainWindow(CoreEnvironment &core,
         setInputFocus(editor);
     });
 
-    // updateLocatorBuffer();
+    _sidebar.project(core.project());
+    _sidebar.tree().onOpen([this](const auto &path) {
+        focusEditor();
+        if (!open(path))
+            focusSidebar();
+    });
+    _sidebar.tree().isOpen([&core](const auto &path) {
+        return static_cast<bool>(core.files().find(path));
+    });
 }
 
 MainWindow::~MainWindow() {
@@ -224,6 +238,8 @@ void MainWindow::draw(IScreen &screen) {
         screen.cursorStyle(e->mode().cursorStyle());
     }
 
+    const auto file = _editors.at(_currentEditor)->file();
+    _sidebar.activeFile(file ? file->path() : std::filesystem::path{});
     _sidebar.draw(screen);
     for (auto &editor : _editors) {
         if (editor->height() > 0 && editor->width() >= 8) {
@@ -432,8 +448,9 @@ void MainWindow::paste(std::string text) {
 }
 
 bool MainWindow::mouseDown(int x, int y) {
-    if (_sidebar.mouseDown(x, y)) {
+    if (_sidebar.contains(x, y)) {
         focusSidebar();
+        _sidebar.mouseDown(x, y);
         return true;
     }
     // Do not let the separator fall through to an editor hit test.
@@ -570,11 +587,15 @@ void MainWindow::showConsole() {
 
 void MainWindow::toggleSidebar() {
     _sidebarRequested = !_sidebarRequested;
+    if (_sidebarRequested)
+        updateLocatorBuffer();
     resize();
     triggerRedraw();
 }
 
 void MainWindow::focusSidebar() {
+    if (!_sidebarRequested)
+        updateLocatorBuffer();
     _sidebarRequested = true;
     resize();
     if (_sidebar.visible()) {

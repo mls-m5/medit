@@ -1,5 +1,6 @@
 #include "core/coreenvironment.h"
 #include "core/jobqueue.h"
+#include "core/meditlog.h"
 #include "core/timer.h"
 #include "mls-unit-test/unittest.h"
 #include "mock/screen/mockscreen.h"
@@ -66,6 +67,8 @@ struct WindowFixture {
 
     WindowFixture() {
         window.resize(100, 30);
+        // Keep assertion diagnostics out of the editor's captured log stream.
+        unsubscribeToLog();
     }
 
     void key(KeyEvent event) {
@@ -278,6 +281,79 @@ TEST_CASE("window shortcuts work while the console has focus") {
     f.key(Key::F3);
     EXPECT_FALSE(f.window._sidebar.visible());
     EXPECT_TRUE(f.window._inputFocus == f.window._console.get());
+}
+
+TEST_CASE("sidebar Enter opens a registered file in the last text split") {
+    sidebar_focus_test::WindowFixture f;
+    f.window.splitEditor();
+    f.window.resize();
+    auto *editor = f.window._editors[1].get();
+    f.window.mouseDown(editor->x() + 4, 0);
+    f.window.showConsole();
+    f.window.focusSidebar();
+    const auto path =
+        std::filesystem::absolute("test/res/annotation_test1.cpp");
+    EXPECT_TRUE(f.window._sidebar.tree().reveal(path));
+    f.screen.mock_title_1.expectNum(1);
+    f.key({Key::Text, '\n'});
+    EXPECT_TRUE(f.window._inputFocus == editor);
+    ASSERT_EQ(editor->file()->path(), path);
+    EXPECT_TRUE(f.window._sidebar.visible());
+    EXPECT_TRUE(f.window._env->showConsole());
+}
+
+TEST_CASE(
+    "clicking a file opens it without restoring sidebar focus afterward") {
+    sidebar_focus_test::WindowFixture f;
+    f.window.focusSidebar();
+    auto &tree = f.window._sidebar.tree();
+    const auto path = std::filesystem::absolute("test/res/complete_test1.cpp");
+    EXPECT_TRUE(tree.reveal(path));
+    const auto row = tree.y() + tree.current() - tree.yScroll();
+    f.screen.mock_title_1.expectNum(1);
+    EXPECT_TRUE(f.window.mouseDown(tree.x() + 3, row));
+    EXPECT_TRUE(f.window._inputFocus == f.window._editors.front().get());
+    ASSERT_EQ(f.window.currentEditor()->file()->path(), path);
+}
+
+TEST_CASE("following active text files reveals without stealing focus or "
+          "resetting navigation") {
+    sidebar_focus_test::WindowFixture f;
+    f.window.focusSidebar();
+    f.window.focusEditor();
+    f.screen.mock_title_1.expectNum(3);
+    f.screen.mock_cursorStyle_1.expectNum(4);
+    f.screen.mock_draw_3.nice();
+    f.screen.mock_draw_3.expectArgs([&](auto x, auto y, FStringView text) {
+        return x + text.size() <= f.window.width() && y < f.window.height();
+    });
+    const auto first =
+        std::filesystem::absolute("test/res/annotation_test1.cpp");
+    const auto second =
+        std::filesystem::absolute("test/res/complete_test1.cpp");
+    EXPECT_TRUE(f.window.open(first));
+    auto *focus = f.window._inputFocus;
+    f.window.draw(f.screen);
+    auto &tree = f.window._sidebar.tree();
+    ASSERT_EQ(tree.entries()[tree.current()].path, first);
+    EXPECT_TRUE(f.window._inputFocus == focus);
+    tree.current(0);
+    f.window.draw(f.screen);
+    ASSERT_EQ(tree.current(), 0u);
+    f.paletteCommand("toggle follow active file");
+    EXPECT_FALSE(f.window._sidebar.followActiveFile());
+    EXPECT_TRUE(f.window.open(second));
+    f.window.draw(f.screen);
+    ASSERT_EQ(tree.current(), 0u);
+    f.paletteCommand("toggle follow active file");
+    EXPECT_TRUE(f.window._sidebar.followActiveFile());
+    ASSERT_EQ(tree.entries()[tree.current()].path, second);
+    EXPECT_TRUE(f.window._inputFocus == focus);
+    f.window.focusSidebar();
+    EXPECT_TRUE(f.window.open(first));
+    f.window.draw(f.screen);
+    ASSERT_EQ(tree.entries()[tree.current()].path, first);
+    EXPECT_TRUE(f.window._inputFocus == &f.window._sidebar);
 }
 
 TEST_SUIT_END

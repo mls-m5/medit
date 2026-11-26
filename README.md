@@ -8,6 +8,7 @@
 
 - Lsp support for c++ (other languages not implemented yet)
 - Vim keybindings
+- Optional project file tree (F3 to show/hide, F6 to focus)
 
 
 ## Requirements
@@ -37,6 +38,32 @@ cmake --build build -j2
 ctest --test-dir build --output-on-failure
 ./build/medit --cli  # or ./build/medit for the GUI
 ```
+
+## Project file panel
+
+The panel is hidden initially. F3 shows or hides it; F6 moves focus between the
+panel and the last text editor. Escape returns to the editor without hiding the
+panel. Window shortcuts such as Ctrl+P (command palette) still work in the panel.
+
+- Up/down or j/k select rows; left/right or h/l collapse/expand directories or
+  move to their parent/first child. Home/End and Page Up/Down navigate the list.
+- Enter toggles a directory or opens a file in the last active text-editor split.
+  Clicking a directory toggles it; clicking a file opens it.
+- `▸`/`▾` mark directories, `›` marks the selected row, and `●` marks loaded files.
+- Following the active text file is enabled initially. Use **toggle follow active
+  file** in the command palette to turn it off/on. Following reveals registered
+  files without changing keyboard focus or repeatedly resetting tree navigation.
+
+The tree uses the shared project's registered files, with the existing known-file
+and CMake build-directory filtering. Empty directories and files outside the
+project root are not displayed. Configurable ignore patterns and Git-status
+filtering are not implemented. Until recursive watching is added, changes in
+subdirectories can be refreshed by hiding and showing the panel again.
+
+UTF-8 single-column filenames are displayed directly. Characters that do not fit
+one cell (including double-width/combining characters), controls, and invalid
+UTF-8 bytes are escaped in labels to keep the current screen buffers aligned.
+Opening a file always uses its original, unchanged path.
 
 ## How to configure clangd
 

@@ -2,6 +2,7 @@
 #include "files/project.h"
 #include "mls-unit-test/unittest.h"
 #include "mock/files/mockdirectorynotifications.h"
+#include "views/sidebar.h"
 #include <algorithm>
 #include <cstdlib>
 #include <filesystem>
@@ -314,6 +315,79 @@ TEST_CASE("changing project root refreshes files and keeps external settings") {
     EXPECT_TRUE(f.contains("../other/new.cpp"));
     EXPECT_TRUE(f.contains(".medit.json"));
     ASSERT_EQ(f.project->files().size(), 2u);
+}
+
+TEST_SUIT_END
+
+TEST_SUIT_BEGIN(SidebarProject)
+
+TEST_CASE("sidebar observes project membership only after GUI queue delivery") {
+    project_test::Fixture f;
+    SideBar sidebar{nullptr};
+    sidebar.project(*f.project);
+    EXPECT_TRUE(sidebar.tree().reveal(f.path(".medit.json")));
+    f.write("src/new.cpp");
+    f.event(DirectoryNotifications::Added, "src/new.cpp");
+    EXPECT_FALSE(sidebar.tree().reveal(f.path("src/new.cpp")));
+    f.drain();
+    EXPECT_TRUE(sidebar.tree().reveal(f.path("src/new.cpp")));
+    f.event(DirectoryNotifications::Removed, "src/new.cpp");
+    f.drain();
+    EXPECT_FALSE(sidebar.tree().reveal(f.path("src/new.cpp")));
+}
+
+TEST_CASE("follow reveals the active file without changing sidebar focus") {
+    project_test::Fixture f;
+    f.write("src/one.cpp");
+    f.write("src/two.cpp");
+    f.project->updateCache();
+    SideBar sidebar{nullptr};
+    sidebar.project(*f.project);
+    sidebar.activeFile(f.path("src/one.cpp"));
+    EXPECT_FALSE(sidebar.focused());
+    ASSERT_EQ(sidebar.tree().entries()[sidebar.tree().current()].path,
+              f.path("src/one.cpp"));
+    sidebar.toggleFollowActiveFile();
+    sidebar.activeFile(f.path("src/two.cpp"));
+    ASSERT_EQ(sidebar.tree().entries()[sidebar.tree().current()].path,
+              f.path("src/one.cpp"));
+    sidebar.toggleFollowActiveFile();
+    ASSERT_EQ(sidebar.tree().entries()[sidebar.tree().current()].path,
+              f.path("src/two.cpp"));
+    EXPECT_FALSE(sidebar.focused());
+    sidebar.tree().current(0);
+    sidebar.activeFile(f.path("src/two.cpp"));
+    ASSERT_EQ(sidebar.tree().current(), 0u);
+}
+
+TEST_CASE("pending follow can reveal a newly registered file without resetting "
+          "later navigation") {
+    project_test::Fixture f;
+    SideBar sidebar{nullptr};
+    sidebar.project(*f.project);
+    sidebar.activeFile(f.path("src/new.cpp"));
+    f.write("src/new.cpp");
+    f.event(DirectoryNotifications::Added, "src/new.cpp");
+    f.drain();
+    ASSERT_EQ(sidebar.tree().entries()[sidebar.tree().current()].path,
+              f.path("src/new.cpp"));
+    sidebar.tree().current(0);
+    f.write("src/other.cpp");
+    f.event(DirectoryNotifications::Added, "src/other.cpp");
+    f.drain();
+    ASSERT_EQ(sidebar.tree().current(), 0u);
+}
+
+TEST_CASE("destroying a sidebar unsubscribes before queued project changes") {
+    project_test::Fixture f;
+    {
+        SideBar sidebar{nullptr};
+        sidebar.project(*f.project);
+        f.write("new.cpp");
+        f.event(DirectoryNotifications::Added, "new.cpp");
+    }
+    f.drain();
+    EXPECT_TRUE(f.contains("new.cpp"));
 }
 
 TEST_SUIT_END

@@ -83,7 +83,7 @@ TEST_CASE("wrapped text still makes progress in very narrow editor splits") {
     }
 }
 
-TEST_CASE("dummy title and separator stay inside the sidebar") {
+TEST_CASE("title and UTF-8 dividers stay inside the sidebar") {
     MockScreen screen;
     SideBar sidebar{nullptr};
     sidebar.x(2);
@@ -94,10 +94,10 @@ TEST_CASE("dummy title and separator stay inside the sidebar") {
     size_t separators = 0;
     screen.mock_draw_3.expectNum(9);
     screen.mock_draw_3.expectArgs([&](auto x, auto y, FStringView text) {
-        if (text == FString{" Project"}) {
+        if (text == FString{" Project [follow:on]"}) {
             titleDrawn = x == 2 && y == 3;
         }
-        if (text == FString{"|"} && x == 26) {
+        if ((text == FString{"│"} || text == FString{"┼"}) && x == 26) {
             ++separators;
         }
         return x >= 2 && x + text.size() <= 27 && y >= 3 && y < 7;
@@ -123,7 +123,7 @@ TEST_CASE("hidden and empty sidebars do not draw") {
     sidebar.draw(screen);
 }
 
-TEST_CASE("dummy title is clipped in a small sidebar") {
+TEST_CASE("title is clipped in a small sidebar") {
     MockScreen screen;
     SideBar sidebar{nullptr};
     sidebar.width(4);
@@ -149,7 +149,7 @@ TEST_CASE("focused sidebar highlights its title") {
     bool highlighted = false;
     screen.mock_draw_3.expectNum(3);
     screen.mock_draw_3.expectArgs([&](auto, auto, FStringView text) {
-        if (text == FString{" Project"}) {
+        if (text == FString{" Project [follow:on]"}) {
             highlighted = text.front().f == Palette::currentLine;
         }
         return true;
