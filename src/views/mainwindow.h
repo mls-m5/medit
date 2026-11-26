@@ -1,6 +1,7 @@
 #pragma once
 
 #include "interactionhandling.h"
+#include "keys/keymap.h"
 #include "meditfwd.h"
 #include "script/jumplist.h"
 #include "script/localenvironment.h"
@@ -24,6 +25,8 @@ struct MainWindow : public Window {
     SideBar _sidebar{this};
     bool _sidebarRequested = false;
     MainWindowLayout _layout;
+    KeyMap _windowKeyMap;
+    bool _paletteFromSidebar = false;
     size_t _split = 10;
     FString _splitString;
     IKeySink *_inputFocus = nullptr;
@@ -112,6 +115,9 @@ struct MainWindow : public Window {
     void showConsole();
 
     void toggleSidebar();
+    void focusSidebar();
+    void focusEditor();
+    void toggleSidebarFocus();
 
     ///! Create a new editor
     void splitEditor();
@@ -132,4 +138,7 @@ struct MainWindow : public Window {
     void showFileSwitcher();
 
     void showCommandPalette();
+
+private:
+    void setInputFocus(IKeySink *focus);
 };

@@ -1,6 +1,7 @@
 #include "files/file.h"
 #include "mls-unit-test/unittest.h"
 #include "mock/screen/mockscreen.h"
+#include "syntax/palette.h"
 #include "text/buffer.h"
 #include "views/bufferview.h"
 #include "views/mainwindowlayout.h"
@@ -137,6 +138,38 @@ TEST_CASE("dummy title is clipped in a small sidebar") {
     });
     sidebar.draw(screen);
     ASSERT_EQ(titleClipped, true);
+}
+
+TEST_CASE("focused sidebar highlights its title") {
+    MockScreen screen;
+    SideBar sidebar{nullptr};
+    sidebar.width(25);
+    sidebar.height(1);
+    sidebar.focused(true);
+    bool highlighted = false;
+    screen.mock_draw_3.expectNum(3);
+    screen.mock_draw_3.expectArgs([&](auto, auto, FStringView text) {
+        if (text == FString{" Project"}) {
+            highlighted = text.front().f == Palette::currentLine;
+        }
+        return true;
+    });
+    sidebar.draw(screen);
+    EXPECT_TRUE(highlighted);
+}
+
+TEST_CASE("sidebar cursor stays within the visible tool area") {
+    MockScreen screen;
+    SideBar sidebar{nullptr};
+    sidebar.x(2);
+    sidebar.y(3);
+    sidebar.width(25);
+    sidebar.height(4);
+    screen.mock_cursor_2.expectNum(1);
+    screen.mock_cursor_2.expectArgs(3, 3);
+    sidebar.updateCursor(screen);
+    sidebar.visible(false);
+    sidebar.updateCursor(screen);
 }
 
 TEST_SUIT_END

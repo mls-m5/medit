@@ -34,6 +34,10 @@ StaticCommandRegister MainWindowReg{{
     {"command_palette",
      [](auto &&env) { env->mainWindow().showCommandPalette(); }},
     {"toggle_sidebar", [](auto &&env) { env->mainWindow().toggleSidebar(); }},
+    {"focus_sidebar", [](auto &&env) { env->mainWindow().focusSidebar(); }},
+    {"focus_editor", [](auto &&env) { env->mainWindow().focusEditor(); }},
+    {"toggle_sidebar_focus",
+     [](auto &&env) { env->mainWindow().toggleSidebarFocus(); }},
     {"split_editor", [](auto &&env) { env->mainWindow().splitEditor(); }},
     {"close_editor", [](auto &&env) { env->mainWindow().closeEditor(); }},
     {"cut", [](auto &&env) { env->mainWindow().copy(true); }},
@@ -42,6 +46,18 @@ StaticCommandRegister MainWindowReg{{
     {"show_locator", [](auto &&env) { env->mainWindow().showLocator(); }},
     {"switch_file", [](auto &&env) { env->mainWindow().showFileSwitcher(); }},
 }};
+
+KeyMap createWindowKeyMap() {
+    auto &sc = StandardCommands::get();
+    return KeyMap{{
+        {KeyEvent{Key::F3}, sc.f("toggle_sidebar")},
+        {KeyEvent{Key::F6}, sc.f("toggle_sidebar_focus")},
+        {KeyEvent{Key::KeyCombination, 'P', Modifiers::Ctrl},
+         sc.f("command_palette")},
+        {KeyEvent{Key::KeyCombination, 'T', Modifiers::Ctrl},
+         [](auto env) { env->mainWindow().showConsole(); }},
+    }};
+}
 
 } // namespace
 
@@ -61,13 +77,14 @@ MainWindow::MainWindow(CoreEnvironment &core,
           std::make_shared<CommandPalette>(this, StandardCommands::get()))
     , _completeView(std::make_shared<CompleteView>(
           this, core.plugins().get<ICompletionSource>()))
+    , _windowKeyMap{createWindowKeyMap()}
     , _currentEditor(0) {
 
     for (int i = 0; i < 1; ++i) {
         _editors.push_back(
             std::make_unique<Editor>(this, _env->core().files().create()));
     }
-    _inputFocus = _editors.front().get();
+    setInputFocus(_editors.front().get());
 
     for (auto &editor : _editors) {
         editor->showLines(true);
@@ -108,7 +125,7 @@ MainWindow::MainWindow(CoreEnvironment &core,
 
     _locator->callback([this](auto &&path) {
         _locator->visible(false);
-        _inputFocus = currentEditor();
+        focusEditor();
         if (path.empty()) {
             return;
         }
@@ -120,10 +137,15 @@ MainWindow::MainWindow(CoreEnvironment &core,
     _commandPalette->showLines(false);
     _commandPalette->callback([this](auto &&path) {
         _commandPalette->visible(false);
+        // Restore the editor before executing: focus commands must have the
+        // final say, and editor-only commands need an explicit editor target.
+        focusEditor();
         if (!path.empty()) {
             StandardCommands::get().namedCommands.at(path).f(_env);
         }
-        _inputFocus = currentEditor();
+        else if (_paletteFromSidebar) {
+            focusSidebar();
+        }
     });
 
     _completeView->visible(false);
@@ -134,7 +156,7 @@ MainWindow::MainWindow(CoreEnvironment &core,
             cursor = insert(c, cursor);
         }
         editor->cursor(cursor);
-        _inputFocus = editor;
+        setInputFocus(editor);
     });
 
     // updateLocatorBuffer();
@@ -164,6 +186,9 @@ void MainWindow::resize(size_t w, size_t h) {
     _sidebar.y(0);
     _sidebar.width(_layout.sidebarWidth);
     _sidebar.height(_layout.editorHeight);
+    if (!_sidebar.visible() && _inputFocus == &_sidebar) {
+        focusEditor();
+    }
 
     for (size_t index = 0; index < _editors.size(); ++index) {
         auto &editor = _editors[index];
@@ -192,7 +217,10 @@ void MainWindow::resize(size_t w, size_t h) {
 }
 
 void MainWindow::draw(IScreen &screen) {
-    if (auto e = currentEditor()) {
+    if (_inputFocus == &_sidebar) {
+        screen.cursorStyle(CursorStyle::Block);
+    }
+    else if (auto e = currentEditor()) {
         screen.cursorStyle(e->mode().cursorStyle());
     }
 
@@ -217,12 +245,19 @@ void MainWindow::draw(IScreen &screen) {
         _commandPalette->draw(screen);
     }
 
-    _completeView->draw(screen);
+    if (_inputFocus != _locator.get() && _inputFocus != _commandPalette.get() &&
+        _inputFocus == currentEditor() && _completeView->visible()) {
+        _completeView->draw(screen);
+    }
 
     if (height() > 0 && width() > 0) {
         auto &editor = _editors.at(_currentEditor);
         auto statusMessage =
-            FString{" - " + std::string{editor->mode().name()} + " - "} +
+            FString{" - " +
+                    (_inputFocus == &_sidebar
+                         ? std::string{"sidebar"}
+                         : std::string{editor->mode().name()}) +
+                    " - "} +
             _statusMessage;
         auto fill = FString{width(), FChar{" "}};
         _screen.draw(0, height() - 1, fill);
@@ -256,7 +291,19 @@ void MainWindow::updateCursor(IScreen &screen) const {
 }
 
 bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
-    if (_inputFocus == currentEditor() && _completeView->visible()) {
+    if (const auto &action = _windowKeyMap.find(env->key()); action) {
+        action(env);
+        return true;
+    }
+
+    if (_inputFocus == &_sidebar) {
+        _sidebar.keyPress(env);
+        // Never pass unhandled tool input to editor modes or interactions.
+        return true;
+    }
+
+    if (_inputFocus != _locator.get() && _inputFocus != _commandPalette.get() &&
+        _inputFocus == currentEditor() && _completeView->visible()) {
         if (_completeView->keyPress(env)) {
             if (auto e = currentEditor()) {
                 env->core().files().updateHighlighting();
@@ -266,7 +313,8 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
     }
 
     /// In practice only check if the key if return or escape
-    if (_interactions.keyPress(env)) {
+    if (_inputFocus != _locator.get() && _inputFocus != _commandPalette.get() &&
+        _interactions.keyPress(env)) {
         return true;
     }
 
@@ -351,16 +399,31 @@ Editor *MainWindow::currentEditor() {
     throw std::runtime_error("could not get the right editor");
 }
 
+void MainWindow::setInputFocus(IKeySink *focus) {
+    if (focus != _locator.get()) {
+        _locator->visible(false);
+    }
+    if (focus != _commandPalette.get()) {
+        _commandPalette->visible(false);
+    }
+    _inputFocus = focus;
+    _sidebar.focused(focus == &_sidebar);
+    triggerRedraw();
+}
+
 void MainWindow::resetFocus() {
-    _inputFocus = _editors.at(_currentEditor).get();
+    focusEditor();
 }
 
 void MainWindow::switchEditor() {
     _currentEditor = (_currentEditor + 1) % _editors.size();
-    _inputFocus = currentEditor();
+    focusEditor();
 }
 
 void MainWindow::paste(std::string text) {
+    if (_inputFocus == &_sidebar) {
+        return;
+    }
     if (auto e = currentEditor()) {
         _env->standardCommands().normal_mode(env().shared_from_this());
         e->selection(replace(e->selection(), text));
@@ -369,7 +432,11 @@ void MainWindow::paste(std::string text) {
 }
 
 bool MainWindow::mouseDown(int x, int y) {
-    // The prototype sidebar is not interactive and must not move editor focus.
+    if (_sidebar.mouseDown(x, y)) {
+        focusSidebar();
+        return true;
+    }
+    // Do not let the separator fall through to an editor hit test.
     if (x >= 0 && y >= 0 && static_cast<size_t>(x) < _layout.sidebarWidth &&
         static_cast<size_t>(y) < _layout.editorHeight) {
         return true;
@@ -378,7 +445,7 @@ bool MainWindow::mouseDown(int x, int y) {
         auto &e = *_editors.at(i);
         if (e.mouseDown(x, y)) {
             _currentEditor = i;
-            _inputFocus = &e;
+            setInputFocus(&e);
             return true;
         }
     }
@@ -386,6 +453,9 @@ bool MainWindow::mouseDown(int x, int y) {
 }
 
 void MainWindow::copy(bool shouldCut) {
+    if (_inputFocus == &_sidebar) {
+        return;
+    }
     if (auto e = currentEditor()) {
         auto text = content(e->selection());
         if (shouldCut) {
@@ -481,15 +551,19 @@ void MainWindow::statusMessage(FStringView str) {
 }
 
 void MainWindow::escape() {
+    if (_inputFocus == &_sidebar) {
+        focusEditor();
+        return;
+    }
     _env->showConsole(false);
-    _inputFocus = currentEditor();
+    focusEditor();
     resize();
     triggerRedraw();
 }
 
 void MainWindow::showConsole() {
     _env->showConsole(true);
-    _inputFocus = _console.get();
+    setInputFocus(_console.get());
     resize();
     triggerRedraw();
 }
@@ -498,6 +572,27 @@ void MainWindow::toggleSidebar() {
     _sidebarRequested = !_sidebarRequested;
     resize();
     triggerRedraw();
+}
+
+void MainWindow::focusSidebar() {
+    _sidebarRequested = true;
+    resize();
+    if (_sidebar.visible()) {
+        setInputFocus(&_sidebar);
+    }
+}
+
+void MainWindow::focusEditor() {
+    setInputFocus(_editors.at(_currentEditor).get());
+}
+
+void MainWindow::toggleSidebarFocus() {
+    if (_inputFocus == &_sidebar) {
+        focusEditor();
+    }
+    else {
+        focusSidebar();
+    }
 }
 
 void MainWindow::splitEditor() {
@@ -519,7 +614,7 @@ void MainWindow::closeEditor() {
         --_currentEditor;
     }
 
-    _inputFocus = currentEditor();
+    focusEditor();
 }
 
 void MainWindow::gotoDefinition() {
@@ -531,6 +626,9 @@ void MainWindow::gotoDefinition() {
 }
 
 void MainWindow::format() {
+    if (_inputFocus == &_sidebar) {
+        return;
+    }
     auto &editor = _env->editor();
     for (auto &format : _env->core().plugins().get<IFormat>()) {
         if (format->format(editor)) {
@@ -540,6 +638,9 @@ void MainWindow::format() {
 }
 
 void MainWindow::autoComplete() {
+    if (_inputFocus == &_sidebar) {
+        return;
+    }
     if (auto editor = currentEditor()) {
         editor->cursor(fix(editor->cursor()));
 
@@ -551,15 +652,18 @@ void MainWindow::autoComplete() {
 
 void MainWindow::showLocator() {
     _locator->visible(true);
-    _inputFocus = _locator.get();
+    setInputFocus(_locator.get());
 }
 
 void MainWindow::showFileSwitcher() {
     _fileSwitcher->visible(true);
-    _inputFocus = _fileSwitcher.get();
+    setInputFocus(_fileSwitcher.get());
 }
 
 void MainWindow::showCommandPalette() {
+    if (_inputFocus != _commandPalette.get()) {
+        _paletteFromSidebar = _inputFocus == &_sidebar;
+    }
     _commandPalette->visible(true);
-    _inputFocus = _commandPalette.get();
+    setInputFocus(_commandPalette.get());
 }

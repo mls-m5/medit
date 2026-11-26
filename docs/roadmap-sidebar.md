@@ -62,19 +62,49 @@ Implementation notes and validation:
 
 ## 2. Sidebar focus and window-level commands
 
-- [ ] Add `focus_sidebar` and `focus_editor`; use F6 to switch between the sidebar
+- [x] Add `focus_sidebar` and `focus_editor`; use F6 to switch between the sidebar
       and the last active text editor.
-- [ ] Make Escape return from the sidebar to the editor without hiding it.
-- [ ] Add mouse focus handling for the sidebar.
-- [ ] Dispatch a small set of window-level commands independently of editor
+- [x] Make Escape return from the sidebar to the editor without hiding it.
+- [x] Add mouse focus handling for the sidebar.
+- [x] Dispatch a small set of window-level commands independently of editor
       modes. Do not expose all text-editing commands to a non-editor tool.
-- [ ] Restore focus before executing a command-palette action, so an action that
+- [x] Restore focus before executing a command-palette action, so an action that
       focuses the sidebar is not immediately overridden by the palette callback.
-- [ ] Preserve the last active text-editor target when the sidebar has focus.
+- [x] Preserve the last active text-editor target when the sidebar has focus.
       Define safe behavior for paste and other editor-only actions.
 
 Tests: focus transitions, hiding a focused panel, Escape, mouse hit boundaries,
 shortcuts from both regions, and focusing the sidebar through the command palette.
+
+Implementation decisions:
+
+- `MainWindow` owns a `KeyMap` for F3, F6, Ctrl+P, and Ctrl+T. A small factory in
+  `mainwindow.cpp` defines the bindings. There is no default action: unmatched
+  keys go to the focused view.
+- ParentMode remains an ordinary editor parent mode with no boolean parameter.
+  Its existing F3, Ctrl+P, and Ctrl+T bindings move to the window map; all other
+  bindings stay there unchanged. No new Mode class is introduced.
+- Ctrl+T still calls `showConsole()` directly. It opens/focuses the console rather
+  than toggling visibility; console Escape behavior is unchanged. There is no
+  new `show_console` command registration.
+- Sidebar Escape is handled by the sidebar itself. Other unmatched tool input
+  and paste are ignored rather than applied to the background text editor.
+- F6 opens the sidebar if needed. Hiding it or resizing until it no longer fits
+  returns focus to the last text editor; widening the window does not steal focus.
+- Focused sidebar rendering highlights its title and shows "sidebar" in the
+  status bar. Cancelling the command palette restores sidebar focus when it was
+  opened there; executing a command first restores the editor so focus commands
+  can choose their final target explicitly.
+
+Validation: layout/rendering tests live in `test/sidebar_test.cpp`; focused-window
+integration tests in `test/sidebarfocus_test.cpp` cover dispatch, editor fallback,
+focus transitions, popup commands, mouse boundaries, and protection against
+background edits. Release build and both CTest entries passed in
+`build/json-upgrade`. CLI pseudo-terminal smoke checks also passed for F6,
+Escape, F3, Ctrl+P focus/cancel, Ctrl+T, text-buffer protection, normal editing,
+and narrow/wide resize using a file containing `åäö 界`.
+
+GUI and precise double-width terminal-coordinate review remain manual checks.
 
 ## 3. Observable project file list
 
