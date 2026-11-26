@@ -111,9 +111,11 @@ void Files::fileChangeCallback(DirectoryNotifications::EventType type,
     _core.context().guiQueue().addTask([this, type, path, time] {
         _tv();
         if (auto f = find(path)) {
-            // TODO: Double check so that there is no unsaved changes in the
-            // document
-            f->load();
+            // Never replace unsaved editor content with a filesystem event.
+            // Conflict detection and explicit resolution must happen before
+            // automatic saving can be enabled.
+            if (!f->isChanged())
+                f->load();
         }
     });
 }

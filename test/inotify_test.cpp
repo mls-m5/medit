@@ -1,4 +1,6 @@
+#include "core/coreenvironment.h"
 #include "core/jobqueue.h"
+#include "core/timer.h"
 #include "files/project.h"
 #include "helpers/temporaryproject.h"
 #include "linux/inotify.h"
@@ -103,6 +105,33 @@ struct Fixture {
 } // namespace inotify_test
 
 TEST_SUIT_BEGIN(Inotify)
+
+TEST_CASE("external file changes do not discard unsaved buffer edits") {
+    test_helpers::TemporaryProject project;
+    project.write("src/example.cpp", "original\n");
+    JobQueue jobs;
+    inotify_test::GuiQueue gui;
+    Timer timer;
+    ThreadContext context{jobs, gui, timer};
+    CoreEnvironment core{context, project.path(".medit.json")};
+    auto buffer = core.files().open(project.path("src/example.cpp"));
+    buffer->text(std::string{"unsaved editor contents\n"});
+    bool observed = false;
+    auto &notifications = core.files().directoryNotifications();
+    notifications.subscribe(
+        [&](auto type, const auto &path, auto) {
+            if (path == project.path("src/example.cpp") &&
+                type == DirectoryNotifications::Changed)
+                observed = true;
+        },
+        &observed);
+    project.write("src/example.cpp", "external contents\n");
+    gui.until([&] { return observed; }, "external file change");
+    gui.work(false);
+    ASSERT_EQ(buffer->text(), "unsaved editor contents\n");
+    EXPECT_TRUE(buffer->isChanged());
+    notifications.unsubcribe(&observed);
+}
 
 TEST_CASE("existing nested directories publish add rename and remove to the "
           "project and sidebar") {
