@@ -71,15 +71,15 @@ scenarios below.
    Any further performance-sensitive changes require explicit approval
    (`AGENTS.md`).
 
-5. **Modification times are only an approximate conflict check.**
-   `src/files/file.cpp:26–62` compares timestamps, and the check and write are
-   not atomic. Preserved timestamps, coarse timestamp resolution, or another
-   write between check and save can evade detection. This is the agreed
-   lightweight initial approach, not a guarantee against overwriting a
-   concurrent writer. Revisit stronger detection when warranted; also see
-   `todo.md`. Do not add whole-file reads on every save without explicit
-   performance approval.
+5. **Disk metadata remains an approximate conflict check.**
+   On Linux, `src/files/file.cpp` compares file identity, size, modification
+   time and change time in a single `stat` call; non-Linux builds compare size
+   and modification time. This catches more replacements and preserved-mtime
+   edits without reading entire files. The check and write are still not atomic:
+   a concurrent writer can change a file between them, and metadata is not a
+   content checksum. Revisit only with a deliberate performance and conflict
+   policy; do not add whole-file reads on every save without approval.
 
 Items 1 and 2 and the `build` directory case of item 4 have since been
-addressed; stronger conflict detection and the GUI close button remain
-follow-ups.
+addressed; metadata checks have been strengthened, but atomic conflict
+handling and the GUI close button remain follow-ups.

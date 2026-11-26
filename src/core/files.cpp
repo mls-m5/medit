@@ -156,6 +156,7 @@ bool Files::rename(std::filesystem::path from, std::filesystem::path to) {
     if (!file) {
         return true;
     }
+    const bool externallyChanged = buffer->hasExternalChanges();
 
     std::error_code ec;
 
@@ -165,7 +166,7 @@ bool Files::rename(std::filesystem::path from, std::filesystem::path to) {
         return true;
     }
 
-    file->rename(to);
+    file->rename(to, externallyChanged);
 
     emitBufferSubscriptionEvent({
         .buffer = nullptr,

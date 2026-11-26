@@ -101,9 +101,10 @@ Todo:
       make it so that each source replace its content when there is something new
       for example lsp-plugin, the compiler or formatter (if it emits error messages)
 - [ ] Show error if formatting does not work
-- [ ] Strengthen external file change detection beyond modification timestamps.
-      Timestamp resolution, preserved timestamps and concurrent writes can hide
-      conflicts; recheck changes during overwrite confirmation and save.
+- [ ] Decide whether to offer atomic conflict-safe saves beyond the current
+      metadata snapshot (Linux: inode/device, size, mtime and ctime). A concurrent
+      write between check and save can still be lost; do not read the entire
+      file on every save without explicit performance approval.
 
 
 ## Prioritized changes

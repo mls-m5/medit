@@ -22,10 +22,12 @@ all modified disk-backed buffers are saved. Unnamed buffers and
 temporary console/interaction buffers are not saved automatically. Autosave
 runs on the editor thread; diagnostics and redraws do not postpone it.
 
-If the file's modification time differs from the version last read or saved,
+If the file's disk metadata differs from the version last read or saved,
 autosave leaves both versions alone and reports the conflict in the existing
-console. A manual save uses the existing overwrite confirmation. Modification
-times are a lightweight check, not a guarantee against simultaneous writes.
+console. On Linux, the check compares modification/change times, size and file
+identity without reading the file contents. A manual save uses the existing
+overwrite confirmation. Metadata checks cannot guarantee safety against
+simultaneous writes.
 Terminal window focus is not always reported, so `--cli` still relies on
 editor/view changes and the inactivity timer. Saving a file does not dismiss a
 disk conflict or ask for confirmation automatically.

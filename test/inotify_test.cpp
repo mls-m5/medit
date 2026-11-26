@@ -106,6 +106,48 @@ struct Fixture {
 
 TEST_SUIT_BEGIN(Inotify)
 
+TEST_CASE("renaming a clean disk file keeps it saveable") {
+    test_helpers::TemporaryProject project;
+    project.write("old.cpp", "original\n");
+    JobQueue jobs;
+    inotify_test::GuiQueue gui;
+    Timer timer;
+    ThreadContext context{jobs, gui, timer};
+    CoreEnvironment core{context, project.path(".medit.json")};
+    const auto oldPath = project.path("old.cpp");
+    const auto newPath = project.path("new.cpp");
+    auto buffer = core.files().open(oldPath);
+    EXPECT_FALSE(core.files().rename(oldPath, newPath));
+    EXPECT_FALSE(buffer->hasExternalChanges());
+    buffer->text(std::string{"editor\n"});
+    EXPECT_TRUE(buffer->save());
+}
+
+TEST_CASE("renaming a disk file preserves an existing conflict") {
+    test_helpers::TemporaryProject project;
+    project.write("old.cpp", "original\n");
+    JobQueue jobs;
+    inotify_test::GuiQueue gui;
+    Timer timer;
+    ThreadContext context{jobs, gui, timer};
+    CoreEnvironment core{context, project.path(".medit.json")};
+    const auto oldPath = project.path("old.cpp");
+    const auto newPath = project.path("new.cpp");
+    const auto originalTime = std::filesystem::last_write_time(oldPath);
+    auto buffer = core.files().open(oldPath);
+    buffer->text(std::string{"editor\n"});
+    project.write("old.cpp", "external\n");
+    std::filesystem::last_write_time(oldPath,
+                                     originalTime + std::chrono::seconds{2});
+    EXPECT_FALSE(core.files().rename(oldPath, newPath));
+    EXPECT_TRUE(buffer->hasExternalChanges());
+    EXPECT_FALSE(buffer->save());
+    std::ifstream disk{newPath};
+    std::string line;
+    std::getline(disk, line);
+    ASSERT_EQ(line, "external");
+}
+
 TEST_CASE("failed Save As leaves an unnamed buffer retryable") {
     test_helpers::TemporaryProject project;
     JobQueue jobs;

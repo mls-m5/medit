@@ -2,7 +2,9 @@
 #include "helpers/temporaryproject.h"
 #include "mls-unit-test/unittest.h"
 #include "text/buffer.h"
+#include <chrono>
 #include <string_view>
+#include <thread>
 
 using namespace std::literals;
 
@@ -38,6 +40,61 @@ TEST_CASE("external changes block saving until explicitly overwritten") {
     EXPECT_FALSE(buffer->hasExternalChanges());
     EXPECT_FALSE(buffer->isChanged());
 }
+
+TEST_CASE(
+    "size changes are detected even when modification time is preserved") {
+    test_helpers::TemporaryProject project;
+    project.write("example.cpp", "short\n");
+    const auto path = project.path("example.cpp");
+    const auto time = std::filesystem::last_write_time(path);
+    auto buffer = Buffer::open(path);
+    buffer->text(std::string{"editor\n"});
+    project.write("example.cpp", "longer external contents\n");
+    std::filesystem::last_write_time(path, time);
+    EXPECT_TRUE(buffer->hasExternalChanges());
+    EXPECT_FALSE(buffer->save());
+    std::ifstream disk{path};
+    std::string line;
+    std::getline(disk, line);
+    ASSERT_EQ(line, "longer external contents");
+}
+
+#if defined(__linux__) && !defined(__EMSCRIPTEN__)
+TEST_CASE("ctime detects equal-size edits with preserved modification time") {
+    test_helpers::TemporaryProject project;
+    project.write("example.cpp", "original\n");
+    const auto path = project.path("example.cpp");
+    const auto time = std::filesystem::last_write_time(path);
+    auto buffer = Buffer::open(path);
+    buffer->text(std::string{"in editor\n"});
+    std::this_thread::sleep_for(std::chrono::milliseconds{20});
+    project.write("example.cpp", "external\n");
+    std::filesystem::last_write_time(path, time);
+    EXPECT_TRUE(buffer->hasExternalChanges());
+    EXPECT_FALSE(buffer->save());
+}
+
+TEST_CASE("replacing a file with equal size and time still blocks saving") {
+    test_helpers::TemporaryProject project;
+    project.write("example.cpp", "original\n");
+    const auto path = project.path("example.cpp");
+    const auto time = std::filesystem::last_write_time(path);
+    auto buffer = Buffer::open(path);
+    buffer->text(std::string{"in editor\n"});
+    const auto replacement = project.path("replacement.cpp");
+    project.write("replacement.cpp", "external\n");
+    std::filesystem::last_write_time(replacement, time);
+    std::filesystem::rename(replacement, path);
+    EXPECT_TRUE(buffer->hasExternalChanges());
+    EXPECT_FALSE(buffer->save());
+    std::ifstream disk{path};
+    std::string line;
+    std::getline(disk, line);
+    ASSERT_EQ(line, "external");
+    EXPECT_TRUE(buffer->save(true));
+    EXPECT_FALSE(buffer->hasExternalChanges());
+}
+#endif
 
 TEST_CASE("an unchanged empty file can be saved") {
     test_helpers::TemporaryProject project;

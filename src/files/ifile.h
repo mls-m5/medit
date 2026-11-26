@@ -27,7 +27,7 @@ public:
     virtual ~IFile() = default;
 
 private:
-    virtual void rename(std::filesystem::path to) = 0;
+    virtual void rename(std::filesystem::path to, bool externallyChanged) = 0;
 
     friend class Files;
 };

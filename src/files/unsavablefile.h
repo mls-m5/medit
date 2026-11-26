@@ -27,7 +27,7 @@ public:
 
 private:
     //! Function used by Files class to change the path
-    void rename(std::filesystem::path to) override {
+    void rename(std::filesystem::path to, bool) override {
         return;
     }
 
