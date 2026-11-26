@@ -6,6 +6,7 @@
 #include "views/sidebar.h"
 #include <chrono>
 #include <condition_variable>
+#include <iostream>
 #include <mutex>
 #include <sstream>
 
@@ -65,6 +66,14 @@ public:
         if (!_ready.wait_for(lock, 4s, [&] { return _submitted > after; }))
             throw std::runtime_error(
                 "No queued inotify callback before deadline");
+    }
+};
+
+struct WarningCapture {
+    std::ostringstream stream;
+    std::streambuf *previous = std::cerr.rdbuf(stream.rdbuf());
+    ~WarningCapture() {
+        std::cerr.rdbuf(previous);
     }
 };
 
@@ -334,6 +343,32 @@ TEST_CASE("directory symlinks and cycles are not traversed") {
     EXPECT_FALSE(f.contains("link/old.cpp"));
     EXPECT_FALSE(f.contains("link/new.cpp"));
     EXPECT_FALSE(followed);
+}
+
+TEST_CASE("temporary CMake directories may disappear without watch failures") {
+    // Keep capture alive until after the watcher is stopped/destroyed, so the
+    // worker never writes to a destroyed stream buffer.
+    inotify_test::WarningCapture warnings;
+    inotify_test::Fixture f;
+    f.environment.write("build/CMakeCache.txt");
+    const auto scratch = f.environment.path("build/CMakeFiles/CMakeScratch");
+    std::filesystem::create_directories(scratch);
+    f.environment.write("src/stable/before.cpp");
+    f.start();
+    for (size_t i = 0; i < 400; ++i) {
+        const auto directory = scratch / ("TryCompile-" + std::to_string(i));
+        std::filesystem::create_directories(directory / "nested");
+        std::filesystem::remove_all(directory);
+    }
+    f.environment.write("src/live/one.cpp");
+    f.wait("src/live/one.cpp");
+    f.environment.write("src/live/two.cpp");
+    f.wait("src/live/two.cpp");
+    f.environment.write("src/stable/after.cpp");
+    f.wait("src/stable/after.cpp");
+    f.notifications->path({});
+    f.gui.work(false);
+    ASSERT(warnings.stream.str().empty(), warnings.stream.str());
 }
 
 TEST_SUIT_END

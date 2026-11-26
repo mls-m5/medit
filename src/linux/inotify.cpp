@@ -120,6 +120,13 @@ private:
     }
 
     void failure(const std::filesystem::path &path, std::error_code error) {
+        // A child may disappear or be replaced after its create event/stat.
+        // Its parent watch covers future entries; this is not degraded
+        // watching. Losing the selected root itself still requires recovery.
+        if (path != _directory &&
+            (error == std::errc::no_such_file_or_directory ||
+             error == std::errc::not_a_directory))
+            return;
         _retry = true;
         if (!_reportedFailure) {
             std::cerr << "Cannot watch " << path << ": " << error.message()
@@ -129,9 +136,9 @@ private:
         }
     }
 
-    void addWatch(const std::filesystem::path &path) {
+    bool addWatch(const std::filesystem::path &path) {
         if (_watchedDirectories.contains(path))
-            return;
+            return true;
         constexpr auto mask = IN_CREATE | IN_DELETE | IN_MODIFY | IN_ATTRIB |
                               IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE_SELF |
                               IN_MOVE_SELF;
@@ -141,44 +148,61 @@ private:
             IN_ONLYDIR | (path == _directory ? 0 : IN_DONT_FOLLOW);
         const auto descriptor =
             inotify_add_watch(_fd, path.c_str(), mask | flags);
-        if (descriptor < 0)
+        if (descriptor < 0) {
             failure(path, std::error_code{errno, std::generic_category()});
-        else {
-            if (const auto old = _watches.find(descriptor);
-                old != _watches.end())
-                _watchedDirectories.erase(old->second);
-            _watches[descriptor] = path;
-            _watchedDirectories.insert(path);
+            return false;
         }
+        if (const auto old = _watches.find(descriptor); old != _watches.end())
+            _watchedDirectories.erase(old->second);
+        _watches[descriptor] = path;
+        _watchedDirectories.insert(path);
+        return true;
     }
 
     void addDirectoryTree(const std::filesystem::path &root) {
-        std::error_code error;
-        if (!std::filesystem::is_directory(root, error)) {
-            failure(root,
-                    error ? error
-                          : std::make_error_code(
-                                std::errc::no_such_file_or_directory));
-            return;
+        // Walk one directory at a time. A recursive iterator can become end()
+        // on a vanished child and leave all remaining siblings unwatched.
+        auto pending = std::vector<std::filesystem::path>{root};
+        while (!_stopping && !pending.empty()) {
+            const auto directory = std::move(pending.back());
+            pending.pop_back();
+            std::error_code error;
+            const auto status =
+                directory == _directory
+                    ? std::filesystem::status(directory, error)
+                    : std::filesystem::symlink_status(directory, error);
+            if (error) {
+                failure(directory, error);
+                continue;
+            }
+            if (!std::filesystem::is_directory(status)) {
+                if (directory == _directory)
+                    failure(directory,
+                            std::make_error_code(std::errc::not_a_directory));
+                continue;
+            }
+            if (!addWatch(directory))
+                continue;
+            auto it = std::filesystem::directory_iterator{directory, error};
+            if (error) {
+                failure(directory, error);
+                continue;
+            }
+            while (!_stopping && it != std::filesystem::directory_iterator{}) {
+                const auto child = it->path();
+                const auto childStatus = it->symlink_status(error);
+                if (error)
+                    failure(child, error);
+                else if (std::filesystem::is_directory(childStatus))
+                    pending.push_back(child);
+                error.clear();
+                it.increment(error);
+                if (error) {
+                    failure(directory, error);
+                    break;
+                }
+            }
         }
-        addWatch(root);
-        auto it = std::filesystem::recursive_directory_iterator{
-            root,
-            std::filesystem::directory_options::skip_permission_denied,
-            error};
-        for (; !_stopping && !error &&
-               it != std::filesystem::recursive_directory_iterator{};
-             it.increment(error)) {
-            const auto status = it->symlink_status(error);
-            if (error)
-                break;
-            if (std::filesystem::is_symlink(status))
-                it.disable_recursion_pending();
-            else if (std::filesystem::is_directory(status))
-                addWatch(it->path());
-        }
-        if (error)
-            failure(root, error);
     }
 
     void removeDirectoryTree(const std::filesystem::path &root) {
@@ -254,7 +278,11 @@ private:
         if (event.mask &
             (IN_IGNORED | IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)) {
             removeDirectoryTree(directory);
-            _retry = true;
+            // Normal child deletion/moves are covered by the parent watch.
+            // Root loss or an unexpected lost watch still needs recovery.
+            if (directory == _directory ||
+                !(event.mask & (IN_DELETE_SELF | IN_MOVE_SELF)))
+                _retry = true;
             emitChanges(Rescan, _directory);
             return;
         }

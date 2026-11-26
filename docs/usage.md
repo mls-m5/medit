@@ -35,6 +35,9 @@ filtering are not implemented. Linux watches the project recursively, including
 new and moved directories. Changes update the tree automatically; showing the
 panel also refreshes the snapshot. If watches fail, a warning is logged and the
 watcher retries and requests recovery snapshots instead of silently going stale.
+Short-lived child directories (for example CMake's `TryCompile` directories) may
+vanish during traversal without triggering a warning or periodic recovery. A
+missing project root or a genuine watch/access failure still triggers recovery.
 
 UTF-8 single-column filenames are displayed directly. Characters that do not fit
 one cell (including double-width/combining characters), controls, and invalid
