@@ -65,8 +65,9 @@ void TcpConnection::write(std::string_view str) {
 std::shared_ptr<TcpConnection> TcpConnection::connect(std::string address,
                                                       int port) {
 
+    // Preserve the old query's default address-family filtering.
     auto endpoints = tcp::resolver{context()}.resolve(
-        tcp::resolver::query{address, std::to_string(port)});
+        address, std::to_string(port), tcp::resolver::address_configured);
 
     auto s = SocketT{context()};
     boost::asio::connect(s, endpoints);
