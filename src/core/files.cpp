@@ -42,6 +42,7 @@ void Files::bufferChanged(const std::shared_ptr<Buffer> &buffer) {
     if (state.editRevision == buffer->editRevision())
         return; // Diagnostics, formatting and other redraws are not edits.
     state.editRevision = buffer->editRevision();
+    state.errorReported = false;
     ++state.generation;
     _core.context().timer().cancel(state.timer);
     state.timer = 0;
@@ -65,19 +66,38 @@ void Files::bufferChanged(const std::shared_ptr<Buffer> &buffer) {
                     state->second.generation != generation)
                     return;
                 state->second.timer = 0;
-                if (buffer->hasExternalChanges()) {
-                    _core.printToAllLogs(
-                        LogType::Error,
-                        "Autosave skipped: file changed on disk: " +
-                            buffer->path().string());
-                }
-                else if (!buffer->save()) {
-                    _core.printToAllLogs(LogType::Error,
-                                         "Autosave failed: " +
-                                             buffer->path().string());
-                }
+                saveIfChanged(*buffer);
             });
         });
+}
+
+void Files::saveIfChanged(Buffer &buffer) {
+    _tv();
+    if (!buffer.isChanged() || !dynamic_cast<File *>(buffer.file()))
+        return;
+    auto state = _autosave.find(&buffer);
+    if (state == _autosave.end())
+        return;
+    _core.context().timer().cancel(state->second.timer);
+    state->second.timer = 0;
+    ++state->second.generation; // Ignore an already queued timeout.
+    const bool conflict = buffer.hasExternalChanges();
+    if (!conflict && buffer.save())
+        return;
+    if (!state->second.errorReported) {
+        _core.printToAllLogs(
+            LogType::Error,
+            std::string{conflict ? "Autosave skipped: file changed on disk: "
+                                 : "Autosave failed: "} +
+                buffer.path().string());
+        state->second.errorReported = true;
+    }
+}
+
+void Files::saveChangedFiles() {
+    _tv();
+    for (const auto &[buffer, state] : _autosave)
+        saveIfChanged(*buffer);
 }
 
 std::shared_ptr<Buffer> Files::open(std::filesystem::path path) {

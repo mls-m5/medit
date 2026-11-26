@@ -137,6 +137,10 @@ struct User {
                 return;
             }
 
+            if (std::holds_alternative<FocusLostEvent>(c)) {
+                mainWindow->env().core().files().saveChangedFiles();
+                continue;
+            }
             if (auto key = std::get_if<KeyEvent>(&c)) {
                 if (*key == Key::Quit) {
                     quitMedit(mainWindow->env().context());

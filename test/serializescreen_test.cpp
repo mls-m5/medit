@@ -177,4 +177,15 @@ TEST_CASE("key callback") {
         EXPECT(wasCalled);
     }
 }
+TEST_CASE("focus loss forwards through the screen event stream") {
+    auto fixture = Fixture{};
+    bool received = false;
+    fixture.ss.subscribe([&](auto events) {
+        received = events.size() == 1 &&
+                   std::holds_alternative<FocusLostEvent>(events.front());
+    });
+    fixture.sendEvent({FocusLostEvent{}});
+    EXPECT_TRUE(received);
+}
+
 TEST_SUIT_END

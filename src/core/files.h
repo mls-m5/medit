@@ -36,6 +36,11 @@ public:
     /// @return true if saved successfull
     bool save(Buffer &, std::filesystem::path);
 
+    /// Save a modified disk-backed buffer now (e.g. before leaving its view).
+    /// Conflicts and failures are reported once per edit; no UI interaction.
+    void saveIfChanged(Buffer &);
+    void saveChangedFiles();
+
     using BufferSubscriptionCallbackT = std::function<void(BufferEvent)>;
 
     //! @param buffer which buffer to subscribe to, null if all buffers
@@ -77,6 +82,7 @@ private:
         size_t timer = 0;
         size_t generation = 0;
         size_t editRevision = 0;
+        bool errorReported = false;
     };
     std::unordered_map<Buffer *, AutosaveState> _autosave;
     std::shared_ptr<int> _lifetime = std::make_shared<int>(0);

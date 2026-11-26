@@ -627,6 +627,8 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
 
         case SDL_WINDOWEVENT:
             switch (sdlEvent.window.event) {
+            case SDL_WINDOWEVENT_FOCUS_LOST:
+                return FocusLostEvent{};
             case SDL_WINDOWEVENT_RESIZED: {
                 resizePixels(
                     sdlEvent.window.data1, sdlEvent.window.data2, false);

@@ -61,6 +61,8 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
     if (!buffer) {
         throw std::runtime_error{"Trying to set editor buffer to null"};
     }
+    if (_onBufferLeave && &this->buffer() != buffer.get())
+        _onBufferLeave(this->buffer());
 
     std::optional<SavedState> foundState;
     for (auto it = _openedBuffers.begin(); it != _openedBuffers.end();) {
@@ -309,6 +311,8 @@ bool Editor::closeBuffer() {
             continue;
         }
         if (buffer) {
+            if (_onBufferLeave && &this->buffer() != buffer.get())
+                _onBufferLeave(this->buffer());
             restoreState(std::move(_openedBuffers.back()));
             _openedBuffers.pop_back();
             return true;

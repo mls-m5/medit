@@ -90,6 +90,58 @@ struct WindowFixture {
 
 TEST_SUIT_BEGIN(SidebarFocus)
 
+TEST_CASE("leaving a text view saves its modified file immediately") {
+    sidebar_focus_test::WindowFixture f;
+    const auto path = f.home.path / "early.cpp";
+    std::ofstream{path} << "before\n";
+    auto buffer = f.core.files().open(path);
+    f.window.currentEditor()->buffer(buffer);
+    buffer->text(std::string{"after\n"});
+    f.key(Key::F3);
+    std::ifstream disk{path};
+    std::string line;
+    std::getline(disk, line);
+    ASSERT_EQ(line, "after");
+    EXPECT_FALSE(buffer->isChanged());
+    EXPECT_TRUE(f.window._sidebar.focused());
+}
+
+TEST_CASE("switching files within an editor saves the previous buffer") {
+    sidebar_focus_test::WindowFixture f;
+    f.screen.mock_title_1.nice();
+    const auto previous = f.home.path / "previous.cpp";
+    const auto next = f.home.path / "next.cpp";
+    std::ofstream{previous} << "before\n";
+    std::ofstream{next} << "next\n";
+    EXPECT_TRUE(f.window.open(previous));
+    auto &buffer = f.window.currentEditor()->buffer();
+    buffer.text(std::string{"after\n"});
+    EXPECT_TRUE(f.window.open(next));
+    std::ifstream disk{previous};
+    std::string line;
+    std::getline(disk, line);
+    ASSERT_EQ(line, "after");
+    EXPECT_FALSE(buffer.isChanged());
+}
+
+TEST_CASE("early save does not overwrite a disk conflict") {
+    sidebar_focus_test::WindowFixture f;
+    const auto path = f.home.path / "conflict.cpp";
+    std::ofstream{path} << "before\n";
+    const auto time = std::filesystem::last_write_time(path);
+    auto buffer = f.core.files().open(path);
+    f.window.currentEditor()->buffer(buffer);
+    buffer->text(std::string{"editor\n"});
+    std::ofstream{path} << "external\n";
+    std::filesystem::last_write_time(path, time + std::chrono::seconds{2});
+    f.key(Key::F3);
+    std::ifstream disk{path};
+    std::string line;
+    std::getline(disk, line);
+    ASSERT_EQ(line, "external");
+    EXPECT_TRUE(buffer->isChanged());
+}
+
 TEST_CASE("F3 opens and focuses the sidebar, then returns to the editor") {
     sidebar_focus_test::WindowFixture f;
     f.window.splitEditor();

@@ -94,6 +94,8 @@ MainWindow::MainWindow(CoreEnvironment &core,
 
     for (auto &editor : _editors) {
         editor->showLines(true);
+        editor->onBufferLeave(
+            [&core](Buffer &buffer) { core.files().saveIfChanged(buffer); });
     }
     _console->showLines(false);
     _console->buffer().assignFile(std::make_unique<UnsavableFile>("Console"));
@@ -416,6 +418,14 @@ Editor *MainWindow::currentEditor() {
 }
 
 void MainWindow::setInputFocus(IKeySink *focus) {
+    if (_inputFocus && _inputFocus != focus) {
+        for (auto &editor : _editors) {
+            if (editor.get() == _inputFocus) {
+                _env->core().files().saveIfChanged(editor->buffer());
+                break;
+            }
+        }
+    }
     if (focus != _locator.get()) {
         _locator->visible(false);
     }
@@ -623,6 +633,8 @@ void MainWindow::splitEditor() {
     _editors.push_back(
         std::make_unique<Editor>(this, buffer.shared_from_this()));
     _editors.back()->showLines(true);
+    _editors.back()->onBufferLeave(
+        [this](Buffer &buffer) { _env->core().files().saveIfChanged(buffer); });
 }
 
 void MainWindow::closeEditor() {

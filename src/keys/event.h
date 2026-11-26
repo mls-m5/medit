@@ -122,12 +122,17 @@ struct ResizeEvent {
     void visit(Archive &arch);
 };
 
+struct FocusLostEvent {
+    void visit(Archive &arch);
+};
+
 using Event = std::variant<NullEvent,
                            KeyEvent,
                            MouseDownEvent,
                            MouseMoveEvent,
                            PasteEvent,
-                           ResizeEvent>;
+                           ResizeEvent,
+                           FocusLostEvent>;
 
 /// Serialization
 void load(Archive &arch, Event &e);

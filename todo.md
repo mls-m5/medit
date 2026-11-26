@@ -161,7 +161,7 @@ Todo:
 - [ ] Interaction for listing and opening any buffer that is loaded into memory
     - [ ] Links between interactions with  `[[]]`  syntax
 - [ ] Add checkbocks asking if you want to push in commit interaction
-- [ ] Auto save
+- [x] Auto save after inactivity, file/view switches, and GUI focus loss
       
 ## Bugs
 - [x] When open a file where there is no project/.git, the program freezes

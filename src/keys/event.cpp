@@ -78,6 +78,8 @@ void ResizeEvent::visit(Archive &arch) {
     ARCH_PAIR(height);
 }
 
+void FocusLostEvent::visit(Archive &arch) {}
+
 void load(Archive &arch, Event &e) {
     size_t t = 0;
     arch("event_type", t);
@@ -103,6 +105,10 @@ void load(Archive &arch, Event &e) {
     }
     case 5: {
         e = ResizeEvent{};
+        break;
+    }
+    case 6: {
+        e = FocusLostEvent{};
         break;
     }
     }

@@ -16,7 +16,9 @@ For terminal mode, use a UTF-8 locale (check with `locale charmap`).
 ## Autosave
 
 Edited files that already have a filename are saved after two seconds without
-further edits, including files open in the background. Unnamed buffers and
+further edits, including files open in the background. Switching files or
+leaving a text editor saves its changes sooner; when the GUI window loses focus,
+all modified disk-backed buffers are saved. Unnamed buffers and
 temporary console/interaction buffers are not saved automatically. Autosave
 runs on the editor thread; diagnostics and redraws do not postpone it.
 
@@ -24,7 +26,9 @@ If the file's modification time differs from the version last read or saved,
 autosave leaves both versions alone and reports the conflict in the existing
 console. A manual save uses the existing overwrite confirmation. Modification
 times are a lightweight check, not a guarantee against simultaneous writes.
-Saving when changing views or when a window loses focus is not implemented yet.
+Terminal window focus is not always reported, so `--cli` still relies on
+editor/view changes and the inactivity timer. Saving a file does not dismiss a
+disk conflict or ask for confirmation automatically.
 
 ## Project file panel
 

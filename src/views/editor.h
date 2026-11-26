@@ -7,6 +7,7 @@
 #include "text/formattype.h"
 #include "views/bufferview.h"
 #include <filesystem>
+#include <functional>
 #include <memory>
 #include <optional>
 
@@ -40,6 +41,10 @@ public:
     Buffer &buffer();
 
     void buffer(std::shared_ptr<Buffer> buffer);
+
+    void onBufferLeave(std::function<void(Buffer &)> callback) {
+        _onBufferLeave = std::move(callback);
+    }
 
     Cursor cursor() const;
 
@@ -130,6 +135,7 @@ private:
     std::optional<Cursor> _selectionAnchor;
     std::shared_ptr<IMode> _mode;
     FormatType _background = 1;
+    std::function<void(Buffer &)> _onBufferLeave;
 
     std::vector<SavedState> _openedBuffers;
 };

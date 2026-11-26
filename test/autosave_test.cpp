@@ -107,6 +107,27 @@ TEST_CASE("unnamed and temporary buffers are not autosaved") {
     EXPECT_TRUE(f.timer.pending.empty());
 }
 
+TEST_CASE("window focus loss saves every changed disk-backed buffer") {
+    autosave_test::Fixture f;
+    f.project.write("one.cpp", "old one\n");
+    f.project.write("two.cpp", "old two\n");
+    auto one = f.core.files().open(f.project.path("one.cpp"));
+    auto two = f.core.files().open(f.project.path("two.cpp"));
+    auto unnamed = f.core.files().create();
+    one->text(std::string{"new one\n"});
+    two->text(std::string{"new two\n"});
+    unnamed->text(std::string{"unsaved draft"});
+    f.core.files().saveChangedFiles();
+    ASSERT_EQ(f.disk("one.cpp"), "new one\n");
+    ASSERT_EQ(f.disk("two.cpp"), "new two\n");
+    EXPECT_FALSE(one->isChanged());
+    EXPECT_FALSE(two->isChanged());
+    EXPECT_TRUE(unnamed->isChanged());
+    f.timer.fire();
+    f.gui.work(false);
+    EXPECT_TRUE(f.timer.pending.empty());
+}
+
 TEST_CASE("external change skips autosave without overwriting the disk") {
     autosave_test::Fixture f;
     f.project.write("one.cpp", "original\n");

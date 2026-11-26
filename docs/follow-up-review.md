@@ -1,11 +1,11 @@
 # Follow-up from the editor changes review
 
 Review of the recent sidebar, file-watching, LSP logging, and saving changes.
-These are follow-up items, not claims that autosave is already implemented.
-Existing tests passed (CTest 2/2 in `build/cmake`), but they do not cover all
-of the scenarios below.
+These are follow-up items, including resolved historical findings. The tests
+at the time passed (CTest 2/2 in `build/cmake`), but did not cover all of the
+scenarios below.
 
-## Before enabling autosave
+## Autosave and early saving
 
 1. **Resolved: Failed Save As leaves a file attached to the buffer.**
    `Files::save()` assigns a `File` before trying to write
@@ -21,11 +21,11 @@ of the scenarios below.
    messages available in the existing console without taking keyboard focus
    away from the editor or sidebar. Test repeated stderr messages while typing.
 
-3. **Early-save triggers are not implemented.**
-   Autosave after two seconds without edits is implemented for named file
-   buffers, with conflict and failure checks on the GUI thread. Saving sooner
-   when leaving a file/view or losing window focus remains to be done.
-   Terminal window-focus notifications may be unavailable.
+3. **Resolved for file/view switches and GUI focus loss:** Autosave after two
+   seconds without edits now also saves sooner on file/view switches and when
+   an SDL window loses focus. Both use the same conflict/failure handling.
+   CLI window-focus notifications are not available everywhere; inactivity and
+   editor/view changes remain its fallbacks.
 
 ## Window-close follow-up
 
@@ -75,4 +75,5 @@ of the scenarios below.
    performance approval.
 
 Items 1 and 2 and the `build` directory case of item 4 have since been
-addressed; autosave and stronger conflict detection remain follow-ups.
+addressed; stronger conflict detection and the GUI close button remain
+follow-ups.
