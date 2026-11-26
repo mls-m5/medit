@@ -106,6 +106,29 @@ struct Fixture {
 
 TEST_SUIT_BEGIN(Inotify)
 
+TEST_CASE("failed Save As leaves an unnamed buffer retryable") {
+    test_helpers::TemporaryProject project;
+    JobQueue jobs;
+    inotify_test::GuiQueue gui;
+    Timer timer;
+    ThreadContext context{jobs, gui, timer};
+    CoreEnvironment core{context, project.path(".medit.json")};
+    auto buffer = core.files().create();
+    buffer->text(std::string{"editor contents"});
+    EXPECT_FALSE(core.files().save(*buffer, project.path("missing/file.cpp")));
+    EXPECT_TRUE(buffer->file() == nullptr);
+    EXPECT_TRUE(buffer->isChanged());
+    const auto destination = project.path("saved.cpp");
+    EXPECT_TRUE(core.files().save(*buffer, destination));
+    EXPECT_TRUE(buffer->file() != nullptr);
+    EXPECT_TRUE(buffer->path() == destination);
+    EXPECT_FALSE(buffer->isChanged());
+    std::ifstream disk{destination};
+    std::string text;
+    std::getline(disk, text);
+    ASSERT_EQ(text, "editor contents");
+}
+
 TEST_CASE("external file changes do not discard unsaved buffer edits") {
     test_helpers::TemporaryProject project;
     project.write("src/example.cpp", "original\n");
@@ -372,6 +395,29 @@ TEST_CASE("directory symlinks and cycles are not traversed") {
     EXPECT_FALSE(f.contains("link/old.cpp"));
     EXPECT_FALSE(f.contains("link/new.cpp"));
     EXPECT_FALSE(followed);
+}
+
+TEST_CASE("build subtree is not watched while other directories remain live") {
+    inotify_test::Fixture f;
+    f.environment.write("build/nested/existing.cpp");
+    f.environment.write("src/existing.cpp");
+    f.start();
+    bool buildFileEvent = false;
+    f.notifications->subscribe(
+        [&](auto type, const auto &path, auto) {
+            if (path == f.environment.path("build/nested/new.cpp") &&
+                type != DirectoryNotifications::Rescan)
+                buildFileEvent = true;
+        },
+        &buildFileEvent);
+    f.environment.write("build/nested/new.cpp");
+    f.environment.write("src/new.cpp");
+    f.wait("src/new.cpp");
+    f.gui.work(false);
+    EXPECT_FALSE(f.contains("build/nested/existing.cpp"));
+    EXPECT_FALSE(f.contains("build/nested/new.cpp"));
+    EXPECT_FALSE(buildFileEvent);
+    f.notifications->unsubcribe(&buildFileEvent);
 }
 
 TEST_CASE("temporary CMake directories may disappear without watch failures") {

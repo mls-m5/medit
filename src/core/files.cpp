@@ -130,10 +130,13 @@ std::shared_ptr<Buffer> Files::create() {
 bool Files::save(Buffer &buffer, std::filesystem::path path) {
     _tv();
 
-    buffer.assignFile(std::make_unique<File>(std::filesystem::absolute(path)));
-    if (!buffer.save()) {
+    if (buffer.file())
         return false;
-    }
+    auto file = std::make_unique<File>(std::filesystem::absolute(path));
+    if (!file->save(buffer))
+        return false;
+    buffer.assignFile(std::move(file));
+    buffer.isChanged(false);
 
     _buffers.push_back(buffer.shared_from_this());
     emitBufferSubscriptionEvent(
