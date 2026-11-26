@@ -174,12 +174,14 @@ struct User {
 };
 
 struct MainData {
-    std::unique_ptr<CoreEnvironment> core;
     std::shared_ptr<IJobQueue> guiQueue;
     std::shared_ptr<IJobQueue> jobQueue;
     std::shared_ptr<ITimer> timer;
     std::shared_ptr<ITimer> guiLoopTimer;
     std::shared_ptr<ThreadContext> context;
+    // Members are destroyed in reverse order. CoreEnvironment (including
+    // Files) must die before its context, timer and queues.
+    std::unique_ptr<CoreEnvironment> core;
     std::unique_ptr<TcpServer> server;
     std::vector<std::unique_ptr<User>> users;
 
