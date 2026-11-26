@@ -48,11 +48,16 @@ scenarios below.
   `python3 test/smoke_cli_shutdown.py build/cmake/medit`: the test checks a
   normal exit, alternate-screen exit, unchanged termios, and no terminal-reset
   sequence. CTest alone did not exercise process shutdown in a real terminal.
-- **Still to review separately:** `_threadQueue` and `_isRunning` in
-  `NCursesScreen` are accessed across threads without synchronization. This
-  investigation did not establish whether that can break other shutdown paths;
-  abnormal termination (signals/crashes) is not covered by the normal-exit
-  smoke test. Do not assume a shell `reset` can repair those cases.
+- **Resolved for normal operation:** the ncurses drawing queue now uses a mutex
+  when enqueuing and detaches a batch under the same mutex before executing
+  screen work. The run flag is atomic. Callback delivery is synchronized with
+  unsubscription, and `BufferedScreen` unsubscribes before its canvas is
+  destroyed. This prevents callback and queue lifetime races during normal
+  shutdown without holding the queue lock during ncurses drawing.
+- **Still to review separately:** abnormal termination (signals/crashes) is not
+  covered by the normal-exit smoke test, and terminal resize reinitialization
+  has not been assessed in detail. Do not assume a shell `reset` repairs those
+  cases.
 
 ## Performance and conflict correctness
 

@@ -104,7 +104,7 @@ void NCursesScreen::draw(size_t x, size_t y, FStringView rstr) {
     // Drawing runs later on the terminal thread. The caller may redraw or
     // resize its buffer before then, so never queue a borrowed FStringView.
     auto str = FString{rstr.begin(), rstr.end()};
-    _threadQueue.push_back([str = std::move(str), this, x, y] {
+    auto task = [str = std::move(str), this, x, y] {
         _tv();
         ::move(y, x);
         for (size_t tx = x, i = 0; i < str.size() && tx < width(); ++tx, ++i) {
@@ -120,11 +120,14 @@ void NCursesScreen::draw(size_t x, size_t y, FStringView rstr) {
             }
             attroff(COLOR_PAIR(c.f));
         }
-    });
+    };
+    auto lock = std::lock_guard{_mutex};
+    _threadQueue.push_back(std::move(task));
 }
 
 void NCursesScreen::refresh() {
     PROFILE_FUNCTION();
+    auto lock = std::lock_guard{_mutex};
     _threadQueue.push_back([this] {
         _tv();
         ::refresh();
@@ -133,6 +136,7 @@ void NCursesScreen::refresh() {
 
 void NCursesScreen::clear() {
     PROFILE_FUNCTION();
+    auto lock = std::lock_guard{_mutex};
     _threadQueue.push_back([this] {
         _tv();
         ::clear();
@@ -141,6 +145,7 @@ void NCursesScreen::clear() {
 
 void NCursesScreen::cursor(size_t x, size_t y) {
     PROFILE_FUNCTION();
+    auto lock = std::lock_guard{_mutex};
     _threadQueue.push_back([this, x, y] {
         _tv();
         ::move(y, x);
@@ -164,22 +169,34 @@ NCursesScreen::NCursesScreen()
 }
 
 NCursesScreen::~NCursesScreen() {
-    _threadQueue.push_back([this] {
-        ::endwin();
-        _isRunning = false;
-    });
+    {
+        auto lock = std::lock_guard{_mutex};
+        _threadQueue.push_back([this] {
+            ::endwin();
+            _isRunning = false;
+        });
+    }
 
     _ncursesThread.join();
 }
 
 void NCursesScreen::subscribe(CallbackT f) {
     PROFILE_FUNCTION();
-    _callback = f;
+    {
+        auto lock = std::lock_guard{_mutex};
+        _callback = f;
+    }
 
     auto r = ResizeEvent();
     r.width = ::COLS; // * 2; // TODO: Find out why * 2
     r.height = ::LINES;
-    _callback({r});
+    f({r});
+}
+
+void NCursesScreen::unsubscribe() {
+    auto lock = std::unique_lock{_mutex};
+    _callback = {};
+    _callbackDone.wait(lock, [this] { return _callbacksInFlight == 0; });
 }
 
 Event NCursesScreen::getInput() {
@@ -269,6 +286,7 @@ void NCursesScreen::title(std::string title) {
 void NCursesScreen::palette(const Palette &palette) {
     PROFILE_FUNCTION();
     _palette = palette;
+    auto lock = std::lock_guard{_mutex};
     _threadQueue.push_back([this] {
         _tv();
         _palette.update(*this);
@@ -325,13 +343,31 @@ void NCursesScreen::loop() {
             list.push_back(std::move(e));
         }
 
-        if (_callback && !list.empty()) {
-            _callback(std::move(list));
+        if (!list.empty()) {
+            CallbackT callback;
+            {
+                auto lock = std::lock_guard{_mutex};
+                callback = _callback;
+                if (callback)
+                    ++_callbacksInFlight;
+            }
+            if (callback) {
+                callback(std::move(list));
+                {
+                    auto lock = std::lock_guard{_mutex};
+                    --_callbacksInFlight;
+                }
+                _callbackDone.notify_all();
+            }
         }
 
-        for (; !_threadQueue.empty(); _threadQueue.pop_front()) {
-            _threadQueue.front()();
+        std::deque<std::function<void()>> tasks;
+        {
+            auto lock = std::lock_guard{_mutex};
+            tasks.swap(_threadQueue);
         }
+        for (auto &task : tasks)
+            task();
 
         std::this_thread::sleep_for(1ms);
     }

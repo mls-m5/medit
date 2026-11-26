@@ -5,6 +5,8 @@
 #include "core/threadvalidation.h"
 #include "screen/iscreen.h"
 #include "syntax/palette.h"
+#include <atomic>
+#include <condition_variable>
 #include <deque>
 #include <functional>
 #include <mutex>
@@ -28,9 +30,7 @@ public:
 
     void subscribe(CallbackT f) override;
 
-    void unsubscribe() override {
-        _callback = {};
-    }
+    void unsubscribe() override;
 
     size_t width() const;
     size_t height() const;
@@ -64,10 +64,12 @@ private:
 
     ThreadValidation _tv{"ncurses thread"};
 
-    bool _isRunning = false;
+    std::atomic<bool> _isRunning{false};
 
     std::thread _ncursesThread;
     std::mutex _mutex;
+    std::condition_variable _callbackDone;
+    size_t _callbacksInFlight = 0;
 
     CallbackT _callback;
 
