@@ -51,9 +51,10 @@ scenarios below.
 - **Resolved for normal operation:** the ncurses drawing queue now uses a mutex
   when enqueuing and detaches a batch under the same mutex before executing
   screen work. The run flag is atomic. Callback delivery is synchronized with
-  unsubscription, and `BufferedScreen` unsubscribes before its canvas is
-  destroyed. This prevents callback and queue lifetime races during normal
-  shutdown without holding the queue lock during ncurses drawing.
+  unsubscription, and the terminal user's teardown unsubscribes before
+  destroying its buffered screen. This prevents callback and queue lifetime
+  races during normal shutdown without holding the queue lock during ncurses
+  drawing. Other screen backends retain their separate teardown behavior.
 - **Still to review separately:** abnormal termination (signals/crashes) is not
   covered by the normal-exit smoke test, and terminal resize reinitialization
   has not been assessed in detail. Do not assume a shell `reset` repairs those

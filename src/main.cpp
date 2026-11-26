@@ -58,6 +58,16 @@ struct User {
     std::shared_ptr<IScreen> screen;
     std::shared_ptr<MainWindow> mainWindow;
 
+    ~User() {
+#ifndef __EMSCRIPTEN__
+        // Ncurses dispatches on its own thread; wait for an in-flight input
+        // callback before destroying the BufferedScreen it captures. Other
+        // backends retain their existing teardown behavior.
+        if (dynamic_cast<NCursesScreen *>(nativeScreen.get()))
+            screen->unsubscribe();
+#endif
+    }
+
 #ifdef __EMSCRIPTEN__
     User(const Settings &settings, CoreEnvironment &core, Context &context) {
         nativesScreen = std::make_unique<ScreenType>();

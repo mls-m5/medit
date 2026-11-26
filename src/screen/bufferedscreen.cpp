@@ -59,11 +59,7 @@ BufferedScreen::BufferedScreen(IScreen *screen)
     : _backend(screen)
     , _canvas(std::make_unique<Canvas>()) {}
 
-BufferedScreen::~BufferedScreen() {
-    // The backend may still be reading input on another thread. Stop callbacks
-    // which capture this canvas before it is destroyed.
-    _backend->unsubscribe();
-}
+BufferedScreen::~BufferedScreen() = default;
 
 void BufferedScreen::draw(size_t x, size_t y, FStringView str) {
     _tv();
