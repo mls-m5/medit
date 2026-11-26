@@ -166,7 +166,6 @@ NCursesScreen::NCursesScreen()
 NCursesScreen::~NCursesScreen() {
     _threadQueue.push_back([this] {
         ::endwin();
-        system("reset");
         _isRunning = false;
     });
 
