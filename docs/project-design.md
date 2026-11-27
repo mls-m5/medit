@@ -23,6 +23,13 @@ notification dispatch are performance-sensitive and need explicit approval.
   Deleted files appear only in this mode, since it is the one used for diffs.
 - The source is chosen through one menu (command palette) entry. The default is
   selected again when medit starts.
+- Submodules are shown, with their files (see "Submodules" below).
+- `.medit.json` is always part of the list, in every source.
+- In the changed source, opening a file shows its diff in a read-only view
+  that cannot be saved (like the console). Diff highlighting is designed later.
+- The file limit stays, but becomes configurable.
+- Symlinks are shown with a link marker in the tree (details below).
+- `ICommandRunner` is separate from `IFileSystem`.
 - Design first, then implement in small steps.
 
 ## Current state and its problems
@@ -33,7 +40,7 @@ notification dispatch are performance-sensitive and need explicit approval.
 | `Files` | Owns the watcher; renames, checks existence directly | Same; reloads changed buffers even with unsaved edits (TODO) |
 | Watcher | `DirectoryNotifications`, Linux inotify, root directory only | Started only when medit starts without a file argument; callbacks run on the *job* thread although the member is named `guiQueue`; a second `path()` call assigns over a running `std::thread` (terminates); non-Linux returns `nullptr`, which `Files` dereferences |
 | `Project` | Recursive scan plus per-event edits of a `std::vector<path>` | Added paths skip the scan's filters; never unsubscribes; no change notification; extension counts not updated |
-| Git | Plugins run `git` through `POpenStream` | No shared way to run commands that a test can replace |
+| Commands | `runCommand`/`runCommandAndCapture` (`core/os.h`, via `system()`), `POpenStream`, `Console`, `viewResultAsInteraction` (`plugin/git.cpp`) | Four ways to run a command, all taking shell strings with hand-written quoting (a `"` in a filename breaks `git add`); nothing a test can replace |
 
 The incremental cache cannot stay consistent once the list comes from Git:
 staging, `.gitignore` edits, checkouts and directory moves change membership
@@ -97,8 +104,36 @@ public:
 - `File` gets its content through `IFileSystem`. Buffers keep using `IFile` and
   never see paths being read or written.
 - Process execution is not a file operation and gets a separate
-  `ICommandRunner` (run a command in a directory, return output and exit code)
-  that wraps `POpenStream`. A future remote file system can provide both.
+  `ICommandRunner`; see below.
+
+### `ICommandRunner`
+
+```cpp
+struct CommandResult {
+    int exitCode = -1;
+    std::string output;   // stdout
+    std::string errors;   // stderr, kept apart from the protocol output
+};
+
+class ICommandRunner {
+public:
+    virtual ~ICommandRunner() = default;
+    // Blocking; call from the job thread. No shell: arguments are passed
+    // as-is, so paths need no quoting.
+    virtual CommandResult run(std::vector<std::string> arguments,
+                              const Path &workingDirectory) = 0;
+};
+```
+
+- Separate from `IFileSystem` because the concerns differ: file-system tests
+  do not need a command fake, and commands are also used by formatting, build
+  and Git plugins that never read project files.
+- The cost is that a remote setup must provide a matching pair. Both are
+  therefore obtained from the same place (the core environment), never created
+  ad hoc, so they can be swapped together later.
+- Existing helpers move to it gradually; this redesign only requires the file
+  sources to use it. Streaming output to the console (`Console`) can stay as it
+  is until it is migrated separately.
 
 ### File sources
 
@@ -129,6 +164,54 @@ public:
 | Directory | `IFileSystem::list` with a filter | Today's rules: known extensions, skip CMake build directories, skip `.git`. Filter configurable later |
 
 - Use `-z` output, so filenames with spaces, newlines or invalid UTF-8 survive.
+- `.medit.json` is always added to the snapshot, whatever the source returns.
+- The number of files is capped by a configurable limit (default: today's
+  100 000). The cap exists so a huge directory cannot hang the editor; when it
+  is reached, the status bar says the list is incomplete.
+
+### Submodules
+
+`git ls-files --recurse-submodules` only supports `--cached`, not `--others`
+(checked: "unsupported mode"). The Git sources therefore recurse themselves:
+
+1. List the repository as usual. Submodules appear as single entries; they are
+   identified with `git ls-files -z --stage` (mode `160000`).
+2. For each initialized submodule, run the same source with the submodule as
+   root and prefix the paths. Repeat for nested submodules.
+3. An uninitialized submodule is shown as an empty directory with a submodule
+   marker.
+
+For the changed source, `git status` reports a submodule with new commits or
+local changes as one modified entry; the files inside come from running
+`git status` in the submodule. The directory source treats submodules as
+ordinary directories. The tree may mark submodule roots.
+
+### Diff view for changed files
+
+Opening a file from the changed source opens a read-only buffer (an
+`UnsavableFile`, as the console uses) holding its diff:
+
+| Status | Command |
+|---|---|
+| Modified, staged or both | `git diff HEAD -- path` |
+| Untracked | `git diff --no-index -- /dev/null path` |
+| Deleted | `git diff HEAD -- path` |
+| Submodule | `git diff --submodule=log HEAD -- path` |
+
+`git diff --no-index` exits with 1 when the files differ, which is the normal
+case here; only other exit codes are errors. Opening the real file stays
+possible from the other sources. For highlighting,
+`universalGitFormat` in `plugin/git.cpp` already colors Git output and can serve
+as a starting point; proper diff highlighting is a separate design.
+
+### Symlinks
+
+- Git lists a symlink as one entry, also when it points to a directory.
+- A symlink to a file is shown with a single-column link marker and opens its
+  target.
+- A symlink to a directory is shown with the marker but is not expanded in the
+  first version, to avoid loops and paths outside the root.
+- The directory source never follows directory symlinks.
 - If the root is not in a Git repository, or `git` is missing, use the directory
   source and say so in the status bar.
 
@@ -168,7 +251,8 @@ Each step is one branch, built and tested on its own.
    `add`/`removeCachedFile` is removed. The tree subscribes instead of refreshing
    on F3. *Touches scanning: approval needed.*
 3. **Git source as default**, with the fallback to directory.
-4. **Changed-in-Git source** and the menu entry for choosing a source.
+4. **Changed-in-Git source**, the menu entry for choosing a source, and the
+   read-only diff view.
 5. **Watch-driven refresh**: debounced hints, recursive watching, `.git/index`.
    Remove `DirectoryNotifications`. *Approval needed.*
 
@@ -189,16 +273,10 @@ filters in `.medit.json`.
 
 ## Open questions
 
-1. **Submodules**: `ls-files` lists a submodule as one entry. Show it as a
-   directory without contents, skip it, or list its files (another command per
-   submodule)?
-2. **`.medit.json`**: today it is always appended. Keep that in every source?
-   In the changed source too?
-3. **Opening a deleted file** in the changed source: show nothing for now, or
-   open an empty read-only buffer until a diff view exists?
-4. **Size limit**: today's scan stops at 100 000 files. Keep a limit for all
-   sources?
-5. **Symlinks**: Git lists a symlink as a file. Open the target, or show it
-   but not open directories?
-6. **Where `ICommandRunner` lives**: next to `IFileSystem` (so a remote file
-   system also runs Git remotely) or as an independent service?
+1. **Link marker**: which single-column glyph? It must not be ambiguous-width,
+   or it misaligns in East Asian terminals.
+2. **Diff view details**: one view per file, or one that is replaced when
+   another changed file is selected? Staged and unstaged together (as above)
+   or separately?
+3. **Submodule cost**: listing runs one or two `git` calls per submodule. Fine
+   for a handful; should there be a setting to skip them in large trees?
