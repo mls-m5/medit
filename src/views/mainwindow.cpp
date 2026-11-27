@@ -414,8 +414,14 @@ void MainWindow::paste(std::string text) {
 bool MainWindow::mouseDown(int x, int y) {
     if (_sidebar.visible() && x >= 0 && y >= 0 &&
         static_cast<size_t>(x) < _sidebar.width() &&
-        static_cast<size_t>(y) < _sidebar.height())
-        return true; // Mouse navigation is not part of this increment.
+        static_cast<size_t>(y) < _sidebar.height()) {
+        if (_sidebar.contains(x, y)) {
+            // Focus first: opening a file moves focus back to the editor.
+            _inputFocus = &_sidebar;
+            _sidebar.mouseDown(x, y);
+        }
+        return true; // The divider must not fall through to an editor.
+    }
     for (size_t i = 0; i < _editors.size(); ++i) {
         auto &e = *_editors.at(i);
         if (e.mouseDown(x, y)) {

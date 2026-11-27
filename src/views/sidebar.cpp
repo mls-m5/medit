@@ -207,6 +207,28 @@ bool SideBar::keyPress(std::shared_ptr<IEnvironment> env) {
     return handleKey(env->key());
 }
 
+bool SideBar::contains(int mouseX, int mouseY) const {
+    return visible() && width() > 1 && mouseX >= 0 && mouseY >= 0 &&
+           static_cast<size_t>(mouseX) >= x() &&
+           static_cast<size_t>(mouseX) - x() < width() - 1 &&
+           static_cast<size_t>(mouseY) >= y() &&
+           static_cast<size_t>(mouseY) - y() < height();
+}
+
+bool SideBar::mouseDown(int mouseX, int mouseY) {
+    if (!contains(mouseX, mouseY))
+        return false;
+    const auto row = static_cast<size_t>(mouseY) - y();
+    if (row == 0)
+        return true; // The title row only takes focus.
+    const auto index = yScroll() + row - 1;
+    if (index < _entries.size()) {
+        select(index);
+        activate();
+    }
+    return true;
+}
+
 void SideBar::draw(IScreen &screen) {
     if (!visible() || !width() || !height())
         return;

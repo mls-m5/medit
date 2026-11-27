@@ -37,9 +37,9 @@ public:
     }
     bool handleKey(KeyEvent key);
     bool keyPress(std::shared_ptr<IEnvironment> env) override;
-    bool mouseDown(int, int) override {
-        return false; // Mouse navigation is a later increment.
-    }
+    // Window coordinates inside the panel, excluding its divider column.
+    bool contains(int x, int y) const;
+    bool mouseDown(int x, int y) override;
     void draw(IScreen &screen) override;
     void updateCursor(IScreen &screen) const override;
     void onResize(size_t, size_t) override;

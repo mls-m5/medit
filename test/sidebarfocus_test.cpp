@@ -153,4 +153,21 @@ TEST_CASE("cancelling the palette restores the focus it was opened from") {
     EXPECT_FALSE(f.sidebarFocused());
 }
 
+TEST_CASE("clicking the sidebar focuses it; the divider is inert") {
+    sidebar_focus_test::WindowFixture f;
+    f.key({Key::F3});
+    f.key({Key::Escape});
+    EXPECT_FALSE(f.sidebarFocused());
+
+    const auto divider = static_cast<int>(f.window._sidebar.width()) - 1;
+    EXPECT_TRUE(f.window.mouseDown(divider, 0));
+    EXPECT_FALSE(f.sidebarFocused());
+
+    EXPECT_TRUE(f.window.mouseDown(1, 0)); // Title row.
+    EXPECT_TRUE(f.sidebarFocused());
+
+    EXPECT_TRUE(f.window.mouseDown(divider + 5, 2)); // Editor area.
+    EXPECT_FALSE(f.sidebarFocused());
+}
+
 TEST_SUIT_END
