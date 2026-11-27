@@ -22,7 +22,7 @@
 
 void registerDefaultPlugins(CoreEnvironment &core) {
     auto &container = core.plugins();
-    container.createPlugin<GenericFormat>();
+    container.createPlugin<GenericFormat>(core.commandRunner());
     container.createPlugin<BasicHighlighting>();
     container.createPlugin<MarkdownHighlighting>();
     container.createPlugin<JsonFormat>();

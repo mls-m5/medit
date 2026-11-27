@@ -52,8 +52,9 @@ public:
 private:
     ThreadContext *_context =
         nullptr; // TODO: Handle lifetime of CoreEnvironment better
-    Plugins _plugins;
+    // Before the plugins, which may keep a reference to it.
     std::unique_ptr<ICommandRunner> _commandRunner = createCommandRunner();
+    Plugins _plugins;
     Files _files{*this};
 
     std::unique_ptr<Project> _project;
