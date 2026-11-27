@@ -209,7 +209,8 @@ void Project::addCachedFile(std::filesystem::path path) {
 
 void Project::removeCachedFile(std::filesystem::path path) {
     _tv();
-    _fileCache.erase(std::remove(_fileCache.begin(), _fileCache.end(), path));
+    // Paths that were never cached (e.g. temporary files) are ignored.
+    std::erase(_fileCache, path);
 }
 
 void Project::updateCachedFile(std::filesystem::path path) {
