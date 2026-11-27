@@ -107,13 +107,56 @@ TEST_CASE("sidebar keeps file labels intact through rendering") {
     screen.mock_draw_3.expectArgs([&](auto x, auto y, FStringView text) {
         if (x == 0 && y == 2) {
             const auto line = static_cast<std::string>(text);
-            found = line.front() == '>' &&
+            found = line.starts_with("›") &&
                     line.find("note.md") != std::string::npos;
         }
         return true;
     });
     sidebar.draw(screen);
     ASSERT_EQ(found, true);
+}
+
+TEST_CASE("single-column tree markers show selection and directory state") {
+    SideBar sidebar{nullptr};
+    sidebar.width(16);
+    sidebar.height(4);
+    sidebar.files("/tmp/tree", {"/tmp/tree/dir/note.md"});
+    MockScreen screen;
+    bool selectedRoot = false;
+    bool collapsed = false;
+    size_t dividers = 0;
+    screen.mock_draw_3.expectNum(8);
+    screen.mock_draw_3.expectArgs([&](auto x, auto y, FStringView text) {
+        const auto label = static_cast<std::string>(text);
+        if (x == 0 && y == 1)
+            selectedRoot = label.starts_with("›▾");
+        if (x == 0 && y == 2)
+            collapsed = label.find("▸ dir") != std::string::npos;
+        if (x == 15 && text == FString{"│"})
+            ++dividers;
+        return x + text.size() <= 16;
+    });
+    sidebar.draw(screen);
+    ASSERT_EQ(selectedRoot, true);
+    ASSERT_EQ(collapsed, true);
+    ASSERT_EQ(dividers, 4u);
+
+    sidebar.handleKey(KeyEvent{Key::Down});
+    sidebar.handleKey(KeyEvent{Key::Right});
+    MockScreen expandedScreen;
+    bool expanded = false;
+    expandedScreen.mock_draw_3.expectNum(8);
+    expandedScreen.mock_draw_3.expectArgs(
+        [&](auto x, auto y, FStringView text) {
+            if (x == 0 && y == 2) {
+                const auto label = static_cast<std::string>(text);
+                expanded = label.starts_with("›") &&
+                           label.find("▾ dir") != std::string::npos;
+            }
+            return true;
+        });
+    sidebar.draw(expandedScreen);
+    ASSERT_EQ(expanded, true);
 }
 
 TEST_SUIT_END
