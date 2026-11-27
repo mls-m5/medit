@@ -8,6 +8,7 @@
 #include "text/fchar.cpp"
 #include "text/fstring.cpp"
 #include "text/fstringview.cpp"
+#include "text/fuzzymatch.cpp"
 #include "text/history.cpp"
 #include "text/rawbuffer.cpp"
 #include "text/utf8caseconversion.cpp"
