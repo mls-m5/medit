@@ -33,6 +33,8 @@ namespace {
 StaticCommandRegister MainWindowReg{{
     {"command_palette",
      [](auto &&env) { env->mainWindow().showCommandPalette(); }},
+    {"focus_sidebar", [](auto &&env) { env->mainWindow().focusSidebar(); }},
+    {"focus_editor", [](auto &&env) { env->mainWindow().resetFocus(); }},
     {"split_editor", [](auto &&env) { env->mainWindow().splitEditor(); }},
     {"close_editor", [](auto &&env) { env->mainWindow().closeEditor(); }},
     {"cut", [](auto &&env) { env->mainWindow().copy(true); }},
@@ -119,10 +121,15 @@ MainWindow::MainWindow(CoreEnvironment &core,
     _commandPalette->showLines(false);
     _commandPalette->callback([this](auto &&path) {
         _commandPalette->visible(false);
+        // Restore the editor before executing, so that a command that moves
+        // focus (such as focus_sidebar) has the final say.
+        resetFocus();
         if (!path.empty()) {
             StandardCommands::get().namedCommands.at(path).f(_env);
         }
-        _inputFocus = currentEditor();
+        else if (_paletteFromSidebar) {
+            focusSidebar();
+        }
     });
 
     _completeView->visible(false);
@@ -264,10 +271,20 @@ void MainWindow::updateCursor(IScreen &screen) const {
 }
 
 bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
-    if (env->key() == KeyEvent{Key::F3} &&
-        (_inputFocus == &_sidebar ||
-         _inputFocus == _editors.at(_currentEditor).get())) {
+    const auto sidebarOrEditorFocused =
+        _inputFocus == &_sidebar ||
+        _inputFocus == _editors.at(_currentEditor).get();
+    if (env->key() == KeyEvent{Key::F3} && sidebarOrEditorFocused) {
         toggleSidebar();
+        return true;
+    }
+    if (env->key() == KeyEvent{Key::F6} && sidebarOrEditorFocused) {
+        if (_inputFocus == &_sidebar) {
+            resetFocus();
+        }
+        else {
+            focusSidebar();
+        }
         return true;
     }
     if (_inputFocus == &_sidebar) {
@@ -575,21 +592,35 @@ void MainWindow::showFileSwitcher() {
 }
 
 void MainWindow::showCommandPalette() {
+    _paletteFromSidebar = _inputFocus == &_sidebar;
     _commandPalette->visible(true);
     _inputFocus = _commandPalette.get();
 }
 
-void MainWindow::toggleSidebar() {
-    _sidebarRequested = !_sidebarRequested;
-    if (_sidebarRequested) {
+void MainWindow::focusSidebar() {
+    if (!_sidebarRequested) {
+        _sidebarRequested = true;
         auto &project = _env->core().project();
         project.updateCache(); // Once when opening, never during drawing.
         _sidebar.files(project.settings().root, project.files());
+        resize();
     }
-    resize();
-    if (_sidebarRequested && _sidebar.visible())
+    // A panel hidden for lack of space cannot take focus.
+    if (_sidebar.visible()) {
         _inputFocus = &_sidebar;
-    else if (_inputFocus == &_sidebar)
+    }
+    triggerRedraw();
+}
+
+void MainWindow::toggleSidebar() {
+    if (!_sidebarRequested) {
+        focusSidebar();
+        return;
+    }
+    _sidebarRequested = false;
+    resize();
+    if (_inputFocus == &_sidebar) {
         resetFocus();
+    }
     triggerRedraw();
 }

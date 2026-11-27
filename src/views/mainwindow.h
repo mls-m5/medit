@@ -24,6 +24,7 @@ struct MainWindow : public Window {
     SideBar _sidebar{this};
     MainWindowLayout _layout;
     bool _sidebarRequested = false;
+    bool _paletteFromSidebar = false;
     size_t _split = 10;
     FString _splitString;
     IKeySink *_inputFocus = nullptr;
@@ -132,4 +133,5 @@ struct MainWindow : public Window {
     void showCommandPalette();
 
     void toggleSidebar();
+    void focusSidebar();
 };
