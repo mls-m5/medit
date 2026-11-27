@@ -1,0 +1,14 @@
+
+build/
+bin/
+
+
+# qtcreator project files
+*.cflags
+*.config
+*.creator
+*.creator.user
+*.cxxflags
+*.files
+*.includes
+.qtc_clangd/
