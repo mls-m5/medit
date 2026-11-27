@@ -1,12 +1,14 @@
 #pragma once
 
 #include "ienvironment.h"
+#include "keys/event.h"
 #include <filesystem>
 #include <functional>
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 // This list should contain only core commands, the rest is registered through
 // StaticCommandRegister or some other method
@@ -127,6 +129,15 @@ struct StandardCommands {
                     void *ref);
 
     void removeCommand(void *ref);
+
+    /// Remember that `key` runs the command `name`, to show it to the user,
+    /// e.g. in the command palette. Does not bind the key.
+    void shortcut(const std::string &name, KeyEvent key);
+
+    /// The shortcuts of a command, e.g. "Ctrl+O, Ctrl+K"; empty if none.
+    std::string shortcutDescription(const std::string &name) const;
+
+    std::unordered_map<std::string, std::vector<KeyEvent>> shortcuts;
 };
 
 #undef STD_DEF

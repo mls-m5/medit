@@ -3,6 +3,7 @@
 #include "meditfwd.h"
 #include "text/utf8char.h"
 #include <functional>
+#include <string>
 #include <variant>
 
 enum class Key {
@@ -78,6 +79,10 @@ public:
 
     /// Create a key event from string representation
     static KeyEvent translate(std::string name);
+
+    /// How a shortcut is shown to the user, e.g. "Ctrl+O" or "F4". Empty for
+    /// events that are not shortcuts.
+    std::string description() const;
 
     Key key = Key::Unknown;
     Utf8Char symbol = {};

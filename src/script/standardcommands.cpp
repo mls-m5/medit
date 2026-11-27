@@ -24,6 +24,7 @@
 #include "togglecomments.h"
 #include "views/editor.h"
 #include "views/mainwindow.h"
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <map>
@@ -674,6 +675,33 @@ const std::function<void(StandardCommands::EnvPtrT)> &StandardCommands::f(
     std::cerr << "could not bind to non existing command " << name << std::endl;
 
     return doNothing;
+}
+
+void StandardCommands::shortcut(const std::string &name, KeyEvent key) {
+    auto &keys = shortcuts[name];
+    if (std::find(keys.begin(), keys.end(), key) == keys.end()) {
+        keys.push_back(key);
+    }
+}
+
+std::string StandardCommands::shortcutDescription(
+    const std::string &name) const {
+    auto found = shortcuts.find(name);
+    if (found == shortcuts.end()) {
+        return {};
+    }
+    auto ret = std::string{};
+    for (auto &key : found->second) {
+        auto text = key.description();
+        if (text.empty()) {
+            continue;
+        }
+        if (!ret.empty()) {
+            ret += ", ";
+        }
+        ret += text;
+    }
+    return ret;
 }
 
 void StandardCommands::addCommand(std::string_view name,

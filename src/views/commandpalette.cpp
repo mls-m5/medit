@@ -16,7 +16,7 @@ QuickList::PopulateRetT CommandPalette::populate() const {
             .text = FString{str, Palette::identifier},
             .value = c.first,
             .emphasisStart = 0,
-            .hint = {},
+            .hint = FString{_commands.shortcutDescription(c.first)},
         });
     }
     // The commands are stored unordered; show them alphabetically.
