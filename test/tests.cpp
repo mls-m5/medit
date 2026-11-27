@@ -14,6 +14,7 @@
 #include "project_test.cpp"
 #include "serializescreen_test.cpp"
 #include "sidebar_test.cpp"
+#include "sidebarfocus_test.cpp"
 #include "utf8char_test.cpp"
 #include "vim_test.cpp"
 #include "wordsiterator_test.cpp"
