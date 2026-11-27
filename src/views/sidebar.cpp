@@ -223,11 +223,11 @@ void SideBar::draw(IScreen &screen) {
                 label = " Project";
             else if (index < _entries.size()) {
                 const auto &entry = _entries[index];
-                label = index == _current ? ">" : " ";
+                label = index == _current ? "›" : " ";
                 label += std::string(
                     std::min(entry.depth, contentWidth / 2) * 2, ' ');
                 if (entry.directory)
-                    label += _expanded.contains(entry.path) ? "v " : "> ";
+                    label += _expanded.contains(entry.path) ? "▾ " : "▸ ";
                 else
                     label += "  ";
                 const auto name = entry.path.filename().string();
@@ -239,7 +239,7 @@ void SideBar::draw(IScreen &screen) {
             screen.draw(x(), y() + row, line);
         }
         screen.draw(
-            x() + contentWidth, y() + row, FString{"|", Palette::lineNumbers});
+            x() + contentWidth, y() + row, FString{"│", Palette::lineNumbers});
     }
 }
 
