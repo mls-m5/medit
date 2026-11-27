@@ -3,6 +3,7 @@
 #include "basichighlighting_test.cpp"
 #include "buffer_test.cpp"
 #include "commandrunner_test.cpp"
+#include "consolecommands_test.cpp"
 #include "bufferkeymap_test.cpp"
 #include "cursorops_test.cpp"
 #include "cursorrangeops_test.cpp"

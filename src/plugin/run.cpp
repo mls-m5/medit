@@ -5,7 +5,7 @@
 #include "views/console.h"
 #include "views/editor.h"
 
-void run(std::shared_ptr<IEnvironment> env) {
+void run(std::shared_ptr<IEnvironment> env, bool clearConsole) {
 #ifndef __EMSCRIPTEN__
     auto &project = env->project();
 
@@ -26,8 +26,9 @@ void run(std::shared_ptr<IEnvironment> env) {
     auto console = Console{
         .openingMessage =
             FString{"running application: ", Palette::comment} + runCommand,
-        .command = runCommand,
+        .command = Command::shell(runCommand, root),
         .buffer = &env->console().buffer(),
+        .shouldClear = clearConsole,
     };
 
     console.run(env);

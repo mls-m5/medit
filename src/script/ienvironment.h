@@ -6,6 +6,8 @@
 #include <functional>
 #include <memory>
 
+class ConsoleCommands;
+
 // Things common to the whole application
 class IEnvironment : public std::enable_shared_from_this<IEnvironment> {
 public:
@@ -32,6 +34,9 @@ public:
 
     //! In the future this can be multiple values depending on which console
     virtual void showConsole(bool shown = true) = 0;
+
+    //! Commands running in this window's console
+    [[nodiscard]] virtual ConsoleCommands &consoleCommands() = 0;
 
     virtual const StandardCommands &standardCommands() const = 0;
 

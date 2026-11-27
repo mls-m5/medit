@@ -5,6 +5,7 @@
 #include "keys/event.h"
 #include "meditfwd.h"
 #include "script/standardcommands.h"
+#include "views/console.h"
 #include "views/editor.h"
 #include <functional>
 
@@ -17,6 +18,8 @@ class LocalEnvironment : public IEnvironment {
     bool _showConsole = false;
     ThreadContext &_context;
     Registers _registers;
+    // Last, so running commands are stopped before the rest is destroyed.
+    ConsoleCommands _consoleCommands;
 
 public:
     LocalEnvironment(CoreEnvironment &core,
@@ -47,6 +50,10 @@ public:
 
     bool showConsole() {
         return _showConsole;
+    }
+
+    ConsoleCommands &consoleCommands() override {
+        return _consoleCommands;
     }
 
     ThreadContext &context() override {

@@ -55,7 +55,7 @@ void gitPush(std::shared_ptr<IEnvironment> env) {
     auto root = env->project().settings().root;
     auto console = Console{
         .openingMessage = FString{"git push", Palette::comment},
-        .command = "git -C \"" + root.string() + "\" push",
+        .command = Command{{"git", "push"}, root},
         .buffer = &env->console().buffer(),
     };
 

@@ -462,8 +462,20 @@ StandardCommands create() {
         ::build(env);
     };
     DEF(run) {
-        ::build(env);
-        ::run(env);
+        // Run only after a successful build. A weak reference, so a build in
+        // progress does not keep a closed window alive.
+        ::build(env, [weakEnv = std::weak_ptr{env}](bool succeeded) {
+            auto env = weakEnv.lock();
+            if (!env) {
+                return;
+            }
+            if (succeeded) {
+                ::run(env, false);
+            }
+            else {
+                env->statusMessage(FString{"build failed, not running"});
+            }
+        });
     };
     DEF(insert_mode) {
         env->editor().mode(createInsertMode());
