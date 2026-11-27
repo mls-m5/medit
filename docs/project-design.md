@@ -102,7 +102,11 @@ public:
   for platforms without watching (watch is a no-op, never `nullptr`), and an
   in-memory implementation for tests.
 - `File` gets its content through `IFileSystem`. Buffers keep using `IFile` and
-  never see paths being read or written.
+  never see paths being read or written. The one exception today,
+  `Buffer::open()` constructing a `File` and calling
+  `std::filesystem::is_regular_file`, moves to `Files`. If a buffer later
+  needs to know whether its file changed on disk, `IFile` answers and its
+  implementation asks `IFileSystem`.
 - Process execution is not a file operation and gets a separate
   `ICommandRunner`; see below.
 
@@ -127,13 +131,21 @@ struct Command {
     }
 };
 
+// Optional line callbacks. A stream with a callback is delivered line by
+// line (without the newline) and is not collected in CommandResult.
+struct CommandOutput {
+    std::function<void(std::string_view)> output;
+    std::function<void(std::string_view)> errors;
+};
+
 class ICommandRunner {
 public:
     virtual ~ICommandRunner() = default;
-    // Blocking; call from the job thread. No shell unless the command is
-    // built with Command::shell, so paths are passed as-is and need no
-    // quoting.
-    virtual CommandResult run(const Command &) = 0;
+    // Blocking; prefer the job thread. No shell unless the command is built
+    // with Command::shell, so paths are passed as-is and need no quoting.
+    // Callbacks run on the calling thread.
+    virtual CommandResult run(const Command &,
+                              const CommandOutput &stream = {}) = 0;
 };
 ```
 
