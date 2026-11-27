@@ -128,11 +128,8 @@ void gitAdd(std::shared_ptr<IEnvironment> env) {
         Command{{"git", "add", "--", path.string()}, path.parent_path()};
     std::cout << command.description() << std::endl;
 
-    const auto result = env->core().commandRunner().run(command);
-    std::cout << result.output;
-    if (result.exitCode) {
-        std::cerr << result.errors;
-    }
+    env->core().commandRunner().run(command,
+                                    CommandOutput::to(std::cout, std::cerr));
 }
 
 } // namespace
