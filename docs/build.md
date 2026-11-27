@@ -8,8 +8,10 @@ submodules with `git submodule update --init --recursive` before configuring. A 
 nlohmann/json 3.12.0; it needs network access.
 
 This build-compatibility branch pins `lib/json.h` to `009d642` (its CMake
-minimum-version update) and `lib/lsp-client` to `e092450` (the earlier JSON
-compatibility and default-value changes, **not** the later stderr feature).
+minimum-version update). `lib/lsp-client` is no longer a submodule: its full
+history is merged into this repository (subtree merge of upstream `e092450`, the
+earlier JSON compatibility and default-value changes, **not** the later stderr
+feature, which is still to be merged).
 The GitHub Actions native build installs `libncurses-dev`; the container build
 uses Ubuntu 24.04 and installs the same package. Test dependency upgrades with
 a fresh build directory as well as the existing test suite.
