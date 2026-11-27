@@ -115,15 +115,38 @@ struct CommandResult {
     std::string errors;   // stderr, kept apart from the protocol output
 };
 
+struct Command {
+    std::vector<std::string> arguments; // arguments[0] is the program
+    Path workingDirectory;
+
+    // For commands the user writes in .medit.json (build, run, format):
+    // these are meant to be shell syntax.
+    static Command shell(std::string commandLine, Path workingDirectory) {
+        return {{"/bin/sh", "-c", std::move(commandLine)},
+                std::move(workingDirectory)};
+    }
+};
+
 class ICommandRunner {
 public:
     virtual ~ICommandRunner() = default;
-    // Blocking; call from the job thread. No shell: arguments are passed
-    // as-is, so paths need no quoting.
-    virtual CommandResult run(std::vector<std::string> arguments,
-                              const Path &workingDirectory) = 0;
+    // Blocking; call from the job thread. No shell unless the command is
+    // built with Command::shell, so paths are passed as-is and need no
+    // quoting.
+    virtual CommandResult run(const Command &) = 0;
 };
 ```
+
+Callers today fall into three groups:
+
+| Group | Where | Change |
+|---|---|---|
+| Paths pasted into shell strings | `git.cpp` (add, blame, push), `gitcommitinteraction.cpp` (rm, add, commit), `genericformat.cpp` (six formatters) | Argument lists; this is where quoting breaks today |
+| User-written commands | build, run and format commands from `.medit.json` | `Command::shell`, with an explicit working directory |
+| Streaming output | `Console` (build, run, git push) | Later: a line-callback variant of `run` |
+
+`fifofile.cpp` runs `mkfifo` through `system()`; it should call `::mkfifo()`
+instead and needs no runner at all.
 
 - Separate from `IFileSystem` because the concerns differ: file-system tests
   do not need a command fake, and commands are also used by formatting, build
@@ -240,20 +263,24 @@ as a starting point; proper diff highlighting is a separate design.
 
 Each step is one branch, built and tested on its own.
 
-1. **`IFileSystem` and `ICommandRunner`** with Linux, null and in-memory
-   implementations. `File` and `Files` use them. The old
+1. **`ICommandRunner`** with a Linux implementation (`posix_spawn`, separate
+   stdout/stderr pipes read without deadlock) and a fake. Migrate the Git
+   commands that take paths, with a regression test for a filename containing
+   quotes. Formatters, `mkfifo` and the console follow as separate small
+   steps.
+2. **`IFileSystem`** with Linux, null and in-memory implementations. `File` and `Files` use them. The old
    `DirectoryNotifications` stays behind an adapter for now. No intended
    behavior change, except that non-Linux builds get a null watcher instead of
    `nullptr`. *Touches watch dispatch: approval needed.*
-2. **Snapshot, `FileSource` and subscription.** The directory source reproduces
+3. **Snapshot, `FileSource` and subscription.** The directory source reproduces
    today's scan. `Project` exposes `ProjectFiles`. Callers are adapted: tree,
    locator, browse interaction, Markdown navigation, header switching. Per-event
    `add`/`removeCachedFile` is removed. The tree subscribes instead of refreshing
    on F3. *Touches scanning: approval needed.*
-3. **Git source as default**, with the fallback to directory.
-4. **Changed-in-Git source**, the menu entry for choosing a source, and the
+4. **Git source as default**, with the fallback to directory.
+5. **Changed-in-Git source**, the menu entry for choosing a source, and the
    read-only diff view.
-5. **Watch-driven refresh**: debounced hints, recursive watching, `.git/index`.
+6. **Watch-driven refresh**: debounced hints, recursive watching, `.git/index`.
    Remove `DirectoryNotifications`. *Approval needed.*
 
 Later, separately: buffer reload/conflict handling on external changes through
