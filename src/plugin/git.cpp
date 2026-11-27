@@ -2,6 +2,7 @@
 #include "core/icommandrunner.h"
 #include "files/project.h"
 #include "gitcommitinteraction.h"
+#include "gitdiff.h"
 #include "script/ienvironment.h"
 #include "script/interaction.h"
 #include "script/standardcommands.h"
@@ -153,4 +154,15 @@ void registerGitCommands(StandardCommands &sc) {
     sc.addCommand("git_commit_amend", beginGitCommitAmmend, nullptr);
     sc.addCommand("git_blame", gitBlame, nullptr);
     sc.addCommand("git_add", gitAdd, nullptr);
+    sc.addCommand(
+        "git_diff_file",
+        [](std::shared_ptr<IEnvironment> env) {
+            auto file = env->editor().file();
+            if (!file) {
+                env->statusMessage({"The current buffer has no file"});
+                return;
+            }
+            showGitDiff(env, file->path());
+        },
+        nullptr);
 }

@@ -10,6 +10,7 @@
 #include "fstring_test.cpp"
 #include "genericformat_test.cpp"
 #include "gitcommit_test.cpp"
+#include "gitdiff_test.cpp"
 #include "history_test.cpp"
 #include "jumplist_test.cpp"
 #include "keysettings_test.cpp"
