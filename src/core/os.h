@@ -5,6 +5,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
 
 enum Os {
@@ -29,16 +30,9 @@ constexpr Os getOs() {
 #endif
 }
 
-[[nodiscard]] inline bool hasCommand(std::string command) {
-    if constexpr (getOs() == Os::Linux) {
-        return !system(("command -v " + command + " > /dev/null").c_str());
-    }
-    else {
-        throw std::runtime_error{std::string{__FILE__} + ":" +
-                                 std::to_string(__LINE__) +
-                                 " is not implemented "};
-    }
-}
+/// True if `command` is an executable program: a path containing '/', or a
+/// name found in PATH. Does not run anything (shell builtins are not found).
+[[nodiscard]] bool hasCommand(std::string_view command);
 
 [[nodiscard]] std::filesystem::path executablePath();
 

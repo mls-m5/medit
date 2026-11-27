@@ -43,6 +43,39 @@ void revealInExplorer(std::filesystem::path path) {
 #include <signal.h>
 #include <unistd.h>
 
+bool hasCommand(std::string_view command) {
+    if (command.empty()) {
+        return false;
+    }
+    const auto isExecutable = [](const std::filesystem::path &path) {
+        auto error = std::error_code{};
+        return std::filesystem::is_regular_file(path, error) &&
+               ::access(path.c_str(), X_OK) == 0;
+    };
+    if (command.find('/') != std::string_view::npos) {
+        return isExecutable(std::filesystem::path{command});
+    }
+    const auto *pathVariable = std::getenv("PATH");
+    if (!pathVariable) {
+        return false;
+    }
+    auto directories = std::string_view{pathVariable};
+    for (;;) {
+        const auto separator = directories.find(':');
+        const auto directory = directories.substr(0, separator);
+        // An empty entry means the current directory.
+        const auto base = directory.empty() ? std::filesystem::path{"."}
+                                            : std::filesystem::path{directory};
+        if (isExecutable(base / command)) {
+            return true;
+        }
+        if (separator == std::string_view::npos) {
+            return false;
+        }
+        directories.remove_prefix(separator + 1);
+    }
+}
+
 std::filesystem::path getPath() {
     auto possibleLinks = std::array<std::filesystem::path, 3>{
         "/proc/self/exe",
