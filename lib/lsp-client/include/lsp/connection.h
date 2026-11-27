@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -12,6 +13,8 @@ namespace lsp {
 struct Connection {
     using HandleFunctionT = std::function<void(std::istream &)>;
     using ExitedFunctionT = std::function<void()>;
+    // Invoked on the stderr reader thread; text does not include the newline.
+    using ErrorFunctionT = std::function<void(std::string)>;
 
     Connection(const Connection &) = delete;
     Connection(Connection &&) = delete;
@@ -21,7 +24,8 @@ struct Connection {
     /// A new thread is created that gets a reference to the input stream
     /// ExitedFunction is called if the process was closed with a error return
     /// code
-    Connection(std::string command, HandleFunctionT callback, ExitedFunctionT);
+    Connection(std::string command, HandleFunctionT callback, ExitedFunctionT,
+               ErrorFunctionT error = {});
 
     /// Note that you need to
     ~Connection();
@@ -45,13 +49,12 @@ private:
 
     std::ofstream _out;
     std::ifstream _in;
-    std::ifstream _error;
 
     std::thread _thread;
     std::thread _clangdThread;
     std::thread _errorThread;
 
-    bool _isServerRunning = false;
+    std::atomic<bool> _isServerRunning = false;
 
     ExitedFunctionT _exitedCallback;
 };
