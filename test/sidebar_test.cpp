@@ -159,4 +159,61 @@ TEST_CASE("single-column tree markers show selection and directory state") {
     ASSERT_EQ(expanded, true);
 }
 
+TEST_CASE("mouse clicks map rows to entries and exclude the divider") {
+    SideBar sidebar{nullptr};
+    sidebar.x(2);
+    sidebar.y(1);
+    sidebar.width(10);
+    sidebar.height(4);
+    const SideBar::Path root{"/tmp/tree"};
+    SideBar::Path opened;
+    sidebar.onOpen([&](const auto &path) { opened = path; });
+    sidebar.files(root, {root / "dir/inner.cpp", root / "a.cpp"});
+    // Rows: title, root, dir, a.cpp.
+
+    ASSERT_EQ(sidebar.contains(11, 2), false); // Divider column.
+    ASSERT_EQ(sidebar.contains(1, 2), false);
+    ASSERT_EQ(sidebar.contains(2, 5), false);
+    ASSERT_EQ(sidebar.mouseDown(11, 2), false);
+
+    ASSERT_EQ(sidebar.mouseDown(2, 1), true); // Title row.
+    ASSERT_EQ(sidebar.current(), 0u);
+
+    ASSERT_EQ(sidebar.mouseDown(5, 3), true); // Directory: expand.
+    ASSERT_EQ(sidebar.expanded(root / "dir"), true);
+    ASSERT_EQ(sidebar.entries()[sidebar.current()].path, root / "dir");
+    ASSERT_EQ(sidebar.entries().size(), 4u);
+    ASSERT_EQ(opened.empty(), true);
+
+    ASSERT_EQ(sidebar.mouseDown(5, 4), true); // File: open.
+    ASSERT_EQ(opened, root / "dir/inner.cpp");
+
+    ASSERT_EQ(sidebar.mouseDown(5, 3), true); // Directory: collapse.
+    ASSERT_EQ(sidebar.expanded(root / "dir"), false);
+}
+
+TEST_CASE("mouse clicks account for scrolling and ignore empty rows") {
+    SideBar sidebar{nullptr};
+    sidebar.width(10);
+    sidebar.height(3); // Title and two entries.
+    const SideBar::Path root{"/tmp/tree"};
+    SideBar::Path opened;
+    sidebar.onOpen([&](const auto &path) { opened = path; });
+    sidebar.files(root, {root / "a.cpp", root / "b.cpp", root / "c.cpp"});
+    sidebar.handleKey(KeyEvent{Key::End}); // Scrolls to c.cpp.
+    ASSERT_EQ(sidebar.yScroll(), 2u);
+    ASSERT_EQ(sidebar.mouseDown(0, 1), true);
+    ASSERT_EQ(opened, root / "b.cpp");
+
+    SideBar shortTree{nullptr};
+    shortTree.width(10);
+    shortTree.height(5);
+    shortTree.onOpen([&](const auto &path) { opened = path; });
+    shortTree.files(root, {root / "a.cpp"});
+    opened.clear();
+    ASSERT_EQ(shortTree.mouseDown(0, 4), true); // Below the last entry.
+    ASSERT_EQ(opened.empty(), true);
+    ASSERT_EQ(shortTree.current(), 0u);
+}
+
 TEST_SUIT_END
