@@ -19,6 +19,7 @@
 #include "palette_test.cpp"
 #include "playbackedit_test.cpp"
 #include "project_test.cpp"
+#include "quicklist_test.cpp"
 #include "serializescreen_test.cpp"
 #include "sidebar_test.cpp"
 #include "sidebarfocus_test.cpp"

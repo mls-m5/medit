@@ -1,20 +1,30 @@
 #include "quicklist.h"
 #include "script/ienvironment.h"
+#include "syntax/palette.h"
 #include "text/buffer.h"
-#include "text/utf8caseconversion.h"
+#include <algorithm>
 #include <filesystem>
 #include <string>
 
 namespace {
 
-std::string convertToComparableString(const FString &str) {
-    auto ret = std::string{toLower(str)};
-    for (auto &c : ret) {
-        if (c == '_') {
-            c = ' ';
+constexpr size_t hintGap = 4;
+constexpr size_t minWidth = 40;
+
+/// The text with the matched characters highlighted.
+FString highlighted(FString text, const std::vector<size_t> &positions) {
+    for (auto position : positions) {
+        if (position < text.size()) {
+            text.at(position).f = Palette::statement;
         }
     }
-    return ret;
+    return text;
+}
+
+bool isBlankPattern(const FString &pattern) {
+    return std::all_of(pattern.begin(), pattern.end(), [](const FChar &c) {
+        return c.c == ' ' || c.c == '_';
+    });
 }
 
 } // namespace
@@ -36,7 +46,7 @@ bool QuickList::keyPress(std::shared_ptr<IEnvironment> env) {
     else {
         auto ret = Editor::keyPress(env);
 
-        updateList();
+        filter();
         return ret;
     }
 }
@@ -76,27 +86,68 @@ bool QuickList::visible() const {
 }
 
 void QuickList::updateList() {
-    const size_t maxFillLen = 20;
-    _list.clear();
-
-    //     auto bufferStr = std::string(toLower(FString{buffer().text()}));
-    auto bufferStr = convertToComparableString(buffer().text());
-
-    for (auto &item : _populate()) {
-        size_t fillLen = 1;
-        //         auto str = std::string{toLower(item.second)};
-        auto str = convertToComparableString(item.second);
-
-        if (str.find(bufferStr) == std::string::npos) {
-            continue;
-        }
-
-        if (item.first.size() < maxFillLen) {
-            fillLen = maxFillLen - item.first.size();
-        }
-
-        _list.addLine(FString{item.first} +
-                          FString{std::string(fillLen, ' '), 1} + item.second,
-                      std::string{item.second});
+    // Read once per opening, not per key press: listing project files can be
+    // slow, and the list rarely changes while the user types.
+    _items = _populate();
+    _candidates.clear();
+    _candidates.reserve(_items.size());
+    for (auto &item : _items) {
+        _candidates.push_back({item.text, item.emphasisStart});
     }
+    filter();
+}
+
+void QuickList::filter() {
+    _list.clear();
+    _shownValues.clear();
+
+    const auto pattern = FString{buffer().text()};
+
+    struct Row {
+        const QuickListItem *item = nullptr;
+        std::vector<size_t> positions;
+    };
+    auto rows = std::vector<Row>{};
+    if (isBlankPattern(pattern)) {
+        // Nothing typed: keep the order the list was given in.
+        for (size_t i = 0; i < _items.size() && i < maxShown; ++i) {
+            rows.push_back({&_items[i], {}});
+        }
+    }
+    else {
+        for (auto &ranked : fuzzyRank(pattern, _candidates, maxShown)) {
+            rows.push_back(
+                {&_items.at(ranked.index), std::move(ranked.match.positions)});
+        }
+    }
+
+    auto textWidth = size_t{0};
+    auto hintWidth = size_t{0};
+    for (auto &row : rows) {
+        textWidth = std::max(textWidth, row.item->text.size());
+        hintWidth = std::max(hintWidth, row.item->hint.size());
+    }
+    // Every row as wide as the widest, with a margin, so the list is drawn as
+    // a box over the editor instead of ragged lines.
+    const auto rowWidth = std::max(
+        minWidth, textWidth + (hintWidth ? hintGap + hintWidth : 0) + 2);
+
+    for (auto &row : rows) {
+        auto line = FString{" ", Palette::standard};
+        line += highlighted(row.item->text, row.positions);
+        if (!row.item->hint.empty()) {
+            const auto hintStart = rowWidth - 1 - row.item->hint.size();
+            line += FString{std::string(hintStart - line.size(), ' '),
+                            Palette::standard};
+            line += FString{row.item->hint, Palette::comment};
+        }
+        line += FString{std::string(rowWidth - line.size(), ' '),
+                        Palette::standard};
+        _list.addLine(std::move(line), row.item->value);
+        _shownValues.push_back(row.item->value);
+    }
+}
+
+std::vector<std::string> QuickList::shownValues() const {
+    return _shownValues;
 }
