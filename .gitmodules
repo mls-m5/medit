@@ -7,6 +7,3 @@
 [submodule "lib/matrix-screen"]
 	path = lib/matrix-screen
 	url = https://github.com/mls-m5/matrix-screen
-[submodule "lib/lsp-client"]
-	path = lib/lsp-client
-	url = https://github.com/mls-m5/lsp-client
