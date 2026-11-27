@@ -44,6 +44,10 @@ CoreEnvironment::~CoreEnvironment() {
     unsubscribeToLog();
 }
 
+ICommandRunner &CoreEnvironment::commandRunner() {
+    return *_commandRunner;
+}
+
 IDebugger *CoreEnvironment::debugger() {
     auto &debuggers = _plugins.get<IDebugger>();
 

@@ -1,3 +1,4 @@
+#include "core/commandrunner.cpp"
 #include "core/fifofile.cpp"
 #include "core/fifofilelistener.cpp"
 #include "core/inarchive.cpp"

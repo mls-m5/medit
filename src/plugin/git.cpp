@@ -1,4 +1,5 @@
-#include "files/popenstream.h"
+#include "core/coreenvironment.h"
+#include "core/icommandrunner.h"
 #include "files/project.h"
 #include "gitcommitinteraction.h"
 #include "script/ienvironment.h"
@@ -8,8 +9,10 @@
 #include "text/fstring.h"
 #include "views/console.h"
 #include "views/editor.h"
+#include <iostream>
 #include <istream>
 #include <memory>
+#include <sstream>
 #include <string>
 
 namespace {
@@ -61,17 +64,21 @@ void gitPush(std::shared_ptr<IEnvironment> env) {
 
 void viewResultAsInteraction(
     std::shared_ptr<IEnvironment> env,
-    const std::string &command,
+    const Command &command,
     std::function<void(FString &)> extraLineFormat = {}) {
-    auto stream = POpenStream{command};
+    auto result = env->core().commandRunner().run(command);
+    auto stream = std::istringstream{result.output};
 
     auto interaction = Interaction{
         .text = universalGitFormat(stream, extraLineFormat),
-        .title = command + "...",
+        .title = command.description() + "...",
     };
 
-    if (stream.returnCode()) {
-        interaction.text += ("\n command failed: " + command);
+    if (result.exitCode) {
+        interaction.text += ("\n command failed: " + command.description());
+        if (!result.errors.empty()) {
+            interaction.text += "\n" + result.errors;
+        }
     }
 
     interaction.begin(env->interactions(), {});
@@ -85,7 +92,9 @@ void gitBlame(std::shared_ptr<IEnvironment> env) {
         return;
     }
 
-    auto command = "git blame \"" + file->path().string() + "\"";
+    const auto path = file->path();
+    const auto command =
+        Command{{"git", "blame", "--", path.string()}, path.parent_path()};
 
     auto formatF = [](FString &line) {
         auto f = line.find(' ');
@@ -114,30 +123,35 @@ void gitAdd(std::shared_ptr<IEnvironment> env) {
     }
 
     std::cout << "adding current file\n";
-    auto command = "git add \"" + file->path().string() + "\"";
-    std::cout << command << std::endl;
+    const auto path = file->path();
+    const auto command =
+        Command{{"git", "add", "--", path.string()}, path.parent_path()};
+    std::cout << command.description() << std::endl;
 
-    auto stream = POpenStream{command};
-    std::cout << stream.rdbuf();
+    const auto result = env->core().commandRunner().run(command);
+    std::cout << result.output;
+    if (result.exitCode) {
+        std::cerr << result.errors;
+    }
 }
 
 } // namespace
 
 void registerGitCommands(StandardCommands &sc) {
-    //    auto git = std::string{"git -c color.status=always "};
-    auto git = std::string{"git "};
-
-    auto wrapInteraction = [](std::string command)
+    auto wrapInteraction = [](std::vector<std::string> arguments)
         -> std::function<void(std::shared_ptr<IEnvironment>)> {
-        return [command](auto env) { viewResultAsInteraction(env, command); };
+        arguments.insert(arguments.begin(), "git");
+        return [command = Command{std::move(arguments)}](auto env) {
+            viewResultAsInteraction(env, command);
+        };
     };
 
-    sc.addCommand("git_status", wrapInteraction(git + " status"), nullptr);
-    sc.addCommand("git_diff", wrapInteraction(git + " diff"), nullptr);
+    sc.addCommand("git_status", wrapInteraction({"status"}), nullptr);
+    sc.addCommand("git_diff", wrapInteraction({"diff"}), nullptr);
     sc.addCommand(
-        "git_diff_cached", wrapInteraction(git + " diff --cached"), nullptr);
+        "git_diff_cached", wrapInteraction({"diff", "--cached"}), nullptr);
     sc.addCommand("git_push", gitPush, nullptr);
-    sc.addCommand("git_log", wrapInteraction(git + " log"), nullptr);
+    sc.addCommand("git_log", wrapInteraction({"log"}), nullptr);
     sc.addCommand("git_commit", beginGitCommit, nullptr);
     sc.addCommand("git_commit_amend", beginGitCommitAmmend, nullptr);
     sc.addCommand("git_blame", gitBlame, nullptr);

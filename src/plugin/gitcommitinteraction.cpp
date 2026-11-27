@@ -1,5 +1,7 @@
 #pragma once
 #include "gitcommitinteraction.h"
+#include "core/coreenvironment.h"
+#include "core/icommandrunner.h"
 #include "core/meditlog.h"
 #include "core/os.h"
 #include "files/config.h"
@@ -58,17 +60,17 @@ void handleGitCommitResponse(std::shared_ptr<IEnvironment> env,
             continue;
         }
 
-        if (isDelete) {
-            if (runCommand(("git rm --cached \"" + line + "\"").c_str())) {
-                logError("Failed to cache removed file ", line, " to git");
-                return;
-            }
-        }
-        else {
-            if (runCommand(("git add \"" + line + "\"").c_str())) {
-                logError("Failed to add ", line, " to git");
-                return;
-            }
+        const auto command =
+            isDelete ? Command{{"git", "rm", "--cached", "--", line}}
+                     : Command{{"git", "add", "--", line}};
+        if (const auto result = env->core().commandRunner().run(command);
+            result.exitCode) {
+            logError(isDelete ? "Failed to cache removed file "
+                              : "Failed to add ",
+                     line,
+                     " to git: ",
+                     result.errors);
+            return;
         }
 
         files.push_back(line);

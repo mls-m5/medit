@@ -2,6 +2,7 @@
 
 #include "core/context.h"
 #include "core/fifofilelistener.h"
+#include "core/icommandrunner.h"
 #include "core/logtype.h"
 #include "core/plugins.h"
 #include "files.h"
@@ -38,6 +39,9 @@ public:
 
     Project &project();
 
+    /// Runs external programs without a shell; see ICommandRunner.
+    ICommandRunner &commandRunner();
+
     void subscribeToLogCallback(
         std::function<void(LogType type, std::string)> f, void *ref);
 
@@ -49,6 +53,7 @@ private:
     ThreadContext *_context =
         nullptr; // TODO: Handle lifetime of CoreEnvironment better
     Plugins _plugins;
+    std::unique_ptr<ICommandRunner> _commandRunner = createCommandRunner();
     Files _files{*this};
 
     std::unique_ptr<Project> _project;
