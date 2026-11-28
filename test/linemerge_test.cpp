@@ -85,8 +85,14 @@ TEST_CASE("a diff that is too large becomes one hunk and is still right") {
     auto from = std::string{};
     auto to = std::string{};
     for (int i = 0; i < 50; ++i) {
-        from += "a" + std::to_string(i) + "\n";
-        to += "b" + std::to_string(i) + "\n";
+        // Appended piece by piece: `"a" + std::to_string(i)` gives a false
+        // -Wrestrict warning with GCC 12.
+        from += 'a';
+        from += std::to_string(i);
+        from += '\n';
+        to += 'b';
+        to += std::to_string(i);
+        to += '\n';
     }
     const auto hunks = diffLines(splitLines(from), splitLines(to), 10);
     ASSERT_EQ(hunks.size(), 1u);

@@ -62,7 +62,7 @@ TEST_CASE("tracked positions follow edits, undo and reloads") {
     // A reload that inserts two lines at the top keeps it on "c".
     buffer->replaceText("x\ny\nnew\na\nb\nc\n");
     EXPECT_TRUE((position.pos() == Position{0, 5}));
-    ASSERT_EQ(std::string{buffer->lineAt(position.pos().y()).front().c}, "c");
+    EXPECT_TRUE(buffer->lineAt(position.pos().y()).front().c == Utf8Char{'c'});
 }
 
 TEST_CASE("a tracked position outlives its buffer and releases its anchor") {
