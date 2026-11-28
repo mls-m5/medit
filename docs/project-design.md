@@ -1,8 +1,11 @@
 # Project files and file system: redesign
 
-**Draft for review, not approval to implement.** Each step below is a separate
-branch and needs its own review. Steps touching scanning, watching or
-notification dispatch are performance-sensitive and need explicit approval.
+Status: `ICommandRunner` (step 1) is on `main`. Steps 2–4 and 6 are being
+implemented on `feature/project-files`, following "Concrete plan" at the end;
+the operator approved that plan, including its performance-sensitive steps.
+Buffer reloading on external changes was done separately
+(`docs/file-reload-design.md`); it added `FileWatcher`, which this redesign
+reuses instead of `IFileSystem::watch`.
 
 ## Goals
 
@@ -319,3 +322,68 @@ filters in `.medit.json`.
    or separately?
 3. **Submodule cost**: listing runs one or two `git` calls per submodule. Fine
    for a handful; should there be a setting to skip them in large trees?
+
+## Concrete plan (`feature/project-files`)
+
+Built on `fix/cli-autodetect`, which has the reload work (`FileWatcher`,
+`DiskContent`, `File` baselines). One commit per step, each built and tested.
+
+### P1. `IFileSystem` without watching
+
+```cpp
+struct FileInfo { bool exists; bool isDirectory; bool isSymlink; };
+class IFileSystem {
+    virtual std::optional<std::string> read(const Path &) = 0;
+    virtual bool write(const Path &, std::string_view) = 0;
+    virtual FileInfo stat(const Path &) = 0;
+    virtual std::vector<Path> list(const Path &root, const ListFilter &) = 0;
+};
+```
+
+- `LocalFileSystem` (std::filesystem) and `MemoryFileSystem` for tests.
+- `File` reads and writes through it (`readDiskContent` becomes a call on it);
+  `CoreEnvironment::fileSystem()` owns the local one.
+- Watching stays in `FileWatcher` (directories, own thread), already used for
+  buffers; a second watch interface would duplicate it.
+
+### P2. Snapshot, `FileSource` and subscription
+
+- `ProjectFiles { Path root; std::vector<Path> files; bool truncated; }`,
+  sorted and unique, `.medit.json` always included.
+- `FileSource::list(root, limit)` runs on the job thread. `DirectorySource`
+  reproduces today's scan through `IFileSystem::list` (known extensions, skip
+  CMake build directories and `.git`).
+- `Project` owns the source and the snapshot. `refresh()` lists on the job
+  queue and swaps on the GUI thread; one running, at most one pending.
+  `subscribeToFiles()` returns a handle; callbacks run on the GUI thread when the
+  list actually changed. The first list is made synchronously at startup, as
+  today. Extension statistics come from each snapshot.
+- The per-event `add/remove/updateCachedFile` go away. `.medit.json` is
+  reloaded when the file watcher reports it.
+- Callers: the tree subscribes; the locator, browse interaction, Markdown
+  navigation and header switching read the snapshot. Opening the tree or the
+  locator asks for a refresh instead of rescanning on the GUI thread.
+
+### P3. Git source as default
+
+- `git ls-files -z --cached --others --exclude-standard` through
+  `ICommandRunner`, in the project root. Tracked files missing on disk are
+  dropped.
+- Submodules: an entry that is a directory with a `.git` is listed with the
+  same source and prefixed; nested ones too.
+- Not a repository, or no `git`: the directory source, with a status message.
+- Reaching the limit marks the snapshot truncated and says so.
+
+### P4. Refresh from watch hints
+
+- `Project` watches the root, the directories in the snapshot (capped, e.g.
+  2000, to stay within inotify limits) and `.git` (index and HEAD changes from
+  staging, commits and checkouts) with a `FileWatcher`.
+- Hints are debounced (about 200 ms) into one refresh.
+- `DirectoryNotifications` is removed.
+
+### Later
+
+The changed-in-Git source with its menu entry and diff view on open, the
+symlink marker, configurable flags, filters and limit.
+
