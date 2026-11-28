@@ -12,6 +12,7 @@
 #include "settings.h"
 #include "thinmain.h"
 #include "views/mainwindow.h"
+#include <exception>
 #include <filesystem>
 #include <iostream>
 #include <string>
@@ -274,7 +275,23 @@ int main(int argc, char **argv) {
 #endif
 
     mainData = std::make_unique<MainData>();
-    mainData->start(settings);
+    try {
+        mainData->start(settings);
+    }
+    catch (const std::exception &e) {
+        const auto message = std::string{e.what()};
+#ifndef __EMSCRIPTEN__
+        mainData->stop();
+#endif
+        // After tearing down, since std::cerr goes to the editor's log while
+        // the core exists.
+        mainData = {};
+        std::cerr << "medit: " << message << "\n";
+        if (settings.style == UiStyle::Matgui) {
+            std::cerr << "medit: use --cli to start in the terminal\n";
+        }
+        return 1;
+    }
     setThreadName("main loop"); // Renaming since all child threads inherits the
                                 // first name
 

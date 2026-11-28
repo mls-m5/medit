@@ -4,7 +4,12 @@
 #include "sdlpp/rect.hpp"
 #include "sdlpp/surface.hpp"
 #include <algorithm>
+#include <cstdlib>
 #include <mutex>
+#include <optional>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 #include <thread>
 #include <vector>
 
@@ -119,6 +124,21 @@ bool isNumericKey(SDL_Scancode code) {
 
 constexpr auto dummyEventNum = SDL_USEREVENT + 1;
 
+/// False for SDL's offscreen and dummy drivers, unless the user asked for one
+/// with SDL_VIDEODRIVER.
+bool hasVisibleVideoDriver() {
+    const auto *driver = SDL_GetCurrentVideoDriver();
+    if (!driver) {
+        return false;
+    }
+    const auto name = std::string_view{driver};
+    if (name != "offscreen" && name != "dummy") {
+        return true;
+    }
+    const auto *requested = std::getenv("SDL_VIDEODRIVER");
+    return requested && name == requested;
+}
+
 } // namespace
 
 /// The rendering and gui is running on one thread and assumes the application
@@ -173,6 +193,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
 
         auto createMutex = std::mutex{};
         bool initialized = false;
+        auto error = std::optional<std::string>{};
         auto createCondition = std::condition_variable{};
 
         _thread = std::thread([this,
@@ -180,6 +201,7 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
                                height,
                                fontSize,
                                &initialized,
+                               &error,
                                &createCondition,
                                &createMutex] {
             _tv.reset();
@@ -192,9 +214,34 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
                                   width * 8,
                                   height * 8,
                                   SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN};
+            auto fail = [&](std::string message) {
+                _renderer.reset();
+                _window.reset();
+                auto lock = std::lock_guard{createMutex};
+                error = std::move(message);
+                initialized = true;
+                createCondition.notify_one();
+            };
+            if (!_window.get()) {
+                fail(SDL_GetError());
+                return;
+            }
+            if (!hasVisibleVideoDriver()) {
+                // SDL falls back to an invisible driver when there is no
+                // display (e.g. a stale DISPLAY over SSH), which would leave
+                // the editor running where nobody can see it.
+                const auto *driver = SDL_GetCurrentVideoDriver();
+                fail(std::string{"no display found (SDL video driver: "} +
+                     (driver ? driver : "none") + ")");
+                return;
+            }
             _renderer = sdl::Renderer{_window,
                                       SDL_RENDERER_ACCELERATED,
                                       0 * SDL_RENDERER_PRESENTVSYNC};
+            if (!_renderer.get()) {
+                fail(SDL_GetError());
+                return;
+            }
             sdl::startTextInput();
             _screen.emplace(width, height, fontPath(), fontSize);
             _styles.resize(16);
@@ -212,6 +259,10 @@ struct GuiScreen : public virtual IGuiScreen, public virtual IPixelSource {
         {
             auto lock = std::unique_lock{createMutex};
             createCondition.wait(lock, [&initialized] { return initialized; });
+        }
+        if (error) {
+            _thread.join();
+            throw std::runtime_error{"could not open a window: " + *error};
         }
     }
 
