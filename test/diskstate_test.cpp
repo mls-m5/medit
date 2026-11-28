@@ -222,15 +222,32 @@ TEST_CASE("a change on disk reloads only buffers without unsaved changes") {
     EXPECT_TRUE(buffer->diskState() == DiskState::InSync);
 }
 
-TEST_CASE("a file deleted on disk keeps the buffer's text") {
+TEST_CASE("a file deleted on disk closes an unchanged buffer") {
     disk_state_test::TemporaryDirectory dir;
     const auto path = dir.path / "a.txt";
     disk_state_test::write(path, "1\n");
     auto buffer = Buffer::open(path);
     std::filesystem::remove(path);
-    reloadFromDisk(*buffer);
+    EXPECT_TRUE(reloadFromDisk(*buffer) == ReloadResult::Close);
     ASSERT_EQ(buffer->text(), "1\n");
+}
+
+TEST_CASE("a file deleted on disk keeps and marks unsaved changes") {
+    disk_state_test::TemporaryDirectory dir;
+    const auto path = dir.path / "a.txt";
+    disk_state_test::write(path, "1\n");
+    auto buffer = Buffer::open(path);
+    disk_state_test::type(*buffer, 0, "mine ");
+    std::filesystem::remove(path);
+    EXPECT_TRUE(reloadFromDisk(*buffer) == ReloadResult::Kept);
+    ASSERT_EQ(buffer->text(), "mine 1\n");
     EXPECT_TRUE(buffer->diskState() == DiskState::DeletedOnDisk);
+    ASSERT_EQ(buffer->diagnostics().findLineDiagnostic(0)->message,
+              "deleted on disk");
+    // Saving writes it again.
+    EXPECT_TRUE(buffer->save());
+    ASSERT_EQ(disk_state_test::read(path), "mine 1\n");
+    EXPECT_TRUE(buffer->diskState() == DiskState::InSync);
 }
 
 TEST_CASE("loading, reloading and saving are recorded in the history") {

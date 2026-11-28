@@ -65,6 +65,11 @@ public:
 
     bool rename(std::filesystem::path from, std::filesystem::path to);
 
+    /// Forgets the buffer and emits BufferEvent::Close for it, so that views
+    /// stop showing it. Used for a file deleted on disk without unsaved
+    /// changes.
+    void close(std::shared_ptr<Buffer> buffer);
+
     /// Stops watching open files for changes on disk. Called before the job
     /// queues stop, since the watcher posts to them.
     void stopWatching();

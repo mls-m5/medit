@@ -106,6 +106,9 @@ struct MainWindow : public Window {
 
     void updateTitle();
 
+    /// Stops showing `buffer` in the editors that show it.
+    void bufferClosed(const Buffer &buffer);
+
     void statusMessage(FStringView str);
 
     // Commands --------------------

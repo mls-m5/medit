@@ -76,6 +76,15 @@ MainWindow::MainWindow(CoreEnvironment &core,
     _console->showLines(false);
     _console->buffer().assignFile(std::make_unique<UnsavableFile>("Console"));
     _env->console(_console.get());
+    // Buffers can be closed from the core, e.g. when their file is deleted.
+    _env->core().files().subscribeToBufferEvents(
+        [this](BufferEvent event) {
+            if (event.type == BufferEvent::Close && event.buffer) {
+                bufferClosed(*event.buffer);
+            }
+        },
+        nullptr,
+        this);
     _env->core().subscribeToLogCallback(
         [this](LogType type, std::string data) {
             _env->context().guiQueue().addTask(
@@ -153,7 +162,21 @@ MainWindow::MainWindow(CoreEnvironment &core,
 }
 
 MainWindow::~MainWindow() {
+    _env->core().files().unsubscribeToBufferEvents(this);
     _env->core().unsubscribeToConsoleCallback(this);
+}
+
+void MainWindow::bufferClosed(const Buffer &buffer) {
+    for (auto &editor : _editors) {
+        if (&editor->buffer() != &buffer) {
+            continue;
+        }
+        // Show the buffer it had before, or an empty one.
+        if (!editor->closeBuffer()) {
+            editor->buffer(_env->core().files().create());
+        }
+    }
+    updateTitle();
 }
 
 void MainWindow::resize(size_t w, size_t h) {

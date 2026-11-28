@@ -4,8 +4,11 @@
 #include "core/meditlog.h"
 #include "core/timer.h"
 #include "mls-unit-test/unittest.h"
+#include "mock/screen/mockscreen.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
+#include "views/editor.h"
+#include "views/mainwindow.h"
 #include <chrono>
 #include <cstdlib>
 #include <filesystem>
@@ -149,6 +152,80 @@ TEST_CASE("typing right after saving is kept") {
     ASSERT_EQ(buffer->text(), "ba1\n");
     EXPECT_TRUE(buffer->diskState() == DiskState::InSync);
     EXPECT_TRUE(buffer->isChanged());
+}
+
+TEST_CASE("a file deleted on disk is closed unless it has unsaved changes") {
+    file_watch_test::Fixture f;
+    const auto kept = f.project / "kept.txt";
+    const auto closed = f.project / "closed.txt";
+    file_watch_test::write(kept, "1\n");
+    file_watch_test::write(closed, "1\n");
+    auto keptBuffer = f.core.files().open(kept);
+    auto closedBuffer = f.core.files().open(closed);
+    insert(Cursor{*keptBuffer, 0, 0}, FString{"mine "});
+
+    auto closedEvents = 0;
+    f.core.files().subscribeToBufferEvents(
+        [&](BufferEvent event) {
+            if (event.type == BufferEvent::Close &&
+                event.buffer == closedBuffer) {
+                ++closedEvents;
+            }
+        },
+        nullptr,
+        &closedEvents);
+
+    std::filesystem::remove(kept);
+    std::filesystem::remove(closed);
+    EXPECT_TRUE(f.runUntil([&] {
+        return !f.core.files().find(closed) &&
+               keptBuffer->diskState() == DiskState::DeletedOnDisk;
+    }));
+    ASSERT_EQ(closedEvents, 1);
+    EXPECT_TRUE(f.core.files().find(kept) == keptBuffer);
+    ASSERT_EQ(keptBuffer->text(), "mine 1\n");
+    f.core.files().unsubscribeToBufferEvents(&closedEvents);
+}
+
+TEST_CASE("a closed buffer is no longer shown") {
+    file_watch_test::Fixture f;
+    MockScreen screen;
+    screen.mock_palette_1.expectNum(1);
+    screen.mock_title_1.nice(); // The title follows the buffer.
+    auto window = MainWindow{f.core, screen, f.context};
+    unsubscribeToLog();
+    const auto first = f.project / "first.txt";
+    const auto second = f.project / "second.txt";
+    file_watch_test::write(first, "first\n");
+    file_watch_test::write(second, "second\n");
+    window.open(first);
+    window.open(second);
+    auto *editor = window.currentEditor();
+    ASSERT_EQ(editor->buffer().text(), "second\n");
+
+    f.core.files().close(f.core.files().find(second));
+    // Back to the buffer shown before.
+    ASSERT_EQ(editor->buffer().text(), "first\n");
+
+    f.core.files().close(f.core.files().find(first));
+    // Nothing shown before that: an empty buffer.
+    ASSERT_EQ(editor->buffer().text(), "");
+    EXPECT_FALSE(editor->buffer().file());
+}
+
+TEST_CASE("opening a file again notices a change the watcher missed") {
+    file_watch_test::Fixture f;
+    const auto path = f.project / "a.txt";
+    file_watch_test::write(path, "1\n");
+    auto buffer = f.core.files().open(path);
+    f.core.files().stopWatching(); // As on a platform without a watcher.
+
+    file_watch_test::write(path, "one\n");
+    f.runFor(std::chrono::milliseconds{300});
+    ASSERT_EQ(buffer->text(), "1\n");
+
+    EXPECT_TRUE(f.core.files().open(path) == buffer);
+    EXPECT_TRUE(f.runUntil([&] { return buffer->text() == "one\n"; }));
 }
 
 TEST_SUIT_END

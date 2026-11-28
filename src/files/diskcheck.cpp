@@ -37,12 +37,6 @@ DiskState checkDisk(Buffer &buffer) {
     return state;
 }
 
-void reloadFromDisk(Buffer &buffer) {
-    if (auto *file = buffer.file()) {
-        reloadFromDisk(buffer, readDiskContent(file->path()));
-    }
-}
-
 bool mergeFromDisk(Buffer &buffer, const std::string &disk) {
     const auto *base = buffer.file()->baseText();
     if (!base) {
@@ -63,10 +57,17 @@ bool mergeFromDisk(Buffer &buffer, const std::string &disk) {
     return true;
 }
 
-void reloadFromDisk(Buffer &buffer, const DiskContent &content) {
+ReloadResult reloadFromDisk(Buffer &buffer) {
+    if (auto *file = buffer.file()) {
+        return reloadFromDisk(buffer, readDiskContent(file->path()));
+    }
+    return ReloadResult::Kept;
+}
+
+ReloadResult reloadFromDisk(Buffer &buffer, const DiskContent &content) {
     auto *file = buffer.file();
     if (!file) {
-        return;
+        return ReloadResult::Kept;
     }
     const auto state = file->diskState(content);
     const auto previous = buffer.diskState();
@@ -75,21 +76,32 @@ void reloadFromDisk(Buffer &buffer, const DiskContent &content) {
         if (!buffer.isChanged()) {
             buffer.reload(*content.bytes);
             logStatusMessage(name, " reloaded from disk");
-            return;
+            return ReloadResult::Kept;
         }
         if (mergeFromDisk(buffer, *content.bytes)) {
             logStatusMessage(
                 name,
                 " changed on disk; merged with your unsaved changes (undo to "
                 "revert)");
-            return;
+            return ReloadResult::Kept;
         }
+    }
+    if (state == DiskState::DeletedOnDisk && !buffer.isChanged()) {
+        logStatusMessage(name, " was deleted on disk; closed");
+        return ReloadResult::Close;
     }
     // Never replace unsaved changes: only mark the buffer.
     markDiskState(buffer, state, content);
-    if (state == DiskState::ChangedOnDisk && previous != state) {
-        logStatusMessage(name,
-                         " changed on disk and conflicts with your unsaved "
-                         "changes");
+    if (previous != state) {
+        if (state == DiskState::ChangedOnDisk) {
+            logStatusMessage(name,
+                             " changed on disk and conflicts with your "
+                             "unsaved changes");
+        }
+        else if (state == DiskState::DeletedOnDisk) {
+            logStatusMessage(name,
+                             " was deleted on disk; save writes it again");
+        }
     }
+    return ReloadResult::Kept;
 }

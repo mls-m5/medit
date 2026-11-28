@@ -8,6 +8,7 @@
 #include "files/filewatcher.h"
 #include "linux/inotify.h"
 #include "text/buffer.h"
+#include <algorithm>
 #include <filesystem>
 
 Files::Files(CoreEnvironment &core)
@@ -103,7 +104,23 @@ void Files::finishCheck(const std::filesystem::path &path,
         fileChanged(path);
         return;
     }
-    reloadFromDisk(*buffer, content);
+    if (reloadFromDisk(*buffer, content) == ReloadResult::Close) {
+        close(buffer);
+    }
+}
+
+void Files::close(std::shared_ptr<Buffer> buffer) {
+    _tv();
+    auto it = std::find(_buffers.begin(), _buffers.end(), buffer);
+    if (it == _buffers.end()) {
+        return;
+    }
+    const auto path = buffer->path();
+    if (buffer->file()) {
+        unwatchFile(buffer->file()->path());
+    }
+    _buffers.erase(it);
+    emitBufferSubscriptionEvent({buffer, path, BufferEvent::Close});
 }
 
 std::shared_ptr<Buffer> Files::open(std::filesystem::path path) {
@@ -112,6 +129,9 @@ std::shared_ptr<Buffer> Files::open(std::filesystem::path path) {
     if (auto buffer = find(path)) {
         emitBufferSubscriptionEvent(
             {buffer, buffer->file()->path(), BufferEvent::Open});
+        // A change the watcher missed (or no watcher on this platform) is
+        // noticed when the file is opened again.
+        fileChanged(buffer->file()->path());
         return buffer;
     }
 

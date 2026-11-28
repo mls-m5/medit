@@ -19,11 +19,18 @@ constexpr size_t mergeMargin = 3;
 /// otherwise, or when the file is too large to have a merge base.
 bool mergeFromDisk(Buffer &buffer, const std::string &disk);
 
+enum class ReloadResult {
+    Kept,  // Reloaded, merged, marked or already in sync
+    Close, // The file was deleted and the buffer has no unsaved changes
+};
+
 /// Called when the buffer's file may have changed on disk. Reloads a buffer
 /// without unsaved changes; merges into one with unsaved changes when the
 /// changes are far enough apart (mergeFromDisk). Otherwise the buffer is never
-/// replaced, only marked as with checkDisk.
-void reloadFromDisk(Buffer &buffer);
+/// replaced, only marked as with checkDisk. When the file was deleted, a buffer
+/// with unsaved changes is marked and one without should be closed (the
+/// caller does that).
+ReloadResult reloadFromDisk(Buffer &buffer);
 
 /// As above, with the file's content already read (e.g. on another thread).
-void reloadFromDisk(Buffer &buffer, const DiskContent &content);
+ReloadResult reloadFromDisk(Buffer &buffer, const DiskContent &content);
