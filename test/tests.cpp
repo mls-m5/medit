@@ -7,6 +7,7 @@
 #include "bufferkeymap_test.cpp"
 #include "cursorops_test.cpp"
 #include "diskstate_test.cpp"
+#include "filewatch_test.cpp"
 #include "cursorrangeops_test.cpp"
 #include "fstring_test.cpp"
 #include "fuzzymatch_test.cpp"

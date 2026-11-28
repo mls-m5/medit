@@ -12,3 +12,6 @@ DiskState checkDisk(Buffer &buffer);
 /// without unsaved changes; a buffer with unsaved changes is never replaced,
 /// only marked as with checkDisk.
 void reloadFromDisk(Buffer &buffer);
+
+/// As above, with the file's content already read (e.g. on another thread).
+void reloadFromDisk(Buffer &buffer, const DiskContent &content);

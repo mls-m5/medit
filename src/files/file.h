@@ -23,6 +23,11 @@ public:
     std::string representation() const override;
     std::filesystem::path path() const override;
     DiskState diskState() const override;
+    DiskState diskState(const DiskContent &) const override;
+    void loaded(const std::string &bytes) override;
+    size_t baselineVersion() const override {
+        return _baselineVersion;
+    }
     const std::string *baseText() const override;
     std::optional<std::string> readDisk() const override;
 
@@ -40,6 +45,7 @@ private:
 
     std::filesystem::path _path;
     std::optional<Baseline> _baseline; // Nothing before the first load/save
+    size_t _baselineVersion = 0;
 
     friend class Files;
 };

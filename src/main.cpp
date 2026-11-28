@@ -232,6 +232,10 @@ void MainData::start(const Settings &settings) {
 }
 
 void MainData::stop() {
+    if (core) {
+        // Its watcher posts to the queues.
+        core->files().stopWatching();
+    }
     jobQueue->stop();
     timer->stop();
     guiQueue->stop();

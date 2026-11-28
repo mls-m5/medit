@@ -2,10 +2,13 @@
 
 #include "core/threadvalidation.h"
 #include "files/directorynotifications.h"
+#include "files/diskstate.h"
+#include "files/filewatcher.h"
 #include "meditfwd.h"
 #include "text/diagnostics.h"
 #include <filesystem>
 #include <functional>
+#include <map>
 #include <memory>
 
 struct BufferEvent {
@@ -62,16 +65,32 @@ public:
 
     bool rename(std::filesystem::path from, std::filesystem::path to);
 
+    /// Stops watching open files for changes on disk. Called before the job
+    /// queues stop, since the watcher posts to them.
+    void stopWatching();
+
 private:
     CoreEnvironment &_core;
 
     std::vector<std::shared_ptr<Buffer>> _buffers;
     std::unique_ptr<DirectoryNotifications> _dirNotifications;
 
-    // Function that is called by the DirectoryNotifications
-    void fileChangeCallback(DirectoryNotifications::EventType,
-                            std::filesystem::path,
-                            std::filesystem::file_time_type);
+    /// Watching open files for changes on disk (see
+    /// docs/file-reload-design.md): a hint from the watcher is debounced,
+    /// the file is read on the job thread, and the result is applied on the
+    /// GUI thread unless the buffer was loaded or saved meanwhile.
+    void watchFile(const std::filesystem::path &file);
+    void unwatchFile(const std::filesystem::path &file);
+    void fileChanged(const std::filesystem::path &path);
+    void startCheck(const std::filesystem::path &path);
+    void finishCheck(const std::filesystem::path &path,
+                     size_t baselineVersion,
+                     const DiskContent &content);
+
+    std::unique_ptr<FileWatcher> _watcher;
+    std::map<std::filesystem::path, size_t> _pendingChecks; // Timer ids
+    /// Expires with this object; queued tasks check it before using `this`.
+    std::shared_ptr<int> _alive = std::make_shared<int>();
 
     struct BufferSubscription {
         BufferSubscriptionCallbackT f;

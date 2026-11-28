@@ -28,6 +28,21 @@ public:
         return DiskState::InSync;
     }
 
+    /// Compares `content` (read from the file earlier) with the last load or
+    /// save.
+    virtual DiskState diskState(const DiskContent &) const {
+        return DiskState::InSync;
+    }
+
+    /// Records that the buffer now has `bytes` from the file, as after a load.
+    virtual void loaded(const std::string &bytes) {}
+
+    /// Increases at every load or save, to notice them while a check that
+    /// read the file earlier is in flight.
+    virtual size_t baselineVersion() const {
+        return 0;
+    }
+
     /// The content at the last load or save (the base for merging), or null
     /// when unknown or too large to keep.
     virtual const std::string *baseText() const {

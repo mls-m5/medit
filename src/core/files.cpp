@@ -5,6 +5,7 @@
 #include "core/itimer.h"
 #include "files/diskcheck.h"
 #include "files/file.h"
+#include "files/filewatcher.h"
 #include "linux/inotify.h"
 #include "text/buffer.h"
 #include <filesystem>
@@ -13,11 +14,97 @@ Files::Files(CoreEnvironment &core)
     : _core{core}
     , _dirNotifications{
           createDirectoryNotifications(_core.context().jobQueue())} {
-    _dirNotifications->subscribe(
-        [this](auto a, auto b, auto c) { fileChangeCallback(a, b, c); }, this);
+    auto *gui = &_core.context().guiQueue();
+    _watcher = createFileWatcher(
+        [gui, alive = std::weak_ptr{_alive}, this](auto &path) {
+            gui->addTask([alive, this, path] {
+                if (!alive.expired()) {
+                    fileChanged(path);
+                }
+            });
+        });
 }
 
-Files::~Files() = default;
+Files::~Files() {
+    stopWatching();
+}
+
+void Files::stopWatching() {
+    if (_watcher) {
+        _watcher->stop();
+    }
+    for (auto &pending : _pendingChecks) {
+        _core.context().timer().cancel(pending.second);
+    }
+    _pendingChecks.clear();
+}
+
+void Files::watchFile(const std::filesystem::path &file) {
+    _watcher->watch(std::filesystem::absolute(file).parent_path());
+}
+
+void Files::unwatchFile(const std::filesystem::path &file) {
+    _watcher->unwatch(std::filesystem::absolute(file).parent_path());
+}
+
+void Files::fileChanged(const std::filesystem::path &path) {
+    _tv();
+    if (!find(path)) {
+        return;
+    }
+    // Debounce: writers often touch a file several times in a row.
+    using namespace std::chrono_literals;
+    auto &timer = _core.context().timer();
+    if (auto pending = _pendingChecks.find(path);
+        pending != _pendingChecks.end()) {
+        timer.cancel(pending->second);
+    }
+    auto *gui = &_core.context().guiQueue();
+    _pendingChecks[path] = timer.setTimeout(
+        100ms, [gui, alive = std::weak_ptr{_alive}, this, path] {
+            gui->addTask([alive, this, path] {
+                if (!alive.expired()) {
+                    startCheck(path);
+                }
+            });
+        });
+}
+
+void Files::startCheck(const std::filesystem::path &path) {
+    _tv();
+    _pendingChecks.erase(path);
+    auto buffer = find(path);
+    if (!buffer || !buffer->file()) {
+        return;
+    }
+    const auto version = buffer->file()->baselineVersion();
+    auto *gui = &_core.context().guiQueue();
+    _core.context().jobQueue().addTask(
+        [gui, alive = std::weak_ptr{_alive}, this, path, version] {
+            auto content = readDiskContent(path);
+            gui->addTask([alive, this, path, version, content] {
+                if (!alive.expired()) {
+                    finishCheck(path, version, content);
+                }
+            });
+        });
+}
+
+void Files::finishCheck(const std::filesystem::path &path,
+                        size_t baselineVersion,
+                        const DiskContent &content) {
+    _tv();
+    auto buffer = find(path);
+    if (!buffer || !buffer->file()) {
+        return;
+    }
+    if (buffer->file()->baselineVersion() != baselineVersion) {
+        // Loaded or saved while the file was read: check again.
+        fileChanged(path);
+        return;
+    }
+    reloadFromDisk(*buffer, content);
+}
 
 std::shared_ptr<Buffer> Files::open(std::filesystem::path path) {
     _tv();
@@ -32,6 +119,9 @@ std::shared_ptr<Buffer> Files::open(std::filesystem::path path) {
     // use theme to update highlighting
 
     _buffers.push_back(Buffer::open(path));
+    if (_buffers.back()->file()) {
+        watchFile(_buffers.back()->file()->path());
+    }
     emitBufferSubscriptionEvent(
         {_buffers.back(), _buffers.back()->file()->path(), BufferEvent::Open});
     return _buffers.back();
@@ -83,7 +173,9 @@ bool Files::rename(std::filesystem::path from, std::filesystem::path to) {
         return true;
     }
 
+    unwatchFile(from);
     file->rename(to);
+    watchFile(to);
 
     emitBufferSubscriptionEvent({
         .buffer = nullptr,
@@ -97,24 +189,6 @@ bool Files::rename(std::filesystem::path from, std::filesystem::path to) {
     });
 
     return false;
-}
-
-void Files::fileChangeCallback(DirectoryNotifications::EventType type,
-                               std::filesystem::path path,
-                               std::filesystem::file_time_type time) {
-
-    // TODO: Handle deleted files later
-    if (type != DirectoryNotifications::Changed &&
-        type != DirectoryNotifications::Added) {
-        return;
-    }
-
-    _core.context().guiQueue().addTask([this, type, path, time] {
-        _tv();
-        if (auto f = find(path)) {
-            reloadFromDisk(*f);
-        }
-    });
 }
 
 std::shared_ptr<Buffer> Files::create() {
@@ -133,6 +207,7 @@ bool Files::save(Buffer &buffer, std::filesystem::path path) {
     }
 
     _buffers.push_back(buffer.shared_from_this());
+    watchFile(buffer.file()->path());
     emitBufferSubscriptionEvent(
         {_buffers.back(), _buffers.back()->file()->path(), BufferEvent::Open});
 

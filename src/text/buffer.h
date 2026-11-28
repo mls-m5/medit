@@ -56,8 +56,12 @@ public:
     void assignFile(std::unique_ptr<IFile> file);
 
     /// Reload from buffers used file. Only the changed lines are replaced,
-    /// as one undo step. Discards unsaved changes.
+    /// as one undo step. Discards unsaved changes. Nothing happens if the file
+    /// cannot be read.
     void load();
+
+    /// As load(), with the file's content already read.
+    void reload(const std::string &bytes);
 
     /// Replaces the text with `text`, changing only the lines that differ, as
     /// one undo step.

@@ -54,21 +54,31 @@ DiskState File::diskState() const {
     if (!_baseline) {
         return DiskState::InSync;
     }
-    auto error = std::error_code{};
-    if (!std::filesystem::exists(_path, error)) {
+    return diskState(readDiskContent(_path));
+}
+
+DiskState File::diskState(const DiskContent &content) const {
+    if (!_baseline) {
+        return DiskState::InSync;
+    }
+    if (!content.exists) {
         return DiskState::DeletedOnDisk;
     }
-    const auto bytes = readDisk();
-    if (!bytes) {
+    if (!content.bytes) {
         // Exists but cannot be read now (e.g. being replaced): no evidence of
         // a change.
         return DiskState::InSync;
     }
-    if (std::hash<std::string_view>{}(*bytes) != _baseline->hash ||
-        (_baseline->text && *_baseline->text != *bytes)) {
+    const auto &bytes = *content.bytes;
+    if (std::hash<std::string_view>{}(bytes) != _baseline->hash ||
+        (_baseline->text && *_baseline->text != bytes)) {
         return DiskState::ChangedOnDisk;
     }
     return DiskState::InSync;
+}
+
+void File::loaded(const std::string &bytes) {
+    baseline(bytes);
 }
 
 const std::string *File::baseText() const {
@@ -79,19 +89,30 @@ const std::string *File::baseText() const {
 }
 
 std::optional<std::string> File::readDisk() const {
-    auto file = std::ifstream{_path, std::ios::binary};
+    return readDiskContent(_path).bytes;
+}
+
+DiskContent readDiskContent(const std::filesystem::path &path) {
+    auto content = DiskContent{};
+    auto error = std::error_code{};
+    content.exists = std::filesystem::exists(path, error);
+    if (!content.exists || std::filesystem::is_directory(path, error)) {
+        return content;
+    }
+    auto file = std::ifstream{path, std::ios::binary};
     if (!file.is_open()) {
-        return std::nullopt;
+        return content;
     }
     auto bytes = std::string{std::istreambuf_iterator<char>{file},
                              std::istreambuf_iterator<char>{}};
-    if (file.bad()) {
-        return std::nullopt;
+    if (!file.bad()) {
+        content.bytes = std::move(bytes);
     }
-    return bytes;
+    return content;
 }
 
 void File::baseline(const std::string &bytes) {
+    ++_baselineVersion;
     _baseline = Baseline{std::hash<std::string_view>{}(bytes), std::nullopt};
     if (bytes.size() <= maxBaseSize) {
         _baseline->text = bytes;

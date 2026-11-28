@@ -53,14 +53,25 @@ void Buffer::assignFile(std::unique_ptr<IFile> file) {
 void Buffer::load() {
     _tv();
     if (_file) {
-        const auto revision = _history.revision();
-        _file->load(*this);
-        _history.tagSince(revision, HistoryKind::Reload);
-        _history.event(HistoryKind::Load);
-        _raw.isChanged(false);
-        diskState(DiskState::InSync);
-        emitChangeSignal();
+        if (auto bytes = _file->readDisk()) {
+            reload(*bytes);
+        }
     }
+}
+
+void Buffer::reload(const std::string &bytes) {
+    _tv();
+    if (!_file) {
+        return;
+    }
+    const auto revision = _history.revision();
+    replaceText(bytes);
+    _history.tagSince(revision, HistoryKind::Reload);
+    _file->loaded(bytes);
+    _history.event(HistoryKind::Load);
+    _raw.isChanged(false);
+    diskState(DiskState::InSync);
+    emitChangeSignal();
 }
 
 void Buffer::replaceText(std::string_view text) {
