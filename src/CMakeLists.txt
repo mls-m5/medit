@@ -12,6 +12,8 @@ add_library(
     core.cpp
     text.cpp
     files/file.cpp
+    files/localfilesystem.cpp
+    files/memoryfilesystem.cpp
     )
 
 target_link_libraries(

@@ -2,6 +2,7 @@
 
 #include "core/threadvalidation.h"
 #include "files/ifile.h"
+#include "files/ifilesystem.h"
 #include "files/path.h"
 #include "history.h"
 #include "rawbuffer.h"
@@ -43,8 +44,10 @@ public:
         return _history;
     }
 
+    /// A buffer with the file at `path`, loaded if it is a regular file.
     [[nodiscard]] static std::unique_ptr<Buffer> open(
-        std::filesystem::path path);
+        std::filesystem::path path,
+        IFileSystem &fileSystem = localFileSystem());
 
     /// Writes the buffer to its file. Unless `overwriteDiskChanges`, refuses
     /// (returns false and writes nothing) when someone else changed the file

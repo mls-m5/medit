@@ -18,5 +18,8 @@ struct DiskContent {
     std::optional<std::string> bytes; // Nothing if missing or unreadable
 };
 
+class IFileSystem;
+
 /// Reads `path`. Safe to call on any thread.
-DiskContent readDiskContent(const std::filesystem::path &path);
+DiskContent readDiskContent(IFileSystem &fileSystem,
+                            const std::filesystem::path &path);

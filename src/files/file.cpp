@@ -15,8 +15,9 @@ std::string fileBytes(const Buffer &buffer) {
     return bytes;
 }
 
-File::File(std::filesystem::path path)
-    : _path(path) {}
+File::File(std::filesystem::path path, IFileSystem &fileSystem)
+    : _path(path)
+    , _fileSystem{&fileSystem} {}
 
 void File::load(Buffer &buffer) {
     if (auto bytes = readDisk()) {
@@ -27,16 +28,9 @@ void File::load(Buffer &buffer) {
 }
 
 bool File::save(const Buffer &buffer) {
-    if (std::filesystem::is_directory(_path)) {
-        return false;
-    }
     const auto bytes = fileBytes(buffer);
-    {
-        auto file = std::ofstream{_path, std::ios::binary};
-        file << bytes;
-        if (!file) {
-            return false;
-        }
+    if (!_fileSystem->write(_path, bytes)) {
+        return false;
     }
     baseline(bytes);
     return true;
@@ -54,7 +48,7 @@ DiskState File::diskState() const {
     if (!_baseline) {
         return DiskState::InSync;
     }
-    return diskState(readDiskContent(_path));
+    return diskState(diskContent());
 }
 
 DiskState File::diskState(const DiskContent &content) const {
@@ -89,24 +83,19 @@ const std::string *File::baseText() const {
 }
 
 std::optional<std::string> File::readDisk() const {
-    return readDiskContent(_path).bytes;
+    return _fileSystem->read(_path);
 }
 
-DiskContent readDiskContent(const std::filesystem::path &path) {
+DiskContent File::diskContent() const {
+    return readDiskContent(*_fileSystem, _path);
+}
+
+DiskContent readDiskContent(IFileSystem &fileSystem,
+                            const std::filesystem::path &path) {
     auto content = DiskContent{};
-    auto error = std::error_code{};
-    content.exists = std::filesystem::exists(path, error);
-    if (!content.exists || std::filesystem::is_directory(path, error)) {
-        return content;
-    }
-    auto file = std::ifstream{path, std::ios::binary};
-    if (!file.is_open()) {
-        return content;
-    }
-    auto bytes = std::string{std::istreambuf_iterator<char>{file},
-                             std::istreambuf_iterator<char>{}};
-    if (!file.bad()) {
-        content.bytes = std::move(bytes);
+    content.exists = fileSystem.stat(path).exists;
+    if (content.exists) {
+        content.bytes = fileSystem.read(path);
     }
     return content;
 }

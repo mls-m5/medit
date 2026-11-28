@@ -54,6 +54,11 @@ public:
         return std::nullopt;
     }
 
+    /// The file as it is on disk now.
+    virtual DiskContent diskContent() const {
+        return {};
+    }
+
     virtual ~IFile() = default;
 
 private:

@@ -80,9 +80,10 @@ void Files::startCheck(const std::filesystem::path &path) {
     }
     const auto version = buffer->file()->baselineVersion();
     auto *gui = &_core.context().guiQueue();
+    auto *fileSystem = &_core.fileSystem();
     _core.context().jobQueue().addTask(
-        [gui, alive = std::weak_ptr{_alive}, this, path, version] {
-            auto content = readDiskContent(path);
+        [gui, fileSystem, alive = std::weak_ptr{_alive}, this, path, version] {
+            auto content = readDiskContent(*fileSystem, path);
             gui->addTask([alive, this, path, version, content] {
                 if (!alive.expired()) {
                     finishCheck(path, version, content);
@@ -138,7 +139,7 @@ std::shared_ptr<Buffer> Files::open(std::filesystem::path path) {
     // TODO: Maybe subscribe to buffer changes here and publish them or just
     // use theme to update highlighting
 
-    _buffers.push_back(Buffer::open(path));
+    _buffers.push_back(Buffer::open(path, _core.fileSystem()));
     if (_buffers.back()->file()) {
         watchFile(_buffers.back()->file()->path());
     }
@@ -169,7 +170,7 @@ bool Files::rename(std::filesystem::path from, std::filesystem::path to) {
         return true;
     }
 
-    if (std::filesystem::exists(to)) {
+    if (_core.fileSystem().stat(to).exists) {
         return true;
     }
 
@@ -185,11 +186,7 @@ bool Files::rename(std::filesystem::path from, std::filesystem::path to) {
         return true;
     }
 
-    std::error_code ec;
-
-    std::filesystem::rename(from, to, ec);
-
-    if (ec) {
+    if (!_core.fileSystem().rename(from, to)) {
         return true;
     }
 
@@ -221,7 +218,8 @@ std::shared_ptr<Buffer> Files::create() {
 bool Files::save(Buffer &buffer, std::filesystem::path path) {
     _tv();
 
-    buffer.assignFile(std::make_unique<File>(std::filesystem::absolute(path)));
+    buffer.assignFile(std::make_unique<File>(std::filesystem::absolute(path),
+                                             _core.fileSystem()));
     if (!buffer.save()) {
         return false;
     }

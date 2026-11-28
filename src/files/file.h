@@ -1,6 +1,7 @@
 #pragma once
 
 #include "files/ifile.h"
+#include "files/ifilesystem.h"
 #include <cstddef>
 #include <filesystem>
 #include <optional>
@@ -16,7 +17,8 @@ public:
     /// they are never merged.
     static constexpr size_t maxBaseSize = 4 * 1024 * 1024;
 
-    File(std::filesystem::path path);
+    File(std::filesystem::path path,
+         IFileSystem &fileSystem = localFileSystem());
 
     void load(Buffer &) override;
     bool save(const Buffer &) override;
@@ -30,6 +32,7 @@ public:
     }
     const std::string *baseText() const override;
     std::optional<std::string> readDisk() const override;
+    DiskContent diskContent() const override;
 
 private:
     /// What the file contained at the last load or save.
@@ -44,6 +47,7 @@ private:
     void rename(std::filesystem::path to) override;
 
     std::filesystem::path _path;
+    IFileSystem *_fileSystem = nullptr;
     std::optional<Baseline> _baseline; // Nothing before the first load/save
     size_t _baselineVersion = 0;
 

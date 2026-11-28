@@ -6,6 +6,7 @@
 #include "core/logtype.h"
 #include "core/plugins.h"
 #include "files.h"
+#include "files/ifilesystem.h"
 #include "files/uniquefile.h"
 #include "threadvalidation.h"
 #include <filesystem>
@@ -42,6 +43,11 @@ public:
     /// Runs external programs without a shell; see ICommandRunner.
     ICommandRunner &commandRunner();
 
+    /// All file access goes through this.
+    IFileSystem &fileSystem() {
+        return *_fileSystem;
+    }
+
     void subscribeToLogCallback(
         std::function<void(LogType type, std::string)> f, void *ref);
 
@@ -54,6 +60,7 @@ private:
         nullptr; // TODO: Handle lifetime of CoreEnvironment better
     // Before the plugins, which may keep a reference to it.
     std::unique_ptr<ICommandRunner> _commandRunner = createCommandRunner();
+    IFileSystem *_fileSystem = &localFileSystem();
     Plugins _plugins;
     Files _files{*this};
 

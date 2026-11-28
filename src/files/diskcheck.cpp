@@ -31,7 +31,7 @@ DiskState checkDisk(Buffer &buffer) {
     if (!file) {
         return DiskState::InSync;
     }
-    const auto content = readDiskContent(file->path());
+    const auto content = file->diskContent();
     const auto state = file->diskState(content);
     markDiskState(buffer, state, content);
     return state;
@@ -59,7 +59,7 @@ bool mergeFromDisk(Buffer &buffer, const std::string &disk) {
 
 ReloadResult reloadFromDisk(Buffer &buffer) {
     if (auto *file = buffer.file()) {
-        return reloadFromDisk(buffer, readDiskContent(file->path()));
+        return reloadFromDisk(buffer, file->diskContent());
     }
     return ReloadResult::Kept;
 }

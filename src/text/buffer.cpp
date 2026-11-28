@@ -7,11 +7,13 @@
 #include <sstream>
 #include <stdexcept>
 
-std::unique_ptr<Buffer> Buffer::open(std::filesystem::path path) {
+std::unique_ptr<Buffer> Buffer::open(std::filesystem::path path,
+                                     IFileSystem &fileSystem) {
     auto buffer = std::make_unique<Buffer>();
 
-    auto file = std::make_unique<File>(path);
-    if (std::filesystem::is_regular_file(file->path())) {
+    auto file = std::make_unique<File>(path, fileSystem);
+    const auto info = fileSystem.stat(path);
+    if (info.exists && !info.isDirectory) {
         file->load(*buffer);
         buffer->_file = std::move(file);
         // The text before loading is not something to undo to.
