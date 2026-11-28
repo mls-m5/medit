@@ -150,4 +150,31 @@ TEST_CASE("a listing that finishes after the project is gone is dropped") {
     gui.work(false); // Must not touch the destroyed project.
 }
 
+TEST_CASE(
+    "the source can be switched, and a listing from the old one is dropped") {
+    using project_test::root;
+    project_test::Fixture f;
+    f.fs.write(root / "a.cpp", "");
+    f.project.refreshNow();
+    EXPECT_TRUE(f.project.sourceKind() == FileSourceKind::Git);
+    ASSERT_EQ(f.project.files().size(), 2u); // Fell back to the directory.
+
+    // The changed source finds no repository with the failing runner: empty
+    // except for the settings file.
+    f.project.refresh(); // In flight with the Git source...
+    f.project.source(FileSourceKind::Changed);
+    f.fs.write(root / "b.cpp", ""); // Seen by the Git listing...
+    f.jobs.work(false);
+    f.gui.work(false); // ...which is dropped when it arrives.
+    ASSERT_EQ(f.project.files().size(), 2u);
+    f.runQueues();
+    EXPECT_TRUE(f.project.sourceKind() == FileSourceKind::Changed);
+    EXPECT_TRUE((f.project.files() ==
+                 std::vector<std::filesystem::path>{root / ".medit.json"}));
+
+    f.project.source(FileSourceKind::Directory);
+    f.runQueues();
+    ASSERT_EQ(f.project.files().size(), 3u);
+}
+
 TEST_SUIT_END

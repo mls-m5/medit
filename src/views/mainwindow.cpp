@@ -8,6 +8,7 @@
 #include "core/logtype.h"
 #include "core/plugins.h"
 #include "files/config.h"
+#include "files/project.h"
 #include "files/unsavablefile.h"
 #include "modes/insertmode.h"
 #include "navigation/inavigation.h"
@@ -29,6 +30,19 @@
 #include <memory>
 
 namespace {
+
+/// The tree's heading for a file source.
+std::string sidebarTitle(FileSourceKind kind) {
+    switch (kind) {
+    case FileSourceKind::Git:
+        return " Project";
+    case FileSourceKind::Changed:
+        return " Changed in Git";
+    case FileSourceKind::Directory:
+        return " Directory";
+    }
+    return " Project";
+}
 
 StaticCommandRegister MainWindowReg{{
     {"command_palette",
@@ -80,6 +94,7 @@ MainWindow::MainWindow(CoreEnvironment &core,
     _projectFiles = _env->core().project().subscribeToFiles([this] {
         auto &project = _env->core().project();
         if (_sidebarRequested) {
+            _sidebar.title(sidebarTitle(project.sourceKind()));
             _sidebar.files(project.settings().root, project.files());
         }
         if (_locator->visible()) {

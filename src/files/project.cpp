@@ -21,6 +21,7 @@ Project::Project(std::filesystem::path projectPath,
                  IJobQueue &guiQueue,
                  ITimer &timer)
     : _fileSystem{&fileSystem}
+    , _runner{&runner}
     , _source{createGitSource(runner, fileSystem)}
     , _tv{"Project"}
     , _jobQueue{&jobQueue}
@@ -142,6 +143,7 @@ void Project::refresh() {
     _refreshing = true;
     loadProjectFile();
     _jobQueue->addTask([source = _source,
+                        generation = _sourceGeneration,
                         root = _settings.root,
                         settingsPath = _settings.settingsPath,
                         limit = _fileLimit,
@@ -150,18 +152,43 @@ void Project::refresh() {
                         this] {
         auto files = source->list(root, limit);
         finishProjectFiles(files, settingsPath);
-        gui->addTask([files = std::move(files), alive, this]() mutable {
-            if (alive.expired()) {
-                return;
-            }
-            _refreshing = false;
-            apply(std::move(files));
-            if (_refreshPending) {
-                _refreshPending = false;
-                refresh();
-            }
-        });
+        gui->addTask(
+            [files = std::move(files), alive, generation, this]() mutable {
+                if (alive.expired()) {
+                    return;
+                }
+                _refreshing = false;
+                if (generation == _sourceGeneration) {
+                    apply(std::move(files));
+                }
+                if (_refreshPending) {
+                    _refreshPending = false;
+                    refresh();
+                }
+            });
     });
+}
+
+void Project::source(FileSourceKind kind) {
+    _tv();
+    if (kind == _sourceKind) {
+        return;
+    }
+    switch (kind) {
+    case FileSourceKind::Git:
+        _source = createGitSource(*_runner, *_fileSystem);
+        break;
+    case FileSourceKind::Changed:
+        _source = createChangedSource(*_runner, *_fileSystem);
+        break;
+    case FileSourceKind::Directory:
+        _source = createDirectorySource(*_fileSystem);
+        break;
+    }
+    _sourceKind = kind;
+    ++_sourceGeneration;
+    // A listing in flight is dropped when it arrives; this one follows it.
+    refresh();
 }
 
 std::shared_ptr<void> Project::subscribeToFiles(
@@ -178,8 +205,13 @@ void Project::apply(ProjectFiles files) {
         _settings.buildCommand = guessBuildCommand();
     }
     if (files.fellBack && !_files.fellBack) {
-        logStatusMessage("Not a Git repository: listing all files in ",
-                         files.root.string());
+        if (_sourceKind == FileSourceKind::Changed) {
+            logStatusMessage("Not a Git repository: no changed files");
+        }
+        else {
+            logStatusMessage("Not a Git repository: listing all files in ",
+                             files.root.string());
+        }
     }
     if (files.truncated && !_files.truncated) {
         logStatusMessage("More than ",

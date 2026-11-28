@@ -48,6 +48,9 @@
     STD_DEF(save)                                                              \
     STD_DEF(save_overwrite)                                                    \
     STD_DEF(reload_file)                                                       \
+    STD_DEF(project_files_git)                                                 \
+    STD_DEF(project_files_changed)                                             \
+    STD_DEF(project_files_directory)                                           \
     STD_DEF(copy_indentation)                                                  \
     STD_DEF(close_brace)                                                       \
     STD_DEF(undo)                                                              \

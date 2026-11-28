@@ -17,6 +17,13 @@ class IFileSystem;
 class ICommandRunner;
 class ITimer;
 
+/// Where the project's file list comes from.
+enum class FileSourceKind {
+    Git,       // The files Git knows about (the default)
+    Changed,   // The files changed in Git
+    Directory, // All files with known extensions in the directory
+};
+
 class Project {
 public:
     enum ProjectLanguage {
@@ -66,6 +73,13 @@ public:
     /// Stops watching for changes. Called before the job queues stop, since
     /// the watcher posts to them.
     void stopWatching();
+
+    /// Switches the source of the file list and refreshes it. The default,
+    /// at every start, is FileSourceKind::Git.
+    void source(FileSourceKind kind);
+    FileSourceKind sourceKind() const {
+        return _sourceKind;
+    }
 
     /// The current snapshot.
     const ProjectFiles &projectFiles() const {
@@ -134,7 +148,12 @@ private:
     ProjectSettings _settings;
 
     IFileSystem *_fileSystem = nullptr;
+    ICommandRunner *_runner = nullptr;
     std::shared_ptr<FileSource> _source; // Shared with a running listing
+    FileSourceKind _sourceKind = FileSourceKind::Git;
+    /// Increases when the source changes, so a listing made with the
+    /// previous one is not applied.
+    size_t _sourceGeneration = 0;
     ProjectFiles _files;
     size_t _fileLimit = defaultFileLimit;
 

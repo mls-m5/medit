@@ -431,6 +431,21 @@ StandardCommands create() {
         }
         env->statusMessage(FString{"Saved to " + path});
     };
+    DEF(project_files_git) {
+        env->project().source(FileSourceKind::Git);
+        env->statusMessage(FString{"Project files: the files in Git"});
+    };
+    DEF(project_files_changed) {
+        env->project().source(FileSourceKind::Changed);
+        env->statusMessage(FString{
+            "Project files: the files changed in Git (opening shows the "
+            "diff)"});
+    };
+    DEF(project_files_directory) {
+        env->project().source(FileSourceKind::Directory);
+        env->statusMessage(
+            FString{"Project files: all files in the directory"});
+    };
     DEF(reload_file) {
         auto &e = env->editor();
         auto *file = e.file();

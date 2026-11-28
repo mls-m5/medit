@@ -7,6 +7,7 @@
 #include <functional>
 #include <map>
 #include <set>
+#include <string>
 #include <vector>
 
 // A snapshot of registered project files; no filesystem work while drawing.
@@ -23,6 +24,10 @@ public:
         : ScrollView{parent} {}
 
     void files(Path root, const std::vector<Path> &paths);
+    /// The heading above the tree.
+    void title(std::string title) {
+        _title = std::move(title);
+    }
     void onOpen(std::function<void(const Path &)> callback) {
         _onOpen = std::move(callback);
     }
@@ -51,6 +56,7 @@ private:
         std::map<Path, Node> children;
     };
     Node _root;
+    std::string _title = " Project";
     std::set<Path> _directories;
     std::set<Path> _expanded;
     std::vector<Entry> _entries;

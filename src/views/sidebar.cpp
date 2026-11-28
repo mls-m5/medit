@@ -242,7 +242,7 @@ void SideBar::draw(IScreen &screen) {
             auto line = FString{contentWidth, FChar{' ', format}};
             std::string label;
             if (row == 0)
-                label = " Project";
+                label = _title;
             else if (index < _entries.size()) {
                 const auto &entry = _entries[index];
                 label = index == _current ? "›" : " ";
