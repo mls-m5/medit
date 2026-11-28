@@ -168,6 +168,21 @@ TEST_CASE("edits at the start, at the end and on empty texts") {
               "A\r\nb\r\nc\r\nD\r\n");
 }
 
+TEST_CASE("a margin makes changes near each other conflict") {
+    const auto base = "1\n2\n3\n4\n5\n6\n7\n8\n";
+    // Lines 1 and 5 changed: three unchanged lines (2-4) between them.
+    const auto ours = "one\n2\n3\n4\n5\n6\n7\n8\n";
+    const auto theirs = "1\n2\n3\n4\nfive\n6\n7\n8\n";
+    EXPECT_FALSE(mergeLines(base, ours, theirs, 3).conflict);
+    EXPECT_TRUE(mergeLines(base, ours, theirs, 4).conflict);
+    // Two unchanged lines between: a conflict with margin 3, not without.
+    const auto closer = "1\n2\n3\nfour\n5\n6\n7\n8\n";
+    EXPECT_TRUE(mergeLines(base, ours, closer, 3).conflict);
+    EXPECT_FALSE(mergeLines(base, ours, closer).conflict);
+    EXPECT_TRUE((mergeLines(base, ours, closer, 3).conflicts ==
+                 std::vector<LineRange>{{0, 1}}));
+}
+
 TEST_CASE("unified diffs with context") {
     ASSERT_EQ(unifiedDiff("a\nb", "a\nb"), "");
     ASSERT_EQ(unifiedDiff("1\n2\n3\n4\n5\n6\n7\n8\n9\n10",

@@ -74,6 +74,20 @@ void Buffer::reload(const std::string &bytes) {
     emitChangeSignal();
 }
 
+void Buffer::mergeFromDisk(std::string_view text,
+                           const std::string &diskBytes) {
+    _tv();
+    if (!_file) {
+        return;
+    }
+    const auto revision = _history.revision();
+    replaceText(text);
+    _history.tagSince(revision, HistoryKind::Merge);
+    _file->loaded(diskBytes);
+    diskState(DiskState::InSync);
+    emitChangeSignal();
+}
+
 void Buffer::replaceText(std::string_view text) {
     _tv();
     const auto current = this->text();

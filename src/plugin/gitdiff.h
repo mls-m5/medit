@@ -6,6 +6,7 @@
 #include "text/fstring.h"
 #include <filesystem>
 #include <memory>
+#include <string>
 #include <string_view>
 
 /// The command that shows how one file differs from HEAD, staged and unstaged
@@ -26,3 +27,12 @@ FString formatGitDiff(std::string_view diff);
 /// saved.
 void showGitDiff(std::shared_ptr<IEnvironment> env,
                  const std::filesystem::path &file);
+
+/// Opens `diff` (unified diff text) in the current editor, colored, in a
+/// buffer named `title` that cannot be saved.
+void showDiff(std::shared_ptr<IEnvironment> env,
+              const std::string &title,
+              std::string_view diff);
+
+/// Shows how the current buffer differs from its file on disk.
+void showDiffWithDisk(std::shared_ptr<IEnvironment> env);

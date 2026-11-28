@@ -258,4 +258,66 @@ TEST_CASE("loading, reloading and saving are recorded in the history") {
                  std::vector{K::Load, K::Reload, K::Load, K::Edit, K::Save}));
 }
 
+TEST_CASE("a change on disk far from the unsaved changes is merged") {
+    disk_state_test::TemporaryDirectory dir;
+    const auto path = dir.path / "a.txt";
+    disk_state_test::write(path, "1\n2\n3\n4\n5\n6\n7\n8\n");
+    auto buffer = Buffer::open(path);
+    disk_state_test::type(*buffer, 0, "mine ");
+
+    disk_state_test::write(path, "1\n2\n3\n4\n5\n6\n7\neight\n");
+    reloadFromDisk(*buffer);
+    ASSERT_EQ(buffer->text(), "mine 1\n2\n3\n4\n5\n6\n7\neight\n");
+    EXPECT_TRUE(buffer->isChanged());
+    EXPECT_TRUE(buffer->diskState() == DiskState::InSync);
+    EXPECT_TRUE(buffer->history().items().back().kind == HistoryKind::Merge);
+
+    // Saving now writes both changes; the disk is not "changed" any more.
+    EXPECT_TRUE(buffer->save());
+    ASSERT_EQ(disk_state_test::read(path), "mine 1\n2\n3\n4\n5\n6\n7\neight\n");
+}
+
+TEST_CASE("a merge undoes in one step") {
+    disk_state_test::TemporaryDirectory dir;
+    const auto path = dir.path / "a.txt";
+    disk_state_test::write(path, "1\n2\n3\n4\n5\n6\n7\n8\n");
+    auto buffer = Buffer::open(path);
+    disk_state_test::type(*buffer, 0, "mine ");
+    buffer->history().markMajor();
+    const auto mine = buffer->text();
+    disk_state_test::write(path, "1\n2\n3\n4\n5\n6\nseven\neight\n");
+    reloadFromDisk(*buffer);
+    ASSERT_EQ(buffer->text(), "mine 1\n2\n3\n4\n5\n6\nseven\neight\n");
+    buffer->history().undoMajor();
+    ASSERT_EQ(buffer->text(), mine);
+}
+
+TEST_CASE("changes on disk close to the unsaved changes are not merged") {
+    disk_state_test::TemporaryDirectory dir;
+    const auto path = dir.path / "a.txt";
+    disk_state_test::write(path, "1\n2\n3\n4\n5\n6\n7\n8\n");
+    auto buffer = Buffer::open(path);
+    disk_state_test::type(*buffer, 0, "mine ");
+    // Only two unchanged lines (2 and 3) in between.
+    disk_state_test::write(path, "1\n2\n3\nfour\n5\n6\n7\n8\n");
+    reloadFromDisk(*buffer);
+    ASSERT_EQ(buffer->text(), "mine 1\n2\n3\n4\n5\n6\n7\n8\n");
+    EXPECT_TRUE(buffer->diskState() == DiskState::ChangedOnDisk);
+    // The line that kept it from merging is marked as the conflict.
+    ASSERT_EQ(buffer->diagnostics().findLineDiagnostic(0)->message,
+              "changed on disk: conflicts with your edit");
+    EXPECT_FALSE(buffer->save());
+}
+
+TEST_CASE("merging keeps a buffer without a final newline as it is") {
+    disk_state_test::TemporaryDirectory dir;
+    const auto path = dir.path / "a.txt";
+    disk_state_test::write(path, "1\n2\n3\n4\n5\n6\n7\n8");
+    auto buffer = Buffer::open(path);
+    disk_state_test::type(*buffer, 7, "mine ");
+    disk_state_test::write(path, "one\n2\n3\n4\n5\n6\n7\n8");
+    reloadFromDisk(*buffer);
+    ASSERT_EQ(buffer->text(), "one\n2\n3\n4\n5\n6\n7\nmine 8");
+}
+
 TEST_SUIT_END

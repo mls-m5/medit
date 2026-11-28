@@ -165,4 +165,5 @@ void registerGitCommands(StandardCommands &sc) {
             showGitDiff(env, file->path());
         },
         nullptr);
+    sc.addCommand("diff_with_disk", showDiffWithDisk, nullptr);
 }

@@ -63,6 +63,11 @@ public:
     /// As load(), with the file's content already read.
     void reload(const std::string &bytes);
 
+    /// Takes in a change made on disk that was merged with the unsaved
+    /// changes: `text` is the merged text and `diskBytes` what the file now
+    /// contains. One undo step, recorded as a merge; the buffer stays unsaved.
+    void mergeFromDisk(std::string_view text, const std::string &diskBytes);
+
     /// Replaces the text with `text`, changing only the lines that differ, as
     /// one undo step.
     void replaceText(std::string_view text);

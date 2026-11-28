@@ -67,10 +67,13 @@ struct LineMerge {
 
 /// Three-way merge like `git merge-file`: `base` is the common ancestor,
 /// `ours` the buffer and `theirs` the file on disk. Changes that overlap or
-/// touch conflict, unless both sides made the same change.
+/// touch conflict, unless both sides made the same change. With a `margin`,
+/// changes also conflict when fewer than `margin` unchanged lines separate
+/// them, which makes the merge more cautious.
 LineMerge mergeLines(std::string_view base,
                      std::string_view ours,
-                     std::string_view theirs);
+                     std::string_view theirs,
+                     size_t margin = 0);
 
 /// `text` with `edits` (as from `mergeLines`) applied.
 std::string applyLineEdits(std::string_view text,

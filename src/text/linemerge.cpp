@@ -185,16 +185,20 @@ std::vector<DiffHunk> diffLines(const std::vector<std::string_view> &from,
 
 LineMerge mergeLines(std::string_view base,
                      std::string_view ours,
-                     std::string_view theirs) {
+                     std::string_view theirs,
+                     size_t margin) {
     const auto baseLines = splitLines(base);
     const auto ourLines = splitLines(ours);
     const auto theirLines = splitLines(theirs);
     const auto ourHunks = diffLines(baseLines, ourLines);
     const auto theirHunks = diffLines(baseLines, theirLines);
 
-    // Overlapping or adjacent ranges in the base, as in `git merge-file`.
-    auto touches = [](const DiffHunk &a, const DiffHunk &b) {
-        return a.fromBegin <= b.fromEnd && b.fromBegin <= a.fromEnd;
+    // Overlapping or adjacent ranges in the base, as in `git merge-file`,
+    // or closer than `margin` lines.
+    const auto extra = margin ? margin - 1 : 0;
+    auto touches = [extra](const DiffHunk &a, const DiffHunk &b) {
+        return a.fromBegin <= b.fromEnd + extra &&
+               b.fromBegin <= a.fromEnd + extra;
     };
     auto same = [&](const DiffHunk &our, const DiffHunk &their) {
         return our.fromBegin == their.fromBegin &&

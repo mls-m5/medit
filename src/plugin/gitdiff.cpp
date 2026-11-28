@@ -1,10 +1,12 @@
 #include "gitdiff.h"
 #include "core/coreenvironment.h"
 #include "core/meditlog.h"
+#include "files/file.h"
 #include "files/unsavablefile.h"
 #include "syntax/palette.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
+#include "text/linemerge.h"
 #include "views/editor.h"
 #include <algorithm>
 #include <string>
@@ -133,12 +135,41 @@ void showGitDiff(std::shared_ptr<IEnvironment> env,
         return;
     }
 
+    showDiff(env, "git diff " + relative, result.output);
+}
+
+void showDiff(std::shared_ptr<IEnvironment> env,
+              const std::string &title,
+              std::string_view diff) {
     auto buffer = env->core().files().create();
-    buffer->assignFile(std::make_unique<UnsavableFile>("git diff " + relative));
-    insert(buffer->end(), formatGitDiff(result.output));
+    buffer->assignFile(std::make_unique<UnsavableFile>(title));
+    insert(buffer->end(), formatGitDiff(diff));
     // Keep the diff colors; the view is for reading, not saving.
     buffer->isColorsOld(false);
     buffer->isChanged(false);
     env->editor().buffer(buffer);
     env->editor().cursor({*buffer, 0, 0});
+}
+
+void showDiffWithDisk(std::shared_ptr<IEnvironment> env) {
+    auto &buffer = env->editor().buffer();
+    auto *file = buffer.file();
+    if (!file) {
+        env->statusMessage({"The current buffer has no file"});
+        return;
+    }
+    const auto name = file->path().filename().string();
+    const auto disk = file->readDisk();
+    if (!disk) {
+        env->statusMessage(FString{"Cannot read " + name + " from disk"});
+        return;
+    }
+    const auto diff = unifiedDiff(*disk, fileBytes(buffer));
+    if (diff.empty()) {
+        env->statusMessage(FString{name + " is the same as on disk"});
+        return;
+    }
+    showDiff(env,
+             "disk diff " + name,
+             "--- disk/" + name + "\n+++ buffer/" + name + "\n" + diff);
 }
