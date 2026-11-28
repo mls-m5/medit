@@ -1,6 +1,7 @@
 # Design: reloading buffers when files change on disk
 
-Status: proposal for review. Nothing here is implemented yet. The steps that
+Status: decisions recorded (see "Decisions" at the end). Nothing here is
+implemented yet. The steps that
 touch file watching, `Files` or notification dispatch are performance-sensitive
 and need explicit approval before they are implemented.
 
@@ -125,13 +126,12 @@ rescheduled. This handles typing or saving while a check is in flight.
 | No unsaved changes | Changed | **Reload.** Replace only the changed line range (common prefix and suffix kept), as one history step. New baseline. Message: `reloaded README.md` |
 | Unsaved changes | Changed, edits do not overlap | **Merge.** Apply the disk side's hunks to the buffer as one history step. New baseline = disk; the buffer stays modified. Message: `README.md changed on disk; merged with unsaved changes (undo to revert)` |
 | Unsaved changes | Changed, edits overlap | **Leave the buffer alone.** State `ChangedOnDisk`. Message: `README.md changed on disk and conflicts with unsaved changes` |
-| Any | Deleted or moved away | State `DeletedOnDisk`, content kept, marked as unsaved so the content is not dropped by accident. Saving recreates the file |
+| No unsaved changes | Deleted or moved away | **Close the buffer.** Message: `README.md was deleted on disk; closed` |
+| Unsaved changes | Deleted or moved away | State `DeletedOnDisk`, content kept and shown as a conflict. Saving recreates the file |
 | Any | Deleted, then recreated (atomic save) | Treated as changed: the check runs after the debounce and sees the new file |
 | Too large or not valid UTF-8 | Changed | Unmodified buffer: reload as a whole. Modified: `ChangedOnDisk`, no merge |
 
-Should a merge be automatic (row 2) or always ask? This proposal merges
-automatically because it is one undo step and the message says so. It is a
-setting if you prefer to be asked.
+Merging is automatic (row 2): it is one undo step and the message says so.
 
 ### The merge
 
@@ -169,6 +169,26 @@ cursor inside a replaced range stays at the same line, clamped. This needs a
 hook from the applied edits to the editors that show the buffer; today nothing
 adjusts other editors' cursors when a buffer changes, so this is new.
 
+### Showing a conflict
+
+A conflict must be obvious, not just a message that scrolls away. It reuses
+the way compiler errors are already shown:
+
+- The buffer's `Diagnostics` get entries from the source `"disk"`, one per
+  conflicting line range (for `DeletedOnDisk`, one on the first line). The
+  existing `BufferView` drawing then shows those line numbers in the error
+  color with the message beside the line, e.g. `changed on disk: conflicts
+  with your edit`. No new drawing code.
+- The status message is drawn in `Palette::error` and repeated when the buffer
+  is shown again, as long as the state lasts.
+- The window title gets `[conflict]`.
+- The markers are cleared (`Diagnostics::clearSource("disk")`) when the state
+  goes back to `InSync`: after `reload_file`, `save_overwrite`, or a later
+  check that finds the disk equal to the buffer.
+
+Conflicting ranges come from the merge: the `ours` hunks that overlap a
+`theirs` hunk.
+
 ## Commands
 
 | Command | Effect |
@@ -190,7 +210,7 @@ adjusts other editors' cursors when a buffer changes, so this is new.
 - `Buffer`: holds the `DiskState`, and the hook that reports applied line
   deltas to its editors.
 - MainWindow: no new logic. It only shows the state in the title it already
-  builds.
+  builds; the line markers go through `Diagnostics`.
 
 ## Steps
 
@@ -198,7 +218,8 @@ Each step is one branch with its own tests.
 
 1. **Line merge**: `linemerge` with unit tests. No behavior change.
 2. **Baseline and safe save**: baseline after load/save; `save` refuses when the
-   disk changed; `save_overwrite`; `DiskState` in the title. Fixes losing an
+   disk changed; `save_overwrite`; conflict markers (diagnostics, title,
+   status color). Fixes losing an
    external change by saving over it. *Touches `File`/`Buffer` save and load.*
 3. **Reload pipeline**: per-directory watches with `IN_CLOSE_WRITE`, debounce,
    job-thread check, GUI-thread apply with the revision check. Unmodified
@@ -229,11 +250,11 @@ Steps 4–6 add the merging.
 - tmux: open a file, change it from outside with and without unsaved edits,
   check the text, the message and undo.
 
-## Open questions
+## Decisions
 
-1. Merge automatically when there is no conflict, or always ask first?
-2. On conflict: only mark and refuse to save (proposed), or also offer a
-   command that inserts Git-style conflict markers into the buffer?
-3. Size limit for keeping the merge base in memory (proposal: 4 MB per file).
-4. A deleted file: keep the buffer marked unsaved (proposed), or close it if it
-   had no unsaved changes?
+1. Merge automatically when there is no conflict.
+2. On conflict: mark and refuse to save. The conflict must be clearly visible
+   with color (see "Showing a conflict"). No conflict markers in the text.
+3. Merge base kept in memory up to 4 MB per file.
+4. A file deleted on disk: close the buffer when it has no unsaved changes;
+   keep it, shown as a conflict, when it has.
