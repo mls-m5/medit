@@ -101,6 +101,11 @@ public:
 
     size_t y() const override;
 
+    /// The view of the buffer (for its scroll position).
+    BufferView &bufferView() {
+        return _bufferView;
+    }
+
     //! Make sure that the buffer with the cursor is scrolled so that the cursor
     //! is visible
     void fitCursor();
@@ -135,6 +140,8 @@ private:
     /// other editors on the same buffer, undo).
     TrackedPosition _cursor;
     std::optional<TrackedPosition> _selectionAnchor;
+    /// Where the cursor was when the view was last fitted to it.
+    Position _fittedCursor;
     std::shared_ptr<IMode> _mode;
     FormatType _background = 1;
 

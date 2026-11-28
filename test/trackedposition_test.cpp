@@ -1,4 +1,5 @@
 #include "mls-unit-test/unittest.h"
+#include "mock/screen/mockscreen.h"
 #include "text/buffer.h"
 #include "text/bufferedit.h"
 #include "text/trackedposition.h"
@@ -87,6 +88,34 @@ TEST_CASE("an editor's cursor and selection follow changes from elsewhere") {
     buffer->replaceText("zero\none\none and a half\ntwo\nthree\n");
     EXPECT_TRUE((editor.cursor().pos() == Position{2, 4}));
     EXPECT_TRUE((editor.selectionAnchor()->pos() == Position{0, 3}));
+}
+
+TEST_CASE("an editor scrolls to a cursor moved by changes from elsewhere") {
+    auto buffer = std::make_shared<Buffer>("a\nb\nc\n");
+    auto editor = Editor{nullptr, buffer};
+    editor.width(20);
+    editor.height(5);
+    editor.cursor(Cursor{*buffer, 0, 2});
+    auto screen = MockScreen{};
+    screen.mock_draw_3.nice();
+    editor.draw(screen);
+    ASSERT_EQ(editor.bufferView().yScroll(), 0u);
+
+    // A reload inserts many lines above the cursor.
+    auto text = std::string{};
+    for (int i = 0; i < 20; ++i) {
+        text += "new\n";
+    }
+    buffer->replaceText(text + "a\nb\nc\n");
+    ASSERT_EQ(editor.cursor().y(), 22u);
+    editor.draw(screen);
+    const auto scroll = editor.bufferView().yScroll();
+    EXPECT_TRUE(scroll <= 22 && 22 < scroll + 5);
+
+    // Scrolled away by the user, with the cursor where it was: left alone.
+    editor.bufferView().scroll(0, 0);
+    editor.draw(screen);
+    ASSERT_EQ(editor.bufferView().yScroll(), 0u);
 }
 
 TEST_SUIT_END

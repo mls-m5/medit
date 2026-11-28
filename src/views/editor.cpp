@@ -265,6 +265,13 @@ void Editor::updateCursor(IScreen &screen) const {
 }
 
 void Editor::draw(IScreen &screen) {
+    // The cursor follows edits made elsewhere (a reload from disk, another
+    // editor on the same buffer). Scroll to it if it moved that way; a view
+    // scrolled by the user with the cursor in place is left as it is.
+    if (_cursor.pos() != _fittedCursor) {
+        fitCursor();
+    }
+
     fillRect(screen, {' ', Palette::standard}, x(), y(), width(), height());
 
     _bufferView.draw(screen);
@@ -311,6 +318,7 @@ size_t Editor::y() const {
 }
 
 void Editor::fitCursor() {
+    _fittedCursor = _cursor.pos();
     _bufferView.fitPosition(_bufferView.cursorToLocal(cursor().pos()));
     if (_bufferView.shouldWrap()) {
         _bufferView.xScroll(0);
