@@ -1,5 +1,6 @@
 #include "core/icommandrunner.h"
 #include "core/jobqueue.h"
+#include "core/timer.h"
 #include "files/memoryfilesystem.h"
 #include "files/project.h"
 #include "mls-unit-test/unittest.h"
@@ -32,7 +33,8 @@ struct Fixture {
     FailingRunner runner;
     JobQueue jobs;
     JobQueue gui;
-    Project project{path, fs, runner, jobs, gui};
+    Timer timer; // Not started: watch hints never refresh in these tests.
+    Project project{path, fs, runner, jobs, gui, timer};
 
     void runQueues() {
         for (int i = 0; i < 10; ++i) {
@@ -138,8 +140,10 @@ TEST_CASE("a listing that finishes after the project is gone is dropped") {
     project_test::FailingRunner runner;
     JobQueue jobs;
     JobQueue gui;
+    Timer timer;
     {
-        auto project = Project{project_test::path, fs, runner, jobs, gui};
+        auto project =
+            Project{project_test::path, fs, runner, jobs, gui, timer};
         project.refresh();
         jobs.work(false);
     }

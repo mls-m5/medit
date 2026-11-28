@@ -1,6 +1,7 @@
 
 #include "project.h"
 #include "core/ijobqueue.h"
+#include "core/itimer.h"
 #include "core/meditlog.h"
 #include "files/extensions.h"
 #include "files/ifilesystem.h"
@@ -17,17 +18,112 @@ Project::Project(std::filesystem::path projectPath,
                  IFileSystem &fileSystem,
                  ICommandRunner &runner,
                  IJobQueue &jobQueue,
-                 IJobQueue &guiQueue)
+                 IJobQueue &guiQueue,
+                 ITimer &timer)
     : _fileSystem{&fileSystem}
     , _source{createGitSource(runner, fileSystem)}
     , _tv{"Project"}
     , _jobQueue{&jobQueue}
-    , _guiQueue{&guiQueue} {
+    , _guiQueue{&guiQueue}
+    , _timer{&timer} {
     auto projectFile = ProjectSettings::findProject(projectPath, true);
     _settings.load(projectFile);
+    _watcher = createFileWatcher(
+        [gui = _guiQueue, alive = std::weak_ptr{_alive}, this](auto &path) {
+            gui->addTask([alive, this, path] {
+                if (!alive.expired()) {
+                    fileChanged(path);
+                }
+            });
+        });
 }
 
-Project::~Project() = default;
+Project::~Project() {
+    stopWatching();
+}
+
+void Project::stopWatching() {
+    if (_watcher) {
+        _watcher->stop();
+    }
+    if (_pendingRefresh) {
+        _timer->cancel(_pendingRefresh);
+        _pendingRefresh = 0;
+    }
+}
+
+void Project::fileChanged(const std::filesystem::path &path) {
+    _tv();
+    const auto gitDirectory = _settings.root / ".git";
+    if (path.parent_path() == gitDirectory && path.filename() != "index" &&
+        path.filename() != "HEAD") {
+        return; // Git's other files do not change the file list.
+    }
+    // Debounce: a checkout or a build touches many files at once.
+    using namespace std::chrono_literals;
+    if (_pendingRefresh) {
+        _timer->cancel(_pendingRefresh);
+    }
+    _pendingRefresh = _timer->setTimeout(
+        200ms, [gui = _guiQueue, alive = std::weak_ptr{_alive}, this] {
+            gui->addTask([alive, this] {
+                if (!alive.expired()) {
+                    _pendingRefresh = 0;
+                    refresh();
+                }
+            });
+        });
+}
+
+void Project::watchFiles() {
+    _tv();
+    auto directories = std::set<std::filesystem::path>{};
+    const auto &root = _files.root;
+    if (!root.empty()) {
+        directories.insert(root);
+        if (_fileSystem->stat(root / ".git").isDirectory) {
+            directories.insert(root / ".git");
+        }
+    }
+    // Closest to the root first, when there are too many.
+    auto candidates = std::vector<std::filesystem::path>{};
+    for (auto &file : _files.files) {
+        for (auto dir = file.parent_path();
+             !root.empty() && dir != root && dir.has_relative_path() &&
+             dir.native().starts_with(root.native());
+             dir = dir.parent_path()) {
+            if (!directories.contains(dir)) {
+                candidates.push_back(dir);
+            }
+        }
+    }
+    std::sort(candidates.begin(), candidates.end());
+    candidates.erase(std::unique(candidates.begin(), candidates.end()),
+                     candidates.end());
+    std::stable_sort(
+        candidates.begin(), candidates.end(), [](auto &a, auto &b) {
+            return std::distance(a.begin(), a.end()) <
+                   std::distance(b.begin(), b.end());
+        });
+    for (auto &dir : candidates) {
+        if (directories.size() >= maxWatchedDirectories) {
+            break;
+        }
+        directories.insert(dir);
+    }
+
+    for (auto &dir : _watched) {
+        if (!directories.contains(dir)) {
+            _watcher->unwatch(dir);
+        }
+    }
+    for (auto &dir : directories) {
+        if (!_watched.contains(dir)) {
+            _watcher->watch(dir);
+        }
+    }
+    _watched = std::move(directories);
+}
 
 void Project::refreshNow() {
     _tv();
@@ -95,6 +191,7 @@ void Project::apply(ProjectFiles files) {
     }
     _files = std::move(files);
     updateExtensions();
+    watchFiles();
 
     std::erase_if(_subscribers, [](auto &s) { return s.expired(); });
     // A copy: a callback may subscribe or unsubscribe.

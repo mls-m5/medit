@@ -1,14 +1,17 @@
 #include "core/coreenvironment.h"
 #include "core/files.h"
+#include "core/icommandrunner.h"
 #include "core/jobqueue.h"
 #include "core/meditlog.h"
 #include "core/timer.h"
+#include "files/project.h"
 #include "mls-unit-test/unittest.h"
 #include "mock/screen/mockscreen.h"
 #include "text/buffer.h"
 #include "text/cursorops.h"
 #include "views/editor.h"
 #include "views/mainwindow.h"
+#include <algorithm>
 #include <chrono>
 #include <cstdlib>
 #include <filesystem>
@@ -55,10 +58,18 @@ void write(const std::filesystem::path &path, const std::string &content) {
     std::ofstream{path, std::ios::binary} << content;
 }
 
+/// A project directory with a settings file, so that it is the project root
+/// (without one, the root would be empty and paths relative to the working
+/// directory).
+std::filesystem::path projectDirectory() {
+    auto path = temporaryDirectory("medit-watch-project-XXXXXX");
+    write(path / ".medit.json", "{}");
+    return path;
+}
+
 struct Fixture {
     TemporaryHome home;
-    std::filesystem::path project =
-        temporaryDirectory("medit-watch-project-XXXXXX");
+    std::filesystem::path project = projectDirectory();
     JobQueue jobs;
     JobQueue gui;
     Timer timer;
@@ -66,6 +77,9 @@ struct Fixture {
     CoreEnvironment core{context, project};
 
     Fixture() {
+        if (core.project().settings().root != project) {
+            throw std::runtime_error("the test project is not the root");
+        }
         std::filesystem::create_directory(project / "sub");
         timer.start();
         unsubscribeToLog();
@@ -73,6 +87,7 @@ struct Fixture {
 
     ~Fixture() {
         core.files().stopWatching();
+        core.project().stopWatching();
         timer.stop();
         std::error_code error;
         std::filesystem::remove_all(project, error);
@@ -226,6 +241,53 @@ TEST_CASE("opening a file again notices a change the watcher missed") {
 
     EXPECT_TRUE(f.core.files().open(path) == buffer);
     EXPECT_TRUE(f.runUntil([&] { return buffer->text() == "one\n"; }));
+}
+
+TEST_CASE("the project file list follows the directories it watches") {
+    file_watch_test::Fixture f;
+    auto &project = f.core.project();
+    const auto root = f.project;
+    file_watch_test::write(root / "a.cpp", "");
+    project.refreshNow();
+    auto has = [&project](const std::filesystem::path &path) {
+        auto &files = project.files();
+        return std::find(files.begin(), files.end(), path) != files.end();
+    };
+    EXPECT_TRUE(has(root / "a.cpp"));
+
+    file_watch_test::write(root / "b.cpp", "");
+    EXPECT_TRUE(f.runUntil([&] { return has(root / "b.cpp"); }));
+
+    // A new directory is noticed, and then files in it.
+    std::filesystem::create_directory(root / "new");
+    file_watch_test::write(root / "new" / "c.cpp", "");
+    EXPECT_TRUE(f.runUntil([&] { return has(root / "new" / "c.cpp"); }));
+    file_watch_test::write(root / "new" / "d.cpp", "");
+    EXPECT_TRUE(f.runUntil([&] { return has(root / "new" / "d.cpp"); }));
+
+    std::filesystem::remove(root / "a.cpp");
+    EXPECT_TRUE(f.runUntil([&] { return !has(root / "a.cpp"); }));
+}
+
+TEST_CASE("a .gitignore change updates the Git file list") {
+    file_watch_test::Fixture f;
+    auto &project = f.core.project();
+    const auto root = f.project;
+    auto runner = createCommandRunner();
+    ASSERT_EQ(runner->run({{"git", "init", "-q"}, root}).exitCode, 0);
+    file_watch_test::write(root / "kept.txt", "");
+    file_watch_test::write(root / "dropped.txt", "");
+    project.refreshNow();
+    EXPECT_FALSE(project.projectFiles().fellBack);
+    auto has = [&project](const std::filesystem::path &path) {
+        auto &files = project.files();
+        return std::find(files.begin(), files.end(), path) != files.end();
+    };
+    EXPECT_TRUE(has(root / "dropped.txt"));
+
+    file_watch_test::write(root / ".gitignore", "dropped.txt\n");
+    EXPECT_TRUE(f.runUntil([&] { return !has(root / "dropped.txt"); }));
+    EXPECT_TRUE(has(root / "kept.txt"));
 }
 
 TEST_SUIT_END

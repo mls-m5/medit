@@ -7,6 +7,7 @@
 #include "core/threadname.h"
 #include "core/timer.h"
 #include "files/config.h"
+#include "files/project.h"
 #include "registerdefaultplugins.h"
 #include "screen/bufferedscreen.h"
 #include "settings.h"
@@ -233,8 +234,9 @@ void MainData::start(const Settings &settings) {
 
 void MainData::stop() {
     if (core) {
-        // Its watcher posts to the queues.
+        // Their watchers post to the queues.
         core->files().stopWatching();
+        core->project().stopWatching();
     }
     jobQueue->stop();
     timer->stop();

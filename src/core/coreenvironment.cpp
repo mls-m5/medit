@@ -20,7 +20,8 @@ CoreEnvironment::CoreEnvironment(ThreadContext &context,
                                          fileSystem(),
                                          commandRunner(),
                                          context.jobQueue(),
-                                         context.guiQueue())}
+                                         context.guiQueue(),
+                                         context.timer())}
     , _consoleTtyPath{createFifo(standardConsoleTtyPipePath())}
     , _errorTtyPath{createFifo(standardErrorTtyPipePath())}
     , _consoleInFile{_consoleTtyPath,

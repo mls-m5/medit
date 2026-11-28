@@ -131,7 +131,8 @@ private:
     }
 
     void handle(const inotify_event &event) {
-        if (!event.len || (event.mask & IN_ISDIR)) {
+        // Directories too: a new directory can hold new project files.
+        if (!event.len) {
             return;
         }
         auto path = std::filesystem::path{};

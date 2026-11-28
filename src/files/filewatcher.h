@@ -9,7 +9,8 @@
 /// programs save by writing a new file and renaming it over the old one.
 ///
 /// Reports are hints: they may be duplicated, and the receiver re-reads the
-/// file to decide.
+/// file to decide. Files and directories in a watched directory are both
+/// reported.
 class FileWatcher {
 public:
     /// Called on the watcher's thread.
