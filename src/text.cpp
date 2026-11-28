@@ -10,6 +10,7 @@
 #include "text/fstringview.cpp"
 #include "text/fuzzymatch.cpp"
 #include "text/history.cpp"
+#include "text/linemerge.cpp"
 #include "text/rawbuffer.cpp"
 #include "text/utf8caseconversion.cpp"
 #include "text/utf8char.cpp"
