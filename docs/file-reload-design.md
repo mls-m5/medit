@@ -1,7 +1,7 @@
 # Design: reloading buffers when files change on disk
 
-Status: steps 1–5 are implemented (see "Steps"); step 6 is not. The
-"Today" table describes the code before this work.
+Status: implemented (steps 1–6). The "Today" table describes the code before
+this work.
 
 Related: `docs/project-design.md` (on branch `docs/project-design`) describes
 `IFileSystem`, `WatchHandle` and the project file sources. This design uses the
@@ -242,7 +242,7 @@ Conflicting ranges come from the merge: the `ours` hunks that overlap a
 
 ## Steps
 
-Each step is one commit with its own tests. Steps 1–5 are done, step 6 is not.
+Each step is one commit with its own tests. All six are done.
 
 1. **Line merge**: `linemerge` with unit tests. No behavior change.
 2. **Baseline and safe save**: baseline after load/save; `save` refuses when the
@@ -257,7 +257,10 @@ Each step is one commit with its own tests. Steps 1–5 are done, step 6 is not.
 4. **Merge**: use `mergeLines` for modified buffers. `reload_file`,
    `diff_with_disk`.
 5. **Cursor adjustment** across reload and merge.
-6. Deleted and moved files, and the `stat` check when a buffer is shown again.
+6. Deleted and moved files, and a check when a file is opened again (the
+   fallback without a watcher). A closed buffer is removed from `Files`, which
+   emits `BufferEvent::Close`; `MainWindow` then shows the buffer each editor
+   had before, or an empty one.
 
 Steps 2 and 3 already satisfy "never reload a buffer with unsaved changes".
 Step 4 adds the merging.
