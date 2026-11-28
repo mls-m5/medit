@@ -1,8 +1,8 @@
 
 #include "project.h"
 #include "core/ijobqueue.h"
-#include "files/directorynotifications.h"
 #include "files/extensions.h"
+#include "files/ifilesystem.h"
 #include "files/projectsettings.h"
 #include <algorithm>
 #include <cmath>
@@ -13,41 +13,104 @@
 #include <unordered_map>
 
 Project::Project(std::filesystem::path projectPath,
-                 DirectoryNotifications &directoryNotifications,
+                 IFileSystem &fileSystem,
+                 IJobQueue &jobQueue,
                  IJobQueue &guiQueue)
-    : _tv{"Project"}
+    : _fileSystem{&fileSystem}
+    , _source{createDirectorySource(fileSystem)}
+    , _tv{"Project"}
+    , _jobQueue{&jobQueue}
     , _guiQueue{&guiQueue} {
-    directoryNotifications.subscribe(
-        [this](DirectoryNotifications::EventType type,
-               std::filesystem::path path,
-               std::filesystem::file_time_type) {
-            _guiQueue->addTask([this, path, type] {
-                _tv();
-                // #warning this is called on the wrong thread
-                if (type == DirectoryNotifications::Added) {
-                    addCachedFile(path);
-                }
-                else if (type == DirectoryNotifications::Removed) {
-                    removeCachedFile(path);
-                }
-                else if (type == DirectoryNotifications::Changed) {
-                    updateCachedFile(path);
-                }
-            });
-        },
-        this);
-
     auto projectFile = ProjectSettings::findProject(projectPath, true);
     _settings.load(projectFile);
 }
 
-void Project::updateCache(size_t max) {
+Project::~Project() = default;
+
+void Project::refreshNow() {
     _tv();
     loadProjectFile();
-    _fileCache = findProjectFiles(_settings.root, max);
+    auto files = _source->list(_settings.root, _fileLimit);
+    finishProjectFiles(files, _settings.settingsPath);
+    apply(std::move(files));
+}
+
+void Project::refresh() {
+    _tv();
+    if (_refreshing) {
+        _refreshPending = true;
+        return;
+    }
+    _refreshing = true;
+    loadProjectFile();
+    _jobQueue->addTask([source = _source,
+                        root = _settings.root,
+                        settingsPath = _settings.settingsPath,
+                        limit = _fileLimit,
+                        gui = _guiQueue,
+                        alive = std::weak_ptr{_alive},
+                        this] {
+        auto files = source->list(root, limit);
+        finishProjectFiles(files, settingsPath);
+        gui->addTask([files = std::move(files), alive, this]() mutable {
+            if (alive.expired()) {
+                return;
+            }
+            _refreshing = false;
+            apply(std::move(files));
+            if (_refreshPending) {
+                _refreshPending = false;
+                refresh();
+            }
+        });
+    });
+}
+
+std::shared_ptr<void> Project::subscribeToFiles(
+    std::function<void()> callback) {
+    _tv();
+    auto handle = std::make_shared<std::function<void()>>(std::move(callback));
+    _subscribers.push_back(handle);
+    return handle;
+}
+
+void Project::apply(ProjectFiles files) {
+    _tv();
     if (_settings.buildCommand.empty()) {
         _settings.buildCommand = guessBuildCommand();
     }
+    if (files == _files) {
+        return;
+    }
+    _files = std::move(files);
+    updateExtensions();
+
+    std::erase_if(_subscribers, [](auto &s) { return s.expired(); });
+    // A copy: a callback may subscribe or unsubscribe.
+    auto subscribers = _subscribers;
+    for (auto &weak : subscribers) {
+        if (auto callback = weak.lock()) {
+            (*callback)();
+        }
+    }
+}
+
+void Project::updateExtensions() {
+    struct PathHash {
+        std::size_t operator()(const std::filesystem::path &p) const {
+            return std::hash<std::string>{}(p.string());
+        }
+    };
+    auto counts = std::unordered_map<std::filesystem::path, size_t, PathHash>{};
+    for (auto &file : _files.files) {
+        if (isKnownExtension(file) && file.has_extension()) {
+            ++counts[file.extension()];
+        }
+    }
+    _extensions.assign(counts.begin(), counts.end());
+    std::sort(_extensions.begin(), _extensions.end(), [](auto &a, auto &b) {
+        return a.second > b.second;
+    });
 }
 
 std::filesystem::path Project::findSwitchHeader(std::filesystem::path path) {
@@ -64,7 +127,7 @@ std::filesystem::path Project::findSwitchHeader(std::filesystem::path path) {
 
     auto stem = path.stem();
 
-    for (auto &file : _fileCache) {
+    for (auto &file : _files.files) {
         if (file.stem() == stem) {
             if (file == path) {
                 continue;
@@ -117,7 +180,7 @@ Project::ProjectLanguage Project::guessProjectLanguage() const {
 
 std::string Project::guessBuildCommand() {
     _tv();
-    if (std::filesystem::exists(_settings.root / "CMakeLists.txt")) {
+    if (_fileSystem->stat(_settings.root / "CMakeLists.txt").exists) {
         auto ss = std::ostringstream{};
         ss << "cd " << _settings.root << " ; "
            << " mkdir -p build/default ; "
@@ -128,99 +191,4 @@ std::string Project::guessBuildCommand() {
         return ss.str();
     }
     return {};
-}
-
-std::vector<std::filesystem::path> Project::findProjectFiles(
-    const std::filesystem::path &pathInProject, size_t max) {
-    _tv();
-
-#ifdef __EMSCRIPTEN__
-
-    return {};
-#endif
-
-    auto &root = _settings.root;
-
-    if (root.empty()) {
-        return {};
-    }
-
-    std::vector<std::filesystem::path> paths;
-
-    struct PathHash {
-        std::size_t operator()(const std::filesystem::path &p) const {
-            return std::hash<std::string>{}(p.string());
-        }
-    };
-
-    auto extensions =
-        std::unordered_map<std::filesystem::path, size_t, PathHash>{};
-
-    size_t i = 0;
-    for (auto it =
-             std::filesystem::recursive_directory_iterator{
-                 root,
-                 std::filesystem::directory_options::skip_permission_denied};
-         it != std::filesystem::recursive_directory_iterator{};
-         ++it) {
-        auto &path = it->path();
-
-        if (std::filesystem::exists(path / "CMakeCache.txt")) {
-            it.disable_recursion_pending();
-            continue;
-        }
-
-        if (!isKnownExtension(path)) {
-            continue;
-        }
-        if (!std::filesystem::is_regular_file(path)) {
-            continue;
-        }
-        paths.push_back(path);
-        if (path.has_extension()) {
-            ++extensions[path.extension()];
-        }
-        ++i;
-        if (i > max) {
-            return paths;
-        }
-    }
-
-    paths.push_back(_settings.settingsPath);
-
-    _extensions.clear();
-    _extensions.assign(extensions.begin(), extensions.end());
-    std::sort(_extensions.begin(), _extensions.end(), [](auto &a, auto &b) {
-        return a.second > b.second;
-    });
-
-    return paths;
-}
-
-void Project::addCachedFile(std::filesystem::path path) {
-    _tv();
-    if (std::find(_fileCache.begin(), _fileCache.end(), path) !=
-        _fileCache.end()) {
-        return;
-    }
-    _fileCache.push_back(path);
-    checkProjectFile(path);
-}
-
-void Project::removeCachedFile(std::filesystem::path path) {
-    _tv();
-    // Paths that were never cached (e.g. temporary files) are ignored.
-    std::erase(_fileCache, path);
-}
-
-void Project::updateCachedFile(std::filesystem::path path) {
-    _tv();
-    checkProjectFile(path);
-}
-
-void Project::checkProjectFile(std::filesystem::path path) {
-    if (std::filesystem::relative(path, _settings.root) != ".medit.json") {
-        return;
-    }
-    loadProjectFile();
 }

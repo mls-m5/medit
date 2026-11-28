@@ -24,6 +24,7 @@ struct MainWindow : public Window {
     SideBar _sidebar{this};
     MainWindowLayout _layout;
     bool _sidebarRequested = false;
+    std::shared_ptr<void> _projectFiles; // Subscription to the file list
     bool _paletteFromSidebar = false;
     size_t _split = 10;
     FString _splitString;

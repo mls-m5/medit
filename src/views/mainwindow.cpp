@@ -76,6 +76,18 @@ MainWindow::MainWindow(CoreEnvironment &core,
     _console->showLines(false);
     _console->buffer().assignFile(std::make_unique<UnsavableFile>("Console"));
     _env->console(_console.get());
+    // The tree and an open locator follow the project's file list.
+    _projectFiles = _env->core().project().subscribeToFiles([this] {
+        auto &project = _env->core().project();
+        if (_sidebarRequested) {
+            _sidebar.files(project.settings().root, project.files());
+        }
+        if (_locator->visible()) {
+            _locator->updateList();
+        }
+        triggerRedraw();
+    });
+
     // Buffers can be closed from the core, e.g. when their file is deleted.
     _env->core().files().subscribeToBufferEvents(
         [this](BufferEvent event) {
@@ -346,11 +358,7 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
 }
 
 void MainWindow::updateLocatorBuffer() {
-    auto &project = _env->core().project();
-    project.updateCache();
-    _env->core().files().directoryNotifications().path(
-        project.settings()
-            .root); // TODO: This should probably be handled somewhere else
+    _env->core().project().refresh();
 }
 
 bool MainWindow::open(std::filesystem::path path,
@@ -614,6 +622,7 @@ void MainWindow::autoComplete() {
 }
 
 void MainWindow::showLocator() {
+    _env->core().project().refresh();
     _locator->visible(true);
     _inputFocus = _locator.get();
 }
@@ -633,8 +642,8 @@ void MainWindow::focusSidebar() {
     if (!_sidebarRequested) {
         _sidebarRequested = true;
         auto &project = _env->core().project();
-        project.updateCache(); // Once when opening, never during drawing.
         _sidebar.files(project.settings().root, project.files());
+        project.refresh(); // Never scans on this thread.
         resize();
     }
     // A panel hidden for lack of space cannot take focus.

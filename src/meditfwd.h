@@ -44,7 +44,6 @@ class ITimer;
 class IJobQueue;
 class ThreadContext;
 
-class DirectoryNotifications;
 
 struct Plugins;
 class IHighlight;

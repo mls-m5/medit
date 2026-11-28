@@ -6,15 +6,12 @@
 #include "files/diskcheck.h"
 #include "files/file.h"
 #include "files/filewatcher.h"
-#include "linux/inotify.h"
 #include "text/buffer.h"
 #include <algorithm>
 #include <filesystem>
 
 Files::Files(CoreEnvironment &core)
-    : _core{core}
-    , _dirNotifications{
-          createDirectoryNotifications(_core.context().jobQueue())} {
+    : _core{core} {
     auto *gui = &_core.context().guiQueue();
     _watcher = createFileWatcher(
         [gui, alive = std::weak_ptr{_alive}, this](auto &path) {

@@ -13,6 +13,7 @@
 #include "core/threadvalidation.cpp"
 #include "core/timer.cpp"
 #include "files/config.cpp"
+#include "files/filesource.cpp"
 #include "files/diskcheck.cpp"
 #include "files/gitstatus.cpp"
 #include "files/popenstream.cpp"
@@ -20,5 +21,4 @@
 #include "files/projectsettings.cpp"
 #include "keys/event.cpp"
 #include "linux/filewatcher.cpp"
-#include "linux/inotify.cpp"
 #include "syntax/palette.cpp"

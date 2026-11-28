@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/threadvalidation.h"
-#include "files/directorynotifications.h"
 #include "files/diskstate.h"
 #include "files/filewatcher.h"
 #include "meditfwd.h"
@@ -59,10 +58,6 @@ public:
     // Return a buffer only if it is loaded
     std::shared_ptr<Buffer> find(std::filesystem::path path);
 
-    DirectoryNotifications &directoryNotifications() {
-        return *_dirNotifications;
-    }
-
     bool rename(std::filesystem::path from, std::filesystem::path to);
 
     /// Forgets the buffer and emits BufferEvent::Close for it, so that views
@@ -78,7 +73,6 @@ private:
     CoreEnvironment &_core;
 
     std::vector<std::shared_ptr<Buffer>> _buffers;
-    std::unique_ptr<DirectoryNotifications> _dirNotifications;
 
     /// Watching open files for changes on disk (see
     /// docs/file-reload-design.md): a hint from the watcher is debounced,

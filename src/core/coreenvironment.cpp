@@ -17,7 +17,7 @@ CoreEnvironment::CoreEnvironment(ThreadContext &context,
                                  std::filesystem::path projectPath)
     : _context{&context}
     , _project{std::make_unique<Project>(
-          projectPath, files().directoryNotifications(), context.guiQueue())}
+          projectPath, fileSystem(), context.jobQueue(), context.guiQueue())}
     , _consoleTtyPath{createFifo(standardConsoleTtyPipePath())}
     , _errorTtyPath{createFifo(standardErrorTtyPipePath())}
     , _consoleInFile{_consoleTtyPath,
@@ -32,7 +32,7 @@ CoreEnvironment::CoreEnvironment(ThreadContext &context,
     std::ofstream{_consoleTtyPath.path()}
         << std::endl; // Prevent the listen file from waiting
 
-    _project->updateCache();
+    _project->refreshNow();
 
     subscribeToLog([this](LogType type, std::string_view str) {
         printToAllLogs(type, std::string{str});
