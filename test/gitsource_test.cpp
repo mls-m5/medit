@@ -159,4 +159,94 @@ TEST_CASE("the limit marks the list as truncated") {
     EXPECT_TRUE(files.truncated);
 }
 
+TEST_CASE("the changed source lists changed files with their status") {
+    git_source_test::Directory dir;
+    git_source_test::Git git;
+    const auto root = dir.path;
+    git.init(root);
+    for (auto name : {"clean.cpp", "modified.cpp", "gone.cpp", "old.cpp"}) {
+        git_source_test::write(root / name, name);
+    }
+    git_source_test::write(root / ".gitignore", "ignored.txt\n");
+    git(root, {"add", "--all"});
+    git(root, {"commit", "-q", "-m", "base"});
+    git_source_test::write(root / "modified.cpp", "changed");
+    std::filesystem::remove(root / "gone.cpp");
+    git(root, {"mv", "old.cpp", "new.cpp"});
+    git_source_test::write(root / "staged.cpp");
+    git(root, {"add", "staged.cpp"});
+    git_source_test::write(root / "src" / "untracked file.txt");
+    git_source_test::write(root / "ignored.txt");
+
+    auto source = createChangedSource(*git.runner, localFileSystem());
+    const auto files = source->list(root, 1000);
+    EXPECT_FALSE(files.fellBack);
+    EXPECT_TRUE((git_source_test::relative(files, root) ==
+                 std::vector<std::string>{"gone.cpp",
+                                          "modified.cpp",
+                                          "new.cpp",
+                                          "src/untracked file.txt",
+                                          "staged.cpp"}));
+    ASSERT_EQ(files.status.at(root / "modified.cpp"), " M");
+    ASSERT_EQ(files.status.at(root / "gone.cpp"), " D");
+    ASSERT_EQ(files.status.at(root / "new.cpp"), "R ");
+    ASSERT_EQ(files.status.at(root / "staged.cpp"), "A ");
+    ASSERT_EQ(files.status.at(root / "src/untracked file.txt"), "??");
+}
+
+TEST_CASE("the changed source keeps to a root inside the repository") {
+    git_source_test::Directory dir;
+    git_source_test::Git git;
+    git.init(dir.path);
+    git_source_test::write(dir.path / "outside.cpp");
+    git_source_test::write(dir.path / "project" / "inside.cpp");
+    // Through a symlink: the paths keep the root as given.
+    std::filesystem::create_directory_symlink(dir.path / "project",
+                                              dir.path / "link");
+    const auto root = dir.path / "link";
+
+    auto source = createChangedSource(*git.runner, localFileSystem());
+    const auto files = source->list(root, 1000);
+    EXPECT_TRUE((files.files ==
+                 std::vector<std::filesystem::path>{root / "inside.cpp"}));
+}
+
+TEST_CASE("the changed source lists the changed files in submodules") {
+    git_source_test::Directory dir;
+    git_source_test::Git git;
+    const auto upstream = dir.path / "upstream";
+    git.init(upstream);
+    git_source_test::write(upstream / "lib.cpp", "1");
+    git(upstream, {"add", "--all"});
+    git(upstream, {"commit", "-q", "-m", "lib"});
+    const auto root = dir.path / "project";
+    git.init(root);
+    git(root,
+        {"-c",
+         "protocol.file.allow=always",
+         "submodule",
+         "add",
+         "-q",
+         upstream.string(),
+         "lib"});
+    git(root, {"commit", "-q", "-m", "add lib"});
+    git_source_test::write(root / "lib" / "lib.cpp", "2");
+
+    auto source = createChangedSource(*git.runner, localFileSystem());
+    const auto files = source->list(root, 1000);
+    EXPECT_TRUE((git_source_test::relative(files, root) ==
+                 std::vector<std::string>{"lib/lib.cpp"}));
+    ASSERT_EQ(files.status.at(root / "lib/lib.cpp"), " M");
+}
+
+TEST_CASE("the changed source is empty outside a repository") {
+    git_source_test::Directory dir;
+    git_source_test::Git git;
+    git_source_test::write(dir.path / "a.cpp");
+    auto source = createChangedSource(*git.runner, localFileSystem());
+    const auto files = source->list(dir.path, 1000);
+    EXPECT_TRUE(files.fellBack);
+    EXPECT_TRUE(files.files.empty());
+}
+
 TEST_SUIT_END
