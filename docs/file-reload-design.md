@@ -1,9 +1,7 @@
 # Design: reloading buffers when files change on disk
 
-Status: decisions recorded (see "Decisions" at the end). Nothing here is
-implemented yet. The steps that
-touch file watching, `Files` or notification dispatch are performance-sensitive
-and need explicit approval before they are implemented.
+Status: steps 1–5 are implemented (see "Steps"); step 6 is not. The
+"Today" table describes the code before this work.
 
 Related: `docs/project-design.md` (on branch `docs/project-design`) describes
 `IFileSystem`, `WatchHandle` and the project file sources. This design uses the
@@ -144,17 +142,25 @@ A line-based three-way merge, like `git merge-file`:
 - Hunks from `theirs` that do not overlap or touch a hunk from `ours` are
   applied; identical changes on both sides count as no conflict. Anything else
   is a conflict and nothing is applied.
+- To be restrictive, the automatic merge also needs at least three unchanged
+  lines (`mergeMargin`) between a change on disk and an unsaved change; closer
+  changes count as a conflict. The marked conflict lines use the same margin.
 - The result is a list of line edits on `ours`, applied as `BufferEdit`s within
   one major history step.
 
 This is a pure function on strings, so it is tested without files or threads:
 
 ```cpp
-struct LineHunk { size_t begin; size_t end; std::vector<std::string> lines; };
-struct MergeResult { bool conflict = false; std::vector<LineHunk> editsToOurs; };
-MergeResult mergeLines(std::string_view base,
-                       std::string_view ours,
-                       std::string_view theirs);
+struct LineEdit { size_t begin; size_t end; std::vector<std::string> lines; };
+struct LineMerge {
+    bool conflict = false;
+    std::vector<LineEdit> edits;      // On ours
+    std::vector<LineRange> conflicts; // Lines of ours
+};
+LineMerge mergeLines(std::string_view base,
+                     std::string_view ours,
+                     std::string_view theirs,
+                     size_t margin = 0);
 ```
 
 The same line diff can produce a unified diff for the "compare with disk"
@@ -162,12 +168,36 @@ command below, displayed with the existing `formatGitDiff` view.
 
 ### Cursors
 
-Reload and merge apply only the changed ranges, so text and cursors outside
-them stay as they are. A cursor below a changed range is moved by that hunk's
-line delta, so it stays on the same text instead of the same line number. A
-cursor inside a replaced range stays at the same line, clamped. This needs a
-hook from the applied edits to the editors that show the buffer; today nothing
-adjusts other editors' cursors when a buffer changes, so this is new.
+Reload and merge apply only the changed ranges. Positions are moved inside the
+buffer's own edit path, not by the callers, so that more cursors and other
+users' cursors can use the same mechanism later:
+
+- `Buffer` keeps anchors; every edit applied through `Buffer::applyRaw` (normal
+  edits, undo, redo, reload, merge) moves them with `movePosition`.
+- `TrackedPosition` owns one anchor. The editor's cursor and selection anchor
+  are tracked positions.
+- Rules: a position before the edit is unchanged; one exactly at a pure
+  insertion ends up after the inserted text (so lines inserted above keep it
+  on its line), and at the start of a replacement it stays; after the removed
+  text it moves by the size difference; inside the removed text it stays, but
+  at most at the end of the inserted text.
+
+### History
+
+Every change goes through the buffer history, also those that do not come from
+typing, so that the history can later become a tree that can be shared and
+rebased. Items have a kind:
+
+| Kind | Meaning |
+|---|---|
+| `Edit` | Typed or made by a command |
+| `Reload` | Text taken from disk, replacing the buffer |
+| `Merge` | Text taken from disk, merged with unsaved changes |
+| `Load` | Marker: the buffer now matches its file (opened or reloaded) |
+| `Save` | Marker: the buffer was saved |
+
+Markers do not change the text. Undo and redo pass over them and move them
+together with the edit before them.
 
 ### Showing a conflict
 
@@ -179,8 +209,7 @@ the way compiler errors are already shown:
   existing `BufferView` drawing then shows those line numbers in the error
   color with the message beside the line, e.g. `changed on disk: conflicts
   with your edit`. No new drawing code.
-- The status message is drawn in `Palette::error` and repeated when the buffer
-  is shown again, as long as the state lasts.
+- When saving is refused, the status message is drawn in `Palette::error`.
 - The window title gets `[conflict]`.
 - The markers are cleared (`Diagnostics::clearSource("disk")`) when the state
   goes back to `InSync`: after `reload_file`, `save_overwrite`, or a later
@@ -207,14 +236,13 @@ Conflicting ranges come from the merge: the `ours` hunks that overlap a
 - `Files`: owns the per-directory watches, the debounce and the decision. It
   already owns the buffer list and the watcher. The project-root watcher used
   by `Project` stays as it is until `project-design.md` step 6.
-- `Buffer`: holds the `DiskState`, and the hook that reports applied line
-  deltas to its editors.
+- `Buffer`: holds the `DiskState` and the anchors moved by every edit.
 - MainWindow: no new logic. It only shows the state in the title it already
   builds; the line markers go through `Diagnostics`.
 
 ## Steps
 
-Each step is one branch with its own tests.
+Each step is one commit with its own tests. Steps 1–5 are done, step 6 is not.
 
 1. **Line merge**: `linemerge` with unit tests. No behavior change.
 2. **Baseline and safe save**: baseline after load/save; `save` refuses when the
@@ -232,7 +260,7 @@ Each step is one branch with its own tests.
 6. Deleted and moved files, and the `stat` check when a buffer is shown again.
 
 Steps 2 and 3 already satisfy "never reload a buffer with unsaved changes".
-Steps 4–6 add the merging.
+Step 4 adds the merging.
 
 ## Tests
 
@@ -258,3 +286,9 @@ Steps 4–6 add the merging.
 3. Merge base kept in memory up to 4 MB per file.
 4. A file deleted on disk: close the buffer when it has no unsaved changes;
    keep it, shown as a conflict, when it has.
+5. The automatic merge is restrictive: changes must be at least three
+   unchanged lines apart.
+6. Cursor tracking lives in the buffer's edit path, for more cursors and
+   sharing later.
+7. All changes, including loading, reloading, merging and saving, are recorded
+   in the history.
