@@ -18,7 +18,7 @@ Editor::~Editor() = default;
 Editor::Editor(IView *parent, std::shared_ptr<Buffer> buffer)
     : View{parent}
     , _bufferView(parent, std::move(buffer))
-    , _cursor(_bufferView.buffer())
+    , _cursor(_bufferView.buffer(), {})
     , _mode(createNormalMode()) {}
 
 IFile *Editor::file() {
@@ -86,7 +86,8 @@ void Editor::buffer(std::shared_ptr<Buffer> buffer) {
                               _cursor.pos(),
                               {_bufferView.xScroll(), _bufferView.yScroll()}});
 
-    _cursor = Cursor{*buffer};
+    _cursor = TrackedPosition{*buffer, {}};
+    _selectionAnchor.reset();
     _bufferView.scroll(0, 0);
     _bufferView.buffer(std::move(buffer));
 }
@@ -106,11 +107,16 @@ Cursor Editor::fix(Cursor cursor) const {
 }
 
 Cursor Editor::cursor() const {
-    return this->fix(_cursor);
+    return this->fix(rawCursor());
+}
+
+Cursor Editor::rawCursor() const {
+    // Cursors refer to a mutable buffer even from a const editor.
+    return {const_cast<Buffer &>(_bufferView.buffer()), _cursor.pos()};
 }
 
 EditorCursor Editor::virtualCursor() {
-    return {*this, _cursor};
+    return {*this, rawCursor()};
 }
 
 Position Editor::screenPositionFromCursor(Position editorPos) const {
@@ -122,10 +128,16 @@ Cursor Editor::cursorFromScreenPosition(Position screenPos) const {
 }
 
 Cursor Editor::cursor(Cursor c, bool deselect) {
-    _cursor = c;
+    auto position = c.pos();
     const auto &lines = buffer().lines();
-    if (_cursor.y() > lines.size()) {
-        _cursor.y(lines.size());
+    if (position.y() > lines.size()) {
+        position.y(lines.size());
+    }
+    if (_cursor.buffer() != &buffer()) {
+        _cursor = TrackedPosition{buffer(), position};
+    }
+    else {
+        _cursor.pos(position);
     }
     fitCursor();
     if (deselect) {
@@ -136,7 +148,7 @@ Cursor Editor::cursor(Cursor c, bool deselect) {
         w->triggerRedraw();
     }
 
-    return _cursor;
+    return rawCursor();
 }
 
 Cursor Editor::cursor(Position position) {
@@ -144,11 +156,15 @@ Cursor Editor::cursor(Position position) {
 }
 
 void Editor::selectionAnchor(Cursor cursor) {
-    _selectionAnchor = {cursor};
+    _selectionAnchor.emplace(buffer(), cursor.pos());
 }
 
 std::optional<Cursor> Editor::selectionAnchor() const {
-    return _selectionAnchor;
+    if (!_selectionAnchor) {
+        return std::nullopt;
+    }
+    return Cursor{const_cast<Buffer &>(_bufferView.buffer()),
+                  _selectionAnchor->pos()};
 }
 
 void Editor::clearSelection() {
@@ -161,20 +177,20 @@ CursorRange Editor::selection() {
             return {home(cursor()), end(cursor())};
         }
 
-        auto range = CursorRange{*_selectionAnchor, cursor()};
+        auto range = CursorRange{*selectionAnchor(), cursor()};
         range.beginPosition(home(range.begin()));
         range.endPosition(right(end(range.end())));
         return range;
     }
 
     if (_selectionAnchor) {
-        auto range = CursorRange{*_selectionAnchor, _cursor};
+        auto range = CursorRange{*selectionAnchor(), rawCursor()};
 
         range.endPosition(right(range.end(), false));
 
         return range;
     }
-    return {_cursor};
+    return {rawCursor()};
 }
 
 bool Editor::isBlockSelection() const {
@@ -332,6 +348,7 @@ void Editor::removeEmptyUnsavedBufferHistory() {
 }
 
 void Editor::restoreState(SavedState state) {
+    _selectionAnchor.reset();
     _bufferView.buffer(state.buffer.lock());
     auto scroll = state.scroll;
     _bufferView.scroll(scroll.x(), scroll.y());

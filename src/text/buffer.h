@@ -73,6 +73,13 @@ public:
     /// are cleared when the state is `InSync`.
     void diskState(DiskState state, std::vector<LineRange> conflicts = {});
 
+    /// Positions that every edit moves along with the text (see
+    /// TrackedPosition, which manages them). Ids are never 0.
+    size_t addAnchor(Position position);
+    void removeAnchor(size_t id);
+    [[nodiscard]] Position anchor(size_t id) const;
+    void anchor(size_t id, Position position);
+
     [[nodiscard]] Path path() {
         _tv();
         if (_file) {
@@ -232,14 +239,24 @@ private:
     // The function history class uses with undo/redo
     void applyWithoutHistory(BufferEdit edit) {
         _tv();
-        _raw.apply(std::move(edit));
+        applyRaw(std::move(edit));
         emitChangeSignal();
     }
+
+    /// Applies the edit to the text and moves the anchors.
+    Cursor applyRaw(BufferEdit edit);
 
     History _history{*this};
     std::unique_ptr<IFile> _file;
     Diagnostics _diagnostics;
     DiskState _diskState = DiskState::InSync;
+
+    struct Anchor {
+        size_t id = 0;
+        Position position;
+    };
+    std::vector<Anchor> _anchors;
+    size_t _nextAnchorId = 1;
     ThreadValidation _tv{"gui thread"};
 
     RawBuffer _raw;

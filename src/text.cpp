@@ -12,6 +12,7 @@
 #include "text/history.cpp"
 #include "text/linemerge.cpp"
 #include "text/rawbuffer.cpp"
+#include "text/trackedposition.cpp"
 #include "text/utf8caseconversion.cpp"
 #include "text/utf8char.cpp"
 #include "text/utf8charops.cpp"

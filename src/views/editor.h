@@ -1,5 +1,7 @@
 #pragma once
 
+#include "text/trackedposition.h"
+
 #include "keys/ikeysink.h"
 #include "meditfwd.h"
 #include "text/cursor.h"
@@ -107,6 +109,9 @@ public:
     //! poosibility of using the modes plus one attribute
     Cursor fix(Cursor) const;
 
+    /// The cursor as stored, not fitted to the line.
+    Cursor rawCursor() const;
+
     /// Close the buffer and open another buffer previously opened in editor
     /// @return true if another buffer was found and false if no other buffer
     /// existed
@@ -126,8 +131,10 @@ private:
     void restoreState(SavedState state);
 
     BufferView _bufferView;
-    Cursor _cursor;
-    std::optional<Cursor> _selectionAnchor;
+    /// Tracked in the buffer, so they follow edits made by others (reloads,
+    /// other editors on the same buffer, undo).
+    TrackedPosition _cursor;
+    std::optional<TrackedPosition> _selectionAnchor;
     std::shared_ptr<IMode> _mode;
     FormatType _background = 1;
 

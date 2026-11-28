@@ -166,9 +166,52 @@ void Buffer::clear() {
 Cursor Buffer::apply(BufferEdit edit) {
     _tv();
     _history.commit(edit);
-    auto cur = _raw.apply(std::move(edit));
+    auto cur = applyRaw(std::move(edit));
     emitChangeSignal();
     return cur;
+}
+
+Cursor Buffer::applyRaw(BufferEdit edit) {
+    if (_anchors.empty()) {
+        return _raw.apply(std::move(edit));
+    }
+    edit.trim();
+    for (auto &anchor : _anchors) {
+        anchor.position = movePosition(anchor.position, edit);
+    }
+    return _raw.apply(std::move(edit));
+}
+
+size_t Buffer::addAnchor(Position position) {
+    _tv();
+    const auto id = _nextAnchorId++;
+    _anchors.push_back({id, position});
+    return id;
+}
+
+void Buffer::removeAnchor(size_t id) {
+    _tv();
+    std::erase_if(_anchors, [id](const Anchor &a) { return a.id == id; });
+}
+
+Position Buffer::anchor(size_t id) const {
+    _tv();
+    for (auto &a : _anchors) {
+        if (a.id == id) {
+            return a.position;
+        }
+    }
+    return {};
+}
+
+void Buffer::anchor(size_t id, Position position) {
+    _tv();
+    for (auto &a : _anchors) {
+        if (a.id == id) {
+            a.position = position;
+            return;
+        }
+    }
 }
 
 FStringView Buffer::lineAt(size_t index) const {
