@@ -2,7 +2,7 @@
 #include "core/icommandrunner.h"
 #include "files/project.h"
 #include "gitcommitinteraction.h"
-#include "gitdiff.h"
+#include "script/gitdiff.h"
 #include "script/ienvironment.h"
 #include "script/interaction.h"
 #include "script/standardcommands.h"

@@ -28,6 +28,9 @@ public:
     void title(std::string title) {
         _title = std::move(title);
     }
+    const std::string &title() const {
+        return _title;
+    }
     void onOpen(std::function<void(const Path &)> callback) {
         _onOpen = std::move(callback);
     }

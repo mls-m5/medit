@@ -3,7 +3,6 @@
 #include "genericformat.cpp"
 #include "git.cpp"
 #include "gitcommitinteraction.cpp"
-#include "gitdiff.cpp"
 #include "jsonformat.cpp"
 #include "markdowntools.cpp"
 #include "run.cpp"

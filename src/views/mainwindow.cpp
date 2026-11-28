@@ -13,6 +13,7 @@
 #include "modes/insertmode.h"
 #include "navigation/inavigation.h"
 #include "screen/iscreen.h"
+#include "script/gitdiff.h"
 #include "script/localenvironment.h"
 #include "script/staticcommandregister.h"
 #include "syntax/basichighligting.h"
@@ -92,10 +93,8 @@ MainWindow::MainWindow(CoreEnvironment &core,
     _env->console(_console.get());
     // The tree and an open locator follow the project's file list.
     _projectFiles = _env->core().project().subscribeToFiles([this] {
-        auto &project = _env->core().project();
         if (_sidebarRequested) {
-            _sidebar.title(sidebarTitle(project.sourceKind()));
-            _sidebar.files(project.settings().root, project.files());
+            updateSidebarFiles();
         }
         if (_locator->visible()) {
             _locator->updateList();
@@ -149,7 +148,7 @@ MainWindow::MainWindow(CoreEnvironment &core,
         if (path.empty()) {
             return;
         }
-        open(env().project().settings().root / path);
+        openProjectFile(env().project().settings().root / path);
     });
 
     _commandPalette->visible(false);
@@ -182,7 +181,7 @@ MainWindow::MainWindow(CoreEnvironment &core,
     _sidebar.visible(false);
     _sidebar.onOpen([this](const auto &path) {
         resetFocus();
-        open(path);
+        openProjectFile(path);
     });
 
     // updateLocatorBuffer();
@@ -374,6 +373,23 @@ bool MainWindow::keyPress(std::shared_ptr<IEnvironment> env) {
 
 void MainWindow::updateLocatorBuffer() {
     _env->core().project().refresh();
+}
+
+void MainWindow::updateSidebarFiles() {
+    auto &project = _env->core().project();
+    _sidebar.title(sidebarTitle(project.sourceKind()));
+    _sidebar.files(project.settings().root, project.files());
+}
+
+void MainWindow::openProjectFile(const std::filesystem::path &path) {
+    // Listing the changed files is for reviewing changes: show the diff,
+    // which also works for a deleted file.
+    if (_env->core().project().sourceKind() == FileSourceKind::Changed) {
+        showGitDiff(_env, path);
+        updateTitle();
+        return;
+    }
+    open(path);
 }
 
 bool MainWindow::open(std::filesystem::path path,
@@ -656,9 +672,8 @@ void MainWindow::showCommandPalette() {
 void MainWindow::focusSidebar() {
     if (!_sidebarRequested) {
         _sidebarRequested = true;
-        auto &project = _env->core().project();
-        _sidebar.files(project.settings().root, project.files());
-        project.refresh(); // Never scans on this thread.
+        updateSidebarFiles();
+        _env->core().project().refresh(); // Never scans on this thread.
         resize();
     }
     // A panel hidden for lack of space cannot take focus.

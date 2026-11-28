@@ -1,4 +1,4 @@
-#include "gitdiff.h"
+#include "script/gitdiff.h"
 #include "core/coreenvironment.h"
 #include "core/meditlog.h"
 #include "files/file.h"

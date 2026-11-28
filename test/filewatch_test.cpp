@@ -20,6 +20,7 @@
 #include <optional>
 #include <stdexcept>
 #include <thread>
+#include <vector>
 
 // Integration tests with the real watcher, a temporary directory and bounded
 // waits.
@@ -288,6 +289,55 @@ TEST_CASE("a .gitignore change updates the Git file list") {
     file_watch_test::write(root / ".gitignore", "dropped.txt\n");
     EXPECT_TRUE(f.runUntil([&] { return !has(root / "dropped.txt"); }));
     EXPECT_TRUE(has(root / "kept.txt"));
+}
+
+TEST_CASE("with the changed source, opening a project file shows its diff") {
+    file_watch_test::Fixture f;
+    MockScreen screen;
+    screen.mock_palette_1.expectNum(1);
+    screen.mock_title_1.nice();
+    auto window = MainWindow{f.core, screen, f.context};
+    unsubscribeToLog();
+
+    auto runner = createCommandRunner();
+    auto git = [&](std::vector<std::string> arguments) {
+        arguments.insert(arguments.begin(), "git");
+        const auto result = runner->run({arguments, f.project});
+        if (result.exitCode) {
+            throw std::runtime_error("git failed: " + result.errors);
+        }
+    };
+    git({"init", "-q"});
+    git({"config", "user.name", "Test"});
+    git({"config", "user.email", "test@example.com"});
+    git({"config", "commit.gpgsign", "false"});
+    file_watch_test::write(f.project / "gone.txt", "old line\n");
+    file_watch_test::write(f.project / "kept.txt", "kept\n");
+    git({"add", "--all"});
+    git({"commit", "-q", "-m", "base"});
+    std::filesystem::remove(f.project / "gone.txt");
+
+    auto &project = f.core.project();
+    project.source(FileSourceKind::Changed);
+    project.refreshNow();
+    EXPECT_TRUE((project.files() ==
+                 std::vector<std::filesystem::path>{f.project / ".medit.json",
+                                                    f.project / "gone.txt"}));
+
+    // The tree names the source, also when it is opened after the switch.
+    window.focusSidebar();
+    ASSERT_EQ(window._sidebar.title(), " Changed in Git");
+
+    window.openProjectFile(f.project / "gone.txt");
+    auto &shown = window.currentEditor()->buffer();
+    EXPECT_TRUE(shown.text().find("-old line") != std::string::npos);
+    // The diff view cannot be saved.
+    EXPECT_FALSE(shown.save());
+
+    // With the other sources the file itself opens.
+    project.source(FileSourceKind::Git);
+    window.openProjectFile(f.project / "kept.txt");
+    ASSERT_EQ(window.currentEditor()->buffer().text(), "kept\n");
 }
 
 TEST_SUIT_END

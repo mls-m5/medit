@@ -1,7 +1,7 @@
 #include "core/icommandrunner.h"
 #include "files/gitstatus.h"
 #include "mls-unit-test/unittest.h"
-#include "plugin/gitdiff.h"
+#include "script/gitdiff.h"
 #include "syntax/palette.h"
 #include <cstdlib>
 #include <filesystem>

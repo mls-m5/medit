@@ -107,6 +107,13 @@ struct MainWindow : public Window {
 
     void updateTitle();
 
+    /// Opens a file chosen from the project's file list (the tree or the
+    /// locator). With the changed-in-Git source, shows its diff instead.
+    void openProjectFile(const std::filesystem::path &path);
+
+    /// Shows the project's current file list, and its source, in the tree.
+    void updateSidebarFiles();
+
     /// Stops showing `buffer` in the editors that show it.
     void bufferClosed(const Buffer &buffer);
 
