@@ -117,4 +117,14 @@ TEST_CASE("apply text change - multiline") {
     }
 }
 
+TEST_CASE("undo a replacement whose trimmed text starts with a newline") {
+    // "cc\n" -> "c\nac\n" trims to inserting "\na" after the first 'c', so
+    // undo removes text that starts with a newline.
+    auto buffer = Buffer{"cc\n"};
+    buffer.apply(BufferEdit{FString{"cc\n"}, FString{"c\nac\n"}, {buffer}});
+    ASSERT_EQ(buffer.text(), "c\nac\n");
+    buffer.history().undo();
+    ASSERT_EQ(buffer.text(), "cc\n");
+}
+
 TEST_SUIT_END

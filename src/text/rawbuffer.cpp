@@ -90,7 +90,7 @@ Cursor RawBuffer::apply(BufferEdit edit) {
             if (from.back() == Utf8Char{'\n'}) {
                 return size_t{0};
             }
-            for (size_t i = from.size() - 1; i != 0; --i) {
+            for (size_t i = from.size(); i-- > 0;) {
                 if (from.at(i) == Utf8Char{'\n'}) {
                     return from.size() - i - 1;
                 }
