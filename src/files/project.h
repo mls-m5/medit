@@ -12,6 +12,7 @@
 #include <vector>
 
 class IFileSystem;
+class ICommandRunner;
 
 class Project {
 public:
@@ -25,8 +26,11 @@ public:
     /// the editor.
     static constexpr size_t defaultFileLimit = 100000;
 
+    /// Lists the files Git knows about (see createGitSource), or the
+    /// directory outside a repository.
     Project(std::filesystem::path projectFile,
             IFileSystem &fileSystem,
+            ICommandRunner &runner,
             IJobQueue &jobQueue,
             IJobQueue &guiQueue);
     ~Project();

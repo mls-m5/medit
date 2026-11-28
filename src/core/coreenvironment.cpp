@@ -16,8 +16,11 @@
 CoreEnvironment::CoreEnvironment(ThreadContext &context,
                                  std::filesystem::path projectPath)
     : _context{&context}
-    , _project{std::make_unique<Project>(
-          projectPath, fileSystem(), context.jobQueue(), context.guiQueue())}
+    , _project{std::make_unique<Project>(projectPath,
+                                         fileSystem(),
+                                         commandRunner(),
+                                         context.jobQueue(),
+                                         context.guiQueue())}
     , _consoleTtyPath{createFifo(standardConsoleTtyPipePath())}
     , _errorTtyPath{createFifo(standardErrorTtyPipePath())}
     , _consoleInFile{_consoleTtyPath,

@@ -14,6 +14,8 @@ struct ProjectFiles {
     Path root;
     std::vector<Path> files; // Absolute, sorted, unique
     bool truncated = false;  // The limit was reached; files are missing
+    /// The Git source could not use Git and listed the directory instead.
+    bool fellBack = false;
 
     bool operator==(const ProjectFiles &) const = default;
 };
@@ -36,6 +38,14 @@ public:
 /// Every regular file with a known extension below the root, skipping `.git`
 /// and CMake build directories.
 std::unique_ptr<FileSource> createDirectorySource(IFileSystem &fileSystem);
+
+/// The files Git knows about: tracked and untracked, not ignored
+/// (`git ls-files --cached --others --exclude-standard`). Tracked files missing
+/// on disk are left out. Initialized submodules and nested repositories are
+/// listed with their files. Outside a repository, or without git, it lists
+/// the directory instead and sets `fellBack`.
+std::unique_ptr<FileSource> createGitSource(ICommandRunner &runner,
+                                            IFileSystem &fileSystem);
 
 /// Sorts and removes duplicates, and adds the settings file (when given),
 /// which is always part of the project.

@@ -1,6 +1,7 @@
 
 #include "project.h"
 #include "core/ijobqueue.h"
+#include "core/meditlog.h"
 #include "files/extensions.h"
 #include "files/ifilesystem.h"
 #include "files/projectsettings.h"
@@ -14,10 +15,11 @@
 
 Project::Project(std::filesystem::path projectPath,
                  IFileSystem &fileSystem,
+                 ICommandRunner &runner,
                  IJobQueue &jobQueue,
                  IJobQueue &guiQueue)
     : _fileSystem{&fileSystem}
-    , _source{createDirectorySource(fileSystem)}
+    , _source{createGitSource(runner, fileSystem)}
     , _tv{"Project"}
     , _jobQueue{&jobQueue}
     , _guiQueue{&guiQueue} {
@@ -78,6 +80,15 @@ void Project::apply(ProjectFiles files) {
     _tv();
     if (_settings.buildCommand.empty()) {
         _settings.buildCommand = guessBuildCommand();
+    }
+    if (files.fellBack && !_files.fellBack) {
+        logStatusMessage("Not a Git repository: listing all files in ",
+                         files.root.string());
+    }
+    if (files.truncated && !_files.truncated) {
+        logStatusMessage("More than ",
+                         _fileLimit,
+                         " project files: the file list is incomplete");
     }
     if (files == _files) {
         return;

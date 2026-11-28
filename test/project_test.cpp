@@ -1,3 +1,4 @@
+#include "core/icommandrunner.h"
 #include "core/jobqueue.h"
 #include "files/memoryfilesystem.h"
 #include "files/project.h"
@@ -7,14 +8,31 @@
 
 namespace project_test {
 
+/// A runner where every command fails, as without git: the Git source falls
+/// back to listing the directory.
+class FailingRunner : public ICommandRunner {
+public:
+    CommandResult run(const Command &, const CommandOutput &) override {
+        auto result = CommandResult{};
+        result.exitCode = 127;
+        return result;
+    }
+    std::unique_ptr<RunningCommand> start(Command,
+                                          CommandOutput,
+                                          DoneT) override {
+        return nullptr;
+    }
+};
+
 const std::filesystem::path path = "test/res/.medit.json";
 const std::filesystem::path root = std::filesystem::absolute("test/res");
 
 struct Fixture {
     MemoryFileSystem fs;
+    FailingRunner runner;
     JobQueue jobs;
     JobQueue gui;
-    Project project{path, fs, jobs, gui};
+    Project project{path, fs, runner, jobs, gui};
 
     void runQueues() {
         for (int i = 0; i < 10; ++i) {
@@ -51,6 +69,7 @@ TEST_CASE("the directory source skips build directories and .git") {
                  std::vector<std::filesystem::path>{
                      root / ".medit.json", root / "b.cpp", root / "src/a.h"}));
     EXPECT_FALSE(f.project.projectFiles().truncated);
+    EXPECT_TRUE(f.project.projectFiles().fellBack);
     EXPECT_TRUE(f.project.getProjectLanguage() == Project::Cpp);
 
     f.project.fileLimit(1);
@@ -116,10 +135,11 @@ TEST_CASE("refreshes while one runs are coalesced into one more") {
 
 TEST_CASE("a listing that finishes after the project is gone is dropped") {
     MemoryFileSystem fs;
+    project_test::FailingRunner runner;
     JobQueue jobs;
     JobQueue gui;
     {
-        auto project = Project{project_test::path, fs, jobs, gui};
+        auto project = Project{project_test::path, fs, runner, jobs, gui};
         project.refresh();
         jobs.work(false);
     }
