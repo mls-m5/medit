@@ -1,7 +1,8 @@
 # Project files and file system: redesign
 
-Status: `ICommandRunner` (step 1) is on `main`. Steps 2–4 and 6 are being
-implemented on `feature/project-files`, following "Concrete plan" at the end;
+Status: `ICommandRunner` (step 1) is on `main`. Steps 2–4 and 6 are
+implemented on `feature/project-files` (P1–P4 in "Concrete plan" at the end);
+step 5 (the changed-in-Git source) is not;
 the operator approved that plan, including its performance-sensitive steps.
 Buffer reloading on external changes was done separately
 (`docs/file-reload-design.md`); it added `FileWatcher`, which this redesign
@@ -379,8 +380,10 @@ class IFileSystem {
 - `Project` watches the root, the directories in the snapshot (capped, e.g.
   2000, to stay within inotify limits) and `.git` (index and HEAD changes from
   staging, commits and checkouts) with a `FileWatcher`.
-- Hints are debounced (about 200 ms) into one refresh.
-- `DirectoryNotifications` is removed.
+- Hints are debounced (about 200 ms) into one refresh. In `.git`, only
+  `index` and `HEAD` count.
+- `DirectoryNotifications` is removed (done already in P2, once nothing used
+  it).
 
 ### Later
 
