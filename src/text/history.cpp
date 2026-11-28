@@ -19,24 +19,56 @@ bool History::commit(BufferEdit edit) {
     return true;
 }
 
-void History::markMajor() {
-    if (_history.empty()) {
-        return;
+void History::event(HistoryKind kind) {
+    _history.push_back({
+        .edit = BufferEdit{{}, {}, Cursor{*_buffer}},
+        .revision = _revision,
+        .kind = kind,
+    });
+}
+
+void History::tagSince(long revision, HistoryKind kind) {
+    for (auto it = _history.rbegin();
+         it != _history.rend() && it->revision > revision;
+         ++it) {
+        if (!it->isMarker()) {
+            it->kind = kind;
+        }
     }
-    _history.back().isMajor = true;
+}
+
+History::Item *History::lastEdit() {
+    for (auto it = _history.rbegin(); it != _history.rend(); ++it) {
+        if (!it->isMarker()) {
+            return &*it;
+        }
+    }
+    return nullptr;
+}
+
+void History::markMajor() {
+    if (auto *item = lastEdit()) {
+        item->isMajor = true;
+    }
 }
 
 void History::undoMajor() {
     undo();
 
-    while (!_history.empty() && !_history.back().isMajor) {
+    for (auto *item = lastEdit(); item && !item->isMajor; item = lastEdit()) {
         undo();
     }
 }
 
 void History::undo() {
-    if (_history.empty()) {
+    if (!lastEdit()) {
         return;
+    }
+
+    // Markers after the edit go with it, so redo puts them back after it.
+    while (_history.back().isMarker()) {
+        _redo.push_back(std::move(_history.back()));
+        _history.pop_back();
     }
 
     auto edit = revert(_history.back().edit);
@@ -54,12 +86,16 @@ void History::redo() {
         return;
     }
 
-    auto text = _buffer->text();
     _buffer->applyWithoutHistory(_redo.back().edit);
 
     _history.push_back(std::move(_redo.back()));
-
     _redo.pop_back();
+
+    // The markers that were undone with this edit.
+    while (!_redo.empty() && _redo.back().isMarker()) {
+        _history.push_back(std::move(_redo.back()));
+        _redo.pop_back();
+    }
 
     ++_revision;
 }
@@ -67,5 +103,4 @@ void History::redo() {
 void History::clear() {
     _history.clear();
     _redo.clear();
-    //    _currentState = _buffer.text();
 }

@@ -233,4 +233,29 @@ TEST_CASE("a file deleted on disk keeps the buffer's text") {
     EXPECT_TRUE(buffer->diskState() == DiskState::DeletedOnDisk);
 }
 
+TEST_CASE("loading, reloading and saving are recorded in the history") {
+    disk_state_test::TemporaryDirectory dir;
+    const auto path = dir.path / "a.txt";
+    disk_state_test::write(path, "1\n2\n");
+    auto buffer = Buffer::open(path);
+    using K = HistoryKind;
+    auto kinds = [&buffer] {
+        auto ret = std::vector<HistoryKind>{};
+        for (auto &item : buffer->history().items()) {
+            ret.push_back(item.kind);
+        }
+        return ret;
+    };
+    EXPECT_TRUE((kinds() == std::vector{K::Load}));
+
+    disk_state_test::write(path, "1\ntwo\n");
+    buffer->load();
+    EXPECT_TRUE((kinds() == std::vector{K::Load, K::Reload, K::Load}));
+
+    disk_state_test::type(*buffer, 0, "x");
+    EXPECT_TRUE(buffer->save());
+    EXPECT_TRUE((kinds() ==
+                 std::vector{K::Load, K::Reload, K::Load, K::Edit, K::Save}));
+}
+
 TEST_SUIT_END

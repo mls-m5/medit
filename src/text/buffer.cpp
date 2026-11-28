@@ -14,7 +14,9 @@ std::unique_ptr<Buffer> Buffer::open(std::filesystem::path path) {
     if (std::filesystem::is_regular_file(file->path())) {
         file->load(*buffer);
         buffer->_file = std::move(file);
+        // The text before loading is not something to undo to.
         buffer->_history.clear();
+        buffer->_history.event(HistoryKind::Load);
     }
     return buffer;
 }
@@ -33,6 +35,7 @@ bool Buffer::save(bool overwriteDiskChanges) {
     if (_file->save(*this)) {
         _raw.isChanged(false);
         diskState(DiskState::InSync);
+        _history.event(HistoryKind::Save);
         return true;
     }
     return false;
@@ -50,7 +53,10 @@ void Buffer::assignFile(std::unique_ptr<IFile> file) {
 void Buffer::load() {
     _tv();
     if (_file) {
+        const auto revision = _history.revision();
         _file->load(*this);
+        _history.tagSince(revision, HistoryKind::Reload);
+        _history.event(HistoryKind::Load);
         _raw.isChanged(false);
         diskState(DiskState::InSync);
         emitChangeSignal();
