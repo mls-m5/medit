@@ -385,8 +385,32 @@ class IFileSystem {
 - `DirectoryNotifications` is removed (done already in P2, once nothing used
   it).
 
+### Step 5 (`feature/changed-files-source`)
+
+C1. **Changed source.** `git status --porcelain=v1 -z --untracked-files=all`
+    through the command runner, parsed with `parseGitStatus`. Modified,
+    staged, untracked, unmerged and deleted files; a rename lists the new
+    path. Initialized submodules are listed with their own changed files.
+    `ProjectFiles` gets the two-letter status of each file (`status`), empty
+    for the other sources. Outside a repository the list is empty and the
+    status bar says so.
+
+C2. **Choosing the source.** `Project::source(FileSourceKind)` with `Git`
+    (default at every start), `Changed` and `Directory`; changing it refreshes
+    the list. Three palette commands: `project_files_git`,
+    `project_files_changed`, `project_files_directory`. The tree's heading
+    names the source (" Project", " Changed in Git", " Directory").
+
+C3. **Diff view on open.** With the changed source, opening a file from the
+    tree or the locator shows its diff (the existing `git_diff_file` view,
+    read-only) instead of the file, which also works for deleted files. The
+    diff view code moves from `plugin/` to `script/`, since the views cannot
+    depend on plugins and the code only needs the core.
+
+Not in this step: status colors in the tree, the symlink marker, diff
+highlighting beyond the current line colors.
+
 ### Later
 
-The changed-in-Git source with its menu entry and diff view on open, the
-symlink marker, configurable flags, filters and limit.
+The symlink marker, configurable flags, filters and limit.
 
