@@ -1,8 +1,9 @@
 # Project files and file system: redesign
 
 Status: `ICommandRunner` (step 1) is on `main`. Steps 2–4 and 6 are
-implemented on `feature/project-files` (P1–P4 in "Concrete plan" at the end);
-step 5 (the changed-in-Git source) is not;
+implemented on `feature/project-files` (P1–P4 in "Concrete plan" at the end),
+and step 5 (the changed-in-Git source, C1–C3) on
+`feature/changed-files-source`;
 the operator approved that plan, including its performance-sensitive steps.
 Buffer reloading on external changes was done separately
 (`docs/file-reload-design.md`); it added `FileWatcher`, which this redesign
@@ -385,7 +386,7 @@ class IFileSystem {
 - `DirectoryNotifications` is removed (done already in P2, once nothing used
   it).
 
-### Step 5 (`feature/changed-files-source`)
+### Step 5 (`feature/changed-files-source`, implemented)
 
 C1. **Changed source.** `git status --porcelain=v1 -z --untracked-files=all`
     through the command runner, parsed with `parseGitStatus`. Modified,
