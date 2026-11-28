@@ -506,6 +506,9 @@ void MainWindow::updateTitle() {
         if (editor->buffer().isChanged()) {
             title += "*";
         }
+        if (editor->buffer().diskState() != DiskState::InSync) {
+            title += " [conflict]";
+        }
         _screen.title(title);
     }
     else {

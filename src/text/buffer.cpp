@@ -19,14 +19,21 @@ std::unique_ptr<Buffer> Buffer::open(std::filesystem::path path) {
     return buffer;
 }
 
-bool Buffer::save() {
+bool Buffer::save(bool overwriteDiskChanges) {
     _tv();
-    if (_file) {
-        if (_file->save(*this)) {
-            _raw.isChanged(false);
-            return true;
-        }
+    if (!_file) {
         return false;
+    }
+    // A file deleted on disk is written again; only someone else's content
+    // is protected.
+    if (!overwriteDiskChanges &&
+        _file->diskState() == DiskState::ChangedOnDisk) {
+        return false;
+    }
+    if (_file->save(*this)) {
+        _raw.isChanged(false);
+        diskState(DiskState::InSync);
+        return true;
     }
     return false;
 }
@@ -45,8 +52,97 @@ void Buffer::load() {
     if (_file) {
         _file->load(*this);
         _raw.isChanged(false);
+        diskState(DiskState::InSync);
         emitChangeSignal();
     }
+}
+
+void Buffer::replaceText(std::string_view text) {
+    _tv();
+    const auto current = this->text();
+    const auto from = splitLines(current);
+    const auto to = splitLines(text);
+    const auto hunks = diffLines(from, to);
+    if (hunks.empty()) {
+        return;
+    }
+
+    auto joined = [&to](size_t begin, size_t end) {
+        auto ret = std::string{};
+        for (auto i = begin; i < end; ++i) {
+            if (i > begin) {
+                ret += '\n';
+            }
+            ret += to[i];
+        }
+        return ret;
+    };
+
+    _history.markMajor();
+    // From the last hunk, so the line numbers of earlier hunks stay valid.
+    for (auto it = hunks.rbegin(); it != hunks.rend(); ++it) {
+        const auto lineCount = lines().size();
+        const auto &h = *it;
+        const auto hasNew = h.toBegin < h.toEnd;
+        auto replacement = joined(h.toBegin, h.toEnd);
+        auto range = CursorRange{*this};
+        if (h.fromEnd < lineCount) {
+            // Whole lines including their newlines.
+            range = CursorRange{*this, {0, h.fromBegin}, {0, h.fromEnd}};
+            if (hasNew) {
+                replacement += '\n';
+            }
+        }
+        else if (h.fromBegin > 0) {
+            // Up to the end: take the newline before the range instead.
+            const auto before = h.fromBegin - 1;
+            range = CursorRange{*this,
+                                {lines().at(before).size(), before},
+                                {lines().back().size(), lineCount - 1}};
+            if (hasNew) {
+                replacement.insert(0, "\n");
+            }
+        }
+        // Otherwise the whole buffer, which `range` already is.
+        replace(range, FString{replacement});
+    }
+    _history.markMajor();
+}
+
+void Buffer::diskState(DiskState state, std::vector<LineRange> conflicts) {
+    _tv();
+    _diskState = state;
+    if (state == DiskState::InSync) {
+        _diagnostics.clearSource("disk");
+        return;
+    }
+
+    constexpr size_t maxMarkedLines = 200;
+    const auto message = std::string{
+        state == DiskState::DeletedOnDisk ? "deleted on disk"
+        : conflicts.empty()               ? "changed on disk"
+                            : "changed on disk: conflicts with your edit"};
+    if (conflicts.empty()) {
+        conflicts.push_back({0, 1});
+    }
+    auto marks = std::vector<Diagnostics::Diagnostic>{};
+    const auto last = lines().size() - 1;
+    for (auto &range : conflicts) {
+        // An empty range (a deleted line) is shown on the line after it.
+        const auto end = std::max(range.end, range.begin + 1);
+        for (auto line = range.begin;
+             line < end && marks.size() < maxMarkedLines;
+             ++line) {
+            const auto y = std::min(line, last);
+            marks.push_back({
+                .type = DiagnosticType::Error,
+                .source = "disk",
+                .message = message,
+                .range = {{0, y}, {0, y}},
+            });
+        }
+    }
+    _diagnostics.publish("disk", std::move(marks));
 }
 
 std::string Buffer::text() const {

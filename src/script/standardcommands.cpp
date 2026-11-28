@@ -3,6 +3,7 @@
 #include "core/coreenvironment.h"
 #include "core/os.h"
 #include "core/registers.h"
+#include "files/diskcheck.h"
 #include "files/project.h"
 #include "main.h"
 #include "modes/insertmode.h"
@@ -15,6 +16,7 @@
 #include "saveinteraction.h"
 #include "script/ienvironment.h"
 #include "script/indent.h"
+#include "syntax/palette.h"
 #include "text/cursorops.h"
 #include "text/cursorrange.h"
 #include "text/cursorrangeops.h"
@@ -406,11 +408,46 @@ StandardCommands create() {
     DEF(format) {
         env->mainWindow().format();
         auto &e = env->editor();
-        e.save();
+        if (!e.save() && checkDisk(e.buffer()) != DiskState::InSync) {
+            showDiskConflict(env, e.buffer());
+        }
     };
     DEF(save) {
         env->editor().mode(createNormalMode());
         saveInteraction(env);
+    };
+    DEF(save_overwrite) {
+        auto &e = env->editor();
+        e.mode(createNormalMode());
+        if (!e.file()) {
+            saveInteraction(env);
+            return;
+        }
+        const auto path = e.file()->path().string();
+        if (!e.buffer().save(true)) {
+            env->statusMessage(
+                FString{"Could not save " + path, Palette::error});
+            return;
+        }
+        env->statusMessage(FString{"Saved to " + path});
+    };
+    DEF(reload_file) {
+        auto &e = env->editor();
+        auto *file = e.file();
+        if (!file) {
+            return;
+        }
+        const auto name = file->path().filename().string();
+        if (!file->readDisk()) {
+            env->statusMessage(
+                FString{"Cannot read " + name + " from disk", Palette::error});
+            return;
+        }
+        const auto hadChanges = e.buffer().isChanged();
+        e.buffer().load();
+        env->statusMessage(
+            FString{"Reloaded " + name +
+                    (hadChanges ? " (undo to get your changes back)" : "")});
     };
     // DEF(copy) {
     //     env->mainWindow().copy(false);

@@ -1,9 +1,11 @@
 #include "saveinteraction.h"
 #include "core/coreenvironment.h"
+#include "files/diskcheck.h"
 #include "files/project.h"
 #include "interaction.h"
 #include "script/ienvironment.h"
 #include "script/simpleinteraction.h"
+#include "syntax/palette.h"
 #include "views/mainwindow.h"
 #include <filesystem>
 #include <memory>
@@ -57,10 +59,31 @@ void handleUserFileNameResponse(std::shared_ptr<IEnvironment> env,
 
 } // namespace
 
+void showDiskConflict(std::shared_ptr<IEnvironment> env, Buffer &buffer) {
+    const auto name = buffer.path().filename().string();
+    auto text = std::string{};
+    switch (buffer.diskState()) {
+    case DiskState::InSync:
+        return;
+    case DiskState::ChangedOnDisk:
+        text = name + " changed on disk, not saved: save_overwrite or "
+                      "reload_file";
+        break;
+    case DiskState::DeletedOnDisk:
+        text = name + " was deleted on disk; save writes it again";
+        break;
+    }
+    env->mainWindow().statusMessage(FString{text, Palette::error});
+}
+
 void saveInteraction(std::shared_ptr<IEnvironment> env) {
     auto &e = env->editor();
     if (e.file()) {
         if (!e.save()) {
+            if (checkDisk(e.buffer()) != DiskState::InSync) {
+                showDiskConflict(env, e.buffer());
+                return;
+            }
             env->mainWindow().statusMessage(FString{"Could not save "} +
                                             e.file()->path().string());
             return;

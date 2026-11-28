@@ -1,22 +1,45 @@
 #pragma once
 
 #include "files/ifile.h"
+#include <cstddef>
 #include <filesystem>
+#include <optional>
+#include <string>
+
+/// The bytes `buffer` is saved as: its text, with a final newline added when
+/// the last line is not empty.
+std::string fileBytes(const Buffer &buffer);
 
 class File : public IFile {
-    std::filesystem::path _path;
-
 public:
+    /// Larger files keep only a hash of their last loaded or saved content, so
+    /// they are never merged.
+    static constexpr size_t maxBaseSize = 4 * 1024 * 1024;
+
     File(std::filesystem::path path);
 
     void load(Buffer &) override;
     bool save(const Buffer &) override;
     std::string representation() const override;
     std::filesystem::path path() const override;
+    DiskState diskState() const override;
+    const std::string *baseText() const override;
+    std::optional<std::string> readDisk() const override;
 
 private:
+    /// What the file contained at the last load or save.
+    struct Baseline {
+        size_t hash = 0;
+        std::optional<std::string> text; // Unless larger than maxBaseSize
+    };
+
+    void baseline(const std::string &bytes);
+
     //! Function used by Files class to change the path
     void rename(std::filesystem::path to) override;
+
+    std::filesystem::path _path;
+    std::optional<Baseline> _baseline; // Nothing before the first load/save
 
     friend class Files;
 };

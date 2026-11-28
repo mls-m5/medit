@@ -3,13 +3,16 @@
 #include "core/threadvalidation.h"
 #include "files/ifile.h"
 #include "files/path.h"
+#include "history.h"
 #include "rawbuffer.h"
 #include "text/diagnostics.h"
 #include "text/fstringview.h"
 #include "text/history.h"
+#include "text/linemerge.h"
 #include <filesystem>
 #include <memory>
-#include "history.h"
+#include <string_view>
+#include <vector>
 
 // Text stored in memory with assosiated undo/redo-history and associated
 // filename information
@@ -43,14 +46,32 @@ public:
     [[nodiscard]] static std::unique_ptr<Buffer> open(
         std::filesystem::path path);
 
-    bool save();
+    /// Writes the buffer to its file. Unless `overwriteDiskChanges`, refuses
+    /// (returns false and writes nothing) when someone else changed the file
+    /// since it was last loaded or saved. A deleted file is written again.
+    bool save(bool overwriteDiskChanges = false);
 
     /// Used when saving a buffer that is not saved yet. Check usage in the
     /// project to se how it is used
     void assignFile(std::unique_ptr<IFile> file);
 
-    /// Reload from buffers used file
+    /// Reload from buffers used file. Only the changed lines are replaced,
+    /// as one undo step. Discards unsaved changes.
     void load();
+
+    /// Replaces the text with `text`, changing only the lines that differ, as
+    /// one undo step.
+    void replaceText(std::string_view text);
+
+    [[nodiscard]] DiskState diskState() const {
+        _tv();
+        return _diskState;
+    }
+
+    /// Marks how the file on disk relates to the buffer. `conflicts` are the
+    /// lines shown as conflicting (with the "disk" diagnostics source); they
+    /// are cleared when the state is `InSync`.
+    void diskState(DiskState state, std::vector<LineRange> conflicts = {});
 
     [[nodiscard]] Path path() {
         _tv();
@@ -218,6 +239,7 @@ private:
     History _history{*this};
     std::unique_ptr<IFile> _file;
     Diagnostics _diagnostics;
+    DiskState _diskState = DiskState::InSync;
     ThreadValidation _tv{"gui thread"};
 
     RawBuffer _raw;

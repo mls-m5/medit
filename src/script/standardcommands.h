@@ -46,6 +46,8 @@
     STD_DEF(toggle_case)                                                       \
     STD_DEF(format)                                                            \
     STD_DEF(save)                                                              \
+    STD_DEF(save_overwrite)                                                    \
+    STD_DEF(reload_file)                                                       \
     STD_DEF(copy_indentation)                                                  \
     STD_DEF(close_brace)                                                       \
     STD_DEF(undo)                                                              \

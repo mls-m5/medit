@@ -13,6 +13,7 @@
 #include "core/threadvalidation.cpp"
 #include "core/timer.cpp"
 #include "files/config.cpp"
+#include "files/diskcheck.cpp"
 #include "files/gitstatus.cpp"
 #include "files/popenstream.cpp"
 #include "files/project.cpp"
