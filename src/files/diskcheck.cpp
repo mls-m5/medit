@@ -20,3 +20,15 @@ DiskState checkDisk(Buffer &buffer) {
     buffer.diskState(state, std::move(conflicts));
     return state;
 }
+
+void reloadFromDisk(Buffer &buffer) {
+    auto *file = buffer.file();
+    if (!file) {
+        return;
+    }
+    if (buffer.isChanged() || !file->readDisk()) {
+        checkDisk(buffer);
+        return;
+    }
+    buffer.load();
+}

@@ -196,4 +196,41 @@ TEST_CASE("the saved bytes end with a newline") {
     ASSERT_EQ(fileBytes(Buffer{"a\nb\n"}), "a\nb\n");
 }
 
+TEST_CASE("a change on disk reloads only buffers without unsaved changes") {
+    disk_state_test::TemporaryDirectory dir;
+    const auto path = dir.path / "a.txt";
+    disk_state_test::write(path, "1\n2\n3\n");
+    auto buffer = Buffer::open(path);
+
+    disk_state_test::write(path, "1\n2\nthree\n");
+    reloadFromDisk(*buffer);
+    ASSERT_EQ(buffer->text(), "1\n2\nthree\n");
+    EXPECT_TRUE(buffer->diskState() == DiskState::InSync);
+
+    disk_state_test::type(*buffer, 0, "mine ");
+    disk_state_test::write(path, "one\n2\nthree\n");
+    reloadFromDisk(*buffer);
+    ASSERT_EQ(buffer->text(), "mine 1\n2\nthree\n");
+    EXPECT_TRUE(buffer->isChanged());
+    EXPECT_TRUE(buffer->diskState() == DiskState::ChangedOnDisk);
+    EXPECT_TRUE(buffer->diagnostics().findLineDiagnostic(0));
+
+    // Our own save afterwards (e.g. after save_overwrite) is no change.
+    EXPECT_TRUE(buffer->save(true));
+    reloadFromDisk(*buffer);
+    ASSERT_EQ(buffer->text(), "mine 1\n2\nthree\n");
+    EXPECT_TRUE(buffer->diskState() == DiskState::InSync);
+}
+
+TEST_CASE("a file deleted on disk keeps the buffer's text") {
+    disk_state_test::TemporaryDirectory dir;
+    const auto path = dir.path / "a.txt";
+    disk_state_test::write(path, "1\n");
+    auto buffer = Buffer::open(path);
+    std::filesystem::remove(path);
+    reloadFromDisk(*buffer);
+    ASSERT_EQ(buffer->text(), "1\n");
+    EXPECT_TRUE(buffer->diskState() == DiskState::DeletedOnDisk);
+}
+
 TEST_SUIT_END

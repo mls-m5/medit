@@ -3,6 +3,7 @@
 #include "core/coreenvironment.h"
 #include "core/ijobqueue.h"
 #include "core/itimer.h"
+#include "files/diskcheck.h"
 #include "files/file.h"
 #include "linux/inotify.h"
 #include "text/buffer.h"
@@ -111,9 +112,7 @@ void Files::fileChangeCallback(DirectoryNotifications::EventType type,
     _core.context().guiQueue().addTask([this, type, path, time] {
         _tv();
         if (auto f = find(path)) {
-            // TODO: Double check so that there is no unsaved changes in the
-            // document
-            f->load();
+            reloadFromDisk(*f);
         }
     });
 }
